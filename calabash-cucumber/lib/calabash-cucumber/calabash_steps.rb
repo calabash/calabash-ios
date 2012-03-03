@@ -4,7 +4,7 @@ STEP_PAUSE = (ENV['STEP_PAUSE'] || 0.5).to_f
 require 'rspec/expectations'
 
 Given /^(my|the) app is running$/ do |_|
-  #no-op on iOS
+  #no-op exists for backwards compatibility
 end
 
 
@@ -158,7 +158,7 @@ Then /^I wait and wait$/ do
   sleep 4
 end
 
-Then /^I wait and wait and wait\.\.\.$/ do
+Then /^I wait and wait and wait...$/ do
   sleep 10
 end
 
@@ -173,24 +173,28 @@ Then /^I go back$/ do
   sleep(STEP_PAUSE)
 end
 
-Then /^take picture$/ do
+Then /^(?:I\s)?take (picture|screenshot)$/ do
   sleep(STEP_PAUSE)
   screenshot
 end
 
 Then /^I swipe (left|right|up|down)$/ do |dir|
-    swipe(dir)
-    sleep(STEP_PAUSE)
+  swipe(dir)
+  sleep(STEP_PAUSE)
 end
 
-Then /^I swipe (left|right|up|down) on index (\d+)$/ do |dir, index|
-    swipe(dir, {:query => "scrollView index:#{index}"})
-    sleep(STEP_PAUSE)
+Then /^I swipe (left|right|up|down) on number (\d+)$/ do |dir, index|
+  index = index.to_i
+  screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
+  swipe(dir, {:query => "scrollView index:#{index-1}"})
+  sleep(STEP_PAUSE)
 end
 
-Then /^I swipe (left|right|up|down) on index (\d+) at x (\d+) and y (\d+)$/ do |dir, index, x, y|
-    swipe(dir, {:offset => {:x => x.to_i, :y => y.to_i}, :query => "scrollView index:#{index}"})
-    sleep(STEP_PAUSE)
+Then /^I swipe (left|right|up|down) on number (\d+) at x (\d+) and y (\d+)$/ do |dir, index, x, y|
+  index = index.to_i
+  screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
+  swipe(dir, {:offset => {:x => x.to_i, :y => y.to_i}, :query => "scrollView index:#{index-1}"})
+  sleep(STEP_PAUSE)
 end
 
 Then /^I swipe (left|right|up|down) on "([^\"]*)"$/ do |dir, mark|
