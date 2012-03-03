@@ -1,12 +1,22 @@
-The document describes the predefined steps in Calabash iOS
-============================================================
+Predefined steps in Calabash iOS
+=================================
+
+Predefined steps give you a fast and easy way to start testing your
+app without having to do any programming. But please remember that
+Calabash is not limited to the steps defined in this document. You can
+write your own, so called, "custom steps". Using custom steps,
+Calabash iOS is able to synthesize most touch events and find most
+views. Ideally, the features that describe your app are written with
+custom steps that use language of your business domain.
 
 This document gives examples, not the full step definitions. It is a "human readable" description of the step definitions found
 in the file `calabash_steps.rb` `(calabash-cucumber\lib\calabash-cucumber\calabash_steps.rb)`.
 
-You can generalize the examples. For example, `Then I touch the "login" button` can have any string in quotes, not just "login". Most steps find views using accessibility labels, so you must enable accessibility on the simulator or phone you are testing on.
+You can easily generalize the examples. For example, `Then I touch the "login" button` can have any string in quotes, not just "login".
 
-Also note that Calabash iOS is not limited to the steps defined in this document. You can write your own, so called, "custom steps". Calabash iOS is able to synthesize most touch events and find most views.
+Also note that most steps find views by their accessibility
+labels. This means that for the tests to work, you must enable
+accessibility on the simulator or phone you are testing on.
 
 
 If you have any questions, please use the google group
