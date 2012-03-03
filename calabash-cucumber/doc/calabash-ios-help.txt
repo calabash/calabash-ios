@@ -1,0 +1,53 @@
+Usage: calabash-ios <command-name> [parameters]
+    <command-name> can be one of
+      help
+      gen
+      setup [path]? (Note: EXPERIMENTAL)
+      sim locale [lang] [regional]?
+      sim reset     (Note: EXPERIMENTAL)
+      sim acc
+      sim device [iPad, iPhone, iPhone_Retina]
+
+  Commands:
+  gen creates a skeleton features dir. This is usually used once when
+      setting up calabash to ensure that the features folder contains
+      the right step definitions and environment to run with cucumber.
+
+  setup [path]? (EXPERIMENTAL) Automates setting up your iOS Xcode project
+        with calabash-io-server. It will download calabash.framework
+        and modifying you Xcode project file.
+        The parameter [path] is optional (default is the current dir).
+        If specified [path] should be the path to your iOS Xcode project
+        (i.e., the folder which contains projectname.xcodeproj).
+
+        The following modifications are made
+          - add the calabash.framework to your Frameworks folder
+          - add $(SRCROOT) to framework search path
+          - link with calabash.framework (target can be chosen)
+          - create a new Build configuration: Calabash
+          - ensure calabash.framework is loaded in Calabash configuration
+          - create a new scheme name project-cal
+
+        Your Xcode project file will be backed up as project.pbxproj.bak.
+        The backup is placed in the .xcodeproj folder for your project.
+        If something goes wrong. Close Xcode and copy project.pbxproj.bak
+        to project.pbxproj inside your .xcodeproj folder.
+
+  check (EXPERIMENTAL) [.app or .ipa]?
+        check whether an app or ipa is linked with calabash.framework
+        if called without parameter [.app or .ipa] then pwd should be
+        a directory containing an xcodeproj. In this case we'll check
+        the default Xcode simulator build path for a Debug and Calabash
+        build configurations. We check that Debug doesn't link with
+        calabash.framework but Calabash does.
+
+  sim locale  [lang] [regional]? Changes the regional settings
+      for the iOS Simulators. You must ensure the correct format
+      for the optional regional parameter, for example,
+      da_DK, en_US.
+
+  sim reset (EXPERIMENTAL) Will select "Reset Content and Settings"
+      in the iOS Simulators using AppleScript.
+
+  sim device [device] Will set the default iOS Simulator device.
+      [device] can be one of iPad, iPhone, iPhone_Retina.

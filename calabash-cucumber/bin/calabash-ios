@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'CFPropertyList'
+require 'rexml/document'
+require 'pbxproject'
+require File.join(File.dirname(__FILE__),"calabash-ios-helpers")
+require File.join(File.dirname(__FILE__),"calabash-ios-generate")
+require File.join(File.dirname(__FILE__),"calabash-ios-setup")
+require File.join(File.dirname(__FILE__),"calabash-ios-sim")
+
+@features_dir = File.join(FileUtils.pwd, "features")
+@source_dir = File.join(File.dirname(__FILE__), '..', 'features-skeleton')
+@script_dir = File.join(File.dirname(__FILE__), '..', 'scripts')
+
+if (ARGV.length == 0)
+  print_usage
+  exit 0
+end
+cmd = ARGV.shift
+if cmd == 'help'
+  print_help
+  exit 0
+elsif cmd == 'gen'
+  calabash_scaffold
+elsif cmd == 'setup'
+  calabash_setup(ARGV)
+  exit 0
+elsif cmd == 'check'
+  validate_setup(ARGV)
+  exit 0
+elsif cmd == 'sim'
+  if ARGV.length == 0
+    print_usage
+    exit 0
+  end
+  subcmd = ARGV.shift
+
+  if subcmd == 'reset'
+    calabash_sim_reset
+  elsif subcmd == 'acc'
+    calabash_sim_accessibility
+  elsif subcmd == 'locale'
+    calabash_sim_locale(ARGV)
+  elsif subcmd == 'device'
+    calabash_sim_device(ARGV)
+  else
+    print_usage
+  end
+else
+  print_usage
+end
+
+
