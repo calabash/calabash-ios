@@ -111,6 +111,6 @@ Put your recorded touch events  in the `features` folder. You can playback using
 
 You have the option of moving the start coordinate for the touch events. This is most commonly used to move a recorded touch sequence to a different view that where it was recorded. This is done using the query option:
 
-    `playback "mytouches", {:query => "view marked:'acclabel'}
+    playback "mytouches", {:query => "view marked:'acclabel'}
 
 The `playback` function also supports an offset option to further move the start of the touches.
