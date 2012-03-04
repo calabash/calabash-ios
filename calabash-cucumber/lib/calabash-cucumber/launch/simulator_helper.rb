@@ -33,7 +33,23 @@ module Calabash
           p_dir = dir.downcase
           ws_dir == p_dir
         }
-        File.dirname(info_plist) unless info_plist.nil?
+        if not info_plist.nil?
+          File.dirname(info_plist)
+        else
+          msg = ["Unable to find your built app."]
+          msg << "This means that Calabash can't automatically launch iOS simulator."
+          msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA}"
+          msg << ""
+          msg << "To fix there are a couple of options:\n"
+          msg << "Option 1) Make sure you are running this command from your project directory, "
+          msg << "i.e., the directory containing your .xcodeproj file."
+          msg << "In Xcode, build your calabash target or scheme for simulator."
+          msg << "Check that your app can be found in\n #{File.expand_path("~/Library/Developer/Xcode/DerivedData")}"
+          msg << "\n\nOption 2). In features/support/launch.rb set APP_BUNDLE_PATH to"
+          msg << "the path where Xcode has built your Calabash target or scheme."
+          msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
+          raise msg.join("\n")
+        end
       end
 
       def self.project_dir

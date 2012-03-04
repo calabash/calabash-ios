@@ -173,7 +173,7 @@ Then /^I go back$/ do
   sleep(STEP_PAUSE)
 end
 
-Then /^(?:I\s)?take (picture|screenshot)$/ do
+Then /^(?:I\s)?take (?:picture|screenshot)$/ do
   sleep(STEP_PAUSE)
   screenshot
 end
