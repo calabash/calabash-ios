@@ -13,9 +13,11 @@ def print_usage
       prints more detailed help information.
     gen
       generate a features folder structure.
-    setup (EXPERIMENTAL)
+    setup (EXPERIMENTAL) [opt path]?
       setup your XCode project for calabash-ios)
-    check (EXPERIMENTAL)
+    download [opt path]?
+      downloads latest compatible version of calabash.framework
+    check (EXPERIMENTAL) [opt path to .ipa/.app]?
       check whether an app or ipa is linked with calabash.framework
     sim locale [lang] [regional]?
       change locale and regional settings in all iOS Simulators
@@ -48,7 +50,6 @@ def ensure_correct_path(args)
   project_files = Dir.foreach(dir_to_search).find_all { |x| /\.xcodeproj$/.match(x) }
   if project_files.empty?
     puts "Found no *.xcodeproj files in dir #{dir_to_search}."
-    puts "Please run calabash-ios setup <project path>"
     exit 1
   end
   if project_files.count > 1

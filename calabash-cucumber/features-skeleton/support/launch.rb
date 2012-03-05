@@ -33,7 +33,7 @@ require 'calabash-cucumber/launch/simulator_helper'
 
 def relaunch
   if ENV['NO_LAUNCH'].nil?
-    Calabash::Cucumber::SimulatorHelper.relaunch(app_path,ENV['SDK_VERSION'],ENV['DEVICE'])
+    Calabash::Cucumber::SimulatorHelper.relaunch(app_path,ENV['SDK_VERSION'],ENV['DEVICE'] || 'iphone')
   end
 end
 

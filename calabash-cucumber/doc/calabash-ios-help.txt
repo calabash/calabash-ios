@@ -1,12 +1,14 @@
 Usage: calabash-ios <command-name> [parameters]
-    <command-name> can be one of
-      help
-      gen
-      setup [path]? (Note: EXPERIMENTAL)
-      sim locale [lang] [regional]?
-      sim reset     (Note: EXPERIMENTAL)
-      sim acc
-      sim device [iPad, iPhone, iPhone_Retina]
+  <command-name> can be one of
+    help
+    gen
+    setup (EXPERIMENTAL) [opt path]?
+    download [opt path]?
+    check (EXPERIMENTAL) [opt path to .ipa/.app]?
+    sim locale [lang] [regional]?
+    sim reset
+    sim acc
+    sim device [iPad, iPhone, iPhone_Retina]
 
   Commands:
   gen creates a skeleton features dir. This is usually used once when
@@ -14,9 +16,12 @@ Usage: calabash-ios <command-name> [parameters]
       the right step definitions and environment to run with cucumber.
 
   setup [path]? (EXPERIMENTAL) Automates setting up your iOS Xcode project
-        with calabash-io-server. It will download calabash.framework
-        and modifying you Xcode project file.
-        The parameter [path] is optional (default is the current dir).
+        with calabash-ios-server. It is your responsibility to ensure
+        that your production build does not link with calabash.framework.
+        setup will try to ensure this, but you should check manually.
+
+        setup will download calabash.framework and modify you Xcode project
+        file. The parameter [path] is optional (default is the current dir).
         If specified [path] should be the path to your iOS Xcode project
         (i.e., the folder which contains projectname.xcodeproj).
 
@@ -24,14 +29,27 @@ Usage: calabash-ios <command-name> [parameters]
           - add the calabash.framework to your Frameworks folder
           - add $(SRCROOT) to framework search path
           - link with calabash.framework (target can be chosen)
+          - link with Apple's CFNetwork.framework
           - create a new Build configuration: Calabash
           - ensure calabash.framework is loaded in Calabash configuration
-          - create a new scheme name project-cal
+          - create a new scheme name <project>-cal
 
         Your Xcode project file will be backed up as project.pbxproj.bak.
         The backup is placed in the .xcodeproj folder for your project.
         If something goes wrong. Close Xcode and copy project.pbxproj.bak
         to project.pbxproj inside your .xcodeproj folder.
+
+  download [opt_path]?
+        downloads latest compatible version of calabash.framework.
+        It should be run from a directory containing an Xcode project,
+        or optionally opt_path should be supplied and pointing to a
+        directory containing an Xcode project.
+        Download will download the latest version that matches the
+        currently installed calabash-cucumber gem.
+        To update Calabash for your project run
+
+        gem update calabash-cucumber
+        calabash-ios download
 
   check (EXPERIMENTAL) [.app or .ipa]?
         check whether an app or ipa is linked with calabash.framework

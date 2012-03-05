@@ -1,10 +1,9 @@
 This guide explains how to setup and use Calabash for iOS.
 =============================================================
 
-After completing this guide you will be able to run
-tests locally against the iOS Simulator. You can also
-interactively explore your applications using the Ruby
-irb console.
+After completing this guide you will be able to run tests locally
+against the iOS Simulator. You can also interactively explore and
+interact with your application using the Calabash console.
 
 Finally, you will be able to test your app on real, non-jailbroken iOS
 devices via [the LessPainful service](http://www.lesspainful.com/).
@@ -13,21 +12,47 @@ If you have any questions, please use the google group
 
 [http://groups.google.com/group/calabash-ios](http://groups.google.com/group/calabash-ios)
 
-This guide aims at XCode 4.2, but should also work for XCode versions >= 4.0.
-It takes approximately 10-15 minutes to complete.
+This guide was writting using XCode 4.2, but should also work for
+XCode versions >= 4.0.
 
 Preparing your application.
 ---------------------------
 
-To use Calabash for iOS in your app, you must create a new target
-for your app. This target links with a couple of frameworks, as
-described here.
+To use Calabash for iOS in your app, you must do two things: link with
+our framework: `calabash.framework`, and install a ruby gem as
+described below. (You also need to link with Apple's CFNetwork
+framework if you are not already using this.)
+
+Important notice
+----------------
+
+The Calabash framework uses private Apple APIs to synthesize touch
+events. This means that you must make sure that `calabash.framework`
+is not included in the .ipa file you submit to App Store.
+
+Installation
+------------
+
+There are two primary ways of linking with the framework. Either you
+can create a whole separate target by duplicating your production
+target from Xcode. Alternatively you can create a special build
+configuration for your existing target. The second option is easiest
+to maintain and setup, but there are some situations where it cannot
+be used (see below).
+
+Automated setup using the calabash-ios tool
+-------------------------------------------
+
+
+
+
+
 
 *Note*: it is important that you create a *separate* target as a copy
  of your "production" target (i.e., the target you usually use when
- distributing you app to your testers) Don't link with our framework in
- your production app - this may cause app rejection by Apple since we
- are using private APIs.
+ distributing you app to your testers) Don't link with our framework
+ in your production app - this may cause app rejection by Apple since
+ we are using private APIs.
 
 Instructions:
 

@@ -185,7 +185,16 @@ module Operations
 
   def load_playback_data(recording,options={})
     os = options["OS"] || ENV["OS"]
-    device = options["DEVICE"] || ENV["DEVICE"]
+    if not os and ENV['SDK_VERSION']
+       sdk = ENV['SDK_VERSION']
+       if sdk[0] != '4' and sdk[0] != '5'
+         raise "SDK_VERSION should be 4.x or 5.x"
+       end
+       os = "ios#{sdk[0]}"
+    elsif os.nil? and ENV['SDK_VERSION'].nil?
+      raise "Either SDK_VERSION or OS environment vars must be set."
+    end
+    device = options["DEVICE"] || ENV["DEVICE"] || "iphone"
 
     rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/playback"
     if !recording.end_with?".base64"
@@ -233,10 +242,21 @@ module Operations
     File.open("_recording.plist",'wb') do |f|
         f.write res
     end
-    file_name = "#{file_name}_#{ENV['OS']}_#{ENV['DEVICE']}.base64"
+    device = ENV['DEVICE'] || 'iphone'
+    os = ENV['OS']
+    if not os and ENV['SDK_VERSION']
+       sdk = ENV['SDK_VERSION']
+       if sdk[0] != '4' and sdk[0] != '5'
+         raise "SDK_VERSION should be 4.x or 5.x"
+       end
+       os = "ios#{sdk[0]}"
+    elsif os.nil? and ENV['SDK_VERSION'].nil?
+      raise "Either SDK_VERSION or OS environment vars must be set."
+    end
+    file_name = "#{file_name}_#{os}_#{device}.base64"
     system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
     system("openssl base64 -in _recording_binary.plist -out #{file_name}")
-    system("rm _recording.plist _recording_binary.plist")
+    #system("rm _recording.plist _recording_binary.plist")
     file_name
   end
 

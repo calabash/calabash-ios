@@ -23,6 +23,10 @@ if cmd == 'help'
   exit 0
 elsif cmd == 'gen'
   calabash_scaffold
+  exit 0
+elsif cmd == 'download'
+  calabash_download(ARGV)
+  exit 0
 elsif cmd == 'setup'
   calabash_setup(ARGV)
   exit 0

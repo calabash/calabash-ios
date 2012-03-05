@@ -1,15 +1,21 @@
 require "calabash-cucumber/version"
 
 
-def dup_scheme(project_name, pbx_dir)
+def dup_scheme(project_name, pbx_dir, target)
 
   userdata_dirs = Dir.foreach("#{pbx_dir}/xcuserdata").find_all { |x|
     /\.xcuserdatad$/.match(x)
   }
 
+  target_name = target.name.value
+
+  if target_name.start_with?'"' and target_name.end_with?'"'
+    target_name = target_name[1..target_name.length-2]
+  end
+
   userdata_dirs.each do |userdata_dir|
-    scheme_to_find = Regexp.new(Regexp.escape("#{project_name}.xcscheme"))
-    cal_scheme_to_find = Regexp.new(Regexp.escape("#{project_name}-cal.xcscheme"))
+    scheme_to_find = Regexp.new(Regexp.escape("#{target_name}.xcscheme"))
+    cal_scheme_to_find = Regexp.new(Regexp.escape("#{target_name}-cal.xcscheme"))
     schemes = Dir.foreach("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes")
     scheme = schemes.find do |scheme|
       scheme_to_find.match(scheme)
@@ -20,19 +26,19 @@ def dup_scheme(project_name, pbx_dir)
 
     if scheme.nil?
       puts "-"*10 + "Warning" + "-"*10
-      puts "Unable to find scheme: #{project_name}.xcscheme."
+      puts "Unable to find scheme: #{target_name}.xcscheme."
       puts "You must manually create a scheme."
       puts "Make sure your scheme uses the Calabash build configuration."
       puts "-"*10 + "-------" + "-"*10
     else
       if not cal_scheme.nil?
         msg("Warning") do
-          puts "Scheme: #{project_name}-cal.xcscheme already exists."
+          puts "Scheme: #{target_name}-cal.xcscheme already exists."
           puts "Will not try to duplicate #{project_name}.xcscheme."
         end
       else
         msg("Action") do
-          puts "Duplicating scheme #{project_name}.xcscheme as #{project_name}-cal.xcscheme"
+          puts "Duplicating scheme #{target_name}.xcscheme as #{target_name}-cal.xcscheme"
 
           doc = REXML::Document.new(File.new("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes/#{scheme}"))
 
@@ -48,12 +54,13 @@ def dup_scheme(project_name, pbx_dir)
           doc.elements.each("Scheme/ProfileAction") do |la|
             la.attributes["buildConfiguration"] = "Calabash"
           end
-          doc.write(File.open("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes/#{project_name}-cal.xcscheme", "w"))
+          doc.write(File.open("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes/#{target_name}-cal.xcscheme", "w"))
         end
       end
     end
 
   end
+  "#{target_name}-cal"
 end
 
 
@@ -63,11 +70,11 @@ def calabash_setup(args)
   if res==""
     puts "Xcode not running."
     project_name, project_path, xpath = find_project_files(args)
-    setup_project(project_name, project_path, xpath)
-    dup_scheme(project_name, xpath)
+    target = setup_project(project_name, project_path, xpath)
+    scheme = dup_scheme(project_name, xpath, target)
     msg("Setup done") do
 
-      puts "Please validate by running the #{project_name}-cal scheme"
+      puts "Please validate by running the #{scheme} scheme"
       puts "from Xcode."
       puts "When starting the iOS Simulator using the"
       puts "new scheme: #{project_name}-cal, you should see:\n\n"
@@ -123,6 +130,72 @@ def find_project_files(args)
   return project_name, dir_to_search, File.expand_path("#{dir_to_search}/#{xc_project_file}")
 end
 
+def calabash_download(args)
+  project_name, project_path, xpath = find_project_files(args)
+  download_calabash(project_path)
+end
+
+def download_calabash(project_path)
+  file = 'calabash.framework'
+  ##Download calabash.framework
+  if not Dir.exists?(File.join(project_path, file))
+    msg("Info") do
+      zip_file = "calabash.framework-#{ENV['FRAMEWORK_VERSION']||Calabash::Cucumber::FRAMEWORK_VERSION}.zip"
+      puts "Did not find calabash.framework. I'll download it...'"
+      puts "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
+      require 'uri'
+
+      uri = URI.parse "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
+      success = false
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        request = Net::HTTP::Get.new uri.request_uri
+
+        http.request request do |response|
+          if response.code == '200'
+            open zip_file, 'wb' do |io|
+              response.read_body do |chunk|
+                print "."
+                io.write chunk
+              end
+            end
+            success = true
+          else
+             puts "Got bad response code #{response.code}."
+             puts "Aborting..."
+          end
+        end
+      end
+      if success
+        puts "\nDownload done: #{file}. Unzipping..."
+        if not system("unzip -C -K -o -q -d #{project_path} #{zip_file}")
+          msg("Error") do
+            puts "Unable to unzip file: #{zip_file}"
+            puts "You must install manually."
+          end
+          exit 1
+        end
+        FileUtils.rm(zip_file)
+      else
+        exit 0
+      end
+    end
+  else
+    msg("Info") do
+      puts "Found calabash.framework in #{File.expand_path(project_path)}."
+      puts "Shall I delete it and download the latest matching version?"
+      puts "Please answer yes (y) or no (n)"
+      answer = STDIN.gets.chomp
+      if (answer == 'yes' or answer == 'y')
+        FileUtils.rm_r File.join(project_path, file)
+        return download_calabash(project_path)
+      else
+        puts "Not downloading..."
+      end
+    end
+  end
+  file
+end
+
 def setup_project(project_name, project_path, path)
   ##Ensure exists and parse
   proj_file = "#{path}/project.pbxproj"
@@ -139,7 +212,7 @@ def setup_project(project_name, project_path, path)
   FileUtils.cd project_path
   ##Backup
   msg("Info") do
-    puts "Making backup of project file: #{proj_file}.bak"
+    puts "Making backup of project file: #{proj_file}"
     if File.exists? "#{proj_file}.bak"
       msg("Error") do
         puts "Backup file already exists. #{proj_file}.bak"
@@ -151,43 +224,7 @@ def setup_project(project_name, project_path, path)
     end
     FileUtils.cp(proj_file, "#{proj_file}.bak")
   end
-  file = 'calabash.framework'
-  ##Download calabash.framework
-  if not Dir.exists?(File.join(project_path, file))
-    msg("Info") do
-      zip_file = "calabash.framework-#{ENV['CALABASH_VERSION']||Calabash::Cucumber::VERSION}.zip"
-      puts "Did not find calabash.framework. I'll download it...'"
-      puts "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
-      require 'uri'
-
-      uri = URI.parse "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
-
-      Net::HTTP.start(uri.host, uri.port) do |http|
-        request = Net::HTTP::Get.new uri.request_uri
-
-        http.request request do |response|
-          open zip_file, 'wb' do |io|
-            response.read_body do |chunk|
-              print "."
-              io.write chunk
-            end
-          end
-        end
-      end
-      puts "\nDownload done: #{file}. Unzipping..."
-      if not system("unzip -C -K -o -q -d #{project_path} #{zip_file}")
-        msg("Error") do
-          puts "Unable to unzip file: #{zip_file}"
-          puts "You must install manually."
-        end
-        exit 1
-      end
-      FileUtils.rm(zip_file)
-    end
-
-  else
-    puts "Found calabash.framework. Will not download."
-  end
+  file = download_calabash(project_path)
 
 
   file_ref = pbx.sections['PBXFileReference'].find do |fr|
@@ -253,7 +290,15 @@ def setup_project(project_name, project_path, path)
     preferred_target = targets.find { |t| t.name.value == project_name }
     msg("Question") do
       puts "You have several targets..."
-      puts (targets.map { |t| t.name.value }).join("\n")
+      target_names = targets.map do |t|
+        n = t.name.value
+        if n.length>2 and n.end_with?'"' and n.start_with?'"'
+          n = n[1..n.length-2]
+        end
+        n
+      end
+
+      puts target_names.join("\n")
 
       found = nil
       until found do
@@ -265,25 +310,13 @@ def setup_project(project_name, project_path, path)
           target = preferred_target
           found = true
         else
-          target = found = targets.find { |t| t.name.value == answer }
+          target = found = targets.find { |t| t.name.value == answer || t.name.value=="\"#{answer}\""}
         end
       end
     end
   end
 
-
-  bc_list_id = target.buildConfigurationList.value
-  bc_list = pbx.find_item :guid => bc_list_id, :type => PBXProject::PBXTypes::XCConfigurationList
-  bc_ref = bc_list.buildConfigurations.find { |bc| bc.comment =="Debug" }
-  bc_id = bc_ref.value
-  bc = pbx.find_item :guid => bc_id, :type => PBXProject::PBXTypes::XCBuildConfiguration
-  cal_build_settings = bc.buildSettings.clone
-
-
-  bc.buildSettings.each do |k, v|
-    cal_build_settings[k] = v.clone
-  end
-
+  ##project level build conf
   project_bc_id = pbx.sections['PBXProject'][0].buildConfigurationList.value
   project_bc_list = pbx.find_item :guid => project_bc_id, :type => PBXProject::PBXTypes::XCConfigurationList
   project_bc_ref = project_bc_list.buildConfigurations.find { |bc| bc.comment =="Debug" }
@@ -294,15 +327,29 @@ def setup_project(project_name, project_path, path)
     project_cal_build_settings[k] = v.clone
   end
 
+  project_cal_bc = PBXProject::PBXTypes::XCBuildConfiguration.new(:name => "Calabash")
+  project_cal_bc.buildSettings = project_cal_build_settings
+  project_cal_bc.comment = "Calabash"
+
+  ##target level build conf
+  bc_list_id = target.buildConfigurationList.value
+  bc_list = pbx.find_item :guid => bc_list_id, :type => PBXProject::PBXTypes::XCConfigurationList
+  bc_ref = bc_list.buildConfigurations.find { |bc| bc.comment =="Debug" }
+  bc_id = bc_ref.value
+  bc = pbx.find_item :guid => bc_id, :type => PBXProject::PBXTypes::XCBuildConfiguration
+  cal_build_settings = bc.buildSettings.clone
+
+  bc.buildSettings.each do |k, v|
+    cal_build_settings[k] = v.clone
+  end
 
   ld_flags = cal_build_settings['OTHER_LDFLAGS'] || []
-
   if not ld_flags.is_a?Array
     ld_flags = [ld_flags]
   end
   danger = ld_flags.find_all {|f| /-ObjC/i.match(f.value) || /-all_load/i.match(f.value)}
 
-  if not danger.empty?
+  unless danger.empty?
     msg("Error") do
       puts "Detected Other Linker Flag: #{(danger.map {|d| d.value}).join(", ")}"
       puts "calabash-ios setup does not yet support this scenario"
@@ -312,9 +359,6 @@ def setup_project(project_name, project_path, path)
     end
     exit 1
   end
-
-
-
 
   ld_flags << PBXProject::PBXTypes::BasicValue.new(:value => '"-force_load"')
   ld_flags << PBXProject::PBXTypes::BasicValue.new(:value => '"$(SRCROOT)/calabash.framework/calabash"')
@@ -327,14 +371,13 @@ def setup_project(project_name, project_path, path)
   cal_bc.buildSettings = cal_build_settings
   cal_bc.comment = "Calabash"
 
-  project_cal_bc = PBXProject::PBXTypes::XCBuildConfiguration.new(:name => "Calabash")
-  project_cal_bc.buildSettings = project_cal_build_settings
-  project_cal_bc.comment = "Calabash"
+  targets.each do |target|
+    bc_list_id = target.buildConfigurationList.value
+    bc_list = pbx.find_item :guid => bc_list_id, :type => PBXProject::PBXTypes::XCConfigurationList
+    bc_list.buildConfigurations << PBXProject::PBXTypes::BasicValue.new(:value => cal_bc.guid, :comment => "Calabash")
+  end
 
-  bc_list.buildConfigurations << PBXProject::PBXTypes::BasicValue.new(:value => cal_bc.guid, :comment => "Calabash")
   project_bc_list.buildConfigurations << PBXProject::PBXTypes::BasicValue.new(:value => project_cal_bc.guid, :comment => "Calabash")
-  FileUtils.cd pwd
-
 
   pbx.sections['XCBuildConfiguration']<<project_cal_bc
   pbx.sections['XCBuildConfiguration']<<cal_bc
@@ -350,9 +393,9 @@ def setup_project(project_name, project_path, path)
     sp << PBXProject::PBXTypes::BasicValue.new(:value => "\"$(SRCROOT)\"") unless srcroot
     bc.buildSettings["FRAMEWORK_SEARCH_PATHS"] = sp
   end
-
+  FileUtils.cd pwd
   pbx.write_to :file => proj_file
-
+  return target
 end
 
 
