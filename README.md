@@ -197,7 +197,7 @@ Instructions:
 
 
 * Step 3/3: cal-Target Build Settings
- - Click on your project and select your new "-LP" target.
+ - Click on your project and select your new "-cal" target.
  - Select "Build Settings".
  - Ensure that "All" and not "Basic" settings are selected in "build settings".
  - Find "Other Linker Flags" (you can type "other link" in the search field).
