@@ -94,9 +94,14 @@ def calabash_submit(args)
 
   feature_path = "features"
   if args.length == 3
-    feature_path = args[2]
+    msg("Error") do
+      puts "You can't supply a path to features folder yet."
+      puts "You should cd into your project folder containing your features folder"
+      puts "and then run this command again"
+    end
+    exit 1
   end
-  system ("zip -r -o #{archive_path} #{File.expand_path(feature_path)}")
+  system ("zip -r -o #{archive_path} #{feature_path}")
 
   msg("Info") do
     puts "Uploading ipa and features to www.lesspainful.com"
