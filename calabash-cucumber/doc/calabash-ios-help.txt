@@ -59,6 +59,15 @@ Usage: calabash-ios <command-name> [parameters]
         build configurations. We check that Debug doesn't link with
         calabash.framework but Calabash does.
 
+  submit [ipapath] [secret] [opt_features path]?
+        submits an ipa and features folder to www.lesspainful.com
+        [ipapath] should be a path to a build .ipa file which is
+        linked with calabash.framework. [secret] should be an account
+        secret created with your LessPainful account.
+        [op_features path] is optional (default is current working dir)
+        If specified it should be the path to the features folder
+        you want to send.
+
   sim locale  [lang] [regional]? Changes the regional settings
       for the iOS Simulators. You must ensure the correct format
       for the optional regional parameter, for example,

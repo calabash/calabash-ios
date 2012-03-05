@@ -1,3 +1,7 @@
+require 'tempfile'
+require 'json'
+
+
 def msg(title, &block)
   puts "\n" + "-"*10 + title + "-"*10
   block.call
@@ -19,6 +23,8 @@ def print_usage
       downloads latest compatible version of calabash.framework
     check (EXPERIMENTAL) [opt path to .ipa/.app]?
       check whether an app or ipa is linked with calabash.framework
+    submit [ipapath] [secret] [opt_features path]?
+      submits an ipa and features folder to www.lesspainful.com
     sim locale [lang] [regional]?
       change locale and regional settings in all iOS Simulators
     sim reset
@@ -62,4 +68,52 @@ def ensure_correct_path(args)
 end
 
 
-####
+def is_json?(str)
+ str[0..0] == '{'
+end
+
+def calabash_submit(args)
+  if args.size < 2
+   msg("Error") do
+     puts "You must supply at path to ipa and secret."
+   end
+   exit 1
+  end
+
+  ipa_file = args[0]
+  if not File.exists?(ipa_file)
+    msg("Error") do
+      puts "Unable to find .ipa at '#{ipa_file}'"
+    end
+    exit 1
+  end
+
+  secret = args[1]
+
+  archive_path = "#{Tempfile.new("archive").path}.zip"
+
+  feature_path = "features"
+  if args.length == 3
+    feature_path = args[2]
+  end
+  system ("zip -r -o #{archive_path} #{File.expand_path(feature_path)}")
+
+  msg("Info") do
+    puts "Uploading ipa and features to www.lesspainful.com"
+  end
+
+  result = `curl -F "secret=#{secret}" -F "app=@#{ipa_file}" -F "env=@#{archive_path}" https://www.lesspainful.com/cmd_upload`
+
+  if is_json? result
+   json_result = JSON.parse(result)
+   puts "Test status is '#{json_result['status']}"
+   puts "Test id is '#{json_result['id']}"
+   puts "You can see the test result here: #{json_result['url']}"
+   puts "You can pull the status by using this command:"
+   puts "curl -F \"secret=#{secret}\" -F \"id=#{json_result['id']}\" https://www.lesspainful.com/cmd_status"
+  else
+   puts result
+  end
+
+end
+

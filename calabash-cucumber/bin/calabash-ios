@@ -33,6 +33,9 @@ elsif cmd == 'setup'
 elsif cmd == 'check'
   validate_setup(ARGV)
   exit 0
+elsif cmd == 'submit'
+  calabash_submit(ARGV)
+  exit 0
 elsif cmd == 'sim'
   if ARGV.length == 0
     print_usage
