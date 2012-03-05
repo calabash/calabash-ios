@@ -1,14 +1,14 @@
-This guide explains how to setup and use Calabash for iOS.
-=============================================================
+This guide explains how to setup and use Calabash for iOS
+=========================================================
 
 After completing this guide you will be able to run tests locally
 against the iOS Simulator. You can also interactively explore and
 interact with your application using the Calabash console.
 
 Finally, you will be able to test your app on real, non-jailbroken iOS
-devices via [the LessPainful service](http://www.lesspainful.com/).
+devices via [the LessPainful service](http://www.lesspainful.com/). Also checkout [Calabash Android](https://github.com/calabash/calabash-android).
 
-If you have any questions, please use the google group
+If you have any questions on Calabash iOS, please use the google group
 
 [http://groups.google.com/group/calabash-ios](http://groups.google.com/group/calabash-ios)
 
@@ -27,105 +27,69 @@ Important notice
 ----------------
 
 The Calabash framework uses private Apple APIs to synthesize touch
-events. This means that you must make sure that `calabash.framework`
+events. This means that you should double check that `calabash.framework`
 is not included in the .ipa file you submit to App Store.
 
 Installation
 ------------
+
+### Prerequisites
+
+You need to have Ruby 1.9.2+ installed, and a recent RubyGems
+installation. I use rbenv to manage my Ruby installations.
+
+For rbenv, see:
+
+ [https://github.com/sstephenson/rbenv](https://github.com/sstephenson/rbenv)
+
+
+Fast track
+============
+Note: Fast track installation works for most iOS projects, but there are some project setups where it does not. If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
+
+1. In a terminal, go to your iOS project
+  - `cd path-to-my-ios-project` (i.e. directory containing .xcodeproj file)
+
+2. Install calabash-cucumber gem
+  - `gem install calabash-cucumber`
+
+3. Setup your project for Calabash-iOS  (remember the "Important notice above").
+  - `calabash-ios setup`
+  (Answer the questions and read the output :)
+
+4. Generate a skeleton features folder for your tests
+  - `calabash-ios gen`
+
+5. In Xcode, build your project using the <project-name>-cal scheme
+  - ![-cal scheme](documentation/images/scheme.png "-cal scheme")
+
+6. Run the generated test!
+  - `cucumber`
+
+If all goes well, you are now ready to write your first test.
+Start by editing the file `features/my_first.feature`.
+
+Proceed by reading details about installation below, or moving on to the
+[Getting started guide](documentation/getting_started.md).
+
+Installation details
+====================
+
+If fast track setup doesn't work for you, or you're interested in
+what's going on you can read the installation details here.
 
 There are two primary ways of linking with the framework. Either you
 can create a whole separate target by duplicating your production
 target from Xcode. Alternatively you can create a special build
 configuration for your existing target. The second option is easiest
 to maintain and setup, but there are some situations where it cannot
-be used (see below).
-
-Automated setup using the calabash-ios tool
--------------------------------------------
-
+be used. Particularly, you must ensure you are not accidentally
+loading `calabash.framework` which may happen if you use `-all_load`
+or `-ObjC` linker options. In this case you must make a separate target for calabash (see Manual setup with Xcode below).
 
 
 
-
-
-*Note*: it is important that you create a *separate* target as a copy
- of your "production" target (i.e., the target you usually use when
- distributing you app to your testers) Don't link with our framework
- in your production app - this may cause app rejection by Apple since
- we are using private APIs.
-
-Instructions:
-
-* Step 1/3: Duplicate target.
- - Select your project in XCode and select your production target for your app.
- - Right click (or two-finger tap) your target and select "Duplicate target"
- - Select "Duplicate only" (not transition to iPad)
- - Rename your new target from ".. copy" to "..-LP"
- - From the menu select Edit Scheme and select manage schemes.
- - Rename the new scheme from ".. copy" to "..-LP"
-
-* Step 2/3: Link with framework.
- - Download the latest version of calabash-ios either by cloning the
-   [git repo](https://github.com/calabash/calabash-ios) or going to [https://github.com/calabash/calabash-ios/downloads](https://github.com/calabash/calabash-ios/downloads).
- - Use Finder to open the folder that contains `calabash.framework`.
- - Drag `calabash.framework` from finder into you project's
-   `Frameworks` folder. Make sure that (i) `Copy items into
-   destination group's folder (if needed)` is checked and (ii) _only_
-   your "-LP " target is checked in `Add to targets`.
-![Linking with calabash.framework](https://github.com/calabash/calabash-ios/raw/master/documentation/Frameworks.png "Linking with frameworks")
-
- - You must also link you -LP target with `CFNetwork.framework`
-   (unless your production target is already linking with
-   `CFNetwork`). To do this click on your -LP target in XCode. Click
-   on Build Phases, expand Link Binary with Libraries, click `+` to
-   add `CFNetwork.framework`.
-
-
-* Step 3/3: LP-Target Build Settings
- - Click on your project and select your new "-LP" target.
- - Select "Build Settings".
- - Ensure that "All" and not "Basic" settings are selected in "build settings".
- - Find "Other Linker Flags" (you can type "other link" in the search field).
- - Ensure that "Other linker flags" contains: `-force_load "$(SRCROOT)/calabash.framework/calabash" -lstdc++`
-
-*Note*: Now that you have created a separate target, new files that you add to your project are not automatically added to your -LP target. Make sure that any new files you add to your production target are also added to your -LP target.
-
-
-This screenshot is a reference for you build settings.
-
-![Build settings](https://github.com/calabash/calabash-ios/raw/master/documentation/linker_flags.png "Build settings")
-
-
-### Test that `calabash.framework` is loaded.
-
-Make sure you select your "..-LP" scheme and then run you app on 4.x/5 simulator.
-
-Verify that you see console output like
-
-    2012-01-19 LPSimpleExample[4318:11603] Creating the server: <HTTPServer: 0x7958d70>
-    2012-01-19 LPSimpleExample[4318:11603] HTTPServer: Started HTTP server on port 37265
-    2012-01-19 LPSimpleExample[4318:13903] Bonjour Service Published: domain(local.) type(_http._tcp.) name(Calabash Server)
-
-
-You should now be able to explore Calabash with your application by
-installing the client as described below.
-
-If you are having problems don't waste time! Contact `karl@lesspainful.com` ASAP :)
-
-Installing the client.
-----------------------
-
-### Prerequisites
-
-You need to have Ruby 1.9.2+ installed, and a recent RubyGems
-installation. I use RVM to manage my Ruby installations.
-
-For RVM, see:
-
- [http://beginrescueend.com/](http://beginrescueend.com/)
-
-
-### Installation
+### Ruby and calabash-cucumber gem.
 
 *   Make sure ruby and ruby gems is on your path.
 
@@ -137,155 +101,131 @@ For RVM, see:
 *   Install the `calabash-cucumber` gem.
 
         krukow:~$ gem install calabash-cucumber
-        Fetching: calabash-cucumber-0.9.2.gem (100%)
-        Successfully installed calabash-cucumber-0.9.2
+        Successfully installed calabash-cucumber-0.9.23
         1 gem installed
-        Installing ri documentation for calabash-cucumber-0.9.2...
-        Installing RDoc documentation for calabash-cucumber-0.9.2...
-
-Exploring the sample application (or your app).
------------------------------------------------
-
-Start your app with the -LP target in simulator.  Alternatively if you
-want to start with the sample app, make sure you clone the git
-repository and open the LPSimpleExample project in the `examples`
-folder.
-
-### Run it
-CMD-R to run. Look at the log output and verify that you see:
-
-    LPSimpleExample[11298:13703] HTTPServer: Started HTTP server on port 37265
-
-If that message is there, you're good to go.
-
-### Writing tests.
-
-Test are run using [Cucumber](http://cukes.info/) and written in a
-special and particularly readable language: Gherkin.
-
-In your project directory you can run the following command to setup a test directory.
-
-    krukow:~/tmp/test$ calabash
-    I'm about to create a subdirectory called features.
-    features will contain all your calabash tests.
-    Please hit return to confirm that's what you want.
-
-    <RETURN>
-
-    features subdirectory created. Try starting you app in the iOS simulator
-    using the Calabash/-LP target.
-
-    Then try executing
-
-    STEP_PAUSE=2 OS=ios5 DEVICE=iphone cucumber
-
-    (replace ios5 with ios4 if running iOS 4.x simulator.
-    Replace iphone with ipad if running iPad simulator.).
-
-This generates a features directory containing a single test that
-simply takes a screenshot.
-
-Try running it with cucumber (`OS=ios4` if running iOS 4).
-
-    krukow:~/tmp/test$ STEP_PAUSE=2 OS=ios5 DEVICE=iphone cucumber
-    Feature: Running a test
-        As an iOS developer
-        I want to have a sample feature file
-        So I can begin testing quickly
-
-        Scenario: Example steps    # features/my_first.feature:6
-          Given the app is running # calabash-cucumber-0.9.2/lib/calabash-cucumber/calabash_steps.rb:6
-          Then take picture        # calabash-cucumber-0.9.2/lib/calabash-cucumber/calabash_steps.rb:165
-          Saved screenshot: screenshot_8.png
-
-    1 scenario (1 passed)
-    2 steps (2 passed)
-    0m2.036s
-    krukow:~/tmp/test$ open screenshot_8.png
-
-To see what steps are available and how they are implemented using the
-Ruby API see [Step definition wiki](https://github.com/calabash/calabash-ios/wiki/Predefined,-canned-steps).
-
-Again, please contact `karl@lesspainful.com` with any questions or problems.
+        Installing ri documentation for calabash-cucumber-0.9.23...
+        Installing RDoc documentation for calabash-cucumber-0.9.23...
 
 
-### Explore interactively!
+You now have two options: automated setup using the `calabash-ios`
+tool or manual setup. Both are described below.
 
-A nice way to use calabash is to explore it interactively.
-The easy way is to just run one of the irb scripts: `irb_ios4.sh` or
-`irb_ios5.sh`. These are included in the `examples` folder in the
-[git repo](https://github.com/calabash/calabash-ios).
+Automated setup using the calabash-ios tool
+===========================================
 
-From this console you can explore your application interactively.
+Verify that you have installed calabash-cucumber correctly by running `calabash-ios` from the command line:
 
-You can query, touch, scroll, etc from the irb session. You'll see how below.
+    krukow:~/tmp/sample$ calabash-ios
+    Usage: calabash-ios <command-name> [parameters]
+    <command-name> can be one of
+        help
+         prints more detailed help information.
+        gen
+         generate a features folder structure.
+        setup (EXPERIMENTAL) [opt path]?
+         setup your XCode project for calabash-ios)
+      ...
 
-### Query
-If you're running the iOS5 iPhone simulator run `irb_ios5.sh` otherwise: `irb_ios4.sh`.
-(if you're running iPad edit the appropriate script and change `iphone` to `ipad`).
+Make sure you are in the directory containing your project.
+Then run `calabash-ios setup` and answer any questions it might ask :)
 
-Notice that the sample app has a button: "Login".
-Now try this from the irb:
+Note that calabash-ios will backup your project file:
 
-    ruby-1.9.2-p290 :003 > query("button")
+    krukow:~/tmp/sample$ calabash-ios setup
+    Checking if Xcode is running...
+    ----------Info----------
+    Making backup of project file: /Users/krukow/tmp/sample/sample.xcodeproj/project.pbxproj
+    ...
 
-You should see something like this:
+The project file is copied to `project.pbxproj.bak`. In case something goes wrong you can move this file back to `project.pbxproj` (in your .xcodeproj) folder.
 
-    => ["<UIRoundedRectButton: 0x6567e00; frame = (109 215; 73 37); opaque = NO; autoresize = RM+BM; layer = <CALayer: 0x6567ef0>>"]
+Setup will modify your xcode project file to use Calabash iOs. You should now have a new Scheme named [target]-cal in Xcode:
 
-The `query` function takes a string query as an argument. They query argument is similar to a css selector, for example we can do:
+![-cal scheme](documentation/images/scheme.png "-cal scheme")
 
-    ruby-1.9.2-p290 :009 > query("button label")
-     => ["<UIButtonLabel: 0x6624f40; frame = (16 9; 40 19); text = 'Login'; clipsToBounds = YES; opaque = NO; userInteractionEnabled = NO; layer = <CALayer: 0x6645ec0>>"]
 
-It may also take parameters that are mapped to Objective-C selectors on the found object.
+`calabash-ios setup` does the following:
 
-    ruby-1.9.2-p290 :010 > query("button label", :text)
-    => ["Login"]
+- add the calabash.framework to your Frameworks folder
+- add $(SRCROOT) to framework search path
+- link with calabash.framework (target can be chosen)
+- link with Apple's CFNetwork.framework
+- create a new Build configuration: Calabash
+- ensure calabash.framework is loaded in Calabash configuration
+- create a new scheme name <project>-cal. This scheme launches
+the Calabash configuration for your target
 
-### Touch
+Note that `calabash.framework` is added to your target, but only
+forced to load in the Calabash build configuration. Hence it is
+stripped from your other build configurations. But this stripping only
+occurs if you don't force the load by other means such as setting
+Other Linker Flags: `-ObjC` or `-all_load`. It is your responsibility
+to ensure that you are not loading `calabash.framework` in the app you
+submit to App Store.
 
-Anything that can be found using query can also be touched.
-Try this while you watch the iOS Simulator:
 
-    ruby-1.9.2-p290 :011 > touch("button")
+Manual setup with Xcode
+=======================
 
-Notice that the button is touched (turns blue), although this button doesn't do anything.
+Instructions:
 
-You can also touch the tab bars:
+* Step 1/3: Duplicate target.
+ - Select your project in XCode and select your production target for your app.
+ - Right click (or two-finger tap) your target and select "Duplicate target"
+ - Select "Duplicate only" (not transition to iPad)
+ - Rename your new target from ".. copy" to "..-cal"
+ - From the menu select Edit Scheme and select manage schemes.
+ - Rename the new scheme from ".. copy" to "..-cal"
 
-    ruby-1.9.2-p290 :016 > touch("tabBarButton index:1")
+* Step 2/3: Link with framework.
+ - Download the latest version of calabash-ios at
+ [https://github.com/calabash/calabash-ios/downloads](https://github.com/calabash/calabash-ios/downloads).
+ - Unzip the file.
+ - Use Finder to open the folder that contains `calabash.framework`.
+ - Drag `calabash.framework` from Finder into you project's
+   `Frameworks` folder in Xcode.
+   Make sure that (i) `Copy items into
+   destination group's folder (if needed)` is checked and (ii) _only_
+   your "-cal " target is checked in `Add to targets`.
+![Linking with calabash.framework](documentation/images/Frameworks.png "Linking with frameworks")
 
-The filter: `index:1` means that it is the second tab-bar button that should be touched.
+ - You must also link you -cal target with `CFNetwork.framework`
+   (unless your production target is already linking with
+   `CFNetwork`). To do this click on your -cal target in XCode. Click
+   on Build Phases, expand Link Binary with Libraries, click `+` to
+   add `CFNetwork.framework`.
 
-### Accessibility
 
-In general UI views are found using accesibility labels. To use those in the simulator they must be enabled.
+* Step 3/3: cal-Target Build Settings
+ - Click on your project and select your new "-LP" target.
+ - Select "Build Settings".
+ - Ensure that "All" and not "Basic" settings are selected in "build settings".
+ - Find "Other Linker Flags" (you can type "other link" in the search field).
+ - Ensure that "Other linker flags" contains: `-force_load "$(SRCROOT)/calabash.framework/calabash" -lstdc++`
 
-* Press the "home-screen" button in the iOS Simulator
-* Scroll left and open the Settings app insied iOS Simulator
-* Select `General` > `Accessibility` > `Accessibility Inspector` : On.
-* Re-run the sample app from XCode.
+*Note*: Now that you have created a separate target, new files that you add to your project are not automatically added to your -LP target. Make sure that any new files you add to your production target are also added to your -LP target.
 
-In your irb session try this:
 
-    ruby-1.9.2-p290 :025 > query("view marked:'switch'")
+This screenshot is a reference for you build settings.
 
-This command finds a view with accessibility label 'switch' (not that we use single quotes to delimit the accessibility label.
+![Build settings](documentation/images/linker_flags.png "Build settings")
 
-In general, many views have accessibility labels that "make sense". For example the tab bar buttons have accessibility labels:
 
-    ruby-1.9.2-p290 :029 > touch("tabBarButton marked:'second'")
+### Test that `calabash.framework` is loaded.
 
-To control accessibility labels on your views use:
-`isAccessibilityElement = YES, and accessibilityLabel = @"somelbl";` This can be done in interface builder or programmatically:
+Make sure you select your "..-cal" scheme and then run you app on 4.x/5 simulator.
 
-        (void) viewDidLoad {
-            [super viewDidLoad];
-            self.uiswitch.isAccessibilityElement = YES;
-            self.uiswitch.accessibilityLabel = @"switch";
-        }
+Verify that you see console output like
 
-### Advanced commands
+    2012-01-19 LPSimpleExample[4318:11603] Creating the server: <HTTPServer: 0x7958d70>
+    2012-01-19 LPSimpleExample[4318:11603] HTTPServer: Started HTTP server on port 37265
+    2012-01-19 LPSimpleExample[4318:13903] Bonjour Service Published: domain(local.) type(_http._tcp.) name(Calabash Server)
 
-Surprisingly, these commands are enough to navigate fairly many iOS apps. However, there are many more commands available. Consult the [Step definition wiki](https://github.com/calabash/calabash-ios/wiki/Predefined,-canned-steps).
+
+You should now be able to explore Calabash.
+
+
+Next steps
+==========
+
+Move on to the [Getting started guide](documentation/getting_started.md).
