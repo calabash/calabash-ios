@@ -61,7 +61,7 @@ Note: Fast track installation works for most iOS projects, but there are some pr
   - `calabash-ios gen`
 
 5. In Xcode, build your project using the <project-name>-cal scheme
-  - ![-cal scheme](documentation/images/scheme.png "-cal scheme")
+  - ![-cal scheme](raw/master/documentation/images/scheme.png "-cal scheme")
 
 6. Run the generated test!
   - `cucumber`
