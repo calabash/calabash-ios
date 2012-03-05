@@ -72,7 +72,7 @@ If all goes well, you are now ready to write your first test.
 Start by editing the file `features/my_first.feature`.
 
 Proceed by reading details about installation below, or moving on to the
-[Getting started guide](calabash-ios/tree/master/documentation).
+[Getting started guide](https://github.com/calabash/calabash-ios/wiki/00-Calabash-iOS-documentation).
 
 Installation details
 ====================
@@ -228,4 +228,4 @@ You should now be able to explore Calabash.
 Next steps
 ==========
 
-Move on to the [Getting started guide](documentation/getting_started.md).
+Move on to the [Getting started guide](https://github.com/calabash/calabash-ios/wiki/00-Calabash-iOS-documentation).
