@@ -29,6 +29,8 @@ Important notice
 The Calabash framework uses private Apple APIs to synthesize touch
 events. This means that you should double check that `calabash.framework`
 is not included in the .ipa file you submit to App Store.
+This is usually done by creating a separate build configuration or target 
+for the version of your app running calabash tests.
 
 Installation
 ------------
@@ -53,7 +55,7 @@ Note: Fast track installation works for most iOS projects, but there are some pr
 2. Install calabash-cucumber gem
   - `gem install calabash-cucumber`
 
-3. Setup your project for Calabash-iOS  (remember the "Important notice above").
+3. Setup your project for Calabash-iOS.
   - `calabash-ios setup`
   (Answer the questions and read the output :)
 
@@ -70,7 +72,7 @@ If all goes well, you are now ready to write your first test.
 Start by editing the file `features/my_first.feature`.
 
 Proceed by reading details about installation below, or moving on to the
-[Getting started guide](documentation/getting_started.md).
+[Getting started guide](calabash-ios/tree/master/documentation).
 
 Installation details
 ====================
@@ -86,8 +88,6 @@ to maintain and setup, but there are some situations where it cannot
 be used. Particularly, you must ensure you are not accidentally
 loading `calabash.framework` which may happen if you use `-all_load`
 or `-ObjC` linker options. In this case you must make a separate target for calabash (see Manual setup with Xcode below).
-
-
 
 ### Ruby and calabash-cucumber gem.
 
