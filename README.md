@@ -29,7 +29,7 @@ Important notice
 The Calabash framework uses private Apple APIs to synthesize touch
 events. This means that you should double check that `calabash.framework`
 is not included in the .ipa file you submit to App Store.
-This is usually done by creating a separate build configuration or target 
+This is usually done by creating a separate build configuration or target
 for the version of your app running calabash tests.
 
 Installation
@@ -229,3 +229,14 @@ Next steps
 ==========
 
 Move on to the [Getting started guide](https://github.com/calabash/calabash-ios/wiki/00-Calabash-iOS-documentation).
+
+License
+=======
+calabash-cucumber
+Copyright (c) LessPainful APS. All rights reserved.
+The use and distribution terms for this software are covered by the
+Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+which can be found in the file epl-v10.html at the root of this distribution.
+By using this software in any fashion, you are agreeing to be bound by
+the terms of this license.
+You must not remove this notice, or any other, from this software.
