@@ -37,8 +37,12 @@ Installation
 
 ### Prerequisites
 
-You need to have Ruby 1.9.2+ installed, and a recent RubyGems
-installation. I use rbenv to manage my Ruby installations.
+You need to have Ruby installed. This is default on MacOSX. 
+Verify by running `ruby -v` in a terminal.
+
+Ruby 1.8.7 is the default on MacOSX. You should be able to get started using
+this version of Ruby, though Ruby 1.9.2+ and a recent RubyGems
+installation is recommended. I use rbenv to manage my Ruby installations.
 
 For rbenv, see:
 
