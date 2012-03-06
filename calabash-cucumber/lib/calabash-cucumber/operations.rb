@@ -166,7 +166,7 @@ module Operations
   end
 
   def check_element_does_not_exist( query )
-    if not element_exists( query ).should be_false
+    if element_exists( query )
       screenshot_and_raise "Expected no elements to match query: #{query}"
     end
   end
@@ -256,7 +256,7 @@ module Operations
     file_name = "#{file_name}_#{os}_#{device}.base64"
     system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
     system("openssl base64 -in _recording_binary.plist -out #{file_name}")
-    #system("rm _recording.plist _recording_binary.plist")
+    system("rm _recording.plist _recording_binary.plist")
     file_name
   end
 

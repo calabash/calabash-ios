@@ -1,8 +1,6 @@
 WAIT_TIMEOUT = ENV['WAIT_TIMEOUT'] || 30
 STEP_PAUSE = (ENV['STEP_PAUSE'] || 0.5).to_f
 
-require 'rspec/expectations'
-
 Given /^(my|the) app is running$/ do |_|
   #no-op exists for backwards compatibility
 end
