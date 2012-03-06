@@ -23,26 +23,16 @@ our framework: `calabash.framework`, and install a ruby gem as
 described below. (You also need to link with Apple's CFNetwork
 framework if you are not already using this.)
 
-Important notice
-----------------
-
-The Calabash framework uses private Apple APIs to synthesize touch
-events. This means that you should double check that `calabash.framework`
-is not included in the .ipa file you submit to App Store.
-This is usually done by creating a separate build configuration or target
-for the version of your app running calabash tests.
-
 Installation
 ------------
 
 ### Prerequisites
 
-You need to have Ruby installed. This is default on MacOSX. 
+You need to have Ruby installed. This is installed by default on MacOSX. 
 Verify by running `ruby -v` in a terminal.
 
-Ruby 1.8.7 is the default on MacOSX. You should be able to get started using
-this version of Ruby, though Ruby 1.9.2+ and a recent RubyGems
-installation is recommended. I use rbenv to manage my Ruby installations.
+You may want to install Ruby 1.9.2+ and a recent RubyGems version.
+I use rbenv to manage my Ruby installations.
 
 For rbenv, see:
 
@@ -84,6 +74,15 @@ Start by editing the file `features/my_first.feature`.
 
 Proceed by reading details about installation below, or moving on to the
 [Getting started guide](https://github.com/calabash/calabash-ios/wiki/00-Calabash-iOS-documentation).
+
+Important notice
+================
+
+The Calabash framework uses private Apple APIs to synthesize touch
+events. This means that you should double check that `calabash.framework`
+is not included in the .ipa file you submit to App Store.
+This is usually done by creating a separate build configuration or target
+for the version of your app running calabash tests.
 
 Installation details
 ====================
