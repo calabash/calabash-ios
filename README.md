@@ -54,6 +54,7 @@ Note: Fast track installation works for most iOS projects, but there are some pr
 
 2. Install calabash-cucumber gem
   - `gem install calabash-cucumber`
+  - (Note you may need to run `sudo gem install calabash-cucumber` depending on your ruby installation).
 
 3. Setup your project for Calabash-iOS.
   - `calabash-ios setup`
