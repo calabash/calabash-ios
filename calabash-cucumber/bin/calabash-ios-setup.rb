@@ -262,20 +262,6 @@ def setup_project(project_name, project_path, path)
 
 
 
-  cfnet = pbx.find_item :name => "CFNetwork.framework", :type => PBXProject::PBXTypes::PBXFileReference
-
-  unless cfnet
-    f = PBXProject::PBXTypes::PBXFileReference.new(:path => "System/Library/Frameworks/CFNetwork.framework", :lastKnownFileType => "wrapper.framework", :sourceTree => 'SDKROOT')
-    f.comment = "CFNetwork.framework"
-    f.name = f.comment
-    pbx.add_item f
-    bf = PBXProject::PBXTypes::PBXBuildFile.new(:comment => "CFNetwork.framework in Frameworks", :fileRef => f.guid)
-    bf.comment = "CFNetwork.framework in Frameworks"
-    pbx.add_item bf
-    group.add_children f
-    build_phase_entry = PBXProject::PBXTypes::BasicValue.new(:value => bf.guid, :comment => bf.comment)
-    pbx.sections['PBXFrameworksBuildPhase'][0].files << build_phase_entry
-  end
 
 
   targets = pbx.sections['PBXNativeTarget']
@@ -317,6 +303,28 @@ def setup_project(project_name, project_path, path)
       end
     end
   end
+
+  #CFNetwork
+  cfnet = pbx.find_item :name => "CFNetwork.framework", :type => PBXProject::PBXTypes::PBXFileReference
+
+  if cfnet
+    msg("Warning") do
+      puts "You are already using CFNetwork.framework"
+      puts "Please make sure you have added it to your target #{target.name.value}."
+    end
+  else
+    f = PBXProject::PBXTypes::PBXFileReference.new(:path => "System/Library/Frameworks/CFNetwork.framework", :lastKnownFileType => "wrapper.framework", :sourceTree => 'SDKROOT')
+    f.comment = "CFNetwork.framework"
+    f.name = f.comment
+    pbx.add_item f
+    bf = PBXProject::PBXTypes::PBXBuildFile.new(:comment => "CFNetwork.framework in Frameworks", :fileRef => f.guid)
+    bf.comment = "CFNetwork.framework in Frameworks"
+    pbx.add_item bf
+    group.add_children f
+    build_phase_entry = PBXProject::PBXTypes::BasicValue.new(:value => bf.guid, :comment => bf.comment)
+    pbx.sections['PBXFrameworksBuildPhase'][0].files << build_phase_entry
+  end
+
 
   ##project level build conf
   project_bc_id = pbx.sections['PBXProject'][0].buildConfigurationList.value
