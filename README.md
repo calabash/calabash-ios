@@ -29,7 +29,7 @@ Installation
 ### Prerequisites
 
 You need to have Ruby installed. This is installed by default on MacOSX. 
-Verify by running `ruby -v` in a terminal.
+Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7".
 
 You may want to install Ruby 1.9.2+ and a recent RubyGems version.
 I use rbenv to manage my Ruby installations.
