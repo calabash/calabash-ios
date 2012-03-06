@@ -223,6 +223,8 @@ def setup_project(project_name, project_path, path)
       exit 1
     end
     FileUtils.cp(proj_file, "#{proj_file}.bak")
+    puts "Saved as #{proj_file}.bak"
+
   end
   file = download_calabash(project_path)
 

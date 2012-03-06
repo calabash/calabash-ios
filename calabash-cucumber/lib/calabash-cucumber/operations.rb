@@ -273,25 +273,12 @@ module Operations
   #end
 
   def screenshot
-    if ENV['UUID'] && !/localhost/.match(ENV['DEVICE_ENDPOINT'])
-      f = %x[idevicescreenshot -u #{ENV['UUID']}]
-      line=f.strip().split("\n").last
-      filename=line.split(" ").last
-      outfile = "#{ENV['SCREENSHOT_PATH_PREFIX']}_#{CALABASH_COUNT[:step_line]}.png"
-      if File.exist?filename
-        puts "converting screenshot: #{filename} to #{outfile}"
-        system("convert #{filename} #{outfile}")
-      else
-        raise "Error. Unable to screenshot for device #{ENV['UUID']}."
-      end
-    else
-      res = http({:method =>:get, :path => 'screenshot'})
-      path = "screenshot_#{CALABASH_COUNT[:step_line]}.png"
-      File.open(path,'wb') do |f|
-        f.write res
-      end
-      puts "Saved screenshot: #{path}"
+    res = http({:method =>:get, :path => 'screenshot'})
+    path = "screenshot_#{CALABASH_COUNT[:step_line]}.png"
+    File.open(path,'wb') do |f|
+      f.write res
     end
+    puts "Saved screenshot: #{path}"
   end
   
   def map( query, method_name, *method_args )
