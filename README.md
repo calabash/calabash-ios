@@ -49,11 +49,18 @@ Fast track
 ============
 Note: Fast track installation works for most iOS projects, but there are some project setups where it does not. If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
 
+Note: If you are an existing user of Calabash iOS, don't run setup. Instead you can update to the latest version by running.
+`gem update calabash-cucumber` and from your project directory (containing calabash.framework) run `calabash-ios download`.
+
+Otherwise, follow these steps:
+
 1. In a terminal, go to your iOS project
   - `cd path-to-my-ios-project` (i.e. directory containing .xcodeproj file)
 
 2. Install calabash-cucumber gem
   - `gem install calabash-cucumber`
+  - (Note you may need to run `sudo gem install calabash-cucumber` depending on your ruby installation).
+  - (Note this may take some time if you don't already have the dependencies for this gem)
 
 3. Setup your project for Calabash-iOS.
   - `calabash-ios setup`
