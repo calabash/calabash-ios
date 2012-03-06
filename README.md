@@ -61,10 +61,10 @@ Otherwise, follow these steps:
 1. In a terminal, go to your iOS project
   - `cd path-to-my-ios-project` (i.e. directory containing .xcodeproj file)
 
-2. Install calabash-cucumber gem
+2. Install calabash-cucumber gem (this make take some time because of dependencies)
   - `gem install calabash-cucumber`
-  - (Note you may need to run `sudo gem install calabash-cucumber` depending on your ruby installation).
-  - (Note this may take some time if you don't already have the dependencies for this gem)
+  - (Note you may need to run `sudo gem install calabash-cucumber` if you get
+     ERROR:  While executing gem ... (Gem::FilePermissionError)).
 
 3. Setup your project for Calabash-iOS.
   - `calabash-ios setup`
