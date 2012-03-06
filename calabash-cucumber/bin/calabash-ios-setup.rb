@@ -138,7 +138,7 @@ end
 def download_calabash(project_path)
   file = 'calabash.framework'
   ##Download calabash.framework
-  if not Dir.exists?(File.join(project_path, file))
+  if not File.directory?(File.join(project_path, file))
     msg("Info") do
       zip_file = "calabash.framework-#{ENV['FRAMEWORK_VERSION']||Calabash::Cucumber::FRAMEWORK_VERSION}.zip"
       puts "Did not find calabash.framework. I'll download it...'"
@@ -514,7 +514,7 @@ def validate_ipa(ipa)
 end
 
 def validate_app(app)
-  if not Dir.exists?app
+  if not File.directory?app
     msg("Error") do
       puts "Path: #{app} is not a directory."
     end

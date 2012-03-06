@@ -44,7 +44,7 @@ def ensure_correct_path(args)
   dir_to_search = nil
   if args.length == 1
     dir_to_search = args[0]
-    if not Dir.exists?(dir_to_search)
+    if not File.directory?(dir_to_search)
       puts "Path: #{dir_to_search} is not a directory."
       puts "It should be your project directory (i.e., the one containing your <projectname.xcodeproject>)."
       exit 1

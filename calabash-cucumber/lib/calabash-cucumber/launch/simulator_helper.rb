@@ -61,7 +61,7 @@ module Calabash
         app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))
         bundle_path = nil
 
-        if path and not Dir.exist?(path)
+        if path and not File.directory?(path)
           puts "Unable to find .app bundle at #{path}"
           if dd_dir.nil?
             raise "Unable to find Project for #{project_dir} in #{%x[ls #{DEFAULT_DERIVED_DATA}]}"
