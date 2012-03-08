@@ -31,10 +31,12 @@ Installation
 You need to have Ruby installed. This is installed by default on MacOSX. 
 Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7".
 
-*Note* there is a bug when running `calabash-ios setup` with ruby 1.8.7. We're working on fixing this. 
-In the mean time please use Ruby 1.9.2+.
+*Note* there is a bug in calabash-cucumber < 0.9.28 
+when running `calabash-ios setup` with ruby 1.8.7. 
+If you are running a prior version please update: `sudo gem uninstall calabash-cucumer` (all versions),
+and `sudo gem install calabash-cucumber`. 
 
-Install Ruby 1.9.2+ and a recent RubyGems version.
+It is recommended, but not necessary to install Ruby 1.9.2+ and a recent RubyGems version.
 I use rbenv to manage my Ruby installations.
 
 For rbenv, see:
