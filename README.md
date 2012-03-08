@@ -31,7 +31,7 @@ Installation
 You need to have Ruby installed. This is installed by default on MacOSX. 
 Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7".
 
-*Note* there is a bug in calabash-cucumber < 0.9.28 
+*Note* there is a bug in calabash-cucumber < 0.9.29 
 when running `calabash-ios setup` with ruby 1.8.7. 
 If you are running a prior version please update: `sudo gem uninstall calabash-cucumer` (all versions),
 and `sudo gem install calabash-cucumber`. 
