@@ -15,14 +15,6 @@ If you have any questions on Calabash iOS, please use the google group
 This guide was writting using XCode 4.2, but should also work for
 XCode versions >= 4.0.
 
-Preparing your application.
----------------------------
-
-To use Calabash for iOS in your app, you must do two things: link with
-our framework: `calabash.framework`, and install a ruby gem as
-described below. (You also need to link with Apple's CFNetwork
-framework if you are not already using this.)
-
 Installation
 ------------
 
@@ -32,8 +24,8 @@ You need to have Ruby installed. This is installed by default on MacOSX.
 Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7" (or higher).
 
 
-Fast track
-============
+### Fast track
+
 Note: Fast track installation works for most iOS projects, but there are some project setups where it does not. If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
 
 Note: If you are an existing user of Calabash iOS, don't run setup. Instead you can update to the latest version by running.
@@ -83,6 +75,15 @@ Installation details
 
 If fast track setup doesn't work for you, or you're interested in
 what's going on you can read the installation details here.
+
+## Preparing your application.
+
+To use Calabash for iOS in your app, you must do two things: link with
+our framework: `calabash.framework`, and install a ruby gem as
+described below. (You also need to link with Apple's CFNetwork
+framework if you are not already using this.)
+
+
 
 There are two primary ways of linking with the framework. Either you
 can create a whole separate target by duplicating your production
