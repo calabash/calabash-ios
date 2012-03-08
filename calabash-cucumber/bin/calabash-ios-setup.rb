@@ -1,4 +1,6 @@
 require "calabash-cucumber/version"
+require 'rexml/rexml'
+require "rexml/document"
 
 
 def dup_scheme(project_name, pbx_dir, target)
@@ -34,7 +36,7 @@ def dup_scheme(project_name, pbx_dir, target)
       if not cal_scheme.nil?
         msg("Warning") do
           puts "Scheme: #{target_name}-cal.xcscheme already exists."
-          puts "Will not try to duplicate #{project_name}.xcscheme."
+          puts "Will not try to duplicate #{target_name}.xcscheme."
         end
       else
         msg("Action") do
@@ -54,7 +56,9 @@ def dup_scheme(project_name, pbx_dir, target)
           doc.elements.each("Scheme/ProfileAction") do |la|
             la.attributes["buildConfiguration"] = "Calabash"
           end
-          doc.write(File.open("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes/#{target_name}-cal.xcscheme", "w"))
+          f=File.open("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes/#{target_name}-cal.xcscheme", "w")
+          doc.write f
+          f.close
         end
       end
     end
