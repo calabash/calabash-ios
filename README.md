@@ -31,11 +31,6 @@ Installation
 You need to have Ruby installed. This is installed by default on MacOSX. 
 Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7".
 
-*Note* there is a bug in calabash-cucumber < 0.9.30 
-when running `calabash-ios setup` with ruby 1.8.7. 
-If you are running a prior version please update: `sudo gem uninstall calabash-cucumer` (all versions),
-and `sudo gem install calabash-cucumber`. 
-
 It is recommended, but not necessary to install Ruby 1.9.2+ and a recent RubyGems version.
 I use rbenv to manage my Ruby installations.
 
@@ -49,7 +44,8 @@ Fast track
 Note: Fast track installation works for most iOS projects, but there are some project setups where it does not. If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
 
 Note: If you are an existing user of Calabash iOS, don't run setup. Instead you can update to the latest version by running.
-`gem update calabash-cucumber` and from your project directory (containing calabash.framework) run `calabash-ios download`.
+`gem update calabash-cucumber` (or possibly `sudo gem update calabash-cucumber`) and from 
+your project directory (containing calabash.framework) run `calabash-ios download`.
 
 Otherwise, follow these steps:
 
