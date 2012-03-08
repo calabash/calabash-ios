@@ -31,6 +31,9 @@ Installation
 You need to have Ruby installed. This is installed by default on MacOSX. 
 Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7".
 
+*Note* there is a bug when running `calabash-ios setup` with ruby 1.8.7. We're working on fixing this. 
+In the mean time please use Ruby 1.9.2+:
+
 You may want to install Ruby 1.9.2+ and a recent RubyGems version.
 I use rbenv to manage my Ruby installations.
 
