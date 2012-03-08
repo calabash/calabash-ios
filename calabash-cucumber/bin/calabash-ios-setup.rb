@@ -16,14 +16,14 @@ def dup_scheme(project_name, pbx_dir, target)
   end
 
   userdata_dirs.each do |userdata_dir|
-    scheme_to_find = Regexp.new(Regexp.escape("#{target_name}.xcscheme"))
-    cal_scheme_to_find = Regexp.new(Regexp.escape("#{target_name}-cal.xcscheme"))
+    scheme_to_find = "#{target_name}.xcscheme"
+    cal_scheme_to_find = "#{target_name}-cal.xcscheme"
     schemes = Dir.foreach("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes")
-    scheme = schemes.find do |scheme|
-      scheme_to_find.match(scheme)
+    scheme = schemes.find do |s|
+      scheme_to_find == s
     end
-    cal_scheme = schemes.find do |scheme|
-      cal_scheme_to_find.match(scheme)
+    cal_scheme = schemes.find do |s|
+      cal_scheme_to_find == s
     end
 
     if scheme.nil?
