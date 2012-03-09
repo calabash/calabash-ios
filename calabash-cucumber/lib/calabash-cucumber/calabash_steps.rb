@@ -237,12 +237,12 @@ Then /^I playback recording "([^"]*)"$/ do |filename|
     sleep(STEP_PAUSE)
 end
 
-Then /^I playback recording "([^"]*) on "([^"]*)"$/ do |filename, name|
+Then /^I playback recording "([^"]*)" on "([^"]*)"$/ do |filename, name|
     playback(filename, {:query => "view marked:'#{name}'"})
     sleep(STEP_PAUSE)
 end
 
-Then /^I playback recording "([^"]*) on "([^"]*)" with offset (\d+),(\d+)$/ do |filename, name, x, y|
+Then /^I playback recording "([^"]*)" on "([^"]*)" with offset (\d+),(\d+)$/ do |filename, name, x, y|
   x = x.to_i
   y = y.to_i
   playback(filename, {:query => "view marked:'#{name}'", :offset => {:x => x, :y => y}})
@@ -259,7 +259,7 @@ Then /^I reverse playback recording "([^"]*) on "([^"]*)"$/ do |filename, name|
   sleep(STEP_PAUSE)
 end
 
-Then /^I reverse playback recording "([^"]*) on "([^"]*)" with offset (\d+),(\d+)$/ do |filename, name, x, y|
+Then /^I reverse playback recording "([^"]*)" on "([^"]*)" with offset (\d+),(\d+)$/ do |filename, name, x, y|
   x = x.to_i
   y = y.to_i
   playback(filename, {:query => "view marked:'#{name}'", :offset => {:x => x, :y => y},:reverse => true})
