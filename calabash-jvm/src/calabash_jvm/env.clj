@@ -6,3 +6,6 @@
                   "http://localhost:37265"))
 
 (def UUID (getenv "UUID"))
+
+(defn err [req rsp]
+  (lg/warn "Error: " req rsp))

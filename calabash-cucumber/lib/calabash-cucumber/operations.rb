@@ -64,6 +64,10 @@ module Operations
     simple_touch(label,*args)
   end
 
+  def html(q)
+    query(q).map {|e| e['html']}
+  end
+
   def ok
     touch("view marked:'ok'")
   end
@@ -231,6 +235,25 @@ module Operations
       screenshot_and_raise "playback failed because: #{res['reason']}\n#{res['details']}"
     end
     res['results']
+  end
+
+  def interpolate(recording, options={})
+      data = load_playback_data(recording)
+
+      post_data = %Q|{"events":"#{data}"|
+      post_data<< %Q|,"start":"#{options[:start]}"| if options[:start]
+      post_data<< %Q|,"end":"#{options[:end]}"| if options[:end]
+      post_data<< %Q|,"offset_start":#{options[:offset_start].to_json}| if options[:offset_start]
+      post_data<< %Q|,"offset_end":#{options[:offset_end].to_json}| if options[:offset_end]
+      post_data << "}"
+
+      res = http({:method=>:post, :raw=>true, :path=>'interpolate'}, post_data)
+
+      res = JSON.parse( res )
+      if res['outcome'] != 'SUCCESS'
+        screenshot_and_raise "interpolate failed because: #{res['reason']}\n#{res['details']}"
+      end
+      res['results']
   end
 
   def record_begin
