@@ -459,8 +459,8 @@ def validate_setup(args)
         end
         exit 1
       end
-      out_debug = `otool #{sim_dirs[0]}/* -o 2> /dev/null | grep CalabashServer`
-      out_cal = `otool #{sim_dirs[1]}/* -o 2> /dev/null | grep CalabashServer 2> /dev/null`
+      out_debug = `otool "#{sim_dirs[0]}/*" -o 2> /dev/null | grep CalabashServer`
+      out_cal = `otool "#{sim_dirs[1]}/*" -o 2> /dev/null | grep CalabashServer 2> /dev/null`
       ok = (not /CalabashServer/.match(out_debug)) and /CalabashServer/.match(out_cal)
       if ok
         msg("OK") do
@@ -504,7 +504,7 @@ def validate_ipa(ipa)
 
     app_dir = Dir.foreach("#{dir}/Payload").find {|d| /\.app$/.match(d)}
     app = app_dir.split(".")[0]
-    res = `otool #{dir}/Payload/#{app_dir}/#{app} -o 2> /dev/null | grep CalabashServer`
+    res = `otool "#{dir}/Payload/#{app_dir}/#{app}" -o 2> /dev/null | grep CalabashServer`
     msg("Info") do
       if /CalabashServer/.match(res)
         puts "Ipa: #{ipa} *contains* calabash.framework"
@@ -527,7 +527,7 @@ def validate_app(app)
     end
     exit 1
   end
-  out = `otool #{app}/* -o 2> /dev/null | grep CalabashServer`
+  out = `otool "#{app}/*" -o 2> /dev/null | grep CalabashServer`
 
   msg("Info") do
     if /CalabashServer/.match(out)

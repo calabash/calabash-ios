@@ -113,7 +113,7 @@ module Calabash
       def self.find_preferred_dir(sim_dirs)
 
         pref = sim_dirs.find do |d|
-          out = `otool #{d}/* -o | grep CalabashServer`
+          out = `otool "#{d}/*" -o 2> /dev/null | grep CalabashServer`
           /CalabashServer/.match(out)
         end
 
@@ -161,7 +161,7 @@ module Calabash
       end
 
       def self.ping_app
-        url = URI.parse (ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
+        url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
         puts "Ping #{url}..."
         http = Net::HTTP.new(url.host, url.port)
         res = http.start do |sess|
