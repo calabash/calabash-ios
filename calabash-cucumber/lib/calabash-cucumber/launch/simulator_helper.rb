@@ -113,7 +113,7 @@ module Calabash
       def self.find_preferred_dir(sim_dirs)
 
         pref = sim_dirs.find do |d|
-          out = `otool "#{File.expand_path(d)}/*" -o 2> /dev/null | grep CalabashServer`
+          out = `otool "#{File.expand_path(d)}"/* -o 2> /dev/null | grep CalabashServer`
           /CalabashServer/.match(out)
         end
 
