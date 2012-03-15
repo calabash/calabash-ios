@@ -207,6 +207,7 @@ Then /^I swipe on cell number (\d+)$/ do |index|
   sleep(STEP_PAUSE)
 end
 
+
 ##pinch##
 Then /^I pinch to zoom (in|out)$/ do |in_out|
   pinch(in_out)

@@ -4,7 +4,7 @@ def quit_sim
   `echo 'application "iPhone Simulator" quit' | osascript`
 end
 def calabash_sim_reset
-  reset_script = File.absolute_path("#{@script_dir}/reset_simulator.scpt")
+  reset_script = File.expand_path("#{@script_dir}/reset_simulator.scpt")
   launcher = SimLauncher::Simulator.new
   sdks = SimLauncher::SdkDetector.new(launcher).available_sdk_versions
   sdks.each do |sdk_path_str|
@@ -21,14 +21,14 @@ end
 def calabash_sim_accessibility
   dirs = Dir.glob(File.join(File.expand_path("~/Library"),"Application Support","iPhone Simulator","*.*","Library","Preferences"))
   dirs.each do |sim_pref_dir|
-    fp = File.absolute_path("#{@script_dir}/data/")
+    fp = File.expand_path("#{@script_dir}/data/")
     FileUtils.cp("#{fp}/com.apple.Accessibility.plist", sim_pref_dir)
   end
 end
 
 def calabash_sim_locale(args)
 
-  prefs_path = File.absolute_path("#{@script_dir}/data/.GlobalPreferences.plist")
+  prefs_path = File.expand_path("#{@script_dir}/data/.GlobalPreferences.plist")
   plist = CFPropertyList::List.new(:file => prefs_path)
   hash = CFPropertyList.native_types(plist.value)
 
