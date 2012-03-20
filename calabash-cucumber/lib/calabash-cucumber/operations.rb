@@ -297,11 +297,13 @@ module Operations
 
   def screenshot
     res = http({:method =>:get, :path => 'screenshot'})
-    path = "screenshot_#{CALABASH_COUNT[:step_line]}.png"
+    prefix = ENV['SCREENSHOT_PATH'] || ""
+    path = "#{prefix}screenshot_#{CALABASH_COUNT[:step_line]}.png"
     File.open(path,'wb') do |f|
       f.write res
     end
     puts "Saved screenshot: #{path}"
+    path
   end
   
   def map( query, method_name, *method_args )
