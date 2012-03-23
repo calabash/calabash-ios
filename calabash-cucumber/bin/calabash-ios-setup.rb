@@ -411,6 +411,25 @@ def setup_project(project_name, project_path, path)
     bc.buildSettings["FRAMEWORK_SEARCH_PATHS"] = sp
   end
   FileUtils.cd pwd
+
+  ##Backup
+  msg("Info") do
+    puts "Making backup of project file: #{proj_file}"
+    if File.exists? "#{proj_file}.bak"
+      msg("Error") do
+        puts "Backup file already exists. #{proj_file}.bak"
+        puts "For safety, I won't overwrite this file."
+        puts "You must manually move this file, if you want to"
+        puts "Run calabash-ios setup again."
+      end
+      exit 1
+    end
+    FileUtils.cp(proj_file, "#{proj_file}.bak")
+    puts "Saved as #{proj_file}.bak"
+
+  end
+
+
   pbx.write_to :file => proj_file
   return target
 end
