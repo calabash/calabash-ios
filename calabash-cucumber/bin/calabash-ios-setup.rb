@@ -138,8 +138,7 @@ def find_project_files(args)
 end
 
 def calabash_download(args)
-  project_name, project_path, xpath = find_project_files(args)
-  download_calabash(project_path)
+  download_calabash(File.expand_path("."))
 end
 
 def download_calabash(project_path)
