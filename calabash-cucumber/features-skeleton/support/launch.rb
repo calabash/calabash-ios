@@ -49,7 +49,7 @@ Before do |scenario|
 end
 
 at_exit do
-  if ENV['NO_LAUNCH'].nil?
+  if ENV['NO_LAUNCH'].nil? and ENV['NO_STOP'].nil?
     Calabash::Cucumber::SimulatorHelper.stop
   end
 end
