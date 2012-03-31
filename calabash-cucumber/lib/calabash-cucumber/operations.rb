@@ -80,7 +80,39 @@ module Operations
 
 
   def swipe(dir,options={})
-    playback("swipe_#{dir}",options)
+      dir = dir.to_sym
+      print "rotation: #{@current_rotation}\n"
+      print "initial dir: #{dir} \n"
+      @current_rotation = @current_rotation || :down
+      if @current_rotation == :left
+          case dir
+          when :left then dir = :down
+          when :right then dir = :up
+          when :up then dir = :left
+          when :down then dir = :right
+          else
+          end
+      end
+      if @current_rotation == :right
+          case dir
+          when :left then dir = :up
+          when :right then dir = :down
+          when :up then dir = :right
+          when :down then dir = :left
+          else
+          end
+      end
+      if @current_rotation == :up
+          case dir
+          when :left then dir = :right
+          when :right then dir = :left
+          when :up then dir = :down
+          when :down then dir = :up
+          else
+          end
+      end
+      print "final dir: #{dir} \n"
+      playback("swipe_#{dir}",options)
   end
 
   def cell_swipe(options={})
