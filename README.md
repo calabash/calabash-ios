@@ -27,6 +27,12 @@ If you have any questions on Calabash iOS, please use the google group
 This guide was writting using XCode 4.2, but should also work for
 XCode versions >= 4.0.
 
+*NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from 
+the preferences pane under "Downloads" in Xcode. Then I had to do
+
+    sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
+
+
 Installation
 ------------
 
