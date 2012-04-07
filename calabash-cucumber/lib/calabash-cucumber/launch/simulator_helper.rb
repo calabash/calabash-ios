@@ -61,24 +61,19 @@ module Calabash
       end
 
       def self.app_bundle_or_raise(path)
-        dd_dir = derived_data_dir_for_project
-        app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))
         bundle_path = nil
 
         if path and not File.directory?(path)
-          puts "Unable to find .app bundle at #{path}"
-          if dd_dir.nil?
-            raise "Unable to find Project for #{project_dir} in #{%x[ls #{DEFAULT_DERIVED_DATA}]}"
-          end
-          if app_bundles.empty?
-            raise "Can't find build in #{dd_dir}/Build/Products/*/*.app'. Have you built your app for simulator?"
-          end
+          puts "Unable to find .app bundle at #{path}. It should be an .app directory."
+          dd_dir = derived_data_dir_for_project
+          app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))
           msg = "Try setting APP_BUNDLE_PATH in features/support/launch.rb to one of:\n\n"
           msg << app_bundles.join("\n")
           raise msg
         elsif path
           bundle_path = path
         else
+          dd_dir = derived_data_dir_for_project
           sim_dirs = Dir.glob(File.join(dd_dir, "Build", "Products", "*-iphonesimulator", "*.app"))
           if sim_dirs.empty?
             msg = ["Unable to auto detect APP_BUNDLE_PATH."]
