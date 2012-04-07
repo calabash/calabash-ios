@@ -1,4 +1,5 @@
-(ns calabash-jvm.env)
+(ns calabash-jvm.env
+  (:require [clojure.tools.logging :as lg]))
 
 (defn getenv [str] (System/getenv str))
 

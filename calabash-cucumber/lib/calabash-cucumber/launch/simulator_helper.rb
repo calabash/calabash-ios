@@ -27,11 +27,15 @@ module Calabash
         dir = project_dir
 
         info_plist = Dir.glob(DEFAULT_DERIVED_DATA).find { |plist_file|
-          plist = CFPropertyList::List.new(:file => plist_file)
-          hash = CFPropertyList.native_types(plist.value)
-          ws_dir = File.dirname(hash['WorkspacePath']).downcase
-          p_dir = dir.downcase
-          ws_dir == p_dir
+          begin
+            plist = CFPropertyList::List.new(:file => plist_file)
+            hash = CFPropertyList.native_types(plist.value)
+            ws_dir = File.dirname(hash['WorkspacePath']).downcase
+            p_dir = dir.downcase
+            ws_dir == p_dir
+          rescue
+            false
+          end
         }
         if not info_plist.nil?
           File.dirname(info_plist)
