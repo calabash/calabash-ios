@@ -1,3 +1,15 @@
+Welcome to Calabash for iOS
+===========================
+
+Calabash is an automated testing technology for Android and iOS native and hybrid applications.
+This repository contains support for iOS, for Android, see [Calabash Android](https://github.com/calabash/calabash-android).
+
+This document explains how to install Calabash. For introductory information about the rationale behind Calabash see
+
+[Introducing Calabash](http://blog.lesspainful.com/2012/03/07/Calabash/).
+
+
+
 This guide explains how to setup and use Calabash for iOS
 =========================================================
 
@@ -6,7 +18,7 @@ against the iOS Simulator. You can also interactively explore and
 interact with your application using the Calabash console.
 
 Finally, you will be able to test your app on real, non-jailbroken iOS
-devices via [the LessPainful service](http://www.lesspainful.com/). Also checkout [Calabash Android](https://github.com/calabash/calabash-android).
+devices via [the LessPainful service](http://www.lesspainful.com/). 
 
 If you have any questions on Calabash iOS, please use the google group
 
@@ -14,6 +26,12 @@ If you have any questions on Calabash iOS, please use the google group
 
 This guide was writting using XCode 4.2, but should also work for
 XCode versions >= 4.0.
+
+*NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from 
+the preferences pane under "Downloads" in Xcode. Then I had to do
+
+    sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
+
 
 Installation
 ------------
