@@ -3,7 +3,6 @@
 require 'fileutils'
 require 'CFPropertyList'
 require 'rexml/document'
-require 'pbxproject'
 
 
 require File.join(File.dirname(__FILE__),"calabash-ios-helpers")

@@ -22,6 +22,5 @@ Gem::Specification.new do |s|
   s.add_dependency( "sim_launcher" )
   s.add_dependency( "slowhandcuke" )
   s.add_dependency( "net-http-persistent" )
-  s.add_dependency( "pbxproject" )
 
 end

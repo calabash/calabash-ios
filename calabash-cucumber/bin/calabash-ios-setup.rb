@@ -3,79 +3,13 @@ require 'rexml/rexml'
 require "rexml/document"
 
 
-def dup_scheme(project_name, pbx_dir, target)
-
-  userdata_dirs = Dir.foreach("#{pbx_dir}/xcuserdata").find_all { |x|
-    /\.xcuserdatad$/.match(x)
-  }
-
-  target_name = target.name.value
-
-  if target_name.start_with?'"' and target_name.end_with?'"'
-    target_name = target_name[1..target_name.length-2]
-  end
-
-  userdata_dirs.each do |userdata_dir|
-    scheme_to_find = "#{target_name}.xcscheme"
-    cal_scheme_to_find = "#{target_name}-cal.xcscheme"
-    schemes = Dir.foreach("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes")
-    scheme = schemes.find do |s|
-      scheme_to_find == s
-    end
-    cal_scheme = schemes.find do |s|
-      cal_scheme_to_find == s
-    end
-
-    if scheme.nil?
-      puts "-"*10 + "Warning" + "-"*10
-      puts "Unable to find scheme: #{target_name}.xcscheme."
-      puts "You must manually create a scheme."
-      puts "Make sure your scheme uses the Calabash build configuration."
-      puts "-"*10 + "-------" + "-"*10
-    else
-      if not cal_scheme.nil?
-        msg("Warning") do
-          puts "Scheme: #{target_name}-cal.xcscheme already exists."
-          puts "Will not try to duplicate #{target_name}.xcscheme."
-        end
-      else
-        msg("Action") do
-          puts "Duplicating scheme #{target_name}.xcscheme as #{target_name}-cal.xcscheme"
-
-          doc = REXML::Document.new(File.new("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes/#{scheme}"))
-
-          doc.elements.each("Scheme/LaunchAction") do |la|
-            la.attributes["buildConfiguration"] = "Calabash"
-          end
-          doc.elements.each("Scheme/ArchiveAction") do |la|
-            la.attributes["buildConfiguration"] = "Calabash"
-          end
-          doc.elements.each("Scheme/AnalyzeAction") do |la|
-            la.attributes["buildConfiguration"] = "Calabash"
-          end
-          doc.elements.each("Scheme/ProfileAction") do |la|
-            la.attributes["buildConfiguration"] = "Calabash"
-          end
-          f=File.open("#{pbx_dir}/xcuserdata/#{userdata_dir}/xcschemes/#{target_name}-cal.xcscheme", "w")
-          doc.write f
-          f.close
-        end
-      end
-    end
-
-  end
-  "#{target_name}-cal"
-end
-
-
 def calabash_setup(args)
   puts "Checking if Xcode is running..."
   res = `ps x -o pid,command | grep -v grep | grep Xcode.app/Contents/MacOS/Xcode`
   if res==""
     puts "Xcode not running."
     project_name, project_path, xpath = find_project_files(args)
-    target = setup_project(project_name, project_path, xpath)
-    scheme = dup_scheme(project_name, xpath, target)
+    setup_project(project_name, project_path, xpath)
     msg("Setup done") do
 
       puts "Please validate by running the #{scheme} scheme"
@@ -211,8 +145,6 @@ def setup_project(project_name, project_path, path)
     end
     exit 1
   end
-  pbx = PBXProject::PBXProject.new(:file => proj_file)
-  pbx.parse
 
   pwd = FileUtils.pwd
   FileUtils.cd project_path
@@ -229,181 +161,11 @@ def setup_project(project_name, project_path, path)
 
   file = download_calabash(project_path)
 
-
-  file_ref = pbx.sections['PBXFileReference'].find do |fr|
-    /calabash\.framework/.match(fr.path)
-  end
-
-  if file_ref
-    msg("Error") do
-      puts "Your project already contains a file reference to calabash.framework."
-      puts "I was not expecting this. Aborting."
-    end
-    exit 1
-  end
-
   msg("Info") do
     puts "Setting up project file for calabash-ios."
   end
 
 
-  ## Augment
-  f = PBXProject::PBXTypes::PBXFileReference.new(:path => file, :lastKnownFileType => "wrapper.framework", :sourceTree => '"<group>"')
-  f.comment = "calabash.framework"
-  pbx.add_item f
-  bf = PBXProject::PBXTypes::PBXBuildFile.new(:comment => "calabash.framework in Frameworks", :fileRef => f.guid)
-  bf.comment = "calabash.framework in Frameworks"
-  pbx.add_item bf
-
-  group = pbx.find_item :name => "Frameworks", :type => PBXProject::PBXTypes::PBXGroup
-  group.add_children f
-
-  build_phase_entry = PBXProject::PBXTypes::BasicValue.new(:value => bf.guid, :comment => bf.comment)
-  pbx.sections['PBXFrameworksBuildPhase'][0].files << build_phase_entry
-
-
-
-
-
-  targets = pbx.sections['PBXNativeTarget']
-  target = nil
-  if targets.count == 0
-    msg("Error") do
-      puts "Unable to find targets in project."
-      puts "Aborting..."
-    end
-    exit 1
-  elsif (targets.count == 1)
-    target = targets[0]
-  else
-    preferred_target = targets.find { |t| t.name.value == project_name }
-    msg("Question") do
-      puts "You have several targets..."
-      target_names = targets.map do |t|
-        n = t.name.value
-        if n.length>2 and n.end_with?'"' and n.start_with?'"'
-          n = n[1..n.length-2]
-        end
-        n
-      end
-
-      puts target_names.join("\n")
-
-      found = nil
-      until found do
-        puts "Please specify which is your production app target."
-        puts "Please enter target name."
-        puts "Hit Enter for default choice: #{preferred_target.name.value}" unless preferred_target.nil?
-        answer = STDIN.gets.chomp
-        if (preferred_target and answer == '')
-          target = preferred_target
-          found = true
-        else
-          target = found = targets.find { |t| t.name.value == answer || t.name.value=="\"#{answer}\""}
-        end
-      end
-    end
-  end
-
-  #CFNetwork
-  cfnet = pbx.find_item :name => "CFNetwork.framework", :type => PBXProject::PBXTypes::PBXFileReference
-
-  if cfnet
-    msg("Warning") do
-      puts "You are already using CFNetwork.framework"
-      puts "Please make sure you have added it to your target #{target.name.value}."
-    end
-  else
-    f = PBXProject::PBXTypes::PBXFileReference.new(:path => "System/Library/Frameworks/CFNetwork.framework", :lastKnownFileType => "wrapper.framework", :sourceTree => 'SDKROOT')
-    f.comment = "CFNetwork.framework"
-    f.name = f.comment
-    pbx.add_item f
-    bf = PBXProject::PBXTypes::PBXBuildFile.new(:comment => "CFNetwork.framework in Frameworks", :fileRef => f.guid)
-    bf.comment = "CFNetwork.framework in Frameworks"
-    pbx.add_item bf
-    group.add_children f
-    build_phase_entry = PBXProject::PBXTypes::BasicValue.new(:value => bf.guid, :comment => bf.comment)
-    pbx.sections['PBXFrameworksBuildPhase'][0].files << build_phase_entry
-  end
-
-
-  ##project level build conf
-  project_bc_id = pbx.sections['PBXProject'][0].buildConfigurationList.value
-  project_bc_list = pbx.find_item :guid => project_bc_id, :type => PBXProject::PBXTypes::XCConfigurationList
-  project_bc_ref = project_bc_list.buildConfigurations.find { |bc| bc.comment =="Debug" }
-  project_bc_id = project_bc_ref.value
-  project_bc = pbx.find_item :guid => project_bc_id, :type => PBXProject::PBXTypes::XCBuildConfiguration
-  project_cal_build_settings = project_bc.buildSettings.clone
-  project_bc.buildSettings.each do |k, v|
-    project_cal_build_settings[k] = v.clone
-  end
-
-  project_cal_bc = PBXProject::PBXTypes::XCBuildConfiguration.new(:name => "Calabash")
-  project_cal_bc.buildSettings = project_cal_build_settings
-  project_cal_bc.comment = "Calabash"
-
-  ##target level build conf
-  bc_list_id = target.buildConfigurationList.value
-  bc_list = pbx.find_item :guid => bc_list_id, :type => PBXProject::PBXTypes::XCConfigurationList
-  bc_ref = bc_list.buildConfigurations.find { |bc| bc.comment =="Debug" }
-  bc_id = bc_ref.value
-  bc = pbx.find_item :guid => bc_id, :type => PBXProject::PBXTypes::XCBuildConfiguration
-  cal_build_settings = bc.buildSettings.clone
-
-  bc.buildSettings.each do |k, v|
-    cal_build_settings[k] = v.clone
-  end
-
-  ld_flags = cal_build_settings['OTHER_LDFLAGS'] || []
-  if not ld_flags.is_a?Array
-    ld_flags = [ld_flags]
-  end
-  danger = ld_flags.find_all {|f| /-ObjC/i.match(f.value) || /-all_load/i.match(f.value)}
-
-  unless danger.empty?
-    msg("Error") do
-      puts "Detected Other Linker Flag: #{(danger.map {|d| d.value}).join(", ")}"
-      puts "calabash-ios setup does not yet support this scenario"
-      puts "(why? karl@lesspainful.com)"
-      puts "You must manually setup ios see:"
-      puts "https://github.com/calabash/calabash-ios"
-    end
-    exit 1
-  end
-
-  ld_flags << PBXProject::PBXTypes::BasicValue.new(:value => '"-force_load"')
-  ld_flags << PBXProject::PBXTypes::BasicValue.new(:value => '"$(SRCROOT)/calabash.framework/calabash"')
-  ld_flags << PBXProject::PBXTypes::BasicValue.new(:value => '"-lstdc++"')
-
-
-  cal_build_settings['OTHER_LDFLAGS'] = ld_flags
-
-  cal_bc = PBXProject::PBXTypes::XCBuildConfiguration.new(:name => "Calabash")
-  cal_bc.buildSettings = cal_build_settings
-  cal_bc.comment = "Calabash"
-
-  targets.each do |target|
-    bc_list_id = target.buildConfigurationList.value
-    bc_list = pbx.find_item :guid => bc_list_id, :type => PBXProject::PBXTypes::XCConfigurationList
-    bc_list.buildConfigurations << PBXProject::PBXTypes::BasicValue.new(:value => cal_bc.guid, :comment => "Calabash")
-  end
-
-  project_bc_list.buildConfigurations << PBXProject::PBXTypes::BasicValue.new(:value => project_cal_bc.guid, :comment => "Calabash")
-
-  pbx.sections['XCBuildConfiguration']<<project_cal_bc
-  pbx.sections['XCBuildConfiguration']<<cal_bc
-
-  pbx.sections['XCBuildConfiguration'].each do |bc|
-    sp = bc.buildSettings["FRAMEWORK_SEARCH_PATHS"] || []
-    if not sp.is_a?Array
-      sp = [sp]
-    end
-    inherit = sp.find { |x| x.value == '"$(inherited)"' }
-    srcroot = sp.find { |x| x.value == "\"$(SRCROOT)\""}
-    sp << PBXProject::PBXTypes::BasicValue.new(:value => '"$(inherited)"') unless inherit
-    sp << PBXProject::PBXTypes::BasicValue.new(:value => "\"$(SRCROOT)\"") unless srcroot
-    bc.buildSettings["FRAMEWORK_SEARCH_PATHS"] = sp
-  end
   FileUtils.cd pwd
 
   ##Backup
@@ -413,9 +175,10 @@ def setup_project(project_name, project_path, path)
     puts "Saved as #{proj_file}.bak"
   end
 
+  path_to_setup = File.join(File.dirname(__FILE__), 'CalabashSetup')
+  setup_cmd = "#{path_to_setup} #{project_path} #{project_name}"
+  system(setup_cmd)
 
-  pbx.write_to :file => proj_file
-  return target
 end
 
 

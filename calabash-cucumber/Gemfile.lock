@@ -1,12 +1,11 @@
 PATH
   remote: .
   specs:
-    calabash-cucumber (0.9.36)
+    calabash-cucumber (0.9.41)
       CFPropertyList
       cucumber
       json
       net-http-persistent
-      pbxproject
       sim_launcher
       slowhandcuke
 
@@ -29,7 +28,6 @@ GEM
     json (1.6.5)
     libxml-ruby (2.2.2)
     net-http-persistent (2.5.2)
-    pbxproject (0.2.4)
     rack (1.4.1)
     rack-protection (1.2.0)
       rack
