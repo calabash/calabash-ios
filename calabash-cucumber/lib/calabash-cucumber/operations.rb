@@ -315,6 +315,19 @@ module Operations
     file_name
   end
 
+  def backdoor(sel, arg)
+    json = {
+      :selector => sel,
+      :arg => arg
+    }
+    res = http({:method=>:post, :path=>'backdoor'}, json)
+    res = JSON.parse(res)
+    if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "map #{query}, #{method_name} failed because: #{res['reason']}\n#{res['details']}"
+    end
+    res['result']
+  end
+
   #def screencast_begin
   #   http({:method=>:post, :path=>'screencast'}, {:action => :start})
   #end
