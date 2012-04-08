@@ -3,6 +3,24 @@ require 'rexml/rexml'
 require "rexml/document"
 
 
+def detect_accessibility_support
+  dirs = Dir.glob(File.join(File.expand_path("~/Library"),"Application Support","iPhone Simulator","*.*","Library","Preferences"))
+  dirs.each do |sim_pref_dir|
+    fp = File.expand_path("#{sim_pref_dir}/com.apple.Accessibility.plist")
+    out = `defaults read "#{fp}" ApplicationAccessibilityEnabled`
+    if not File.exists?(fp) || (out.strip == "0\n")
+        msg("Warn") do
+          puts "Accessibility is not enabled for simulator: #{sim_pref_dir}"
+          puts "Enabled accessibility as described here:"
+          puts "https://github.com/calabash/calabash-ios/wiki/01-Getting-started-guide"
+          puts "Alternatively run command:"
+          puts "calabash-ios sim acc"
+        end
+    end
+
+  end
+end
+
 def calabash_setup(args)
   puts "Checking if Xcode is running..."
   res = `ps x -o pid,command | grep -v grep | grep Xcode.app/Contents/MacOS/Xcode`
@@ -10,12 +28,15 @@ def calabash_setup(args)
     puts "Xcode not running."
     project_name, project_path, xpath = find_project_files(args)
     setup_project(project_name, project_path, xpath)
+
+    detect_accessibility_support
+
     msg("Setup done") do
 
-      puts "Please validate by running the #{scheme} scheme"
+      puts "Please validate by running the -cal target"
       puts "from Xcode."
       puts "When starting the iOS Simulator using the"
-      puts "new scheme: #{project_name}-cal, you should see:\n\n"
+      puts "new -cal target, you should see:\n\n"
       puts '  "Started LPHTTP server on port 37265"'
       puts "\nin the application log in Xcode."
       puts "\n\n"
@@ -176,7 +197,7 @@ def setup_project(project_name, project_path, path)
   end
 
   path_to_setup = File.join(File.dirname(__FILE__), 'CalabashSetup')
-  setup_cmd = "#{path_to_setup} #{project_path} #{project_name}"
+  setup_cmd = "#{path_to_setup} #{path} #{project_name}"
   system(setup_cmd)
 
 end
@@ -208,7 +229,7 @@ def validate_setup(args)
       sim_dirs = sim_dirs.concat(Dir.glob(File.join(dd_dir, "Build", "Products", "Calabash-iphonesimulator", "*.app")))
       if sim_dirs.empty?
         msg = ["Have you built your app for simulator?"]
-        msg << "You should build the -cal scheme and your normal scheme"
+        msg << "You should build the -cal target and your normal target"
         msg << "(with configuration Debug)."
         msg << "Searched dir: #{dd_dir}/Build/Products"
         msg("Error") do
@@ -217,7 +238,7 @@ def validate_setup(args)
         exit 1
       elsif sim_dirs.count != 2
         msg = ["Have you built your app for simulator?"]
-        msg << "You should build the -cal scheme and your normal scheme"
+        msg << "You should build the -cal target and your normal target"
         msg << "(with configuration Debug)."
         msg << "Searched dir: #{dd_dir}/Build/Products"
         msg("Error") do

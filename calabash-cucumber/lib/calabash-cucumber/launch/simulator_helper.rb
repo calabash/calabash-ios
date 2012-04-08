@@ -47,10 +47,10 @@ module Calabash
           msg << "To fix there are a couple of options:\n"
           msg << "Option 1) Make sure you are running this command from your project directory, "
           msg << "i.e., the directory containing your .xcodeproj file."
-          msg << "In Xcode, build your calabash target or scheme for simulator."
+          msg << "In Xcode, build your calabash target for simulator."
           msg << "Check that your app can be found in\n #{File.expand_path("~/Library/Developer/Xcode/DerivedData")}"
           msg << "\n\nOption 2). In features/support/launch.rb set APP_BUNDLE_PATH to"
-          msg << "the path where Xcode has built your Calabash target or scheme."
+          msg << "the path where Xcode has built your Calabash target."
           msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
           raise msg.join("\n")
         end
@@ -80,7 +80,7 @@ module Calabash
             msg << "Have you built your app for simulator?."
             msg << "Searched dir: #{dd_dir}/Build/Products"
             msg << "Please build your app from Xcode"
-            msg << "You should build the -cal scheme or your calabash target."
+            msg << "You should build the -cal target."
             msg << ""
             msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/launch.rb"
             msg << "This should point to the location of your built app linked with calabash.\n"
@@ -91,7 +91,7 @@ module Calabash
             msg = ["Error... Unable to find APP_BUNDLE_PATH."]
             msg << "Cannot find a built app that is linked with calabash.framework"
             msg << "Please build your app from Xcode"
-            msg << "You should build the -cal scheme or your calabash target."
+            msg << "You should build your calabash target."
             msg << ""
             msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/launch.rb"
             msg << "This should point to the location of your built app linked with calabash.\n"
