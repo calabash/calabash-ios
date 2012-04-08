@@ -8,7 +8,9 @@ def detect_accessibility_support
   dirs.each do |sim_pref_dir|
     fp = File.expand_path("#{sim_pref_dir}/com.apple.Accessibility.plist")
     out = `defaults read "#{fp}" ApplicationAccessibilityEnabled`
-    if not File.exists?(fp) || (/^0/.match(out))
+    p out
+
+    if not(File.exists?(fp)) || out.split("\n")[0] == "0"
         msg("Warn") do
           puts "Accessibility is not enabled for simulator: #{sim_pref_dir}"
           puts "Enabled accessibility as described here:"
