@@ -46,7 +46,7 @@ def calabash_setup(args)
       puts "Then run calabash-ios gen"
       puts "(if you don't already have a features folder)."
       sleep 2
-      system("open #{xpath}")
+      system(%Q[open "#{xpath}"])
 
     end
 
