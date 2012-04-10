@@ -198,7 +198,7 @@ def setup_project(project_name, project_path, path)
   end
 
   path_to_setup = File.join(File.dirname(__FILE__), 'CalabashSetup')
-  setup_cmd = "#{path_to_setup} #{path} #{project_name}"
+  setup_cmd = %Q[#{path_to_setup} "#{path}" "#{project_name}"]
   system(setup_cmd)
 
 end
