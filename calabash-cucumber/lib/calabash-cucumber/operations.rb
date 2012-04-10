@@ -23,6 +23,16 @@ module Operations
     end
   end
 
+  def home_direction
+    @current_rotation = @current_rotation || :down
+  end
+
+  def assert_home_direction(expected)
+    unless expected.to_sym == home_direction
+      screenshot_and_raise "Expected home button to have direction #{expected} but had #{home_direction}"
+    end
+  end
+
   def wait_for(timeout, &block)
     begin
       Timeout::timeout(timeout) do
