@@ -26,13 +26,12 @@ Usage: calabash-ios <command-name> [parameters]
         (i.e., the folder which contains projectname.xcodeproj).
 
         The following modifications are made
+          - duplicate an existing target of your choice
           - add the calabash.framework to your Frameworks folder
           - add $(SRCROOT) to framework search path
-          - link with calabash.framework (target can be chosen)
-          - link with Apple's CFNetwork.framework
-          - create a new Build configuration: Calabash
-          - ensure calabash.framework is loaded in Calabash configuration
-          - create a new scheme name <project>-cal
+          - link with calabash.framework in duped target
+          - link with Apple's CFNetwork.framework in duped target
+          - setup special linker options to ensure calabash is loaded
 
         Your Xcode project file will be backed up as project.pbxproj.bak.
         The backup is placed in the .xcodeproj folder for your project.

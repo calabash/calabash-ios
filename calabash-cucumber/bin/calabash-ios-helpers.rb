@@ -18,7 +18,7 @@ def print_usage
     gen
       generate a features folder structure.
     setup (EXPERIMENTAL) [opt path]?
-      setup your XCode project for calabash-ios)
+      setup your XCode project for calabash-ios
     download [opt path]?
       downloads latest compatible version of calabash.framework
     check (EXPERIMENTAL) [opt path to .ipa/.app]?
@@ -95,7 +95,7 @@ def calabash_submit(args)
   feature_path = "features"
   if args.length == 3
     msg("Error") do
-      puts "You can't supply a path to features folder yet."
+      puts "Not implemented: You can't supply a path to features folder yet."
       puts "You should cd into your project folder containing your features folder"
       puts "and then run this command again"
     end
