@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    calabash-cucumber (0.9.41)
+    calabash-cucumber (0.9.47)
       CFPropertyList
       cucumber
       json
@@ -26,8 +26,8 @@ GEM
     gherkin (2.9.0)
       json (>= 1.4.6)
     json (1.6.5)
-    libxml-ruby (2.2.2)
-    net-http-persistent (2.5.2)
+    libxml-ruby (2.3.0)
+    net-http-persistent (2.6)
     rack (1.4.1)
     rack-protection (1.2.0)
       rack
