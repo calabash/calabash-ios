@@ -92,7 +92,7 @@ by duplicating your production target in Xcode (explained below).
 
 ### Ruby and calabash-cucumber gem.
 
-*   Install the `calabash-cucumber` gem.
+*   Install the `calabash-cucumber` gem. (You may need to do `sudo gem install calabash-cucumber`)
 
         krukow:~$ gem install calabash-cucumber
         Successfully installed calabash-cucumber-0.9.47
