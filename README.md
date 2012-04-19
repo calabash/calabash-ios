@@ -24,7 +24,7 @@ If you have any questions on Calabash iOS, please use the google group
 
 [http://groups.google.com/group/calabash-ios](http://groups.google.com/group/calabash-ios)
 
-This guide was writting using XCode 4.2, but should also work for
+This guide was writting using XCode 4.3, but should also work for
 XCode versions >= 4.0.
 
 *NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from 
@@ -41,16 +41,14 @@ Installation
 You need to have Ruby installed. This is installed by default on MacOSX. 
 Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7" (or higher).
 
-
 ### Fast track
 
-Note: Fast track installation works for most iOS projects, but there are some project setups where it does not. If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
+Note: Fast track is EXPERIMENTAL, but in my experience it works for most iOS projects. 
+But there *are* some project setups where it does not. 
 
-Note: If you are an existing user of Calabash iOS, don't run setup. Instead you can update to the latest version by running.
-`gem update calabash-cucumber` (or possibly `sudo gem update calabash-cucumber`) and from 
-your project directory (containing calabash.framework) run `calabash-ios download`.
+If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
 
-Otherwise, follow these steps:
+For automatic setup: 
 
 1. In a terminal, go to your iOS project
   - `cd path-to-my-ios-project` (i.e. directory containing .xcodeproj file)
@@ -79,126 +77,42 @@ Start by editing the file `features/my_first.feature`.
 Proceed by reading details about installation below, or moving on to the
 [Getting started guide](https://github.com/calabash/calabash-ios/wiki/00-Calabash-iOS-documentation).
 
-Important notice
-================
-
-The Calabash framework uses private Apple APIs to synthesize touch
-events. This means that you should double check that `calabash.framework`
-is not included in the .ipa file you submit to App Store.
-This is usually done by creating a separate build configuration or target
-for the version of your app running calabash tests.
-
-Installation details
-====================
-
-If fast track setup doesn't work for you, or you're interested in
-what's going on you can read the installation details here.
-
-## Preparing your application.
-
-To use Calabash for iOS in your app, you must do two things: link with
-our framework: `calabash.framework`, and install a ruby gem as
-described below. (You also need to link with Apple's CFNetwork
-framework if you are not already using this.)
-
-
-
-There are two primary ways of linking with the framework. Either you
-can create a whole separate target by duplicating your production
-target from Xcode. Alternatively you can create a special build
-configuration for your existing target. The second option is easiest
-to maintain and setup, but there are some situations where it cannot
-be used. Particularly, you must ensure you are not accidentally
-loading `calabash.framework` which may happen if you use `-all_load`
-or `-ObjC` linker options. In this case you must make a separate target for calabash (see Manual setup with Xcode below).
-
-### Ruby and calabash-cucumber gem.
-
-*   Make sure ruby and ruby gems is on your path.
-
-        krukow:~/examples$ ruby -v
-        ruby 1.9.2p290 (2011-07-09 revision 32553) [x86_64-darwin11.1.0]
-        krukow:~/examples$ gem -v
-        1.8.10
-
-*   Install the `calabash-cucumber` gem.
-
-        krukow:~$ gem install calabash-cucumber
-        Successfully installed calabash-cucumber-0.9.23
-        1 gem installed
-        Installing ri documentation for calabash-cucumber-0.9.23...
-        Installing RDoc documentation for calabash-cucumber-0.9.23...
-
-
-You now have two options: automated setup using the `calabash-ios`
-tool or manual setup. Both are described below.
-
-Automated setup using the calabash-ios tool
-===========================================
-
-Verify that you have installed calabash-cucumber correctly by running `calabash-ios` from the command line:
-
-    krukow:~/tmp/sample$ calabash-ios
-    Usage: calabash-ios <command-name> [parameters]
-    <command-name> can be one of
-        help
-         prints more detailed help information.
-        gen
-         generate a features folder structure.
-        setup (EXPERIMENTAL) [opt path]?
-         setup your XCode project for calabash-ios)
-      ...
-
-Make sure you are in the directory containing your project.
-Then run `calabash-ios setup` and answer any questions it might ask :)
-
-Note that calabash-ios will backup your project file:
-
-    krukow:~/tmp/sample$ calabash-ios setup
-    Checking if Xcode is running...
-    ----------Info----------
-    Making backup of project file: /Users/krukow/tmp/sample/sample.xcodeproj/project.pbxproj
-    ...
-
-The project file is copied to `project.pbxproj.bak`. In case something goes wrong you can move this file back to `project.pbxproj` (in your .xcodeproj) folder.
-
-Setup will modify your xcode project file to use Calabash iOs. You should now have a new Scheme named [target]-cal in Xcode:
-
-![-cal scheme](calabash-ios/raw/master/documentation/images/scheme.png "-cal scheme")
-
-
-`calabash-ios setup` does the following:
-
-- add the calabash.framework to your Frameworks folder
-- add $(SRCROOT) to framework search path
-- link with calabash.framework (target can be chosen)
-- link with Apple's CFNetwork.framework
-- create a new Build configuration: Calabash
-- ensure calabash.framework is loaded in Calabash configuration
-- create a new scheme name <project>-cal. This scheme launches
-the Calabash configuration for your target
-
-Note that `calabash.framework` is added to your target, but only
-forced to load in the Calabash build configuration. Hence it is
-stripped from your other build configurations. But this stripping only
-occurs if you don't force the load by other means such as setting
-Other Linker Flags: `-ObjC` or `-all_load`. It is your responsibility
-to ensure that you are not loading `calabash.framework` in the app you
-submit to App Store.
-
-
 Manual setup with Xcode
 =======================
 
+## Background
+
+To use Calabash for iOS in your app, you must do two things: link with
+our framework: `calabash.framework`, and install a ruby gem as
+described below. You also need to link with Apple's CFNetwork
+framework if you are not already using this.
+
+For functional testing with Calabash iOS, you should create a whole separate target
+by duplicating your production target in Xcode (explained below). 
+
+### Ruby and calabash-cucumber gem.
+
+*   Install the `calabash-cucumber` gem. (You may need to do `sudo gem install calabash-cucumber`)
+
+        krukow:~$ gem install calabash-cucumber
+        Successfully installed calabash-cucumber-0.9.47
+        1 gem installed
+        Installing ri documentation for calabash-cucumber-0.9.47...
+        Installing RDoc documentation for calabash-cucumber-0.9.47...
+
+
+### Setting up Xcode project
+
 Instructions:
 
-* Step 1/3: Duplicate target.
+* Step 1/3 is to duplicate your primary/production target.
  - Select your project in XCode and select your production target for your app.
  - Right click (or two-finger tap) your target and select "Duplicate target"
  - Select "Duplicate only" (not transition to iPad)
  - Rename your new target from ".. copy" to "..-cal"
  - From the menu select Edit Scheme and select manage schemes.
  - Rename the new scheme from ".. copy" to "..-cal"
+ - Optionally, set the Product name to ..-cal in Build settings for the new target.
 
 * Step 2/3: Link with framework.
  - Download the latest version of calabash-ios at
@@ -208,7 +122,7 @@ Instructions:
  - Drag `calabash.framework` from Finder into you project's
    `Frameworks` folder in Xcode.
    Make sure that (i) `Copy items into
-   destination group's folder (if needed)` is checked and (ii) _only_
+   destination group's folder (if needed)` *is checked* and (ii) _only_
    your "-cal " target is checked in `Add to targets`.
 ![Linking with calabash.framework](calabash-ios/raw/master/documentation/images/Frameworks.png "Linking with frameworks")
 
@@ -245,7 +159,82 @@ Verify that you see console output like
     2012-01-19 LPSimpleExample[4318:13903] Bonjour Service Published: domain(local.) type(_http._tcp.) name(Calabash Server)
 
 
-You should now be able to explore Calabash.
+Updating
+========
+
+If you are already using Calabash iOS in a project and you want to update to the latest version, this is very simple.
+You open a Terminal and cd into your project directory (containing your .xcodeproj and calabash.framework).
+Then do (you may need to do `sudo gem update calabash-cucumber` depending on your installation):
+
+    gem update calabash-cucumber
+    ...
+    calabash-ios download
+
+Now clean and build your -cal target. There you go!
+
+Important notice
+================
+
+The Calabash framework uses private Apple APIs to synthesize touch
+events. This means that you should double check that `calabash.framework`
+is not included in the .ipa file you submit to App Store.
+This is usually done by creating a separate build configuration or target
+for the version of your app running calabash tests.
+
+An experimental check can be done by the calabash-ios tool
+
+    calabash-ios check PATH_TO_IPA_OR_APP
+    
+But this is not guaranteed to work, and it is your responsibility to ensure.    
+
+
+Installation details
+====================
+
+If you're interested in what's going on you can read the installation details here.
+
+How does automated setup work?
+==============================
+
+Verify that you have installed calabash-cucumber correctly by running `calabash-ios` from the command line:
+
+    krukow:~/tmp/sample$ calabash-ios
+    Usage: calabash-ios <command-name> [parameters]
+    <command-name> can be one of
+        help
+         prints more detailed help information.
+        gen
+         generate a features folder structure.
+        setup (EXPERIMENTAL) [opt path]?
+         setup your XCode project for calabash-ios
+      ...
+
+When you run `calabash-ios setup` and answer any questions it might ask the following happens:
+
+Note that calabash-ios will backup your project file:
+
+    krukow:~/tmp/sample$ calabash-ios setup
+    Checking if Xcode is running...
+    ----------Info----------
+    Making backup of project file: /Users/krukow/tmp/sample/sample.xcodeproj/project.pbxproj
+    ...
+
+The project file is copied to `project.pbxproj.bak`. In case something goes wrong you can move this file back to `project.pbxproj` (in your .xcodeproj) folder.
+
+Setup will modify your xcode project file to use Calabash iOs. You should now have a new Scheme named [target]-cal in Xcode:
+
+![-cal scheme](calabash-ios/raw/master/documentation/images/scheme.png "-cal scheme")
+
+
+`calabash-ios setup` does the following:
+
+- creates a new -cal target as a copy of your primary target
+- add the calabash.framework to your Frameworks folder 
+- add $(SRCROOT) to framework search path (for that target)
+- link with calabash.framework (for that target)
+- link with Apple's CFNetwork.framework (for that target)
+- set the special `-force_load` and `-lstdc++` linker flags (for that target)
+
 
 
 Next steps

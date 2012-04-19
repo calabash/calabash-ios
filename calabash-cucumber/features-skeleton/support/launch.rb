@@ -22,6 +22,7 @@
 ########################################
 
 require 'calabash-cucumber/launch/simulator_helper'
+require 'sim_launcher'
 
 # Uncomment and replace ?? appropriately
 # This should point to your Simulator build
@@ -31,9 +32,24 @@ require 'calabash-cucumber/launch/simulator_helper'
 #APP_BUNDLE_PATH = "~/Library/Developer/Xcode/DerivedData/??/Build/Products/Calabash-iphonesimulator/??.app""
 #
 
+def reset_app_jail(sdk, app_path)
+  app = File.basename(app_path)
+  bundle = `find "#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}/Applications/" -type d -depth 2 -name #{app} | head -n 1`
+  return if bundle.empty? # Assuming we're already clean
+
+  sandbox = File.dirname(bundle)
+  ['Library', 'Documents', 'tmp'].each do |dir|
+    FileUtils.rm_rf(File.join(sandbox, dir))
+  end
+end
+
 def relaunch
   if ENV['NO_LAUNCH'].nil?
-    Calabash::Cucumber::SimulatorHelper.relaunch(app_path,ENV['SDK_VERSION'],ENV['DEVICE'] || 'iphone')
+    sdk = ENV['SDK_VERSION'] || SimLauncher::SdkDetector.new().latest_sdk_version
+    path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+    reset_app_jail(sdk, path)
+
+    Calabash::Cucumber::SimulatorHelper.relaunch(path,ENV['SDK_VERSION'],ENV['DEVICE'] || 'iphone')
   end
 end
 

@@ -94,6 +94,15 @@ def calabash_download(args)
   download_calabash(File.expand_path("."))
 end
 
+def has_proxy?
+  ENV['http_proxy'] ? true : false
+end
+
+def proxy
+  url_parts = URI.split(ENV['http_proxy'])
+  [url_parts[2], url_parts[3]]
+end
+
 def download_calabash(project_path)
   file = 'calabash.framework'
   ##Download calabash.framework
@@ -106,7 +115,13 @@ def download_calabash(project_path)
 
       uri = URI.parse "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
       success = false
-      Net::HTTP.start(uri.host, uri.port) do |http|
+      if has_proxy?
+        proxy_url = proxy
+        connection = Net::HTTP::Proxy(proxy_url[0], proxy_url[1])
+      else
+        connection = Net::HTTP
+      end
+      connection.start(uri.host, uri.port) do |http|
         request = Net::HTTP::Get.new uri.request_uri
 
         http.request request do |response|
