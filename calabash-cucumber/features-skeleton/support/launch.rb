@@ -44,12 +44,14 @@ def reset_app_jail(sdk, app_path)
 end
 
 def relaunch
-  if ENV['NO_LAUNCH'].nil?
+  if ENV['NO_LAUNCH']!="1"
     sdk = ENV['SDK_VERSION'] || SimLauncher::SdkDetector.new().latest_sdk_version
     path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
-    reset_app_jail(sdk, path)
+    if ENV['RESET_BETWEEN_SCENARIOS']=="1"
+      reset_app_jail(sdk, path)
+    end
 
-    Calabash::Cucumber::SimulatorHelper.relaunch(path,ENV['SDK_VERSION'],ENV['DEVICE'] || 'iphone')
+    Calabash::Cucumber::SimulatorHelper.relaunch(path,sdk,ENV['DEVICE'] || 'iphone')
   end
 end
 
@@ -58,14 +60,12 @@ def app_path
   ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
 end
 
-##TODO Reset simulator between features!
-
 Before do |scenario|
   relaunch
 end
 
 at_exit do
-  if ENV['NO_LAUNCH'].nil? and ENV['NO_STOP'].nil?
+  if ENV['NO_LAUNCH']!="1" and ENV['NO_STOP']!="1"
     Calabash::Cucumber::SimulatorHelper.stop
   end
 end
