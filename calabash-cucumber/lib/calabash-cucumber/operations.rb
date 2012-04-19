@@ -394,7 +394,7 @@ module Operations
 
 
   def url_for( verb )
-    url = URI.parse (ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
+    url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
     url.path = '/'+verb
     url
   end
