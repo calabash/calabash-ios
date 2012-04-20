@@ -62,7 +62,9 @@ module Operations
   def touch(uiquery,options={})
     options[:query] = uiquery
     views_touched = playback("touch",options)
-    screenshot_and_raise "could not find view to touch: '#{uiquery}', args: #{args}" if views_touched.empty?
+    unless uiquery.nil?
+     screenshot_and_raise "could not find view to touch: '#{uiquery}', args: #{options}" if views_touched.empty?
+    end
     views_touched
   end
 
