@@ -98,6 +98,7 @@ module Calabash
 
       def self.app_bundle_or_raise(path)
         bundle_path = nil
+        path = File.expand_path(path)
 
         if path and not File.directory?(path)
           puts "Unable to find .app bundle at #{path}. It should be an .app directory."

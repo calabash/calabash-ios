@@ -143,7 +143,9 @@ module Operations
 
   def scroll_to_row(uiquery,number)
     views_touched=map(uiquery, :scrollToRow, number)
-    screenshot_and_raise "could not find view to scroll: '#{uiquery}', args: #{number}" if views_touched.empty?
+    if views_touched.empty? or views_touched.member?"<VOID>"
+      screenshot_and_raise "Unable to scroll: '#{uiquery}' to: #{number}"
+    end
     views_touched
   end
 
