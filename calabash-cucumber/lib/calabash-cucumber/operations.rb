@@ -268,7 +268,7 @@ module Operations
     data = load_playback_data(recording)
 
     post_data = %Q|{"events":"#{data}"|
-    post_data<< %Q|,"query":"#{options[:query]}"| if options[:query]
+    post_data<< %Q|,"query":"#{options[:query]}"| if options[:query].encode("UTF-8")
     post_data<< %Q|,"offset":#{options[:offset].to_json}| if options[:offset]
     post_data<< %Q|,"reverse":#{options[:reverse]}| if options[:reverse]
     post_data<< %Q|,"prototype":"#{options[:prototype]}"| if options[:prototype]

@@ -1,5 +1,6 @@
 CALABASH_COUNT = {:step_index => 0, :step_line => nil}
 
+#TODO change this approach as it breaks scenario outlines
 Before do |scenario|
   begin
     CALABASH_COUNT[:step_index] = 0
@@ -10,7 +11,6 @@ Before do |scenario|
 end
 
 AfterStep do |scenario|
-  #Håndtering af den situation hvor Feature/Scenario/steps er mulitline
   CALABASH_COUNT[:step_index] = CALABASH_COUNT[:step_index] + 1
   raw = scenario.raw_steps[CALABASH_COUNT[:step_index]]
   CALABASH_COUNT[:step_line] = raw.line unless raw.nil?

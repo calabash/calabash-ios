@@ -55,13 +55,19 @@ def relaunch
   end
 end
 
-
 def app_path
   ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
 end
 
+def calabash_notify
+  if self.respond_to?:on_launch
+    self.on_launch
+  end
+end
+
 Before do |scenario|
   relaunch
+  calabash_notify
 end
 
 at_exit do
