@@ -33,6 +33,10 @@ module Operations
     end
   end
 
+  def escape_quotes(str)
+    str.gsub("'","\\\\'")
+  end
+
   def wait_for(timeout, &block)
     begin
       Timeout::timeout(timeout) do
