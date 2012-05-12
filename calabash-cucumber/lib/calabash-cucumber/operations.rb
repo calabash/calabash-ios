@@ -49,6 +49,23 @@ module Operations
     end
   end
 
+  def wait_ready(timeout, times=2,sleep=0.3, &block)
+    raise "Times parameter must be greater than or equal 2" if times < 2
+    raise "Sleep parameter must be greater than 0" if sleep <= 0
+    begin
+      Timeout::timeout(timeout) do
+        while times > 0 do
+          if block.call
+            times -= 1
+          end
+          sleep 0.3
+        end
+      end
+    rescue Exception => e
+      screenshot_and_raise e
+    end
+  end
+
   def query(uiquery, *args)
     map(uiquery, :query, *args)
   end
@@ -272,7 +289,7 @@ module Operations
     data = load_playback_data(recording)
 
     post_data = %Q|{"events":"#{data}"|
-    post_data<< %Q|,"query":"#{options[:query]}"| if options[:query].encode("UTF-8")
+    post_data<< %Q|,"query":"#{escape_quotes(options[:query])}"| if options[:query]
     post_data<< %Q|,"offset":#{options[:offset].to_json}| if options[:offset]
     post_data<< %Q|,"reverse":#{options[:reverse]}| if options[:reverse]
     post_data<< %Q|,"prototype":"#{options[:prototype]}"| if options[:prototype]
@@ -291,8 +308,8 @@ module Operations
       data = load_playback_data(recording)
 
       post_data = %Q|{"events":"#{data}"|
-      post_data<< %Q|,"start":"#{options[:start]}"| if options[:start]
-      post_data<< %Q|,"end":"#{options[:end]}"| if options[:end]
+      post_data<< %Q|,"start":"#{escape_quotes(options[:start])}"| if options[:start]
+      post_data<< %Q|,"end":"#{escape_quotes(options[:end])}"| if options[:end]
       post_data<< %Q|,"offset_start":#{options[:offset_start].to_json}| if options[:offset_start]
       post_data<< %Q|,"offset_end":#{options[:offset_end].to_json}| if options[:offset_end]
       post_data << "}"
