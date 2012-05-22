@@ -93,8 +93,6 @@ module Operations
 
   def swipe(dir,options={})
       dir = dir.to_sym
-      print "rotation: #{@current_rotation}\n"
-      print "initial dir: #{dir} \n"
       @current_rotation = @current_rotation || :down
       if @current_rotation == :left
           case dir
@@ -123,7 +121,6 @@ module Operations
           else
           end
       end
-      print "final dir: #{dir} \n"
       playback("swipe_#{dir}",options)
   end
 
@@ -364,7 +361,7 @@ module Operations
     puts "Saved screenshot: #{path}"
     path
   end
-  
+
   def map( query, method_name, *method_args )
     operation_map = {
       :method_name => method_name,
