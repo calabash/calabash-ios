@@ -255,7 +255,7 @@ Then /^I reverse playback recording "([^\"]*)"$/ do |filename|
   sleep(STEP_PAUSE)
 end
 
-Then /^I reverse playback recording "([^\"]*) on "([^\"]*)"$/ do |filename, name|
+Then /^I reverse playback recording "([^\"]*)" on "([^\"]*)"$/ do |filename, name|
   playback(filename, {:query => "view marked:'#{name}'",:reverse => true})
   sleep(STEP_PAUSE)
 end
