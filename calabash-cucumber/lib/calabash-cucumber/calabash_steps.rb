@@ -75,7 +75,7 @@ end
 
 # alias
 Then /^I fill in "([^\"]*)" with "([^\"]*)"$/ do |text_field, text_to_type|
-  When %Q|I enter "#{text_to_type}" into the "#{text_field}" text field|
+  macro %Q|I enter "#{text_to_type}" into the "#{text_field}" text field|
 end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
