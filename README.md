@@ -64,6 +64,7 @@ For automatic setup:
 
 4. Generate a skeleton features folder for your tests
   - `calabash-ios gen`
+  (this also copies the scripts irb_iosX.sh for "interactive development" into your current dir)
 
 5. In Xcode, build your project using the <project-name>-cal scheme
   - ![-cal scheme](calabash-ios/raw/master/documentation/images/scheme.png "-cal scheme")
