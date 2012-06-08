@@ -153,10 +153,14 @@ module Operations
     map(nil,:touchDone,load_playback_data("touch_done"))
   end
 
+  #Possible values
+  # 'Dictation'
+  # 'Shift'
+  # 'Delete'
+  # 'International'
+  # 'More'
+
   def keyboard_enter_char(chr)
-    if chr.length != 1 or not chr.is_a?String
-      raise "keyboard_enter_char called with #{chr}. Must be called with a length 1 string."
-    end
     map(nil,:touchDone,load_playback_data("touch_done"),chr)
   end
 
