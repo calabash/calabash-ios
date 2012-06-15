@@ -192,7 +192,7 @@ module Calabash
       def self.launch(app_bundle_path, sdk, version)
         simulator = SimLauncher::Simulator.new
         simulator.quit_simulator
-        simulator.launch_ios_app(app_bundle_path, sdk, version)
+        simulator.  launch_ios_app(app_bundle_path, sdk, version)
         simulator
       end
 

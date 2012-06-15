@@ -1,12 +1,12 @@
 PATH
   remote: .
   specs:
-    calabash-cucumber (0.9.62)
+    calabash-cucumber (0.9.64)
       CFPropertyList
       cucumber
       json
       net-http-persistent
-      sim_launcher
+      sim_launcher (= 0.3.8)
       slowhandcuke
 
 GEM
