@@ -32,6 +32,9 @@ elsif cmd == 'console'
 elsif cmd == 'build'
   build
   exit 0
+elsif cmd == 'run'
+  run
+  exit 0
 elsif cmd == 'download'
   calabash_download(ARGV)
   exit 0

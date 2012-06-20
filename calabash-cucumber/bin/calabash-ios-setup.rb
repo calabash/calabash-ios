@@ -121,6 +121,7 @@ def download_calabash(project_path)
       else
         connection = Net::HTTP
       end
+      begin
       connection.start(uri.host, uri.port) do |http|
         request = Net::HTTP::Get.new uri.request_uri
 
@@ -138,6 +139,13 @@ def download_calabash(project_path)
              puts "Aborting..."
           end
         end
+      end
+      rescue SocketError => e
+        msg("Error") do
+          puts "Exception: #{e}"
+          puts "Unable to download Calabash. Please check connection."
+        end
+        exit 1
       end
       if success
         puts "\nDownload done: #{file}. Unzipping..."
