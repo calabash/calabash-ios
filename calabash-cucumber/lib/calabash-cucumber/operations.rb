@@ -263,16 +263,7 @@ module Operations
 
 
   def load_playback_data(recording,options={})
-    os = options["OS"] || ENV["OS"]
-    if not os and ENV['SDK_VERSION']
-       sdk = ENV['SDK_VERSION']
-       if sdk[0] != '4' and sdk[0] != '5'
-         raise "SDK_VERSION should be 4.x or 5.x"
-       end
-       os = "ios#{sdk[0]}"
-    elsif os.nil? and ENV['SDK_VERSION'].nil?
-      raise "Either SDK_VERSION or OS environment vars must be set."
-    end
+    os = options["OS"] || ENV["OS"] || "ios5"
     device = options["DEVICE"] || ENV["DEVICE"] || "iphone"
 
     rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/playback"

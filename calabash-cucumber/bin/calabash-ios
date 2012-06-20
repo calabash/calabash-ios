@@ -9,6 +9,7 @@ require File.join(File.dirname(__FILE__),"calabash-ios-helpers")
 require File.join(File.dirname(__FILE__),"calabash-ios-generate")
 require File.join(File.dirname(__FILE__),"calabash-ios-setup")
 require File.join(File.dirname(__FILE__),"calabash-ios-sim")
+require File.join(File.dirname(__FILE__),"calabash-ios-build")
 
 @features_dir = File.join(FileUtils.pwd, "features")
 @source_dir = File.join(File.dirname(__FILE__), '..', 'features-skeleton')
@@ -24,6 +25,9 @@ if cmd == 'help'
   exit 0
 elsif cmd == 'gen'
   calabash_scaffold
+  exit 0
+elsif cmd == 'console'
+  console
   exit 0
 elsif cmd == 'download'
   calabash_download(ARGV)

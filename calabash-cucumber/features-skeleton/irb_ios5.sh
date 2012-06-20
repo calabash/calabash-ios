@@ -1,2 +1,2 @@
 #!/bin/bash
-IRBRC=.irbrc OS=ios5 DEVICE=iphone irb
+IRBRC=.irbrc irb
