@@ -6,6 +6,10 @@ def build(options={:build_dir=>"Calabash",
                    :wrapper_name => "Calabash.app"})
   #Follow Pete's .xcconfig-based approach with zero-config
 
+  if !File.exist?(options[:build_dir])
+    FileUtils.mkdir_p options[:build_dir]
+  end
+
   if !File.exists?("#{options[:build_dir]}/cal.xcconfig")
       FileUtils.cp(File.join(File.dirname(__FILE__),"cal.xcconfig"),"#{options[:build_dir]}/cal.xcconfig")
   end
