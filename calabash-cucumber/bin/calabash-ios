@@ -29,6 +29,9 @@ elsif cmd == 'gen'
 elsif cmd == 'console'
   console
   exit 0
+elsif cmd == 'build'
+  build
+  exit 0
 elsif cmd == 'download'
   calabash_download(ARGV)
   exit 0
