@@ -4,5 +4,9 @@ Feature: Running a test
   So I can begin testing quickly
 
 Scenario: Example steps
-  Given the app is running
-    Then take picture
+  Given I am on the Welcome Screen
+  When I swipe left
+  Then I wait until I don't see "Please swipe left"
+  And take picture
+
+

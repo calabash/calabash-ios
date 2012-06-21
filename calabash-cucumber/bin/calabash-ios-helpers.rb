@@ -107,7 +107,8 @@ def calabash_submit(args)
     puts "Uploading ipa and features to www.lesspainful.com"
   end
 
-  result = `curl -F "secret=#{secret}" -F "app=@#{ipa_file}" -F "env=@#{archive_path}" https://www.lesspainful.com/cmd_upload`
+  url = ENV['SUBMIT_URL'] || "https://www.lesspainful.com/cmd_upload"
+  result = `curl -F "secret=#{secret}" -F "app=@#{ipa_file}" -F "env=@#{archive_path}" #{url}`
 
   if is_json? result
    json_result = JSON.parse(result)
