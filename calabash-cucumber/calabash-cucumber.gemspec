@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Karl Krukow"]
   s.email       = ["karl@lesspainful.com"]
-  s.homepage    = "http://www.lesspainful.com/calabash"
+  s.homepage    = "http://calaba.sh"
   s.summary     = %q{Client for calabash-ios-server for automated functional testing on iOS}
   s.description = %q{calabash-cucumber drives tests for native iOS apps. You must link your app with calabash-ios-server framework to execute tests.}
   s.files         = `git ls-files`.split("\n")

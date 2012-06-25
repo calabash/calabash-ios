@@ -103,11 +103,13 @@ def calabash_submit(args)
   end
   system ("zip -r -o #{archive_path} #{feature_path}")
 
-  msg("Info") do
-    puts "Uploading ipa and features to www.lesspainful.com"
-  end
+
 
   url = ENV['SUBMIT_URL'] || "https://www.lesspainful.com/cmd_upload"
+
+  msg("Info") do
+    puts "Uploading ipa and features to #{url}"
+  end
   result = `curl -F "secret=#{secret}" -F "app=@#{ipa_file}" -F "env=@#{archive_path}" #{url}`
 
   if is_json? result

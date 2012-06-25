@@ -10,6 +10,8 @@ module Calabash
       DERIVED_DATA = File.expand_path("~/Library/Developer/Xcode/DerivedData")
       DEFAULT_DERIVED_DATA_INFO = File.expand_path("#{DERIVED_DATA}/*/info.plist")
 
+      DEFAULT_SIM_WAIT = "15"
+
       MAX_PING_ATTEMPTS = 5
 
       def self.relaunch(path, sdk = nil, version = 'iphone')
@@ -161,7 +163,8 @@ module Calabash
 
       def self.ensure_connectivity(app_bundle_path, sdk, version)
         begin
-          Timeout::timeout(15) do
+          timeout = (ENV['CONNECT_TIMEOUT'] || DEFAULT_SIM_WAIT).to_i
+          Timeout::timeout(timeout) do
             connected = false
             until connected
               simulator = launch(app_bundle_path, sdk, version)
