@@ -5,8 +5,8 @@ Feature: Running a test
 
 Scenario: Example steps
   Given I am on the Welcome Screen
-  When I swipe left
-  Then I wait until I don't see "Please swipe left"
+  Then I swipe left
+  And I wait until I don't see "Please swipe left"
   And take picture
 
 
