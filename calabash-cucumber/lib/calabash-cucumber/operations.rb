@@ -52,22 +52,22 @@ module Calabash
         end
       end
 
-      def wait_ready(timeout, times=2, sleep=0.3, &block)
-        raise "Times parameter must be greater than or equal 2" if times < 2
-        raise "Sleep parameter must be greater than 0" if sleep <= 0
-        begin
-          Timeout::timeout(timeout) do
-            while times > 0 do
-              if block.call
-                times -= 1
-              end
-              sleep 0.3
-            end
-          end
-        rescue Exception => e
-          screenshot_and_raise e
-        end
-      end
+      #def wait_ready(timeout, times=2, sleep_wait=0.3, &block)
+      #  raise "Times parameter must be greater than or equal 2" if times < 2
+      #  raise "Sleep parameter must be greater than 0" if sleep <= 0
+      #  begin
+      #    Timeout::timeout(timeout) do
+      #      while times > 0 do
+      #        if block.call
+      #          times -= 1
+      #        end
+      #        sleep(sleep_wait)
+      #      end
+      #    end
+      #  rescue Exception => e
+      #    screenshot_and_raise e
+      #  end
+      #end
 
       def query(uiquery, *args)
         map(uiquery, :query, *args)

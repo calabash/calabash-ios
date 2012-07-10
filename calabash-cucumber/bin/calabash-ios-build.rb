@@ -71,8 +71,9 @@ def run(options={:build_dir=>"Calabash",
 
   if ENV['NO_BUILD'] != "1"
     if !build(options)
-      msg("Info") do
+      msg("Error") do
         puts "Build failed. Please consult logs. Aborting."
+        exit(false)
       end
     end
   end
@@ -80,12 +81,19 @@ def run(options={:build_dir=>"Calabash",
   if ENV["NO_GEN"] != "1"
     if !File.directory?("features")
       calabash_scaffold
+    else
+      msg("Info") do
+        puts "Detected features folder, will not generate..."
+      end
     end
   end
 
   default_path = "#{options[:dstroot]}/#{options[:wrapper_name]}"
   cmd = %Q[APP_BUNDLE_PATH="#{ENV['APP_BUNDLE_PATH'] || default_path}" cucumber]
-  puts cmd
+  msg("Info") do
+    puts "Running command:"
+    puts cmd
+  end
   system(cmd)
   puts "Done..."
 end
