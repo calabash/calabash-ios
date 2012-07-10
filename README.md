@@ -2,7 +2,9 @@ Welcome to Calabash for iOS
 ===========================
 
 Calabash is an automated testing technology for Android and iOS native and hybrid applications.
-This repository contains support for iOS, for Android, see [Calabash Android](https://github.com/calabash/calabash-android).
+This repository contains support for iOS, for Android, see [Calabash Landing Page](http://calaba.sh/).
+
+
 
 This document explains how to install Calabash. For introductory information about the rationale behind Calabash see
 
