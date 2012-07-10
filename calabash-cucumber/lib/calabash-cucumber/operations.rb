@@ -1,4 +1,5 @@
 require 'net/http/persistent'
+require "test/unit"
 require 'json'
 
 if not Object.const_defined?(:CALABASH_COUNT)
@@ -9,8 +10,9 @@ end
 
 module Calabash
   module Cucumber
-
     module Operations
+      include Test::Unit::Assertions
+
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
 
@@ -40,34 +42,18 @@ module Calabash
         str.gsub("'", "\\\\'")
       end
 
-      def wait_for(timeout, &block)
+      def wait_for(timeout,opt_post_timeout=0.3, &block)
         begin
           Timeout::timeout(timeout) do
             until block.call
               sleep 0.3
             end
           end
+          sleep(opt_post_timeout)
         rescue Exception => e
           screenshot_and_raise e
         end
       end
-
-      #def wait_ready(timeout, times=2, sleep_wait=0.3, &block)
-      #  raise "Times parameter must be greater than or equal 2" if times < 2
-      #  raise "Sleep parameter must be greater than 0" if sleep <= 0
-      #  begin
-      #    Timeout::timeout(timeout) do
-      #      while times > 0 do
-      #        if block.call
-      #          times -= 1
-      #        end
-      #        sleep(sleep_wait)
-      #      end
-      #    end
-      #  rescue Exception => e
-      #    screenshot_and_raise e
-      #  end
-      #end
 
       def query(uiquery, *args)
         map(uiquery, :query, *args)
@@ -79,8 +65,15 @@ module Calabash
 
       def screenshot_and_raise(msg)
         screenshot
-        sleep 5
+        puts "------ Error -----"
+        puts msg
+        puts "------------------"
+        sleep 1
         raise(msg)
+      end
+
+      def fail(msg="Error. Check log for details.")
+        screenshot_and_raise(msg)
       end
 
       def touch(uiquery, options={})
@@ -102,10 +95,6 @@ module Calabash
 
       def html(q)
         query(q).map { |e| e['html'] }
-      end
-
-      def ok
-        touch("view marked:'ok'")
       end
 
       def set_text(uiquery, txt)
@@ -174,6 +163,7 @@ module Calabash
       # 'Delete'
       # 'International'
       # 'More'
+      # 'Return'
       def keyboard_enter_char(chr)
         map(nil, :keyboard, load_playback_data("touch_done"), chr)
       end
@@ -279,8 +269,13 @@ module Calabash
         res = http({:method=>:post, :path=>'background'}, {:duration => secs})
       end
 
+
+      def element_does_not_exist(uiquery)
+        query(uiquery).empty?
+      end
+
       def element_exists(uiquery)
-        !query(uiquery).empty?
+        not element_does_not_exist(query)
       end
 
       def view_with_mark_exists(expected_mark)
@@ -303,7 +298,6 @@ module Calabash
         check_element_exists("view marked:'#{expected_mark}'")
       end
 
-      # a better name would be element_exists_and_is_not_hidden
       def element_is_not_hidden(uiquery)
         matches = query(uiquery, 'isHidden')
         matches.delete(true)
