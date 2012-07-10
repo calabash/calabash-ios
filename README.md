@@ -164,14 +164,9 @@ Updating
 ========
 
 If you are already using Calabash iOS in a project and you want to update to the latest version, this is very simple.
-You open a Terminal and cd into your project directory (containing your .xcodeproj and calabash.framework).
-Then do (you may need to do `sudo gem update calabash-cucumber` depending on your installation):
 
-    gem update calabash-cucumber
-    ...
-    calabash-ios download
+[Updating your Calabash iOS version](B1-Updating-your-Calabash-iOS-version)
 
-Now clean and build your -cal target. There you go!
 
 Important notice
 ================
