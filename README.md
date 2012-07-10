@@ -165,7 +165,7 @@ Updating
 
 If you are already using Calabash iOS in a project and you want to update to the latest version, this is very simple.
 
-[Updating your Calabash iOS version](B1-Updating-your-Calabash-iOS-version)
+[Updating your Calabash iOS version](https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version)
 
 
 Important notice
