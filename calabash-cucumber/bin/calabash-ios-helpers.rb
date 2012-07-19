@@ -17,6 +17,8 @@ def print_usage
       prints more detailed help information.
     gen
       generate a features folder structure.
+    console
+      starts an interactive console to interact with your app via Calabash
     setup (EXPERIMENTAL) [opt path]?
       setup your XCode project for calabash-ios
     download [opt path]?
@@ -35,6 +37,7 @@ def print_usage
       change the default iOS Simulator device.
 EOF
 end
+
 def print_help
   file = File.join(File.dirname(__FILE__), '..', 'doc', 'calabash-ios-help.txt')
   system("less #{file}")

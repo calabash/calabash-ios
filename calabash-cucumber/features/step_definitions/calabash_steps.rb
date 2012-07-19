@@ -34,7 +34,7 @@ Then /^I (?:press|touch) the "([^\"]*)" button$/ do |name|
 end
 
 Then /^I (?:press|touch) the "([^\"]*)" (?:input|text) field$/ do |name|
-  touch("textField placeholder:'#{name}'")
+  touch("textField placeholdwer:'#{name}'")
   sleep(STEP_PAUSE)
 end
 

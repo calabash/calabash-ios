@@ -14,7 +14,10 @@ Usage: calabash-ios <command-name> [parameters]
   gen creates a skeleton features dir. This is usually used once when
       setting up calabash to ensure that the features folder contains
       the right step definitions and environment to run with cucumber.
-
+  console
+      starts an interactive console to interact with your app via Calabash.
+      Copies the irb_ios5.sh and irb_ios4.sh scripts and the .irbrc file
+      then launches irb_ios5.sh.
   setup [path]? (EXPERIMENTAL) Automates setting up your iOS Xcode project
         with calabash-ios-server. It is your responsibility to ensure
         that your production build does not link with calabash.framework.
