@@ -1,8 +1,10 @@
 require 'calabash-cucumber/tests_helpers'
+require 'calabash-cucumber/keyboard_helpers'
 require 'calabash-cucumber/wait_helpers'
 require 'net/http'
 require 'test/unit/assertions'
 require 'json'
+require 'set'
 require 'calabash-cucumber/version'
 
 
@@ -17,14 +19,10 @@ module Calabash
     module Operations
       include Test::Unit::Assertions
       include Calabash::Cucumber::WaitHelpers
+      include Calabash::Cucumber::KeyboardHelpers
       include Calabash::Cucumber::TestsHelpers
 
-
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
-
-      KEYBOARD_SMALL_LETTERS = "Keyboard_Small-Letters"
-      KEYBOARD_CAPITAL_LETTERS = "Keyboard_Capital-Letters"
-      KEYBOARD_NUMBERS_AND_PUNCTUATION = "Keyboard_Numbers-And-Punctuation"
 
       def macro(txt)
         if self.respond_to? :step
@@ -137,58 +135,6 @@ module Calabash
       def done
         map(nil, :keyboard, load_playback_data("touch_done"))
       end
-
-      #Possible values
-      # 'Dictation'
-      # 'Shift'
-      # 'Delete'
-      # 'International'
-      # 'More'
-      # 'Return'
-      def keyboard_enter_char(chr)
-        #map(nil, :keyboard, load_playback_data("touch_done"), chr)
-        res = http({:method => :post, :path => 'keyboard'},
-                   {:key => chr, :events => load_playback_data("touch_done")})
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "Keyboard enter failed failed because: #{res['reason']}\n#{res['details']}"
-        end
-        res['results']
-      end
-
-      def keyboard_change_keyplane(plane)
-        desc = query("view:'UIKBKeyplaneView'", "keyplane", "description")
-        return nil if desc.empty?
-        desc = desc.first
-        plane_exp = Regexp.new(plane)
-        if not plane_exp.match(desc)
-          keyboard_enter_char "Shift"
-          sleep(0.3)
-          desc = query("view:'UIKBKeyplaneView'", "keyplane", "description").first
-          if not plane_exp.match(desc)
-            keyboard_enter_char "Shift"
-            sleep(0.3)
-            return nil
-          end
-        end
-        desc
-      end
-
-      #TODO only letters now
-      def keyboard_enter_text(text)
-        text.each_char do |ch|
-          if /[a-z]/.match(ch)
-            keyboard_change_keyplane(KEYBOARD_SMALL_LETTERS)
-          elsif /\d/.match(ch)
-            #Todo - handle digits and special chars
-            raise "Digits and special chars not handled by keyboard_enter_text yet."
-          else
-            keyboard_change_keyplane(KEYBOARD_CAPITAL_LETTERS)
-          end
-          keyboard_enter_char(ch)
-        end
-      end
-
 
       def scroll(uiquery, direction)
         views_touched=map(uiquery, :scroll, direction)

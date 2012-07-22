@@ -74,7 +74,6 @@ module Calabash
             body = @http.request(req).body
             break
           rescue Exception => e
-            puts "Connection error #{e}"
             if count < CAL_HTTP_RETRY_COUNT-1
               puts "Retrying.."
             else
@@ -89,11 +88,8 @@ module Calabash
 
       def init_request(url)
         http = Net::HTTP.new(url.host, url.port)
-        if http.respond_to? :read_timeout=
-          http.read_timeout=60
-        end
         if http.respond_to? :open_timeout=
-          http.open_timeout==10
+          http.open_timeout==15
         end
         http
       end
