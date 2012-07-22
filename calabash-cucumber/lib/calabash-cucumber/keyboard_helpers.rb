@@ -13,7 +13,6 @@ module Calabash
           :numbers_and_punctuation_alternate => "numbers-and-punctuation-alternate"
       }
 
-
       #Possible values
       # 'Dictation'
       # 'Shift'
