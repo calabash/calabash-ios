@@ -1,7 +1,7 @@
 require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/wait_helpers'
 require 'net/http'
-require 'test/unit'
+require 'test/unit/assertions'
 require 'json'
 require 'calabash-cucumber/version'
 
@@ -55,7 +55,6 @@ module Calabash
       def label(uiquery)
         query(uiquery, :accessibilityLabel)
       end
-
 
 
       def touch(uiquery, options={})
@@ -147,7 +146,14 @@ module Calabash
       # 'More'
       # 'Return'
       def keyboard_enter_char(chr)
-        map(nil, :keyboard, load_playback_data("touch_done"), chr)
+        #map(nil, :keyboard, load_playback_data("touch_done"), chr)
+        res = http({:method => :post, :path => 'keyboard'},
+                   {:key => chr, :events => load_playback_data("touch_done")})
+        res = JSON.parse(res)
+        if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "Keyboard enter failed failed because: #{res['reason']}\n#{res['details']}"
+        end
+        res['results']
       end
 
       def keyboard_change_keyplane(plane)
@@ -180,7 +186,6 @@ module Calabash
             keyboard_change_keyplane(KEYBOARD_CAPITAL_LETTERS)
           end
           keyboard_enter_char(ch)
-          sleep(0.3)
         end
       end
 
