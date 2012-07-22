@@ -1,5 +1,8 @@
 require 'test/unit'
 require 'json'
+require 'tests_helpers'
+require 'wait_helpers'
+
 
 if not Object.const_defined?(:CALABASH_COUNT)
   #compatability with IRB
@@ -12,6 +15,7 @@ module Calabash
     module Operations
       include Test::Unit::Assertions
       include Calabash::Cucumber::WaitHelpers
+      include Calabash::Cucumber::TestsHelpers
 
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))

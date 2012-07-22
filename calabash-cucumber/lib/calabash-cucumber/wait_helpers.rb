@@ -1,9 +1,9 @@
-require 'test_helpers'
+require 'tests_helpers'
 
 module Calabash
   module Cucumber
     module WaitHelpers
-      include Calabash::Cucumber::TestHelpers
+      include Calabash::Cucumber::TestsHelpers
 
       def wait_for(timeout, opt_post_timeout=0.3, &block)
         begin

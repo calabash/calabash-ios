@@ -1,6 +1,6 @@
 module Calabash
   module Cucumber
-    module TestHelpers
+    module TestsHelpers
 
       def screenshot_and_raise(msg,prefix=nil,name=nil)
         screenshot(prefix,name)
