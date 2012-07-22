@@ -132,10 +132,6 @@ module Calabash
         playback("cell_swipe", options)
       end
 
-      def done
-        map(nil, :keyboard, load_playback_data("touch_done"))
-      end
-
       def scroll(uiquery, direction)
         views_touched=map(uiquery, :scroll, direction)
         screenshot_and_raise "could not find view to scroll: '#{uiquery}', args: #{direction}" if views_touched.empty?

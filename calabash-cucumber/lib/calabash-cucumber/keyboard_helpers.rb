@@ -37,6 +37,10 @@ module Calabash
         res['results']
       end
 
+      def done
+        keyboard_enter_char "Return"
+      end
+
 
       def current_keyplane
         kp_arr = _do_keyplane(
