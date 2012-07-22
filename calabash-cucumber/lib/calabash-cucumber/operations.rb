@@ -1,7 +1,5 @@
 require 'test/unit'
 require 'json'
-require 'tests_helpers'
-require 'wait_helpers'
 
 
 if not Object.const_defined?(:CALABASH_COUNT)

@@ -1,4 +1,4 @@
-require 'tests_helpers'
+require 'calabash-cucumber/tests_helpers'
 
 module Calabash
   module Cucumber
