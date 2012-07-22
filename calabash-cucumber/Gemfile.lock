@@ -1,11 +1,10 @@
 PATH
   remote: .
   specs:
-    calabash-cucumber (0.9.75.pre.1)
+    calabash-cucumber (0.9.74)
       CFPropertyList
       cucumber
       json
-      net-http-persistent
       sim_launcher (= 0.3.8)
       slowhandcuke
 
@@ -23,7 +22,6 @@ GEM
     gherkin (2.11.1)
       json (>= 1.4.6)
     json (1.7.3)
-    net-http-persistent (2.7)
     rack (1.4.1)
     rack-protection (1.2.0)
       rack

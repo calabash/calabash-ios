@@ -1,5 +1,4 @@
-require 'net/http/persistent'
-require "test/unit"
+require 'test/unit'
 require 'json'
 
 if not Object.const_defined?(:CALABASH_COUNT)
@@ -12,6 +11,7 @@ module Calabash
   module Cucumber
     module Operations
       include Test::Unit::Assertions
+      include Calabash::Cucumber::WaitHelpers
 
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
@@ -42,19 +42,6 @@ module Calabash
         str.gsub("'", "\\\\'")
       end
 
-      def wait_for(timeout,opt_post_timeout=0.3, &block)
-        begin
-          Timeout::timeout(timeout) do
-            until block.call
-              sleep 0.3
-            end
-          end
-          sleep(opt_post_timeout)
-        rescue Exception => e
-          screenshot_and_raise e
-        end
-      end
-
       def query(uiquery, *args)
         map(uiquery, :query, *args)
       end
@@ -63,18 +50,7 @@ module Calabash
         query(uiquery, :accessibilityLabel)
       end
 
-      def screenshot_and_raise(msg)
-        screenshot
-        puts "------ Error -----"
-        puts msg
-        puts "------------------"
-        sleep 1
-        raise(msg)
-      end
 
-      def fail(msg="Error. Check log for details.")
-        screenshot_and_raise(msg)
-      end
 
       def touch(uiquery, options={})
         options[:query] = uiquery
@@ -266,7 +242,7 @@ module Calabash
       end
 
       def background(secs)
-        res = http({:method=>:post, :path=>'background'}, {:duration => secs})
+        res = http({:method => :post, :path => 'background'}, {:duration => secs})
       end
 
 
@@ -338,7 +314,7 @@ module Calabash
         post_data<< %Q|,"prototype":"#{options[:prototype]}"| if options[:prototype]
         post_data << "}"
 
-        res = http({:method=>:post, :raw=>true, :path=>'play'}, post_data)
+        res = http({:method => :post, :raw => true, :path => 'play'}, post_data)
 
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
@@ -357,7 +333,7 @@ module Calabash
         post_data<< %Q|,"offset_end":#{options[:offset_end].to_json}| if options[:offset_end]
         post_data << "}"
 
-        res = http({:method=>:post, :raw=>true, :path=>'interpolate'}, post_data)
+        res = http({:method => :post, :raw => true, :path => 'interpolate'}, post_data)
 
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
@@ -367,11 +343,11 @@ module Calabash
       end
 
       def record_begin
-        http({:method=>:post, :path=>'record'}, {:action => :start})
+        http({:method => :post, :path => 'record'}, {:action => :start})
       end
 
       def record_end(file_name)
-        res = http({:method=>:post, :path=>'record'}, {:action => :stop})
+        res = http({:method => :post, :path => 'record'}, {:action => :stop})
         File.open("_recording.plist", 'wb') do |f|
           f.write res
         end
@@ -390,7 +366,7 @@ module Calabash
             :selector => sel,
             :arg => arg
         }
-        res = http({:method=>:post, :path=>'backdoor'}, json)
+        res = http({:method => :post, :path => 'backdoor'}, json)
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
           screenshot_and_raise "backdoor #{json} failed because: #{res['reason']}\n#{res['details']}"
@@ -454,24 +430,13 @@ module Calabash
       #  file_name
       #end
 
-      def screenshot(prefix=nil, name=nil)
-        res = http({:method =>:get, :path => 'screenshot'})
-        prefix = prefix || ENV['SCREENSHOT_PATH'] || ""
-        name = "screenshot_#{CALABASH_COUNT[:step_line]}.png" if name.nil?
-        path = "#{prefix}#{name}"
-        File.open(path, 'wb') do |f|
-          f.write res
-        end
-        puts "Saved screenshot: #{path}"
-        path
-      end
 
       def map(query, method_name, *method_args)
         operation_map = {
             :method_name => method_name,
             :arguments => method_args
         }
-        res = http({:method=>:post, :path=>'map'},
+        res = http({:method => :post, :path => 'map'},
                    {:query => query, :operation => operation_map})
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
@@ -504,22 +469,43 @@ module Calabash
         url
       end
 
+      CAL_HTTP_RETRY_COUNT=3
+
       def make_http_request(url, req)
-        @http = Net::HTTP.new(url.host, url.port)
-        res = @http.start do |sess|
-          sess.request req
+        body = nil
+        CAL_HTTP_RETRY_COUNT.times do |count|
+          begin
+            if not (@http) or not (@http.started?)
+              @http = init_request(url)
+              @http.start
+            end
+            body = @http.request(req).body
+            break
+          rescue Exception => e
+            puts "Connection error #{e}"
+            if count < CAL_HTTP_RETRY_COUNT-1
+              puts "Retrying.."
+            else
+              puts "Failing..."
+              raise e
+            end
+          end
         end
-        body = res.body
-        begin
-          @http.finish if @http and @http.started?
-        rescue Exception => e
-          puts "Finish #{e}"
-        end
+
         body
       end
 
+      def init_request(url)
+        http = Net::HTTP.new(url.host, url.port)
+        if http.respond_to? :read_timeout=
+          http.read_timeout=10
+        end
+        if http.respond_to? :open_timeout=
+          http.open_timeout==10
+        end
+        http
+      end
+
     end
-
-
   end
 end

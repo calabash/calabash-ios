@@ -10,7 +10,7 @@ module Calabash
       DERIVED_DATA = File.expand_path("~/Library/Developer/Xcode/DerivedData")
       DEFAULT_DERIVED_DATA_INFO = File.expand_path("#{DERIVED_DATA}/*/info.plist")
 
-      DEFAULT_SIM_WAIT = "15"
+      DEFAULT_SIM_WAIT = 15
 
       MAX_PING_ATTEMPTS = 5
 
@@ -149,36 +149,29 @@ module Calabash
       end
 
       def self.find_preferred_dir(sim_dirs)
-
-        pref = sim_dirs.find do |d|
+        sim_dirs.find do |d|
           out = `otool "#{File.expand_path(d)}"/* -o 2> /dev/null | grep CalabashServer`
           /CalabashServer/.match(out)
         end
-
-        if pref.nil?
-          pref = sim_dirs.find {|d| /Calabash-iphonesimulator/.match(d)}
-        end
-        pref
       end
 
       def self.ensure_connectivity(app_bundle_path, sdk, version)
         begin
           timeout = (ENV['CONNECT_TIMEOUT'] || DEFAULT_SIM_WAIT).to_i
+          max_ping = (ENV['MAX_PING_ATTEMPTS'] || MAX_PING_ATTEMPTS).to_i
           Timeout::timeout(timeout) do
             connected = false
             until connected
               simulator = launch(app_bundle_path, sdk, version)
               num_pings = 0
-              until connected or (num_pings == MAX_PING_ATTEMPTS)
+              until connected or (num_pings == max_ping)
                 begin
                     connected = (ping_app == '405')
                 rescue Exception => e
-                  if (num_pings > 2) then p e end
+                  p e if num_pings > 2
                 ensure
                   num_pings += 1
-                  unless connected
-                    sleep 1
-                  end
+                  sleep 1 unless connected
                 end
               end
             end
@@ -209,13 +202,12 @@ module Calabash
         status = res.code
         begin
           http.finish if http and http.started?
-        rescue Exception => e
-          puts "Finish #{e}"
+        rescue
+
         end
         status
       end
     end
-
 
   end
 end
