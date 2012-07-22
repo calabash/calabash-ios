@@ -1,5 +1,9 @@
+require 'calabash-cucumber/tests_helpers'
+require 'calabash-cucumber/wait_helpers'
+require 'net/http'
 require 'test/unit'
 require 'json'
+require 'calabash-cucumber/version'
 
 
 if not Object.const_defined?(:CALABASH_COUNT)
