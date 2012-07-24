@@ -10,7 +10,7 @@ module Calabash
       end
 
       def element_exists(uiquery)
-        not element_does_not_exist(query)
+        not element_does_not_exist(uiquery)
       end
 
       def view_with_mark_exists(expected_mark)
@@ -53,9 +53,6 @@ module Calabash
         puts "Saved screenshot: #{path}"
         path
       end
-
-
-
 
     end
   end
