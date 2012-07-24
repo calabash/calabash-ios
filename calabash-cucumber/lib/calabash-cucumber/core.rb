@@ -137,7 +137,7 @@ module Calabash
       end
 
       def background(secs)
-        res = http({:method => :post, :path => 'background'}, {:duration => secs})
+        http({:method => :post, :path => 'background'}, {:duration => secs})
       end
 
 
