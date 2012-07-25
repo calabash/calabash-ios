@@ -21,6 +21,6 @@ Gem::Specification.new do |s|
   s.add_dependency( "CFPropertyList" )
   s.add_dependency( "sim_launcher", "0.3.8") #Recommended by Pete for now
   s.add_dependency( "slowhandcuke" )
-  s.add_dependency( "location-one")
+  s.add_dependency( "location-one", "~>0.0.2")
 
 end
