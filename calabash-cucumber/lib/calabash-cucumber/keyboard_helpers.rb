@@ -3,6 +3,7 @@ require 'calabash-cucumber/tests_helpers'
 module Calabash
   module Cucumber
     module KeyboardHelpers
+      include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
 
       KEYPLANE_NAMES = {

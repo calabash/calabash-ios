@@ -2,6 +2,7 @@ require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/keyboard_helpers'
 require 'calabash-cucumber/wait_helpers'
+require 'calabash-cucumber/location'
 require 'net/http'
 require 'test/unit/assertions'
 require 'json'
@@ -23,6 +24,7 @@ module Calabash
       include Calabash::Cucumber::TestsHelpers
       include Calabash::Cucumber::WaitHelpers
       include Calabash::Cucumber::KeyboardHelpers
+      include Calabash::Cucumber::Location
 
 
       def home_direction

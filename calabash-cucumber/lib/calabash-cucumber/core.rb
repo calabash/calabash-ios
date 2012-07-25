@@ -262,6 +262,23 @@ module Calabash
 
         else
           req = Net::HTTP::Get.new url.path
+          if data
+            if URI.respond_to?:encode_www_form
+              url.query = URI.encode_www_form(data)
+            else
+              ##suport only "safe" ascii params for now
+              url.query = enum.map do |k,v|
+                "#{k.to_s}=#{v.to_s}"
+              end.join('&')
+            end
+            resp = Net::HTTP.get_response(url)
+            if resp.is_a?Net::HTTPSuccess
+              return resp.body
+            else
+              raise "HTTP-level Error #{resp}"
+            end
+          end
+
         end
         make_http_request(url, req)
       end
