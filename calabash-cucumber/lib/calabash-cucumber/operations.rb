@@ -67,6 +67,29 @@ module Calabash
       end
 
 
+      def set_user_pref(key, val)
+        res = http({:method => :post, :path => 'userprefs'},
+                   {:key=> key, :value => val})
+        res = JSON.parse(res)
+        if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "set_user_pref #{key} = #{val} failed because: #{res['reason']}\n#{res['details']}"
+        end
+
+        res['results']
+      end
+
+      def user_pref(key)
+        res = http({:method => :get, :path => 'userprefs'},
+                   {:key=> key})
+        res = JSON.parse(res)
+        if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "get user_pref #{key} failed because: #{res['reason']}\n#{res['details']}"
+        end
+
+        res['results'].first
+      end
+
+
 
       #not officially supported yet
       #def change_slider_value_to(q, value)

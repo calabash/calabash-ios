@@ -5,7 +5,7 @@ PATH
       CFPropertyList
       cucumber
       json
-      location-one (~> 0.0.2)
+      location-one (~> 0.0.5)
       sim_launcher (= 0.3.8)
       slowhandcuke
 
@@ -24,7 +24,7 @@ GEM
     gherkin (2.11.1)
       json (>= 1.4.6)
     json (1.7.3)
-    location-one (0.0.2)
+    location-one (0.0.5)
       geocoder (~> 1.1)
       json
     rack (1.4.1)
