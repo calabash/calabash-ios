@@ -16,6 +16,10 @@ module Calabash
         map(uiquery, :query, *args)
       end
 
+      def query_all(uiquery, *args)
+        map(uiquery, :query_all, *args)
+      end
+
       def touch(uiquery, options={})
         options[:query] = uiquery
         views_touched = playback("touch", options)
