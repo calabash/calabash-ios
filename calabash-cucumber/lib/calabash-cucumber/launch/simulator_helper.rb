@@ -29,7 +29,7 @@ module Calabash
 
       def self.derived_data_dir_for_project
         dir = project_dir
-
+        xcode_workspace_name = ''
         info_plist = Dir.glob(DEFAULT_DERIVED_DATA_INFO).find { |plist_file|
           begin
             plist = CFPropertyList::List.new(:file => plist_file)
@@ -37,6 +37,9 @@ module Calabash
             ws_dir = File.dirname(hash['WorkspacePath']).downcase
             p_dir = dir.downcase
             ws_dir == p_dir
+            if (p_dir.include? ws_dir)
+              xcode_workspace_name = ws_dir.split('/').last
+            end
           rescue
             false
           end
@@ -60,6 +63,13 @@ module Calabash
             File.basename(xc_proj).start_with?(xcode_proj_name)
           end
 
+          if (build_dirs.count == 0 && !xcode_workspace_name.empty?)
+            # check for directory named "workspace-{deriveddirectoryrandomcharacters}"
+            build_dirs = Dir.glob("#{DERIVED_DATA}/*").find_all do |xc_proj|
+              File.basename(xc_proj).downcase.start_with?(xcode_workspace_name)
+            end
+          end
+          
           if (build_dirs.count == 0)
             msg = ["Unable to find your built app."]
             msg << "This means that Calabash can't automatically launch iOS simulator."
