@@ -36,10 +36,10 @@ module Calabash
             hash = CFPropertyList.native_types(plist.value)
             ws_dir = File.dirname(hash['WorkspacePath']).downcase
             p_dir = dir.downcase
-            ws_dir == p_dir
             if (p_dir.include? ws_dir)
               xcode_workspace_name = ws_dir.split('/').last
             end
+            ws_dir == p_dir
           rescue
             false
           end
