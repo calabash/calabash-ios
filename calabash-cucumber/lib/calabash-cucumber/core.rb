@@ -100,6 +100,11 @@ module Calabash
         playback(file, options)
       end
 
+      #Current position of home button
+      def current_rotation
+        @current_rotation
+      end
+
       def rotate(dir)
         @current_rotation = @current_rotation || :down
         rotate_cmd = nil
@@ -141,9 +146,51 @@ module Calabash
       end
 
       def background(secs)
-        http({:method => :post, :path => 'background'}, {:duration => secs})
+        set_user_pref("__calabash_action", {:action => :background, :duration => secs})
       end
 
+      def prepare_dialog_action(opts={:dialog => nil, :answer => "Ok"})
+        if opts[:dialog].nil? || opts[:dialog].length < 1
+          raise ":dialog must be specified as a non-empty string (used as regexp to match dialog text)"
+        end
+        txt = opts[:answer] || 'Ok'
+        set_user_pref("__calabash_action", {:action => :dialog,
+                                            :text => opts[:dialog],
+                                            :answer => txt})
+      end
+
+      def picker(opts={:query => "pickerView", :action => :texts})
+        raise "Not implemented" unless opts[:action] == :texts
+
+        q = opts[:query]
+
+        check_element_exists(q)
+
+        comps = query(q,:numberOfComponents).first
+        row_counts = []
+        texts = []
+        comps.times do |i|
+          row_counts[i] = query(q,:numberOfRowsInComponent=>i).first
+          texts[i] = []
+        end
+
+        row_counts.each_with_index do |row_count, comp|
+          row_count.times do |i|
+            #view = query(q,[{:viewForRow => 0}, {:forComponent => 0}],:accessibilityLabel).first
+            spec = [{:viewForRow => i}, {:forComponent => comp}]
+            view = query(q,spec).first
+            if view
+              txt = query(q,spec,:accessibilityLabel).first
+            else
+              txt = query(q, :delegate, [{:pickerView=>:view},
+                                         {:titleForRow=>i},
+                                         {:forComponent=>comp}]).first
+            end
+            texts[comp] << txt
+          end
+        end
+        texts
+      end
 
       def load_playback_data(recording, options={})
         os = options["OS"] || ENV["OS"] || "ios5"
@@ -267,16 +314,16 @@ module Calabash
         else
           req = Net::HTTP::Get.new url.path
           if data
-            if URI.respond_to?:encode_www_form
+            if URI.respond_to? :encode_www_form
               url.query = URI.encode_www_form(data)
             else
               ##suport only "safe" ascii params for now
-              url.query = enum.map do |k,v|
+              url.query = enum.map do |k, v|
                 "#{k.to_s}=#{v.to_s}"
               end.join('&')
             end
             resp = Net::HTTP.get_response(url)
-            if resp.is_a?Net::HTTPSuccess
+            if resp.is_a? Net::HTTPSuccess
               return resp.body
             else
               raise "HTTP-level Error #{resp}"
