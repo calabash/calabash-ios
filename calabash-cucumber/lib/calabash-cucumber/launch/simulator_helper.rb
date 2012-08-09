@@ -1,4 +1,3 @@
-require 'net/http/persistent'
 require 'sim_launcher'
 require 'CFPropertyList'
 
