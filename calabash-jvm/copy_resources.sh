@@ -1,2 +1,2 @@
 #!/bin/bash
-cp ../resources/* resources
+cp -R ../calabash-cucumber/lib/calabash-cucumber/resources resources
