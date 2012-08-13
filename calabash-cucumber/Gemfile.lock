@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    calabash-cucumber (0.9.83)
+    calabash-cucumber (0.9.84)
       CFPropertyList
       cucumber
       json

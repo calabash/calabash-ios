@@ -336,8 +336,14 @@ module Calabash
 
 
       def url_for(verb)
-        url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
-        url.path = '/'+verb
+        url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265")
+        path = url.path
+        if path.end_with?"/"
+          path = "#{path}#{verb}"
+        else
+          path = "#{path}/#{verb}"
+        end
+        url.path = path
         url
       end
 
