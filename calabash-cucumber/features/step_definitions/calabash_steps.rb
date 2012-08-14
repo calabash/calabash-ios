@@ -1,4 +1,4 @@
-WAIT_TIMEOUT = ENV['WAIT_TIMEOUT'] || 30
+WAIT_TIMEOUT = (ENV['WAIT_TIMEOUT'] || 30).to_f
 STEP_PAUSE = (ENV['STEP_PAUSE'] || 0.5).to_f
 
 Given /^(my|the) app is running$/ do |_|
@@ -34,7 +34,7 @@ Then /^I (?:press|touch) the "([^\"]*)" button$/ do |name|
 end
 
 Then /^I (?:press|touch) the "([^\"]*)" (?:input|text) field$/ do |name|
-  touch("textField placeholdwer:'#{name}'")
+  touch("textField placeholder:'#{name}'")
   sleep(STEP_PAUSE)
 end
 
