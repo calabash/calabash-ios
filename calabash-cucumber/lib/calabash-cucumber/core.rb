@@ -353,15 +353,16 @@ module Calabash
         body = nil
         CAL_HTTP_RETRY_COUNT.times do |count|
           begin
-            if not (@http) or not (@http.started?)
+        if not (@http) or not (@http.started?)
               @http = init_request(url)
               @http.start
-            end
-            body = @http.request(req).body
-            break
-          rescue Exception => e
+        end
+        body = @http.request(req).body
+        break
+        rescue Errno::ECONNRESET, EOFError, Errno::ECONNREFUSED => e
             if count < CAL_HTTP_RETRY_COUNT-1
-              puts "Retrying.."
+              puts "Retrying.. (#{e})"
+              sleep(0.3)
             else
               puts "Failing..."
               raise e

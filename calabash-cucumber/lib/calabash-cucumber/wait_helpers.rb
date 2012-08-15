@@ -7,6 +7,9 @@ module Calabash
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
 
+
+      class WaitError < RuntimeError
+      end
       CALABASH_CONDITIONS = {:none_animating => "NONE_ANIMATING"}
 
 
@@ -32,13 +35,13 @@ module Calabash
         end
 
         begin
-          Timeout::timeout(timeout) do
+          Timeout::timeout(timeout,WaitError) do
             until block.call
               sleep(retry_frequency)
             end
           end
           sleep(post_timeout) if post_timeout > 0
-        rescue Timeout::Error => e
+        rescue WaitError => e
           handle_error_with_options(e,timeout_message, screenshot_on_error)
         rescue Exception => e
           handle_error_with_options(e, nil, screenshot_on_error)
@@ -65,7 +68,7 @@ module Calabash
         options[:screenshot_on_error] = options[:screenshot_on_error] || true
 
         begin
-          Timeout::timeout(options[:timeout]) do
+          Timeout::timeout(options[:timeout],WaitError) do
             loop do
               res = http({:method => :post, :path => 'condition'},
                          options)
@@ -75,7 +78,7 @@ module Calabash
             end
             sleep(options[:post_timeout]) if options[:post_timeout] > 0
           end
-        rescue Timeout::Error => e
+        rescue WaitError => e
           handle_error_with_options(e,options[:timeout_message], options[:screenshot_on_error])
         rescue Exception => e
           handle_error_with_options(e,nil, options[:screenshot_on_error])
@@ -101,6 +104,9 @@ module Calabash
 
       def handle_error_with_options(ex, timeout_message, screenshot_on_error)
         msg = (timeout_message || ex)
+        if ex
+          msg = "#{msg} (#{ex.caller.join(", ")})"
+        end
         if screenshot_on_error
           screenshot_and_raise msg
         else
