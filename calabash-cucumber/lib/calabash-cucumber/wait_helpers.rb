@@ -104,7 +104,7 @@ module Calabash
 
       def handle_error_with_options(ex, timeout_message, screenshot_on_error)
         msg = (timeout_message || ex)
-        if ex and ex.respond_to?:backtrace
+        if ex and ex.respond_to?(:backtrace)
           msg = "#{msg} (#{ex.backtrace.join(", ")})"
         end
         if screenshot_on_error

@@ -20,7 +20,7 @@
 
   (query*
    `[UITableView {marked "Karl Krukow"}]
-    `[delegate [tableView self numberOfRowsInSection 0]])
+    `[delegate [tableView: self numberOfRowsInSection 0]])
   )
 
 (defmacro query
@@ -77,9 +77,9 @@
   (query UITableView [delegate [tableView :self ]])
 Examples
 
-(query [ UITableViewCell
-        {:text "Cell 1"}
-        :parent ])
+(query `UITableViewCell
+       (marked x)
+       :parent )
   )
 
 
