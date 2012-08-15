@@ -10,7 +10,8 @@ module Calabash
 
       class WaitError < RuntimeError
       end
-      CALABASH_CONDITIONS = {:none_animating => "NONE_ANIMATING"}
+      CALABASH_CONDITIONS = {:none_animating => "NONE_ANIMATING",
+                             :no_network_indicator => "NO_NETWORK_INDICATOR"}
 
 
       def wait_for(options_or_timeout=
@@ -104,8 +105,8 @@ module Calabash
 
       def handle_error_with_options(ex, timeout_message, screenshot_on_error)
         msg = (timeout_message || ex)
-        if ex and ex.respond_to?(:backtrace)
-          msg = "#{msg} (#{ex.backtrace.join(", ")})"
+        if ex
+          msg = "#{msg} (#{ex.class})"
         end
         if screenshot_on_error
           screenshot_and_raise msg
