@@ -359,7 +359,7 @@ module Calabash
         end
         body = @http.request(req).body
         break
-        rescue Errno::ECONNRESET, EOFError, Errno::ECONNREFUSED, Errno::EPIPE  => e
+        rescue Errno::ECONNRESET, EOFError, Errno::ECONNREFUSED, Errno::EPIPE, Timeout::Error  => e
             if count < CAL_HTTP_RETRY_COUNT-1
               puts "Retrying.. (#{e})"
               sleep(0.3)
