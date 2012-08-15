@@ -166,11 +166,11 @@ module Calabash
 
         check_element_exists(q)
 
-        comps = query(q,:numberOfComponents).first
+        comps = query(q, :numberOfComponents).first
         row_counts = []
         texts = []
         comps.times do |i|
-          row_counts[i] = query(q,:numberOfRowsInComponent=>i).first
+          row_counts[i] = query(q, :numberOfRowsInComponent => i).first
           texts[i] = []
         end
 
@@ -178,13 +178,13 @@ module Calabash
           row_count.times do |i|
             #view = query(q,[{:viewForRow => 0}, {:forComponent => 0}],:accessibilityLabel).first
             spec = [{:viewForRow => i}, {:forComponent => comp}]
-            view = query(q,spec).first
+            view = query(q, spec).first
             if view
-              txt = query(q,spec,:accessibilityLabel).first
+              txt = query(q, spec, :accessibilityLabel).first
             else
-              txt = query(q, :delegate, [{:pickerView=>:view},
-                                         {:titleForRow=>i},
-                                         {:forComponent=>comp}]).first
+              txt = query(q, :delegate, [{:pickerView => :view},
+                                         {:titleForRow => i},
+                                         {:forComponent => comp}]).first
             end
             texts[comp] << txt
           end
@@ -338,7 +338,7 @@ module Calabash
       def url_for(verb)
         url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265")
         path = url.path
-        if path.end_with?"/"
+        if path.end_with? "/"
           path = "#{path}#{verb}"
         else
           path = "#{path}/#{verb}"
@@ -353,18 +353,23 @@ module Calabash
         body = nil
         CAL_HTTP_RETRY_COUNT.times do |count|
           begin
-        if not (@http) or not (@http.started?)
+            if not (@http) or not (@http.started?)
               @http = init_request(url)
               @http.start
-        end
-        body = @http.request(req).body
-        break
-        rescue Errno::ECONNRESET, EOFError, Errno::ECONNREFUSED, Errno::EPIPE, Timeout::Error  => e
+            end
+            body = @http.request(req).body
+            break
+          rescue Errno::ECONNRESET, EOFError, Errno::ECONNREFUSED, Errno::EPIPE, Timeout::Error => e
+
             if count < CAL_HTTP_RETRY_COUNT-1
-              puts "Retrying.. (#{e})"
-              sleep(0.3)
+              if e.is_a?(Timeout::Error)
+                sleep(5)
+              else
+                sleep(0.3)
+              end
+              puts "Retrying.. #{e.class}: (#{e})"
             else
-              puts "Failing..."
+              puts "Failing... #{e.class}"
               raise e
             end
           end
@@ -377,6 +382,9 @@ module Calabash
         http = Net::HTTP.new(url.host, url.port)
         if http.respond_to? :open_timeout=
           http.open_timeout==15
+        end
+        if http.respond_to?(:read_timeout=)
+          http.read_timeout = 30
         end
         http
       end
