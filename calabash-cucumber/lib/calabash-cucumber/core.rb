@@ -1,3 +1,5 @@
+require 'httpclient'
+
 module Calabash
   module Cucumber
     module Core
@@ -302,36 +304,16 @@ module Calabash
       end
 
       def http(options, data=nil)
-        url = url_for(options[:path])
-        if options[:method] == :post
-          req = Net::HTTP::Post.new url.path
+        options[:uri] = url_for(options[:path])
+        options[:method] = options[:method] || :get
+        if data
           if options[:raw]
-            req.body=data
+            options[:body] = data
           else
-            req.body = data.to_json
+            options[:body] = data.to_json
           end
-
-        else
-          req = Net::HTTP::Get.new url.path
-          if data
-            if URI.respond_to? :encode_www_form
-              url.query = URI.encode_www_form(data)
-            else
-              ##suport only "safe" ascii params for now
-              url.query = enum.map do |k, v|
-                "#{k.to_s}=#{v.to_s}"
-              end.join('&')
-            end
-            resp = Net::HTTP.get_response(url)
-            if resp.is_a? Net::HTTPSuccess
-              return resp.body
-            else
-              raise "HTTP-level Error #{resp}"
-            end
-          end
-
         end
-        make_http_request(url, req)
+        make_http_request(options)
       end
 
 
@@ -349,28 +331,47 @@ module Calabash
 
       CAL_HTTP_RETRY_COUNT=3
 
-      def make_http_request(url, req)
+      def make_http_request(options)
         body = nil
         CAL_HTTP_RETRY_COUNT.times do |count|
           begin
-            if not (@http) or not (@http.started?)
-              @http = init_request(url)
-              @http.start
+            if not @http
+              @http = init_request(options)
             end
-            body = @http.request(req).body
+            if options[:method] == :post
+              body = @http.post(options[:uri], options[:body]).body
+            else
+              body = @http.get(options[:uri], options[:body]).body
+            end
             break
-          rescue Errno::ECONNRESET, EOFError, Errno::ECONNREFUSED, Errno::EPIPE, Timeout::Error => e
-
+          rescue HTTPClient::TimeoutError => e
             if count < CAL_HTTP_RETRY_COUNT-1
-              if e.is_a?(Timeout::Error)
-                sleep(5)
-              else
-                sleep(0.3)
-              end
-              puts "Retrying.. #{e.class}: (#{e})"
+              sleep(0.5)
+              @http.reset_all
+              @http=nil
+              STDOUT.write "Retrying.. #{e.class}: (#{e})\n"
+              STDOUT.flush
+
             else
               puts "Failing... #{e.class}"
               raise e
+            end
+          rescue Exception => e
+            case e
+              when Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ECONNABORTED, Errno::ETIMEDOUT
+                if count < CAL_HTTP_RETRY_COUNT-1
+                  sleep(0.5)
+                  @http.reset_all
+                  @http=nil
+                  STDOUT.write "Retrying.. #{e.class}: (#{e})\n"
+                  STDOUT.flush
+
+                else
+                  puts "Failing... #{e.class}"
+                  raise e
+                end
+              else
+                raise e
             end
           end
         end
@@ -379,13 +380,10 @@ module Calabash
       end
 
       def init_request(url)
-        http = Net::HTTP.new(url.host, url.port)
-        if http.respond_to? :open_timeout=
-          http.open_timeout==15
-        end
-        if http.respond_to?(:read_timeout=)
-          http.read_timeout = 30
-        end
+        http = HTTPClient.new
+        http.connect_timeout = 15
+        http.send_timeout = 15
+        http.receive_timeout = 15
         http
       end
     end

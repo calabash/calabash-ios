@@ -47,6 +47,10 @@ elsif cmd == 'check'
 elsif cmd == 'submit'
   calabash_submit(ARGV)
   exit 0
+elsif cmd == 'version'
+  require 'calabash-cucumber'
+  puts Calabash::Cucumber::VERSION
+  exit 0
 elsif cmd == 'sim'
   if ARGV.length == 0
     print_usage
