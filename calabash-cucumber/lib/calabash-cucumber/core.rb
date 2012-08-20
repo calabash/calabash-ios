@@ -188,7 +188,7 @@ module Calabash
                                          {:titleForRow => i},
                                          {:forComponent => comp}]).first
             end
-            texts[comp] << txt
+             texts[comp] << txt
           end
         end
         texts
@@ -270,7 +270,7 @@ module Calabash
         file_name = "#{file_name}_#{os}_#{device}.base64"
         system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
         system("openssl base64 -in _recording_binary.plist -out #{file_name}")
-        system("rm _recording.plist _recording_binary.plist")
+          system("rm _recording.plist _recording_binary.plist")
         file_name
       end
 
@@ -313,7 +313,9 @@ module Calabash
             options[:body] = data.to_json
           end
         end
-        make_http_request(options)
+        res = make_http_request(options)
+        res.force_encoding("UTF-8")
+        res
       end
 
 
