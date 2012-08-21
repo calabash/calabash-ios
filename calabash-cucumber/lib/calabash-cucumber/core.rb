@@ -314,7 +314,7 @@ module Calabash
           end
         end
         res = make_http_request(options)
-        res.force_encoding("UTF-8")
+        res.force_encoding("UTF-8") if res.respond_to?(:force_encoding)
         res
       end
 

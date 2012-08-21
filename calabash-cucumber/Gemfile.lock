@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    calabash-cucumber (0.9.94)
+    calabash-cucumber (0.9.95)
       CFPropertyList
       bundler (~> 1.1)
       cucumber
