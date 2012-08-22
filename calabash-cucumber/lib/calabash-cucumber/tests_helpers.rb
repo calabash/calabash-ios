@@ -33,17 +33,26 @@ module Calabash
         check_element_exists("view marked:'#{expected_mark}'")
       end
 
-      def screenshot_and_raise(msg, prefix=nil, name=nil)
-        screenshot(prefix, name)
+      def screenshot_and_raise(msg, options={:prefix => nil, :name => nil, :label => nil})
+        screenshot_embed(options)
         raise(msg)
       end
 
-      def fail(msg="Error. Check log for details.", prefix=nil, name=nil)
-        screenshot_and_raise(msg, prefix, name)
+      def fail(msg="Error. Check log for details.", options={:prefix => nil, :name => nil, :label => nil})
+        screenshot_and_raise(msg, options)
       end
 
-      def screenshot(prefix=nil, name=nil)
-        @screenshot_count ||= 0
+
+      def screenshot_embed(options={:prefix => nil, :name => nil, :label => nil})
+        path = screenshot(options)
+        embed(path, "image/png", options[:label] || File.basename(path))
+      end
+
+      def screenshot(options={:prefix => nil, :name => nil})
+        prefix = options[:prefix]
+        name = options[:name]
+
+        @@screenshot_count ||= 0
         res = http({:method => :get, :path => 'screenshot'})
         prefix = prefix || ENV['SCREENSHOT_PATH'] || ""
         if name.nil?
@@ -54,13 +63,14 @@ module Calabash
           end
         end
 
-        path = "#{prefix}#{name}_#{@screenshot_count}.png"
+        path = "#{prefix}#{name}_#{@@screenshot_count}.png"
         File.open(path, 'wb') do |f|
           f.write res
         end
-        @screenshot_count += 1
+        @@screenshot_count += 1
         path
       end
+
 
     end
   end

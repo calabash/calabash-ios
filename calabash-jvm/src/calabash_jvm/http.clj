@@ -11,6 +11,11 @@
 (def ^:dynamic *conn-timeout* 10000)
 (def ^:dynamic *socket-timeout* 10000)
 
+
+(declare error!)
+(declare is-error?)
+
+
 (defn- mk-conn-mgr
   []
   (mgr/make-reusable-conn-manager {:timeout *conn-timeout*}))
@@ -42,7 +47,7 @@
                     http-spec))]
 
           (if (is-error? rsp)
-            (error rsp)
+            (error! rsp)
             (:body rsp))))))
 
 
@@ -50,8 +55,6 @@
   {:method_name op
    :arguments (or args [])})
 
-(declare error!)
-(declare is-error?)
 
 (defn map-views
   "Reaches the map endpoint via POST.
@@ -72,7 +75,7 @@
    (>= (:status rsp) 400)
    (not= (:outcome (:body rsp) "SUCCESS"))))
 
-(defn- error
+(defn- error!
   [{body :body}]
   (throw (RuntimeException.
           (str "Failure: " (:reason body)

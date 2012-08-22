@@ -173,7 +173,7 @@ end
 
 Then /^(?:I\s)?take (?:picture|screenshot)$/ do
   sleep(STEP_PAUSE)
-  screenshot
+  screenshot_embed
 end
 
 Then /^I swipe (left|right|up|down)$/ do |dir|

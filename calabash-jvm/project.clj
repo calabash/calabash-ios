@@ -16,13 +16,10 @@
                                               javax.jms/jms
                                               com.sun.jdmk/jmxtools
                                               com.sun.jmx/jmxri]]
-;                 [info.cukes/cucumber-java "1.0.11"]
-;                 [info.cukes/cucumber-junit "1.0.11"]
-;                 [junit/junit "4.10"]
-                 [org.clojure/tools.logging "0.2.3"]
-                 [clj-logging-config/clj-logging-config "1.9.8"]]
 
-  :plugins [[lein-swank "1.4.4"]]
+                 [org.clojure/tools.logging "0.2.3"]
+                 [clj-logging-config/clj-logging-config "1.9.8"]
+                 [org.clojure/tools.nrepl "0.2.0-beta9"]]
 
   :resources-path "resources"
   :dev-dependencies [[clojure-source "1.4.0"]])

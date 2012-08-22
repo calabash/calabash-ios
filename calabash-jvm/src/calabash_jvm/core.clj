@@ -6,13 +6,31 @@
             [calabash-jvm.env :as env]))
 
 
-;; The key is to start swank from emacs as the inferior lisp process instead of calling lein swank from the shell. One way to do this is to use elein (the command is M-x elein-swank). Then you can either inspect the output in the inferior lisp buffer (which is called *elein-swank* in the example of using elein), or execute slime-redirect-inferior-output and have the output inline in the repl. Clojure.contrib.logging is a useful tool for sending log output.
+
+(defn- dsl-op
+  [key val]
+  {::_calabash-type key key val})
+
+(defn index
+  "construct an index query"
+  [i]
+  (dsl-op :index i))
+
+(defn css
+  "construct a css query for web views"
+  [css]
+  (dsl-op :css css))
+
+(defn xpath
+  "construct a css query for web views"
+  [xpath]
+  (dsl-op :xpath xpath))
 
 
 (defn query*
   "qwe"
   [q & selectors]
-  (apply http/cmap q :query selectors))
+  (apply http/map-views  q :query selectors))
 
 (comment
   (query*
@@ -20,13 +38,14 @@
 
   (query*
    `[UITableView {marked "Karl Krukow"}]
-    `[delegate [tableView: self numberOfRowsInSection 0]])
+    `[delegate [tableView :self numberOfRowsInSection 0]])
   )
 
-(defmacro query
-  "docs"
-  [q selectors]
-  (apply query* q (transform selectors)))
+(comment
+  (defmacro query
+    "docs"
+    [q selectors]
+    (apply query* q (transform selectors))))
 
 
 (comment
@@ -39,13 +58,15 @@
    `[UITableView {marked "Karl Krukow"}]
     `[delegate [tableView self numberOfRowsInSection 0]])
   )
-;query*
- []
+                                        ;query*
+
+(comment
+  []
 
 
-(http/cmap `[UILabel {text "Cell 2"} parent UITableViewCell child UITableViewCellReorderControl] :query)
+  (http/cmap `[UILabel {text "Cell 2"} parent UITableViewCell child UITableViewCellReorderControl] :query)
 
-(http/cmap `[UITableView] :query :delegate [{:tableView nil} {:numberOfRowsInSection 0}])
+  (http/cmap `[UITableView] :query :delegate [{:tableView nil} {:numberOfRowsInSection 0}]))
 ;(query [:tableViewCell {:text 42} :parent] :delegate [:tableView self :numberOfRowsInSection 0])
 
 ;;Model 2
@@ -73,36 +94,37 @@
        UIWebView
        {:css "asdf"})
 
-  (co,,emt simple message send)
-  (query UITableView [delegate [tableView :self ]])
-Examples
 
-(query `UITableViewCell
-       (marked x)
-       :parent )
-  )
+  (comment simple message send
+           (query UITableView [delegate [tableView :self ]])
+           Examples
 
-
-
+           (query `UITableViewCell
+                  (marked x)
+                  :parent )
+           )
 
 
 
-(comment (defmacro query
-           ""
-           [q & args]
-           (let [normal (clojure.walk/prewalk
-                         (fn [x]
-                           (cond
-                             (symbol? x) x
-                             (map? x)
-                             (let [k (first (keys x))
-                                   v (first (vals x))]
-                               (str key ":" ))
 
-                             )
-                           ))
 
-                 x (apply str (map str (interpose " " q)))]
-             `(let [qq# ~x]
-                (swank.core/break)
-                (query* qq# ~@args)))))
+
+  (comment (defmacro query
+             ""
+             [q & args]
+             (let [normal (clojure.walk/prewalk
+                           (fn [x]
+                             (cond
+                              (symbol? x) x
+                              (map? x)
+                              (let [k (first (keys x))
+                                    v (first (vals x))]
+                                (str key ":" ))
+
+                              )
+                             ))
+
+                   x (apply str (map str (interpose " " q)))]
+               `(let [qq# ~x]
+                  (swank.core/break)
+                  (query* qq# ~@args))))))
