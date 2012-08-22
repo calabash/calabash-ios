@@ -43,14 +43,22 @@ module Calabash
       end
 
       def screenshot(prefix=nil, name=nil)
+        @screenshot_count ||= 0
         res = http({:method => :get, :path => 'screenshot'})
         prefix = prefix || ENV['SCREENSHOT_PATH'] || ""
-        name = "screenshot_#{CALABASH_COUNT[:step_line]}.png" if name.nil?
-        path = "#{prefix}#{name}"
+        if name.nil?
+          name = "screenshot"
+        else
+          if File.extname(name).downcase == ".png"
+            name = name.split(".png")[0]
+          end
+        end
+
+        path = "#{prefix}#{name}_#{@screenshot_count}.png"
         File.open(path, 'wb') do |f|
           f.write res
         end
-        puts "Saved screenshot: #{path}"
+        @screenshot_count += 1
         path
       end
 

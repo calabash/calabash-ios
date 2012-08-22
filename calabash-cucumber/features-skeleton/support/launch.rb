@@ -60,7 +60,7 @@ def app_path
 end
 
 def calabash_notify
-  if self.respond_to?:on_launch
+  if self.respond_to?(:on_launch)
     self.on_launch
   end
 end
