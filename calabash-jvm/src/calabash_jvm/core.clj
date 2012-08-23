@@ -3,7 +3,8 @@
             [clojure.tools.logging :as lg]
             [calabash-jvm.http :as http]
             [clj-logging-config.log4j :as l4j]
-            [calabash-jvm.env :as env]))
+            [calabash-jvm.env :as env]
+            [calabash-jvm.events :as events]))
 
 
 
@@ -28,9 +29,17 @@
 
 
 (defn query*
-  "qwe"
+  "query views and optionally apply selectors to the results"
   [q & selectors]
   (apply http/map-views  q :query selectors))
+
+(defn playback
+  ([recname] (events/playback-or-nil recname {}))
+  ([recname options] (events/playback-or-nil recname options)))
+
+(defn touch
+  "touch the center of the view that results from performing query q.
+   Options include offset")
 
 (comment
   (query*

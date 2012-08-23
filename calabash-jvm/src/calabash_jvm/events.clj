@@ -39,15 +39,40 @@
 
 (defn record-begin!
   []
-  (http/req {:method :post :path "record"} {:action :start}))
+  (http/req {:method :post
+             :path "record"
+             :check-json? false} {:action :start}))
 
 (defn record-end!
   [file]
-  (let [rsp (http/req {:method :post :path "record"} {:action :stop})
+  (let [rsp (http/req {:method :post
+                       :path "record"
+                       :check-json? false} {:action :stop})
         f (spit "_recording.plist" rsp)
         filename (str file "_" env/*os* "_" env/*idiom* ".base64")]
-    (prn (sh/sh "/usr/bin/plutil" "-convert" "binary1" "-o" "_recording_binary.plist" "_recording.plist"))
-    (prn (sh/sh "openssl" "base64" "-in" "_recording_binary.plist" "-out" filename))
-    (prn (sh/sh "rm" "_recording.plist" "_recording_binary.plist"))
+    (sh/sh "/usr/bin/plutil" "-convert" "binary1" "-o" "_recording_binary.plist" "_recording.plist")
+    (sh/sh "openssl" "base64" "-in" "_recording_binary.plist" "-out" filename)
+    (sh/sh "rm" "_recording.plist" "_recording_binary.plist")
 
     filename))
+
+
+(defn- event-action
+  [recname options route]
+  (if-let [data (event-data recname)]
+    (http/req {:method :post
+               :path route
+               :as :json}
+              (merge {:events data} options))))
+
+(defn playback
+  "plays back a pre-recorded sequence of events"
+  ([recname] (playback recname {}))
+  ([recname options]
+     (event-action recname options "play")))
+
+(defn interpolate
+  "TBD"
+  ([recname] (interpolate recname {}))
+  ([recname options]
+     (event-action recname options "interpolate")))

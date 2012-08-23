@@ -21,5 +21,7 @@
                  [clj-logging-config/clj-logging-config "1.9.8"]
                  [org.clojure/tools.nrepl "0.2.0-beta9"]]
 
+  :plugins [[lein-swank "1.4.4"]]
+
   :resources-path "resources"
   :dev-dependencies [[clojure-source "1.4.0"]])
