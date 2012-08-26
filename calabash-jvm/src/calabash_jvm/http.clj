@@ -2,14 +2,14 @@
   (:require [clojure.data.json :as json]
             [clj-http.client :as client]
             [clj-http.conn-mgr :as mgr]
-            [clojure.tools.logging :as lg]
+            [clojure.tools.logging :as log]
             [clj-logging-config.log4j :as l4j]
             [calabash-jvm.env :as env])
-  (:import (java.security KeyStore)
-           (org.apache.http.impl.conn.tsccm ThreadSafeClientConnManager)))
+  (:use [slingshot.slingshot :only [try+ throw+]]))
 
-(def ^:dynamic *conn-timeout* 60000)
-(def ^:dynamic *socket-timeout* 60000)
+
+(def ^:dynamic *conn-timeout* 5000)
+(def ^:dynamic *socket-timeout* 5000)
 
 
 (declare error!)
@@ -22,6 +22,10 @@
 
 (def ^:private ^:dynamic *conn-mgr*  (mk-conn-mgr))
 
+(defn ^:dynamic *retry-handler*
+  [ex try-count http-context]
+  (log/info "Retrying (" try-count ") reason"  ex)
+  (<= try-count 2))
 
 (defn req
   "Makes http according to spec, with json body"
@@ -34,20 +38,19 @@
                                :socket-timeout *socket-timeout*
                                :check-json? true
                                :conn-timeout *conn-timeout*
-                               :retry-handler (fn [ex try-count http-context]
-                                                (println "Retrying on:" ex)
-                                                (<= try-count 2))}
+                               :retry-handler *retry-handler*}
                               spec)
               param-key (if (= (:method spec) :get)
                           :query-params
                           :body)
+             _  (log/debug "Making Request" http-spec)
              rsp (http-method
                   uri
                   (if body
                     (assoc http-spec param-key (json/json-str body))
                     http-spec))]
-
-         (if (is-error? rsp (:check-json? http-spec))
+         (if-not (http-spec :binary) (log/debug "Got response" rsp))
+         (if (is-error? rsp http-spec)
            (error! rsp)
            (:body rsp))))))
 
@@ -62,24 +65,23 @@
    Takes a UIQuery, and op name and optional args"
   [query op & args]
   (:results (req {:method :post
-                   :path "map"
-                   :as :json}
-                  {:query query
-                   :operation (apply op-map op args)})))
-
-
+                  :path "map"
+                  :as :json}
+                 {:query query
+                  :operation (apply op-map op args)})))
 
 
 (defn- is-error?
-  [rsp check-json?]
+  [rsp {:keys [check-json? binary]}]
   (or
    (>= (:status rsp) 400)
-   (and check-json?
+   (and (not binary)
+        check-json?
         (not=  (:outcome (:body rsp)) "SUCCESS"))))
 
 (defn- error!
   [{body :body}]
-  (prn body)
-  (throw (RuntimeException.
-          (str "Failure: " (:reason body) "\n"
-               "Details: " (:details body) "\n"))))
+  (log/warn "Failure: " (:reason body) "Details: " (:details body))
+  (throw+
+   {:type :calabash-jvm/protocol-error
+    :body body}))

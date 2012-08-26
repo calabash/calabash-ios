@@ -1,54 +1,119 @@
 (ns calabash-jvm.core
   (:require [clojure.data.json :as json]
-            [clojure.tools.logging :as lg]
-            [calabash-jvm.http :as http]
             [clj-logging-config.log4j :as l4j]
-            [calabash-jvm.env :as env]
-            [calabash-jvm.events :as events]))
+            [calabash-jvm
+             [env :as env]
+             [events :as events]
+             [http :as http]])
+  (:use [calabash-jvm.utils :only [logging]])
+  (:import [java.io File FileOutputStream]))
 
 
+(def screenshot-count (atom 0))
 
-(defn- dsl-op
-  [key val]
-  {::_calabash-type key key val})
-
-(defn index
-  "construct an index query"
-  [i]
-  (dsl-op :index i))
-
-(defn css
-  "construct a css query for web views"
-  [css]
-  (dsl-op :css css))
-
-(defn xpath
-  "construct a css query for web views"
-  [xpath]
-  (dsl-op :xpath xpath))
+(defn screenshot
+  [& keyargs]
+  (logging
+   {:action "screenshot"}
+   (let [opts (merge {:prefix (or (env/getenv "SCREENSHOT_PATH") "")
+                      :name "screenshot"}
+                     (apply hash-map keyargs))
+         sc-data (http/req {:method :get
+                            :path "screenshot"
+                            :as :stream
+                            :binary true})
+         path (str (:prefix opts) (:name opts) "_" @screenshot-count ".png")]
+     (clojure.java.io/copy sc-data (java.io.FileOutputStream. path))
+     (swap! screenshot-count inc)
+     path)))
 
 
 (defn query*
-  "query views and optionally apply selectors to the results"
   [q & selectors]
-  (apply http/map-views  q :query selectors))
+  (logging
+   {:query q
+    :extras selectors
+    :action "query*"}
+   (apply http/map-views  q :query selectors)))
 
-(defn playback
-  ([recname] (events/playback-or-nil recname {}))
-  ([recname options] (events/playback-or-nil recname options)))
+(defn query-all*
+  "query views (optionally applying selectors to results)
+   Does not filter out non-visible views"
+  [q & selectors]
+  (logging
+   {:query q
+    :extras selectors
+    :action "query-all*"}
+   (apply http/map-views q :query_all selectors)))
 
-(defn touch
+
+(defn touch*
   "touch the center of the view that results from performing query q.
-   Options include offset")
+   Options include offset..."
+  ([q] (touch* q {}))
+  ([q options]
+     (logging
+      {:query q
+       :extras options
+       :action "touch*"}
+      (events/playback "touch"
+                       (if q
+                         (assoc options :query q)
+                         options)))))
 
-(comment
-  (query*
-   [:UILabel {:text "Karl Krukow"} :parent :UITableViewCell :child :UITableViewCellReorderControl])
+(defn touch-point
+  "Touch the point x,y in the screen coordinate system"
+  [x y] (touch* nil {:offset {:x x :y y}}))
 
-  (query*
-   `[UITableView {marked "Karl Krukow"}]
-    `[delegate [tableView :self numberOfRowsInSection 0]])
-  )
+(defn touch-mark
+  "Touch a view by accessibilityIdentifier/Label (mark)"
+  [mark]
+  (query* [:UIView {:marked mark}]))
+
+(defn scroll
+  ([dir] (scroll [:UIScrollView] dir))
+  ([q dir]
+     (logging
+      {:query q
+       :extras dir
+       :action "scroll"}
+      (http/map-views q :scroll dir))))
+
+(defn scroll-to-row
+  "Scrolls UITableView corresponding to query q to number"
+  ([num] (scroll-to-row [:UITableView] num))
+  ([q num]
+     (logging
+      {:query q
+       :extras num
+       :action "scroll-to-row"}
+      (http/map-views q :scrollToRow num))))
+
+
+(defn pinch
+  ([in_out] (events/playback (str "pinch_" (name in_out))))
+  ([q in_out]
+     (logging
+      {:query q
+       :extras in_out
+       :action "pinch"}
+      (events/playback (str "pinch_" (name in_out)) {:query q}))))
+
+(defn exists?
+  [q]
+  (boolean (not-empty (query* q))))
+
+(defn not-exists?
+  [q]
+  (not (exists? q)))
+
+(defn mark-exists?
+  [mark]
+  (exists? [:UIView {:marked mark}]))
+
+
+
+
 
 (comment
   (defmacro query
