@@ -106,17 +106,3 @@
        (log/debug "Enter text" text)
        (doseq [k text]
          (search-keyplanes-and-enter (str k)))))))
-
-;; (
-;;     res = http({:method => :post, :path => 'keyboard'},
-;;                    {:key => chr, :events => load_playback_data("touch_done")})
-;;         res = JSON.parse(res)
-;;         if res['outcome'] != 'SUCCESS'
-;;           msg = "Keyboard enter failed failed because: #{res['reason']}\n#{res['details']}"
-;;           if should_screenshot
-;;             screenshot_and_raise msg
-;;           else
-;;             raise msg
-;;           end
-;;         end
-;;         res['results'])
