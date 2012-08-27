@@ -7,6 +7,7 @@
              [utils :as utils]
              [env :as env]
              [http :as http]
+             [wait :as wait]
              [events :as events]])
   (:use [calabash-jvm.utils :only [logging]]))
 
@@ -57,7 +58,7 @@
 (defn touch-mark
   "Touch a view by accessibilityIdentifier/Label (mark)"
   [mark]
-  (query* [:UIView {:marked mark}]))
+  (touch* [:UIView {:marked mark}]))
 
 (defn scroll
   "Scrolls a scroll view in direction dir (:up, :down, :left, :right)
@@ -77,7 +78,9 @@
   "Pinch :in or :out (in-out). May specify query."
   ([in-out] (events/playback (str "pinch_" (name in-out))))
   ([q in-out]
-     (core/pinch q in-out)))
+     (if q
+       (core/pinch q in-out)
+       (pinch in-out))))
 
 
 (defn enter-char
@@ -104,6 +107,11 @@
 
 (defn search "Touches return/done/search on keyboard" [] (done))
 
+
+(defn screenshot
+  "Takes a screenshot of the current view (keyword args :prefix and :name determine output file)"
+  [& args]
+  (apply core/screenshot args))
 
 (defn record-begin!
   "Begins recording touch events"
@@ -161,24 +169,144 @@
 
 
 
+(defprotocol ^:private Keywordize
+  (kw [this] "Keyworded version of this")
+  (st [this] "Stringified version of this"))
+
+(extend-protocol Keywordize
+  nil
+  (kw [this] nil)
+  (st [this] nil)
+
+  clojure.lang.Keyword
+  (kw [this] this)
+  (st [this] (name this))
+
+  String
+  (kw [this] (keyword this))
+  (st [this] this)
+
+  java.util.List
+  (kw [this] (mapv kw this))
+  (st [this] (mapv st this))
+
+  java.util.Map
+  (kw [this] (clojure.walk/keywordize-keys this))
+  (st [this] (clojure.walk/stringify-keys this)))
+
+
 ;; interop
 
 (gen-class
  :name calabash_jvm.API
  :main true
- :methods [^:static [query [java.util.List java.util.List] java.util.List]
-           ^:static [queryq [String java.util.List] java.util.List]
-           ^:static [q     [String] java.util.List]])
+ :methods [
+           ^:static [index [Integer] java.util.Map]
+           ^:static [xpath [String] java.util.Map]
+           ^:static [css [String] java.util.Map]
 
-(defn- -query [x & args] (apply query* x args))
+           ^:static [query [java.util.List java.util.List] java.util.List]
+           ^:static [queryq [String String] java.util.List]
+           ^:static [queryAll [java.util.List java.util.List] java.util.List]
+           ^:static [queryqAll [String String] java.util.List]
+           ^:static [q     [String] java.util.List]
+           ^:static [touch [java.util.List java.util.Map] java.util.Map]
+           ^:static [touchq [String String] java.util.Map]
+           ^:static [touchAt [Integer Integer] java.util.Map]
+           ^:static [touchMark [String] java.util.Map]
+           ^:static [scroll [java.util.List String] java.util.List]
+           ^:static [scrollToRow [java.util.List Integer] java.util.List]
+           ^:static [pinch [java.util.List String] java.util.Map]
+           ^:static [enterChar [String] java.util.Map]
+           ^:static [enterText [String] java.util.Map]
+           ^:static [done [] java.util.Map]
+           ^:static [recordBegin [] String]
+           ^:static [recordEnd [String] String]
+           ^:static [playbackEvents [String java.util.Map] java.util.Map]
+           ^:static [interpolateEvents [String java.util.Map] java.util.Map]
+           ^:static [setHttpLogLevel [String] void]
+           ^:static [setCalabashLogLevel [String] void]
+           ^:static [existsq [String] boolean]
+           ^:static [exists [java.util.List] boolean]
+           ^:static [waitForExistsq [String String] void]
+           ^:static [waitForExists [java.util.List java.util.Map] void]
+           ^:static [waitForAllExistq [String String] void]
+           ^:static [waitForAllExist [java.util.List java.util.Map] void]
+           ^:static [screenshot [java.util.Map] String]
+
+           ])
+
+(defn- -index
+  [i]
+  (index i))
+(defn- -css
+  [s]
+  (css s))
+
+(defn- -xpath
+  [s]
+  (xpath s))
+
+(defn- -q [s] (eval (read-string s))) ;;todo use namespace of DSL constructors
+
+(defn- -query [x args] (st (apply query* x (kw args))))
+
+(defn- -queryq [qs os]
+  (st (apply query* (-q qs) (-q os))))
+
+(defn- -queryqAll
+  [qs os]
+  (st (apply query-all* (-q qs) (-q os))))
+
+(defn- -touchq
+  [qs os]
+  (st (touch* (-q qs) (-q os))))
+
+(defn- -queryAll [x args]  (st (apply query-all* x (kw args))))
 
 
-(defn- -q [s] (eval (read-string s)))
+(defn- -touch [q opt] (st (touch* q (kw opt))))
+(defn- -touchAt [x y] (st (touch-point x y)))
+(defn- -touchMark [mark] (st (touch-mark mark)))
+(defn- -scroll [q dir] (st (scroll q (keyword dir))))
+(defn- -scrollToRow [q n] (st (scroll-to-row q n)))
+(defn- -pinch [q dir] (st (pinch q (keyword dir))))
+(defn- -enterChar [s] (st (enter-char s)))
+(defn- -enterText [s] (st (enter-text s)))
+(def ^:private -done done)
+(def ^:private -recordBegin record-begin!)
+(def ^:private -recordEnd record-end!)
+(defn- -playbackEvents [name opts] (playback name (kw opts)))
+(defn- -interpolateEvents [name opts] (interpolate name (kw opts)))
+(defn- -setHttpLogLevel [name] (set-http-log-level! (keyword name)))
+(defn- -setCalabashLogLevel [name] (set-calabash-log-level! (keyword name)))
 
 
-(defn- -queryq [x ss]
-  (let [ds (-q x)]
-    (apply query* ds ss)))
+(defn- -existsq [qs] (core/exists? (-q qs)))
+(defn- -exists [q] (core/exists? q))
+
+(defn- -waitForExistsq
+  [qs opts]
+  (wait/wait_for_exists [(-q  qs)] (-q opts)))
+
+(defn- -waitForExists
+  [qs opts]
+  (wait/wait_for_exists  [qs] opts))
+
+
+(defn- -waitForAllExistq
+  [qs opts]
+  (wait/wait_for_exists (-q  qs) (-q opts)))
+
+
+(defn- -waitForAllExist
+  [qs opts]
+  (wait/wait_for_exists  qs opts))
+
+(defn- -screenshot
+  [opts]
+  (apply screenshot (flatten (seq (or (kw opts) {})))))
+
 
 (defn -main [& args]
   (when (< (count args) 1)
