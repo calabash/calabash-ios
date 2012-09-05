@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    calabash-cucumber (0.9.100)
+    calabash-cucumber (0.9.101)
       CFPropertyList
       bundler (~> 1.1)
       cucumber
@@ -26,7 +26,7 @@ GEM
     gherkin (2.11.1)
       json (>= 1.4.6)
     httpclient (2.2.7)
-    json (1.7.4)
+    json (1.7.5)
     location-one (0.0.5)
       geocoder (~> 1.1)
       json
@@ -35,7 +35,7 @@ GEM
       rack
     sim_launcher (0.3.8)
       sinatra
-    sinatra (1.3.2)
+    sinatra (1.3.3)
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
       tilt (~> 1.3, >= 1.3.3)

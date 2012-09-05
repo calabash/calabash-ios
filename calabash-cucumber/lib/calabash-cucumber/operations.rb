@@ -79,7 +79,7 @@ module Calabash
       end
 
       def user_pref(key)
-        res = http({:method => :get, :path => 'userprefs'},
+        res = http({:method => :get, :raw => true, :path => 'userprefs'},
                    {:key=> key})
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'

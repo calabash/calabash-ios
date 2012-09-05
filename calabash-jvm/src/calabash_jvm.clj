@@ -19,7 +19,7 @@
     {:level :info}
 
     ["calabash-jvm"]
-    {:level :debug
+    {:level :info
      :pattern "%p %m (query=%X{query}, action=%X{action}, :extras=%X{extras}) %n"})
 
 
