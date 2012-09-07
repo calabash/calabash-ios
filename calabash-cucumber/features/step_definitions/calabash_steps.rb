@@ -46,6 +46,11 @@ Then /^I (?:press|touch) list item number (\d+)$/ do |index|
    sleep(STEP_PAUSE)
 end
 
+Then /^I (?:press|touch) list item "([^\"]*)"$/ do |cell_name|
+   touch("tableViewCell marked:'#{cell_name}'")
+   sleep(STEP_PAUSE)
+end
+
 Then /^I toggle the switch$/ do
   touch("switch")
   sleep(STEP_PAUSE)
@@ -68,6 +73,12 @@ end
 
 
 ## -- Entering text -- ##
+
+Then /^I enter "([^\"]*)" into the "([^\"]*)" field$/ do |text_to_type, field_name|
+  set_text("textField marked:'#{field_name}'", text_to_type)
+  sleep(STEP_PAUSE)
+end
+
 Then /^I enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
   set_text("textField placeholder:'#{field_name}'", text_to_type)
   sleep(STEP_PAUSE)
