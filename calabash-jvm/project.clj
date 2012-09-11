@@ -29,4 +29,5 @@
   :plugins [[lein-swank "1.4.4"]]
 
   :resources-path "resources"
-  :dev-dependencies [[clojure-source "1.4.0"]])
+  :dev-dependencies [[org.clojure/clojure "1.4.0"]
+                     [org.clojure/clojure-source "1.4.0"]])

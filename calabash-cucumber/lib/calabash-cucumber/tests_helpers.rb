@@ -5,6 +5,16 @@ module Calabash
     module TestsHelpers
       include Calabash::Cucumber::Core
 
+      def navigation_path(*args)
+
+        #navigation_path(
+        #    [:a , 2],
+        #    [""],
+        #)
+
+
+      end
+
       def element_does_not_exist(uiquery)
         query(uiquery).empty?
       end

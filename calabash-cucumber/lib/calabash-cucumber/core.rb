@@ -18,6 +18,21 @@ module Calabash
         map(uiquery, :query, *args)
       end
 
+      def perform(*args)
+        if args.length == 1
+          #simple selector
+          hash = args.first
+          q = hash[:on]
+          hash = hash.dup
+          hash.delete(:on)
+          args = [hash]
+        elsif args.length == 2
+          q = args[1][:on]
+          args = [*args[0]]
+        end
+        map(q, :query_all, *args)
+      end
+
       def query_all(uiquery, *args)
         map(uiquery, :query_all, *args)
       end

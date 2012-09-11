@@ -169,7 +169,7 @@
 
 
 
-(defprotocol ^:private Keywordize
+(defprotocol Keywordize
   (kw [this] "Keyworded version of this")
   (st [this] "Stringified version of this"))
 
@@ -187,8 +187,8 @@
   (st [this] this)
 
   java.util.List
-  (kw [this] (mapv kw this))
-  (st [this] (mapv st this))
+  (kw [this] (map kw this))
+  (st [this] (map st this))
 
   java.util.Map
   (kw [this] (clojure.walk/keywordize-keys this))
@@ -247,7 +247,13 @@
   [s]
   (xpath s))
 
-(defn- -q [s] (eval (read-string s))) ;;todo use namespace of DSL constructors
+(defn- -q [s]
+  (->> (read-string s)
+       (clojure.walk/postwalk-replace
+        '{index calabash-jvm/index
+          css   calabash-jvm/css
+          xpath calabash-jvm/xpath})
+       eval))
 
 (defn- -query [x args] (st (apply query* x (kw args))))
 
@@ -309,13 +315,11 @@
 
 
 (defn -main [& args]
+  (require 'calabash-jvm)
   (when (< (count args) 1)
     (println "Usage java -cp target/calabash-jvm-[VERSION]-standalone.jar calabash_jvm.API calabash_jvm.API [query] (selectors)")
     (System/exit 1))
-  (let [ds (read-string (first args))
+  (let [ds (-q (first args))
         args (rest args)]
-    (if (vector? ds)
-      (do
-        (prn "Running Query: " ds "(" (class ds) ")")
-        (prn (apply query* (eval ds) args)))
-      (eval ds))))
+    (prn "Running Query: " ds args)
+    (prn (apply query* ds args))))
