@@ -28,7 +28,11 @@ module Calabash
           args = [hash]
         elsif args.length == 2
           q = args[1][:on]
-          args = [*args[0]]
+          if args[0].is_a?Hash
+            args = [args[0]]
+          else
+            args = args[0]
+          end
         end
         map(q, :query_all, *args)
       end

@@ -14,3 +14,7 @@ IRB.conf[:HISTORY_FILE] = ".irb-history"
 
 require 'calabash-cucumber/operations'
 include Calabash::Cucumber::Operations
+
+def embed(x,y=nil,z=nil)
+   puts "Screenshot at #{x}"
+end
