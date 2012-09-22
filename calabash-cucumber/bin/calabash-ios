@@ -62,6 +62,8 @@ elsif cmd == 'sim'
     calabash_sim_reset
   elsif subcmd == 'acc'
     calabash_sim_accessibility
+  elsif subcmd == 'location'
+      calabash_sim_location(ARGV)
   elsif subcmd == 'locale'
     calabash_sim_locale(ARGV)
   elsif subcmd == 'device'

@@ -25,10 +25,10 @@ def print_usage
       downloads latest compatible version of calabash.framework
     check (EXPERIMENTAL) [opt path to .ipa/.app]?
       check whether an app or ipa is linked with calabash.framework
-    submit [ipapath] [secret] [opt_features path]?
-      submits an ipa and features folder to www.lesspainful.com
     sim locale [lang] [regional]?
       change locale and regional settings in all iOS Simulators
+    sim location [on|off] [bundleid]?
+      set allow location on/off for current project or bundleid
     sim reset
       reset content and settings in all iOS Simulators
     sim acc

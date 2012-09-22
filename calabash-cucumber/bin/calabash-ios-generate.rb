@@ -18,9 +18,9 @@ def calabash_scaffold
   FileUtils.mv "#{@features_dir}/irb_ios5.sh", "."
 
   msg("Info") do
-    puts "features subdirectory created. \n"
-    puts "Try executing \n\nDEVICE=iphone OS=ios5 cucumber"
-    puts "\n (replace ios5 with ios4 if running iOS 4.x simulator.\nReplace iphone with ipad if running iPad simulator.).\n"
+    puts "Features subdirectory created. \n"
+    puts "Make sure you've build your -cal scheme in XCode and "
+    puts "try executing \n\ncucumber"
   end
 
 end

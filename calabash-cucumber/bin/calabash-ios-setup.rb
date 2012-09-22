@@ -24,7 +24,7 @@ end
 
 def calabash_setup(args)
   puts "Checking if Xcode is running..."
-  res = `ps x -o pid,command | grep -v grep | grep Xcode.app/Contents/MacOS/Xcode`
+  res = `ps x -o pid,command | grep -v grep | grep Contents/MacOS/Xcode`
   if res==""
     puts "Xcode not running."
     project_name, project_path, xpath = find_project_files(args)
@@ -49,22 +49,8 @@ def calabash_setup(args)
 
   else
     puts "Xcode is running. We'll be changing the project file so we'd better stop it."
-    puts "Shall I stop Xcode? Please answer yes (y) or no (n)"
-    answer = STDIN.gets.chomp
-    if (answer == 'yes' or answer == 'y')
-      res.split("\n").each do |line|
-        pid = line.split(" ")[0]
-        if system("kill #{pid}")
-          puts "Stopped XCode. Retrying... "
-          calabash_setup(args)
-        else
-          puts "Killing Xcode seemed to fail :( Aborting..."
-        end
-      end
-    else
-      puts "Please stop Xcode and try again."
-      exit(0)
-    end
+    puts "Please stop XCode and run setup again"
+    exit(0)
   end
 end
 
