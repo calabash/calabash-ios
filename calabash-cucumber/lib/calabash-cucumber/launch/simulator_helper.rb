@@ -1,4 +1,6 @@
 require 'sim_launcher'
+require 'json'
+require 'net/http'
 require 'CFPropertyList'
 
 module Calabash
@@ -68,7 +70,7 @@ module Calabash
               File.basename(xc_proj).downcase.start_with?(xcode_workspace_name)
             end
           end
-          
+
           if (build_dirs.count == 0)
             msg = ["Unable to find your built app."]
             msg << "This means that Calabash can't automatically launch iOS simulator."
@@ -175,7 +177,25 @@ module Calabash
               num_pings = 0
               until connected or (num_pings == max_ping)
                 begin
-                    connected = (ping_app == '405')
+                  connected = (ping_app == '405')
+                  post_connect_sleep = (ENV['POST_START_BREAK'] || "2").to_f
+                  sleep(post_connect_sleep) unless post_connect_sleep <= 0
+                  server_version = get_version
+                  if server_version
+                    unless version_check(server_version)
+                      msgs = ["You're running an older version of Calabash server with a newer client",
+                                                                           "Client:#{Calabash::Cucumber::VERSION}",
+                                                                           "Server:#{server_version}",
+                                                                           "Minimum server version #{Calabash::Cucumber::FRAMEWORK_VERSION}",
+                                                                           "Update recommended:",
+                                                                           "https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version"
+                                                            ]
+
+                      raise msgs.join("\n")
+                    end
+                  else
+                    connected = false
+                  end
                 rescue Exception => e
                   p e if num_pings > 2
                 ensure
@@ -215,6 +235,25 @@ module Calabash
 
         end
         status
+      end
+
+      def self.get_version
+        endpoint = ENV['DEVICE_ENDPOINT']|| "http://localhost:37265"
+        endpoint += "/" unless endpoint.end_with?"/"
+        url = URI.parse("#{endpoint}version")
+
+        puts "Fetch version #{url}..."
+        begin
+          body = Net::HTTP.get_response(url).body
+          return JSON.parse(body)
+        rescue
+        end
+        nil
+      end
+
+      def self.version_check(version)
+        server_version = version["version"]
+        Calabash::Cucumber::FRAMEWORK_VERSION == server_version
       end
     end
 
