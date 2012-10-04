@@ -37,15 +37,25 @@ module Calabash
 
         begin
           Timeout::timeout(timeout,WaitError) do
-            until block.call
-              sleep(retry_frequency)
-            end
+            sleep(retry_frequency) until yield
           end
           sleep(post_timeout) if post_timeout > 0
         rescue WaitError => e
           handle_error_with_options(e,timeout_message, screenshot_on_error)
         rescue Exception => e
           handle_error_with_options(e, nil, screenshot_on_error)
+        end
+      end
+
+      def wait_poll(opts, &block)
+        test = opts[:until]
+        wait_for(opts) do
+          if test.call()
+            true
+          else
+            yield
+            false
+          end
         end
       end
 
