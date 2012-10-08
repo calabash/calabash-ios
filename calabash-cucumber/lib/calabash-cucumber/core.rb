@@ -185,6 +185,15 @@ module Calabash
         wheel = opts[:wheel] || 0
         dir = opts[:dir] || :down
 
+        raise "Wheel index must be non negative" if wheel < 0
+        raise "Only up and down supported :dir (#{dir})" unless [:up,:down].include?(dir)
+
+        if ENV['OS'] == "ios4"
+          playback "wheel_#{dir}", :query => "#{q} pickerTable index:#{wheel}"
+        else
+          playback "wheel_#{dir}", :query => "#{q} pickerTableView index:#{wheel}"
+        end
+
       end
 
       def picker(opts={:query => "pickerView", :action => :texts})
