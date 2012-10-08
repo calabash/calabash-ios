@@ -15,6 +15,14 @@ module Calabash
 
       end
 
+      def query_map(uiquery,prop, *args)
+        query(uiquery,*args).map {|o| o[prop.to_s]}
+      end
+
+      def classes(uiquery,*args)
+        query_map(uiquery,:class,*args)
+      end
+
       def element_does_not_exist(uiquery)
         query(uiquery).empty?
       end

@@ -66,10 +66,17 @@ module Calabash
           elements_arr.all? { |q| element_exists(q) }
         end
       end
+      #options for wait_for apply
+      def wait_for_elements_do_not_exist(elements_arr, options={})
+        options[:timeout_message] = options[:timeout_message] || "Timeout waiting for no elements matching: #{elements_arr.join(",")}"
+        wait_for(options) do
+          elements_arr.none? { |q| element_exists(q) }
+        end
+      end
 
       def wait_for_condition(options = {})
         options[:timeout] = options[:timeout] || 10
-        options[:query] = options[:query] || "view"
+        options[:query] = options[:query] || "activityIndicatorView"
         options[:condition] = options[:condition] || CALABASH_CONDITIONS[:none_animating]
         options[:post_timeout] = options[:post_timeout] || 0.1
         options[:frequency] = options[:frequency] || 0.2

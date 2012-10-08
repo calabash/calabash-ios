@@ -180,6 +180,13 @@ module Calabash
                                             :answer => txt})
       end
 
+      def move_wheel(opts={})
+        q = opts[:query] || "pickerView"
+        wheel = opts[:wheel] || 0
+        dir = opts[:dir] || :down
+
+      end
+
       def picker(opts={:query => "pickerView", :action => :texts})
         raise "Not implemented" unless opts[:action] == :texts
 
