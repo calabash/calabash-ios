@@ -1,16 +1,25 @@
 require 'sim_launcher'
+require 'calabash-cucumber/launch/simulator_helper'
 
 def quit_sim
   `echo 'application "iPhone Simulator" quit' | osascript`
 end
+
 def calabash_sim_reset
   reset_script = File.expand_path("#{@script_dir}/reset_simulator.scpt")
   launcher = SimLauncher::Simulator.new
-  sdks = SimLauncher::SdkDetector.new(launcher).available_sdk_versions
+
+  sdks = ENV['SDK_VERSIONS']
+  if sdks
+    sdks = sdks.split(",")
+  else
+    sdks = SimLauncher::SdkDetector.new(launcher).available_sdk_versions
+  end
+
   sdks.each do |sdk_path_str|
-    launcher.launch_ios_app("DUMMY_APP",sdk_path_str,"ipad")
+    launcher.launch_ios_app(app_bundle_path, sdk_path_str, "ipad")
     system("osascript #{reset_script}")
-    launcher.launch_ios_app("DUMMY_APP",sdk_path_str,"iphone")
+    launcher.launch_ios_app(app_bundle_path, sdk_path_str, "iphone")
     system("osascript #{reset_script}")
   end
 
