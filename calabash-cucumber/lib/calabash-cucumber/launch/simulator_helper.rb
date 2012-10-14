@@ -8,12 +8,15 @@ module Calabash
 
     module SimulatorHelper
 
+      class TimeoutErr < RuntimeError
+      end
+
       DERIVED_DATA = File.expand_path("~/Library/Developer/Xcode/DerivedData")
       DEFAULT_DERIVED_DATA_INFO = File.expand_path("#{DERIVED_DATA}/*/info.plist")
 
-      DEFAULT_SIM_WAIT = 15
+      DEFAULT_SIM_WAIT = 30
 
-      MAX_PING_ATTEMPTS = 5
+      DEFAULT_SIM_RETRY = 2
 
       def self.relaunch(path, sdk = nil, version = 'iphone')
 
@@ -168,47 +171,59 @@ module Calabash
 
       def self.ensure_connectivity(app_bundle_path, sdk, version)
         begin
+          max_retry_count = (ENV['MAX_CONNECT_RETRY'] || DEFAULT_SIM_RETRY).to_i
           timeout = (ENV['CONNECT_TIMEOUT'] || DEFAULT_SIM_WAIT).to_i
-          max_ping = (ENV['MAX_PING_ATTEMPTS'] || MAX_PING_ATTEMPTS).to_i
-          Timeout::timeout(timeout) do
-            connected = false
-            until connected
-              simulator = launch(app_bundle_path, sdk, version)
-              num_pings = 0
-              until connected or (num_pings == max_ping)
-                begin
-                  connected = (ping_app == '405')
-                  post_connect_sleep = (ENV['POST_START_BREAK'] || "2").to_f
-                  sleep(post_connect_sleep) unless post_connect_sleep <= 0
-                  server_version = get_version
-                  if server_version
-                    unless version_check(server_version)
-                      msgs = ["You're running an older version of Calabash server with a newer client",
-                                                                           "Client:#{Calabash::Cucumber::VERSION}",
-                                                                           "Server:#{server_version}",
-                                                                           "Minimum server version #{Calabash::Cucumber::FRAMEWORK_VERSION}",
-                                                                           "Update recommended:",
-                                                                           "https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version"
-                                                            ]
-
-                      raise msgs.join("\n")
+          retry_count = 0
+          connected = false
+          puts "Waiting at most #{timeout} seconds for simulator (CONNECT_TIMEOUT)"
+          puts "Retrying at most #{max_retry_count} times (MAX_CONNECT_RETRY)"
+          until connected do
+            raise "MAX_RETRIES" if retry_count == max_retry_count
+            retry_count += 1
+            puts "(#{retry_count}.) Start Simulator #{sdk}, #{version}, for #{app_bundle_path}"
+            begin
+              Timeout::timeout(timeout, TimeoutErr) do
+                simulator = launch(app_bundle_path, sdk, version)
+                until connected
+                  begin
+                    connected = (ping_app == '405')
+                    if ENV['POST_START_BREAK']
+                      puts "Environment var POST_START_BREAK is deprecated and should no longer be necessary."
+                      post_connect_sleep = (ENV['POST_START_BREAK'] || "2").to_f
+                      sleep(post_connect_sleep) unless post_connect_sleep <= 0
                     end
-                  else
-                    connected = false
+                    if connected
+                      server_version = get_version
+                      if server_version
+                        unless version_check(server_version)
+                          msgs = ["You're running an older version of Calabash server with a newer client",
+                                  "Client:#{Calabash::Cucumber::VERSION}",
+                                  "Server:#{server_version}",
+                                  "Minimum server version #{Calabash::Cucumber::FRAMEWORK_VERSION}",
+                                  "Update recommended:",
+                                  "https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version"
+                          ]
+                          raise msgs.join("\n")
+                        end
+                      else
+                        connected = false
+                      end
+                    end
+                  rescue Exception => e
+
+                  ensure
+                    sleep 1 unless connected
                   end
-                rescue Exception => e
-                  p e if num_pings > 2
-                ensure
-                  num_pings += 1
-                  sleep 1 unless connected
                 end
               end
+            rescue TimeoutErr => e
+              puts "Timed out..."
             end
           end
         rescue
           msg = "Unable to make connection to Calabash Server at #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}\n"
           msg << "Make sure you've' linked correctly with calabash.framework and set Other Linker Flags.\n"
-          msg << "See: http://github.com/calabash/calabash-ios"
+          msg << "Make sure you don't have a firewall blocking traffic to #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}.\n"
           raise msg
         end
       end
@@ -239,7 +254,7 @@ module Calabash
 
       def self.get_version
         endpoint = ENV['DEVICE_ENDPOINT']|| "http://localhost:37265"
-        endpoint += "/" unless endpoint.end_with?"/"
+        endpoint += "/" unless endpoint.end_with? "/"
         url = URI.parse("#{endpoint}version")
 
         puts "Fetch version #{url}..."
