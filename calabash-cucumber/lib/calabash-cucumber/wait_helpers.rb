@@ -76,7 +76,7 @@ module Calabash
 
       def wait_for_condition(options = {})
         options[:timeout] = options[:timeout] || 10
-        options[:query] = options[:query] || "activityIndicatorView"
+        options[:query] = options[:query] || "view"
         options[:condition] = options[:condition] || CALABASH_CONDITIONS[:none_animating]
         options[:post_timeout] = options[:post_timeout] || 0.1
         options[:frequency] = options[:frequency] || 0.2
