@@ -1,7 +1,7 @@
 require 'sim_launcher'
 require 'json'
 require 'net/http'
-require 'CFPropertyList'
+require 'cfpropertylist'
 
 module Calabash
   module Cucumber

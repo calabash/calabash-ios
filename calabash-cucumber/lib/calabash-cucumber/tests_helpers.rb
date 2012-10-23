@@ -60,6 +60,47 @@ module Calabash
         screenshot_and_raise(msg, options)
       end
 
+      def each_cell(opts={:query => "tableView", :post_scroll => 0.3, :animate => true}, &block)
+        uiquery = opts[:query] || "tableView"
+        skip = opts[:skip_if]
+        check_element_exists(uiquery)
+        secs = query(uiquery,:numberOfSections).first
+        secs.times do |sec|
+          rows = query(uiquery,{:numberOfRowsInSection => sec}).first
+          rows.times do |row|
+            next if skip and skip.call(row,sec)
+            scroll_opts = {:section => sec, :row => row}.merge(opts)
+            scroll_to_cell(scroll_opts)
+            sleep(opts[:post_scroll]) if opts[:post_scroll] and opts[:post_scroll] > 0
+            yield(row, sec)
+          end
+        end
+      end
+
+      def each_cell_and_back(opts={:query => "tableView",
+                                   :post_scroll => 0.3,
+                                   :post_back => 0.5,
+                                   :post_tap_cell => 0.3,
+                                   :animate => true}, &block)
+        back_query = opts[:back_query] || "navigationItemButtonView"
+        post_tap_cell = opts[:post_tap_cell] || 0.3
+        post_back = opts[:post_back] || 0.6
+
+
+        each_cell(opts) do |row, sec|
+          touch("tableViewCell indexPath:#{row},#{sec}")
+          wait_for_elements_exist([back_query])
+          sleep(post_tap_cell) if post_tap_cell > 0
+
+          yield(row,sec) if block_given?
+
+          touch(back_query)
+
+          sleep(post_back) if post_back > 0
+
+        end
+      end
+
 
       def screenshot_embed(options={:prefix => nil, :name => nil, :label => nil})
         path = screenshot(options)

@@ -18,6 +18,14 @@ module Calabash
         map(uiquery, :query, *args)
       end
 
+      def server_version
+        JSON.parse(http(:path => 'version'))
+      end
+
+      def client_version
+        Calabash::Cucumber::VERSION
+      end
+
       def perform(*args)
         if args.length == 1
           #simple selector
@@ -28,7 +36,7 @@ module Calabash
           args = [hash]
         elsif args.length == 2
           q = args[1][:on]
-          if args[0].is_a?Hash
+          if args[0].is_a? Hash
             args = [args[0]]
           else
             args = args[0]
@@ -113,6 +121,35 @@ module Calabash
         views_touched
       end
 
+      def scroll_to_cell(options={:query => "tableView",
+                                  :row => 0,
+                                  :section => 0,
+                                  :scroll_position => :top,
+                                  :animate => true})
+        uiquery = options[:query] || "tableView"
+        row = options[:row]
+        sec = options[:section]
+        if row.nil? or sec.nil?
+          raise "You must supply both :row and :section keys to scroll_to_cell"
+        end
+
+        args = []
+        if options.has_key?(:scroll_position)
+          args << options[:scroll_position]
+        else
+          args << "top"
+        end
+        if options.has_key?(:animate)
+          args << options[:animate]
+        end
+        views_touched=map(uiquery, :scrollToRow, row.to_i, sec.to_i, *args)
+
+        if views_touched.empty? or views_touched.member? "<VOID>"
+          screenshot_and_raise "Unable to scroll: '#{uiquery}' to: #{options}"
+        end
+        views_touched
+      end
+
       def pinch(in_out, options={})
         file = "pinch_in"
         if in_out.to_sym==:out
@@ -186,7 +223,7 @@ module Calabash
         dir = opts[:dir] || :down
 
         raise "Wheel index must be non negative" if wheel < 0
-        raise "Only up and down supported :dir (#{dir})" unless [:up,:down].include?(dir)
+        raise "Only up and down supported :dir (#{dir})" unless [:up, :down].include?(dir)
 
         if ENV['OS'] == "ios4"
           playback "wheel_#{dir}", :query => "#{q} pickerTable index:#{wheel}"
@@ -223,7 +260,7 @@ module Calabash
                                          {:titleForRow => i},
                                          {:forComponent => comp}]).first
             end
-             texts[comp] << txt
+            texts[comp] << txt
           end
         end
         texts
@@ -305,7 +342,7 @@ module Calabash
         file_name = "#{file_name}_#{os}_#{device}.base64"
         system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
         system("openssl base64 -in _recording_binary.plist -out #{file_name}")
-          system("rm _recording.plist _recording_binary.plist")
+        system("rm _recording.plist _recording_binary.plist")
         file_name
       end
 

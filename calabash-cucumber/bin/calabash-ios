@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
-require 'CFPropertyList'
+require 'cfpropertylist'
 require 'rexml/document'
 
 

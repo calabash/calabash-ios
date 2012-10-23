@@ -1,13 +1,13 @@
 PATH
   remote: .
   specs:
-    calabash-cucumber (0.9.112)
+    calabash-cucumber (0.9.115)
       CFPropertyList
       bundler (~> 1.1)
       cucumber
-      httpclient (~> 2.2)
+      httpclient (= 2.2.7)
       json
-      location-one (~> 0.0.7)
+      location-one (~> 0.0.8)
       sim_launcher (= 0.4.6)
       slowhandcuke
 
@@ -25,11 +25,11 @@ GEM
     geocoder (1.1.4)
     gherkin (2.11.5)
       json (>= 1.4.6)
-    httpclient (2.3.0.1)
+    httpclient (2.2.7)
     json (1.7.5)
-    location-one (0.0.7)
+    location-one (0.0.8)
       geocoder (~> 1.1)
-      httpclient (~> 2.2)
+      httpclient (= 2.2.7)
       json
     rack (1.4.1)
     rack-protection (1.2.0)
