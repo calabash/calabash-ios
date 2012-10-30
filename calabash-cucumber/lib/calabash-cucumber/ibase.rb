@@ -1,4 +1,4 @@
-class Calabash::Base
+class Calabash::IBase
   include Calabash::Cucumber::Operations
 
   def initialize(world)
@@ -6,11 +6,11 @@ class Calabash::Base
   end
 
   def embed(*args)
-    @world.embed(*args)
+    @world.send(:embed,*args)
   end
 
-  def puts
-    @world.puts(*args)
+  def puts(*args)
+    @world.send(:puts, *args)
   end
 
 end
