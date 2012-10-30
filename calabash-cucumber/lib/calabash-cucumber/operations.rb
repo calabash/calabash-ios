@@ -27,6 +27,11 @@ module Calabash
       include Calabash::Cucumber::Location
 
 
+
+      def base(clz,*args)
+        clz.new(self,*args)
+      end
+
       def home_direction
         @current_rotation = @current_rotation || :down
       end

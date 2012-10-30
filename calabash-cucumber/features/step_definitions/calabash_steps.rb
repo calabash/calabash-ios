@@ -230,7 +230,7 @@ Then /^I pinch to zoom (in|out) on "([^\"]*)"$/ do |in_out, name|
   sleep(STEP_PAUSE)
 end
 
-#   Note "up/left/right" seems to be missing on the web page
+#   Note "up/left/right" seems to be missing on the web base
 Then /^I scroll (left|right|up|down)$/ do |dir|
   scroll("scrollView index:0", dir)
   sleep(STEP_PAUSE)
