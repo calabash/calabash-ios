@@ -28,8 +28,12 @@ module Calabash
 
 
 
-      def base(clz,*args)
+      def page(clz,*args)
         clz.new(self,*args)
+      end
+
+      def await_page(clz,*args)
+        clz.new(self,*args).await
       end
 
       def home_direction

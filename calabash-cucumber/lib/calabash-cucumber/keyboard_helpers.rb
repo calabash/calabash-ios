@@ -81,6 +81,11 @@ module Calabash
         end
       end
 
+      def await_keyboard
+        wait_for_elements_exist(["view:'UIKBKeyplaneView'"])
+        sleep(0.3)
+      end
+
       def keyboard_enter_text(text)
         fail("No visible keyboard") if element_does_not_exist("view:'UIKBKeyplaneView'")
 

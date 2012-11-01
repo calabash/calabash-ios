@@ -49,6 +49,11 @@ module Calabash
 
       def wait_poll(opts, &block)
         test = opts[:until]
+        if test.nil?
+          cond = opts[:until_exists]
+          raise "Must provide :until or :until_exists" unless cond
+          test = lambda { element_exists(cond) }
+        end
         wait_for(opts) do
           if test.call()
             true
@@ -109,6 +114,7 @@ module Calabash
       end
 
       def wait_for_none_animating(options = {})
+        #sleep(0.3)
         options[:condition] = CALABASH_CONDITIONS[:none_animating]
         wait_for_condition(options)
       end

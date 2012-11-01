@@ -1,3 +1,6 @@
+require 'calabash-cucumber/core'
+require 'calabash-cucumber/operations'
+
 class Calabash::IBase
   include Calabash::Cucumber::Operations
 
@@ -11,6 +14,24 @@ class Calabash::IBase
 
   def puts(*args)
     @world.send(:puts, *args)
+  end
+
+  def trait
+    "navigationItemView marked:'#{self.title}'"
+  end
+
+  def base(clz,*args)
+    clz.new(@world,*args)
+  end
+
+  def await(opts={})
+    wait_for_elements_exist([trait], opts)
+    self
+  end
+
+  def await_screenshot(wait_opts={},screenshot_opts={})
+    await(wait_opts)
+    screenshot_embed(screenshot_opts)
   end
 
 end
