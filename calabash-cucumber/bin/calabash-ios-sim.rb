@@ -130,7 +130,7 @@ def calabash_sim_device(args)
   if args.length != 1 or not options.find {|x| x == args[0]}
     print_usage
     puts "Unrecognized args: #{args}"
-    puts "should be one of #{options}"
+    puts "should be one of #{options.inspect}"
     exit(0)
   end
   path =File.join(File.expand_path("~/Library"),"Preferences","com.apple.iphonesimulator.plist")

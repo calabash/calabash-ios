@@ -11,29 +11,29 @@ end
 
 def print_usage
   puts <<EOF
-  Usage: calabash-ios <command-name> [parameters]
-  <command-name> can be one of
+  Usage: calabash-ios <command> [<args>]
+  where <command> can be one of
     help
       prints more detailed help information.
     gen
       generate a features folder structure.
     console
       starts an interactive console to interact with your app via Calabash
-    setup (EXPERIMENTAL) [opt path]?
-      setup your XCode project for calabash-ios
-    download [opt path]?
+    setup [<path>]
+      setup your XCode project for calabash-ios (EXPERIMENTAL)
+    download
       downloads latest compatible version of calabash.framework
-    check (EXPERIMENTAL) [opt path to .ipa/.app]?
-      check whether an app or ipa is linked with calabash.framework
-    sim locale [lang] [regional]?
+    check [{<path to .ipa>|<path to .app>}]
+      check whether an app or ipa is linked with calabash.framework (EXPERIMENTAL)
+    sim locale <lang> [<region>]
       change locale and regional settings in all iOS Simulators
-    sim location [on|off] [bundleid]?
+    sim location {on|off} <bundleid>
       set allow location on/off for current project or bundleid
     sim reset
       reset content and settings in all iOS Simulators
     sim acc
       enable accessibility in all iOS Simulators
-    sim device [iPad, iPhone, iPhone_Retina]
+    sim device {iPad|iPhone|iPhone_Retina}
       change the default iOS Simulator device.
 EOF
 end
