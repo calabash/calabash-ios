@@ -135,7 +135,7 @@ def download_calabash(project_path)
       end
       if success
         puts "\nDownload done: #{file}. Unzipping..."
-        if not system("unzip -C -K -o -q -d #{project_path} #{zip_file}")
+        if not system("unzip -C -K -o -q -d #{project_path} #{zip_file} -x __MACOSX/* calabash.framework/.DS_Store")
           msg("Error") do
             puts "Unable to unzip file: #{zip_file}"
             puts "You must install manually."
