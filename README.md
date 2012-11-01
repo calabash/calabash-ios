@@ -238,7 +238,7 @@ Setup will modify your xcode project file to use Calabash iOs. You should now ha
 Next steps
 ==========
 
-Move on to the [Getting started guide](https://github.com/calabash/calabash-ios/wiki/00-Calabash-iOS-documentation).
+Move on to the [Getting started guide](https://github.com/calabash/calabash-ios/wiki/01-Getting-started-guide).
 
 License
 =======
