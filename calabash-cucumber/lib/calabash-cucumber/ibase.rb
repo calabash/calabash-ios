@@ -20,7 +20,7 @@ class Calabash::IBase
     "navigationItemView marked:'#{self.title}'"
   end
 
-  def base(clz,*args)
+  def page(clz,*args)
     clz.new(@world,*args)
   end
 

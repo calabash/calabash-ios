@@ -91,9 +91,9 @@ module Calabash
         options[:screenshot_on_error] = options[:screenshot_on_error] || true
 
         if options[:condition] == CALABASH_CONDITIONS[:none_animating]
-          puts "Waiting for none-animating has been found unreliable."
-          puts "You are advised not to use it until this is resolved."
-          puts "Test will continue..."
+          #puts "Waiting for none-animating has been found unreliable."
+          #puts "You are advised not to use it until this is resolved."
+          #puts "Test will continue..."
         end
         begin
           Timeout::timeout(options[:timeout],WaitError) do
