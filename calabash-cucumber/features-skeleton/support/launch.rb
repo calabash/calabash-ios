@@ -34,7 +34,7 @@ require 'sim_launcher'
 
 def reset_app_jail(sdk, app_path)
   app = File.basename(app_path)
-  bundle = `find "#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}/Applications/" -type d -depth 2 -name #{app} | head -n 1`
+  bundle = `find "#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}/Applications/" -type d -depth 2 -name "#{app}" | head -n 1`
   return if bundle.empty? # Assuming we're already clean
 
   sandbox = File.dirname(bundle)
