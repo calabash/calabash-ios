@@ -24,6 +24,14 @@ class Calabash::IBase
     clz.new(@world,*args)
   end
 
+  def step(s)
+
+  end
+
+  def steps(ss)
+
+  end
+
   def await(opts={})
     wait_for_elements_exist([trait], opts)
     self

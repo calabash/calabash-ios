@@ -1,9 +1,28 @@
 (ns calabash-jvm.wait
+  (:use [slingshot.slingshot :only [try+ throw+]])
+
   (:require [calabash-jvm
              [http :as http]
              [core :as core]
              [utils :as utils]]))
 
+
+(defn with-timeout*
+  [opts action]
+  (let [opts (merge {:timeout 10 :message "Timeout"} opts)
+        f (future-call action)
+        timeout (* 1000 (:timeout opts))
+        res (deref f timeout :calabash-jvm/timeout)]
+    (try
+      (if (= :calabash-jvm/timeout res)
+        (throw+ (merge {:type :calabash-jvm/timeout} opts))
+        res)
+      (finally
+       (future-cancel f)))))
+
+(defmacro with-timeout [opts & body]
+  `(let [f# (fn [] ~@body)]
+     (with-timeout* ~opts f#)))
 
 (defn do-until
   [pred action]

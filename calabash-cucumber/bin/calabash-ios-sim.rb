@@ -28,7 +28,7 @@ def calabash_sim_reset
 end
 
 def calabash_sim_accessibility
-  dirs = Dir.glob(File.join(File.expand_path("~/Library"),"Application Support","iPhone Simulator","*.*","Library","Preferences"))
+  dirs = Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "*.*", "Library", "Preferences"))
   dirs.each do |sim_pref_dir|
     fp = File.expand_path("#{@script_dir}/data/")
     FileUtils.cp("#{fp}/com.apple.Accessibility.plist", sim_pref_dir)
@@ -50,7 +50,7 @@ def calabash_sim_location(args)
   bundle_id = args.shift
 
 
-  dirs = Dir.glob(File.join(File.expand_path("~/Library"),"Application Support","iPhone Simulator","*.*","Library","Caches","locationd"))
+  dirs = Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "*.*", "Library", "Caches", "locationd"))
   dirs.each do |sim_dir|
     existing_path = "#{sim_dir}/clients.plist"
     if File.exist?(existing_path)
@@ -99,7 +99,7 @@ def calabash_sim_locale(args)
   end
 
   langs = hash['AppleLanguages']
-  lang_index = langs.find_index {|l| l == lang}
+  lang_index = langs.find_index { |l| l == lang }
 
   if lang_index.nil?
     puts "Unable to find #{lang}..."
@@ -107,7 +107,7 @@ def calabash_sim_locale(args)
     exit 0
   end
 
-  langs[0],langs[lang_index] = langs[lang_index],langs[0]
+  langs[0], langs[lang_index] = langs[lang_index], langs[0]
 
 
   if reg
@@ -115,7 +115,7 @@ def calabash_sim_locale(args)
   end
   res_plist = CFPropertyList::List.new
   res_plist.value = CFPropertyList.guess(hash)
-  dirs = Dir.glob(File.join(File.expand_path("~/Library"),"Application Support","iPhone Simulator","*.*","Library","Preferences"))
+  dirs = Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "*.*", "Library", "Preferences"))
   dirs.each do |sim_pref_dir|
     res_plist.save("#{sim_pref_dir}/.GlobalPreferences.plist", CFPropertyList::List::FORMAT_BINARY)
   end
@@ -126,18 +126,29 @@ end
 
 def calabash_sim_device(args)
   quit_sim
-  options = ["iPad", "iPhone", "iPhone_Retina"]
-  if args.length != 1 or not options.find {|x| x == args[0]}
+  options = ["iPad", "iPhone", "iPhone_Retina", "iPhone_Retina_4inch"]
+  if args.length != 1 or not options.find { |x| x == args[0] }
     print_usage
     puts "Unrecognized args: #{args}"
     puts "should be one of #{options}"
     exit(0)
   end
-  path =File.join(File.expand_path("~/Library"),"Preferences","com.apple.iphonesimulator.plist")
+  path =File.join(File.expand_path("~/Library"), "Preferences", "com.apple.iphonesimulator.plist")
   plist = CFPropertyList::List.new(:file => path)
   hash = CFPropertyList.native_types(plist.value)
-  hash['SimulateDevice'] = args[0].gsub("iPhone_Retina","iPhone (Retina)")
-  plist.value = CFPropertyList.guess(hash)
-  plist.save(path, CFPropertyList::List::FORMAT_BINARY)
-end
 
+  device = case args[0]
+             when "iPhone_Retina"
+               "iPhone (Retina)"
+             when "iPhone_Retina_4inch"
+               "iPhone (Retina 4-inch)"
+             else
+               args[0]
+           end
+  if device
+    hash['SimulateDevice'] = device
+    plist.value = CFPropertyList.guess(hash)
+    plist.save(path, CFPropertyList::List::FORMAT_BINARY)
+  end
+
+end
