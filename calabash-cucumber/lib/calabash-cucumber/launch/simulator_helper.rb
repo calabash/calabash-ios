@@ -195,6 +195,7 @@ module Calabash
                     if connected
                       server_version = get_version
                       if server_version
+                        p server_version
                         unless version_check(server_version)
                           msgs = ["You're running an older version of Calabash server with a newer client",
                                   "Client:#{Calabash::Cucumber::VERSION}",
@@ -220,7 +221,8 @@ module Calabash
               puts "Timed out..."
             end
           end
-        rescue
+        rescue e
+          p e
           msg = "Unable to make connection to Calabash Server at #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}\n"
           msg << "Make sure you've' linked correctly with calabash.framework and set Other Linker Flags.\n"
           msg << "Make sure you don't have a firewall blocking traffic to #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}.\n"
@@ -232,7 +234,7 @@ module Calabash
       def self.launch(app_bundle_path, sdk, version, args = nil)
         simulator = SimLauncher::Simulator.new
         simulator.quit_simulator
-        simulator.launch_ios_app(app_bundle_path, sdk, version, args)
+        simulator.launch_ios_app(app_bundle_path, sdk, version) #, args wait for update to sim launcher
         simulator
       end
 
@@ -264,9 +266,10 @@ module Calabash
           if res['iOS_version']
             @ios_version = res['iOS_version']
           end
+          res
         rescue
+          nil
         end
-        nil
       end
 
       def self.ios_version
