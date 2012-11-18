@@ -43,7 +43,7 @@ def reset_app_jail(sdk, app_path)
   end
 end
 
-def relaunch(args)
+def relaunch(args=nil)
   if ENV['NO_LAUNCH']!="1"
     sdk = ENV['SDK_VERSION'] || SimLauncher::SdkDetector.new().latest_sdk_version
     path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
@@ -66,8 +66,7 @@ def calabash_notify
 end
 
 Before do |scenario|
-  args = scenario.instance_variable_get("@steps").map(&:name).grep(/^(?:an )?arguments? (?:".*"\s*)+$/){|s| s.scan(/"([^"]+)"/) }.flatten
-  relaunch(args)
+  relaunch
   calabash_notify
 end
 
