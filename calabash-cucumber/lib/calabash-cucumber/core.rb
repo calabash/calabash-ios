@@ -301,7 +301,16 @@ EOF
         elsif (File.exists?("#{DATA_PATH}/resources/#{recording}"))
           data = File.read("#{DATA_PATH}/resources/#{recording}")
         else
-          screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
+          if os=="ios6"
+            recording = recording.gsub("ios6","ios5")
+            if (File.exists?("#{DATA_PATH}/resources/#{recording}"))
+              data = File.read("#{DATA_PATH}/resources/#{recording}")
+            else
+              screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
+            end
+          else
+            screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
+          end
         end
         data
       end
