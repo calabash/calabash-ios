@@ -1,4 +1,5 @@
 require 'httpclient'
+require 'calabash-cucumber/launch/simulator_helper'
 
 module Calabash
   module Cucumber
@@ -267,8 +268,24 @@ module Calabash
       end
 
       def load_playback_data(recording, options={})
-        os = options["OS"] || ENV["OS"] || "ios5"
+        os = options["OS"] || ENV["OS"]
         device = options["DEVICE"] || ENV["DEVICE"] || "iphone"
+
+        unless os
+          major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+          unless major
+            raise <<EOF
+          Unable to determine iOS major version
+          Most likely you have updated your calabash-cucumber client
+          but not your server. Please follow closely:
+
+https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version
+
+          If you are running version 0.9.120+ then please report this message as a bug.
+EOF
+          end
+          os = "ios#{major}"
+        end
 
         rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/playback"
         if !recording.end_with? ".base64"
