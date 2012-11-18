@@ -34,6 +34,12 @@ module Calabash
             raise msg
           end
         end
+        if ENV['POST_ENTER_KEYBOARD']
+          w = ENV['POST_ENTER_KEYBOARD'].to_f
+          if w > 0
+            sleep(w)
+          end
+        end
         res['results']
       end
 
