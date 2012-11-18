@@ -260,10 +260,27 @@ module Calabash
         puts "Fetch version #{url}..."
         begin
           body = Net::HTTP.get_response(url).body
-          return JSON.parse(body)
+          res = JSON.parse(body)
+          if res['iOS_version']
+            @ios_version = res['iOS_version']
+          end
         rescue
         end
         nil
+      end
+
+      def self.ios_version
+        unless @ios_version
+          get_version
+        end
+        @ios_version
+      end
+
+      def self.ios_major_version
+        v = ios_version
+        if v
+          v.split(".")[0]
+        end
       end
 
       def self.version_check(version)
