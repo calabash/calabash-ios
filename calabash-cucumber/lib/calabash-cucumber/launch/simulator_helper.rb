@@ -18,10 +18,10 @@ module Calabash
 
       DEFAULT_SIM_RETRY = 2
 
-      def self.relaunch(path, sdk = nil, version = 'iphone')
+      def self.relaunch(path, sdk = nil, version = 'iphone', args = nil)
 
         app_bundle_path = app_bundle_or_raise(path)
-        ensure_connectivity(app_bundle_path, sdk, version)
+        ensure_connectivity(app_bundle_path, sdk, version, args)
 
       end
 
@@ -169,7 +169,7 @@ module Calabash
         end
       end
 
-      def self.ensure_connectivity(app_bundle_path, sdk, version)
+      def self.ensure_connectivity(app_bundle_path, sdk, version, args = nil)
         begin
           max_retry_count = (ENV['MAX_CONNECT_RETRY'] || DEFAULT_SIM_RETRY).to_i
           timeout = (ENV['CONNECT_TIMEOUT'] || DEFAULT_SIM_WAIT).to_i
@@ -183,7 +183,7 @@ module Calabash
             puts "(#{retry_count}.) Start Simulator #{sdk}, #{version}, for #{app_bundle_path}"
             begin
               Timeout::timeout(timeout, TimeoutErr) do
-                simulator = launch(app_bundle_path, sdk, version)
+                simulator = launch(app_bundle_path, sdk, version, args)
                 until connected
                   begin
                     connected = (ping_app == '405')
@@ -229,10 +229,10 @@ module Calabash
       end
 
 
-      def self.launch(app_bundle_path, sdk, version)
+      def self.launch(app_bundle_path, sdk, version, args = nil)
         simulator = SimLauncher::Simulator.new
         simulator.quit_simulator
-        simulator.launch_ios_app(app_bundle_path, sdk, version)
+        simulator.launch_ios_app(app_bundle_path, sdk, version, args)
         simulator
       end
 
