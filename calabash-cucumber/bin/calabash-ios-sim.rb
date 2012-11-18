@@ -16,14 +16,7 @@ def calabash_sim_reset
     sdks = SimLauncher::SdkDetector.new(launcher).available_sdk_versions
   end
 
-  sdks.each do |sdk_path_str|
-    launcher.launch_ios_app(app_bundle_path, sdk_path_str, "ipad")
-    system("osascript #{reset_script}")
-    launcher.launch_ios_app(app_bundle_path, sdk_path_str, "iphone")
-    system("osascript #{reset_script}")
-  end
-
-  quit_sim
+  launcher.reset(sdks)
 
 end
 
@@ -126,11 +119,11 @@ end
 
 def calabash_sim_device(args)
   quit_sim
-  options = ["iPad", "iPhone", "iPhone_Retina", "iPhone_Retina_4inch"]
+  options = ["iPad","iPad_Retina", "iPhone", "iPhone_Retina", "iPhone_Retina_4inch"]
   if args.length != 1 or not options.find { |x| x == args[0] }
     print_usage
     puts "Unrecognized args: #{args}"
-    puts "should be one of #{options}"
+    puts "should be one of #{options.inspect}"
     exit(0)
   end
   path =File.join(File.expand_path("~/Library"), "Preferences", "com.apple.iphonesimulator.plist")
@@ -138,8 +131,10 @@ def calabash_sim_device(args)
   hash = CFPropertyList.native_types(plist.value)
 
   device = case args[0]
+             when "iPad_Retina"
+               "iPad (Retina)"
              when "iPhone_Retina"
-               "iPhone (Retina)"
+               "iPhone (Retina 3.5-inch)"
              when "iPhone_Retina_4inch"
                "iPhone (Retina 4-inch)"
              else

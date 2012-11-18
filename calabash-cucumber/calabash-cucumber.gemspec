@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency( "cucumber" )
   s.add_dependency( "json" )
   s.add_dependency( "CFPropertyList" )
-  s.add_dependency( "sim_launcher", "0.4.6")
+  s.add_dependency( "sim_launcher", "0.4.7")
   s.add_dependency( "slowhandcuke" )
   s.add_dependency( "location-one", "~>0.0.8")
   s.add_dependency( "httpclient","2.2.7")

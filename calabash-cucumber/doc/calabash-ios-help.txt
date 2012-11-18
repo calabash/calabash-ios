@@ -8,7 +8,7 @@ Usage: calabash-ios <command-name> [parameters]
     sim locale [lang] [regional]?
     sim reset
     sim acc
-    sim device [iPad, iPhone, iPhone_Retina]
+    sim device [iPad_Retina, iPhone, iPhone_Retina, iPhone_Retina_4inch]
 
   Commands:
   gen creates a skeleton features dir. This is usually used once when
