@@ -6,6 +6,8 @@ module Calabash
     module Core
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
+      CAL_HTTP_RETRY_COUNT=3
+      RETRYABLE_ERRORS = [Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ECONNABORTED, Errno::ETIMEDOUT]
 
       def macro(txt)
         if self.respond_to? :step
@@ -415,6 +417,15 @@ EOF
         res['result']
       end
 
+      def calabash_exit
+        # Exiting the app shuts down the HTTP connection and generates ECONNREFUSED,
+        # which needs to be suppressed.
+        begin
+          http(:path => 'exit', :retryable_errors => RETRYABLE_ERRORS - [Errno::ECONNREFUSED])
+        rescue Errno::ECONNREFUSED
+          []
+        end
+      end
 
       def map(query, method_name, *method_args)
         operation_map = {
@@ -459,10 +470,9 @@ EOF
         url
       end
 
-      CAL_HTTP_RETRY_COUNT=3
-
       def make_http_request(options)
         body = nil
+        retryable_errors = options[:retryable_errors] || RETRYABLE_ERRORS
         CAL_HTTP_RETRY_COUNT.times do |count|
           begin
             if not @http
@@ -487,21 +497,20 @@ EOF
               raise e
             end
           rescue Exception => e
-            case e
-              when Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ECONNABORTED, Errno::ETIMEDOUT
-                if count < CAL_HTTP_RETRY_COUNT-1
-                  sleep(0.5)
-                  @http.reset_all
-                  @http=nil
-                  STDOUT.write "Retrying.. #{e.class}: (#{e})\n"
-                  STDOUT.flush
+            if retryable_errors.include?(e)
+              if count < CAL_HTTP_RETRY_COUNT-1
+                sleep(0.5)
+                @http.reset_all
+                @http=nil
+                STDOUT.write "Retrying.. #{e.class}: (#{e})\n"
+                STDOUT.flush
 
-                else
-                  puts "Failing... #{e.class}"
-                  raise e
-                end
               else
+                puts "Failing... #{e.class}"
                 raise e
+              end
+            else
+              raise e
             end
           end
         end
