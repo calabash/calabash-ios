@@ -267,7 +267,30 @@ module Calabash
         texts
       end
 
-      def load_playback_data(recording, options={})
+      def recording_name_for(recording_name, os, device)
+        if !recording_name.end_with? ".base64"
+          "#{recording_name}_#{os}_#{device}.base64"
+        else
+          recording_name
+        end
+      end
+
+
+      def load_recording(recording,rec_dir)
+        data = nil
+        if (File.exists?(recording))
+          data = File.read(recording)
+        elsif (File.exists?("features/#{recording}"))
+          data = File.read("features/#{recording}")
+        elsif (File.exists?("#{rec_dir}/#{recording}"))
+          data = File.read("#{rec_dir}/#{recording}")
+        elsif (File.exists?("#{DATA_PATH}/resources/#{recording}"))
+          data = File.read("#{DATA_PATH}/resources/#{recording}")
+        end
+        data
+      end
+
+      def load_playback_data(recording_name, options={})
         os = options["OS"] || ENV["OS"]
         device = options["DEVICE"] || ENV["DEVICE"] || "iphone"
 
@@ -288,30 +311,20 @@ EOF
         end
 
         rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/playback"
-        if !recording.end_with? ".base64"
-          recording = "#{recording}_#{os}_#{device}.base64"
+
+        recording = recording_name_for(recording_name, os, device)
+        data = load_recording(recording,rec_dir)
+
+        if data.nil? and os=="ios6"
+          recording = recording_name_for(recording_name, "ios5", device)
         end
-        data = nil
-        if (File.exists?(recording))
-          data = File.read(recording)
-        elsif (File.exists?("features/#{recording}"))
-          data = File.read("features/#{recording}")
-        elsif (File.exists?("#{rec_dir}/#{recording}"))
-          data = File.read("#{rec_dir}/#{recording}")
-        elsif (File.exists?("#{DATA_PATH}/resources/#{recording}"))
-          data = File.read("#{DATA_PATH}/resources/#{recording}")
-        else
-          if os=="ios6"
-            recording = recording.gsub("ios6","ios5")
-            if (File.exists?("#{DATA_PATH}/resources/#{recording}"))
-              data = File.read("#{DATA_PATH}/resources/#{recording}")
-            else
-              screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
-            end
-          else
-            screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
-          end
+
+        data = load_recording(recording,rec_dir)
+
+        if data.nil?
+          screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
         end
+
         data
       end
 
@@ -362,8 +375,25 @@ EOF
         File.open("_recording.plist", 'wb') do |f|
           f.write res
         end
+
         device = ENV['DEVICE'] || 'iphone'
-        os = ENV['OS'] || 'ios5'
+        os = ENV['OS']
+
+        unless os
+          major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+          unless major
+            raise <<EOF
+          Unable to determine iOS major version
+          Most likely you have updated your calabash-cucumber client
+          but not your server. Please follow closely:
+
+https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version
+
+          If you are running version 0.9.120+ then please report this message as a bug.
+EOF
+          end
+          os = "ios#{major}"
+        end
 
         file_name = "#{file_name}_#{os}_#{device}.base64"
         system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
