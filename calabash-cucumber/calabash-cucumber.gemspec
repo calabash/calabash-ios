@@ -24,5 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency( "location-one", "~>0.0.8")
   s.add_dependency( "httpclient","2.2.7")
   s.add_dependency( "bundler", "~> 1.1")
+  s.add_dependency( "run_loop", "0.0.3" )
 
 end

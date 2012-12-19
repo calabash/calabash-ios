@@ -442,6 +442,29 @@ EOF
         res['results']
       end
 
+
+      def start_app_in_background(path=nil, sdk = nil, version = 'iphone', args = nil)
+
+        if path.nil?
+          path = ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
+        end
+        app_bundle_path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(path)
+
+        @ios_device  = RunLoop.run(:app => app_bundle_path)
+      end
+
+      def send_uia_command(opts ={})
+        RunLoop.send_command(opts[:device] ||@ios_device, opts[:command])
+      end
+
+      def stop_background_app(stop_spec = nil)
+
+        @ios_device = RunLoop.stop(stop_spec || @ios_device)
+
+      end
+
+
+
       def http(options, data=nil)
         options[:uri] = url_for(options[:path])
         options[:method] = options[:method] || :get
