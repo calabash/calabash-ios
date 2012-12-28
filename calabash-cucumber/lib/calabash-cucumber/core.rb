@@ -507,7 +507,7 @@ EOF
               body = @http.get(options[:uri], options[:body]).body
             end
             break
-          rescue HTTPClient::TimeoutError => e
+          rescue HTTPClient::TimeoutError, HTTPClient::KeepAliveDisconnected => e
             if count < CAL_HTTP_RETRY_COUNT-1
               sleep(0.5)
               @http.reset_all
@@ -519,6 +519,7 @@ EOF
               puts "Failing... #{e.class}"
               raise e
             end
+
           rescue Exception => e
             if retryable_errors.include?(e)
               if count < CAL_HTTP_RETRY_COUNT-1
