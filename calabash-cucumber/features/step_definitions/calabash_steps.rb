@@ -90,7 +90,9 @@ Then /^I fill in "([^\"]*)" with "([^\"]*)"$/ do |text_field, text_to_type|
 end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
-  raise "Native keyboard entering is not yet implemented on iOS"
+  touch("textField placeholder:'#{field_name}'")
+  await_keyboard
+  keyboard_enter_text(text_to_type)
 end
 
 Then /^I fill in text fields as follows:$/ do |table|
@@ -106,7 +108,11 @@ Then /^I enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text, ind
 end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text, index|
-  raise "Native keyboard entering is not yet implemented on iOS"
+  index = index.to_i
+  screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
+  touch("textField index:#{index-1}")
+  await_keyboard
+  keyboard_enter_text(text)
 end
 
 
@@ -122,12 +128,12 @@ end
 
 # -- See -- #
 Then /^I wait to see "([^\"]*)"$/ do |expected_mark|
-  wait_for(WAIT_TIMEOUT) { view_with_mark_exists( expected_mark ) }
+  wait_for_elements_exist( [ marked(expected_mark) ], :timeout => WAIT_TIMEOUT)
 end
 
 Then /^I wait until I don't see "([^\"]*)"$/ do |expected_mark|
   sleep 1## wait for previous screen to disappear
-  wait_for(WAIT_TIMEOUT) { not element_exists( "view marked:'#{expected_mark}'" )}
+  wait_for_elements_do_not_exist( [ marked(expected_mark) ], :timeout => WAIT_TIMEOUT)
 end
 
 Then /^I wait to not see "([^\"]*)"$/ do |expected_mark|
@@ -139,23 +145,29 @@ Then /^I wait for "([^\"]*)" to appear$/ do |name|
 end
 
 Then /^I wait for the "([^\"]*)" button to appear$/ do |name|
-  wait_for(WAIT_TIMEOUT) { element_exists( "button marked:'#{name}'" ) }
+  wait_for_elements_exist([ "button marked:'#{name}'" ], :timeout => WAIT_TIMEOUT)
 end
 
 
 Then /^I wait to see a navigation bar titled "([^\"]*)"$/ do |expected_mark|
-  wait_for(WAIT_TIMEOUT) do
-     query('navigationItemView', :accessibilityLabel).include?(expected_mark)
+  wait_for(:timeout => WAIT_TIMEOUT,
+           :timeout_message => "Timed out waiting for a navigationItemView with label #{expected_mark}") do
+
+     label('navigationItemView').include?(expected_mark)
   end
 end
 
 Then /^I wait for the "([^\"]*)" (?:input|text) field$/ do |placeholder|
-  wait_for(WAIT_TIMEOUT) { element_exists( "textField placeholder:'#{placeholder}'") }
+  wait_for_elements_exist([ "textField placeholder:'#{placeholder}'" ], :timeout => WAIT_TIMEOUT)
 end
 
 Then /^I wait for (\d+) (?:input|text) field(?:s)?$/ do |count|
   count = count.to_i
-  wait_for(WAIT_TIMEOUT) { query(:textField).count >= count  }
+  wait_for(:timeout => WAIT_TIMEOUT,
+           :timeout_message => "Timed out waiting for at least #{count} textFields") do
+
+    query(:textField).count >= count
+  end
 end
 
 

@@ -31,8 +31,12 @@ module Calabash
         not element_does_not_exist(uiquery)
       end
 
+      def marked(expected_mark)
+        "view marked:'#{expected_mark}'"
+      end
+
       def view_with_mark_exists(expected_mark)
-        element_exists("view marked:'#{expected_mark}'")
+        element_exists(marked(expected_mark))
       end
 
       def check_element_exists(query)
@@ -48,7 +52,7 @@ module Calabash
       end
 
       def check_view_with_mark_exists(expected_mark)
-        check_element_exists("view marked:'#{expected_mark}'")
+        check_element_exists(marked(expected_mark))
       end
 
       def screenshot_and_raise(msg, options={:prefix => nil, :name => nil, :label => nil})

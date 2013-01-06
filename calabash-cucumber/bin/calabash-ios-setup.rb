@@ -1,6 +1,7 @@
 require "calabash-cucumber/version"
 require 'rexml/rexml'
 require "rexml/document"
+require 'frank-cucumber/cli'
 
 
 def detect_accessibility_support
@@ -23,6 +24,13 @@ def detect_accessibility_support
 end
 
 def calabash_setup(args)
+  #TODO ensure frank setup called
+  lib_cal = File.expand_path(File.join(@lib_cal_dir,"libCalabash.a"),)
+  tgt_dir = File.join(File.expand_path("."),"Frank")
+  FileUtils.cp(lib_cal, tgt_dir)
+
+
+  return
   puts "Checking if Xcode is running..."
   res = `ps x -o pid,command | grep -v grep | grep Contents/MacOS/Xcode`
   if res==""

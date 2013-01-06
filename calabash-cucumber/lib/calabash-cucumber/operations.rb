@@ -70,6 +70,9 @@ module Calabash
       end
 
       def set_text(uiquery, txt)
+        $stderr.write("Warning: set_text is deprecated.\n")
+        $stderr.write("Please use keyboard_enter_text\n")
+        $stderr.flush
         text_fields_modified = map(uiquery, :setText, txt)
         screenshot_and_raise "could not find text field #{uiquery}" if text_fields_modified.empty?
         text_fields_modified
