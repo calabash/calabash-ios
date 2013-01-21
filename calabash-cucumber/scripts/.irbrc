@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'irb/completion'
 require 'irb/ext/save-history'
+require 'awesome_print'
+AwesomePrint.irb!
 
 ARGV.concat [ "--readline",
               "--prompt-mode",

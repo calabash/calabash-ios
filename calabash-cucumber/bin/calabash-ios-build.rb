@@ -44,28 +44,13 @@ def build(options={:build_dir=>"Calabash",
   res
 end
 
-def console(options={:script => "irb_ios5.sh"})
-  path = File.join(@source_dir,".irbrc")
-  if File.exists?(".irbrc")
-    old_str = File.read(".irbrc")
-    new_str = File.read(path)
-    if old_str != new_str
-      puts "Moving old .irbrc file to .irbrc.old"
-      FileUtils.mv(".irbrc", ".irbrc.old")
-      puts "Copying calabash-ios .irbrc file to current directory..."
-      FileUtils.cp(path, ".")
-    end
-  else
-    puts "Copying calabash-ios .irbrc file to current directory..."
-    FileUtils.cp(path, ".")
+def console
+  unless ENV['IRBRC']
+    path = File.expand_path(File.join(@script_dir,".irbrc"))
+    ENV['IRBRC'] = path
   end
-
-  if !File.exists?(options[:script])
-    puts "Copying calabash-ios #{options[:script]} file to current directory..."
-    FileUtils.cp(File.join(@source_dir,options[:script]), ".")
-  end
-  puts "Running irb with ./.irbrc..."
-  system("./#{options[:script]}")
+  puts "Running irb..."
+  exec("irb")
 end
 
 
