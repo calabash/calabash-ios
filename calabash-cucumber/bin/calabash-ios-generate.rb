@@ -13,9 +13,6 @@ def calabash_scaffold
   exit 2 unless STDIN.gets.chomp == ''
 
   FileUtils.cp_r(@source_dir, @features_dir)
-  FileUtils.mv "#{@features_dir}/.irbrc", "."
-  FileUtils.mv "#{@features_dir}/irb_ios4.sh", "."
-  FileUtils.mv "#{@features_dir}/irb_ios5.sh", "."
 
   msg("Info") do
     puts "Features subdirectory created. \n"
