@@ -1,5 +1,4 @@
 require 'tempfile'
-require 'json'
 
 
 def msg(title, &block)

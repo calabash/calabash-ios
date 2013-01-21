@@ -433,7 +433,8 @@ EOF
             :arguments => method_args
         }
         res = http({:method => :post, :path => 'map'},
-                   {:query => query, :operation => operation_map})
+                   {:query => query, :selector_engine => "calabash_uispec",
+                    :operation => operation_map})
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
           screenshot_and_raise "map #{query}, #{method_name} failed because: #{res['reason']}\n#{res['details']}"

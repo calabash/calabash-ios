@@ -1,7 +1,7 @@
 require "calabash-cucumber/version"
 require 'rexml/rexml'
 require "rexml/document"
-require 'frank-cucumber/cli'
+
 
 
 def detect_accessibility_support
@@ -25,9 +25,38 @@ end
 
 def calabash_setup(args)
   #TODO ensure frank setup called
+  msg("Info") do
+    puts "Copy libCalabash.a to Frank directory"
+  end
+
   lib_cal = File.expand_path(File.join(@lib_cal_dir,"libCalabash.a"),)
   tgt_dir = File.join(File.expand_path("."),"Frank")
   FileUtils.cp(lib_cal, tgt_dir)
+
+  xc_config_path = File.join(tgt_dir, "frankify.xcconfig")
+  xc_config = File.read(xc_config_path)
+
+  msg("Info") do
+    puts "Checking Frank/frankify.xcconfig for libCalabash"
+  end
+
+  added_xcconfig = []
+  xc_config.each_line do |line|
+    line = line.strip
+    if line.start_with?('FRANK_LDFLAGS')
+      unless line.index("-lCalabash")
+        line = "#{line} -lCalabash"
+      end
+    end
+    added_xcconfig << line
+  end
+
+  File.open(xc_config_path, "w") do |f|
+    f.write(added_xcconfig.join("\n")+"\n")
+  end
+
+
+
 
 
   return
