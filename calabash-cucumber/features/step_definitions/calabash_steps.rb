@@ -33,6 +33,13 @@ Then /^I (?:press|touch) the "([^\"]*)" button$/ do |name|
   sleep(STEP_PAUSE)
 end
 
+Then /^I (?:press|touch) (?:input|text) field number (\d+)$/ do |index|
+  index = index.to_i
+  screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
+  touch("textField index:#{index-1}")
+  sleep(STEP_PAUSE)  
+end
+
 Then /^I (?:press|touch) the "([^\"]*)" (?:input|text) field$/ do |name|
   touch("textField placeholder:'#{name}'")
   sleep(STEP_PAUSE)
@@ -93,6 +100,7 @@ Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text
   touch("textField placeholder:'#{field_name}'")
   await_keyboard
   keyboard_enter_text(text_to_type)
+  sleep(STEP_PAUSE)
 end
 
 Then /^I fill in text fields as follows:$/ do |table|
@@ -107,14 +115,14 @@ Then /^I enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text, ind
   set_text("textField index:#{index-1}",text)
 end
 
-Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text, index|
+Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text_to_type, index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
   touch("textField index:#{index-1}")
   await_keyboard
   keyboard_enter_text(text)
+  sleep(STEP_PAUSE)
 end
-
 
 When /^I clear "([^\"]*)"$/ do |name|
   macro %Q|I enter "" into the "#{name}" text field|
