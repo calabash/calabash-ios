@@ -4,7 +4,7 @@ Welcome to Calabash for iOS
 Calabash is an automated testing technology for Android and iOS native and hybrid applications.
 This repository contains support for iOS, for Android, see [Calabash Landing Page](http://calaba.sh/).
 
-
+Calabash is a free open source project, developed and maintained by [LessPainful - automated app testing](https://www.lesspainful.com). 
 
 This document explains how to install Calabash. For introductory information about the rationale behind Calabash see
 
@@ -26,8 +26,8 @@ If you have any questions on Calabash iOS, please use the google group
 
 [http://groups.google.com/group/calabash-ios](http://groups.google.com/group/calabash-ios)
 
-This guide was writting using XCode 4.3, but should also work for
-XCode versions >= 4.0.
+This guide was writting using XCode 4.5, but should also work for
+XCode versions >= 4.3.
 
 *NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from 
 the preferences pane under "Downloads" in Xcode. Then I had to do
@@ -79,6 +79,14 @@ Start by editing the file `features/my_first.feature`.
 
 Proceed by reading details about installation below, or moving on to the
 [Getting started guide](https://github.com/calabash/calabash-ios/wiki/00-Calabash-iOS-documentation).
+
+
+### Note on Cocoapods
+
+Soon we will fully support Cocoapods. 
+
+Until then, please se this nice article [http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods)
+by [@angelolloqui][https://twitter.com/angelolloqui].
 
 Manual setup with Xcode
 =======================
@@ -168,6 +176,25 @@ Updating
 If you are already using Calabash iOS in a project and you want to update to the latest version, this is very simple.
 
 [Updating your Calabash iOS version](https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version)
+
+
+#### Troubleshooting Installation
+
+On Mountain Lion with Ruby 1.8.x, you may see an error like this:
+
+    ~$ sudo gem install calabash-cucumber
+    Password:
+    Building native extensions.  This could take a while...
+    ERROR:  Error installing calabash-android:
+    ERROR: Failed to build gem native extension.
+    
+    /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby extconf.rb
+    mkmf.rb can't find header files for ruby at /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/ruby/ruby.h
+
+One possible cause can be not having the correct Command Line Tools (compiler
+tool chain) for your OS X release. For example, for OS X 10.8
+"Mountain Lion" you need the "Mountain Lion" version of these. You can
+install them from Xcode Preferences pane (in the Download tab).
 
 
 Important notice
