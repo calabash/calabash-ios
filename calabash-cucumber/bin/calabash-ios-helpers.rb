@@ -1,5 +1,6 @@
 require 'tempfile'
 
+require 'calabash-cucumber/version'
 
 def msg(title, &block)
   puts "\n" + "-"*10 + title + "-"*10
@@ -10,17 +11,16 @@ end
 
 def print_usage
   puts <<EOF
+  calabash-ios #{Calabash::Cucumber::VERSION}
   Usage: calabash-ios <command> [<args>]
   where <command> can be one of
-    help
-      prints more detailed help information.
     gen
-      generate a features folder structure.
+      generate a features folder structure
     console
       starts an interactive console to interact with your app via Calabash
     setup [<path>]
       setup your XCode project for calabash-ios (EXPERIMENTAL)
-    download
+    download [<path>]
       downloads latest compatible version of calabash.framework
     check [{<path to .ipa>|<path to .app>}]
       check whether an app or ipa is linked with calabash.framework (EXPERIMENTAL)
@@ -29,11 +29,13 @@ def print_usage
     sim location {on|off} <bundleid>
       set allow location on/off for current project or bundleid
     sim reset
-      reset content and settings in all iOS Simulators
+      reset content and settings in all iOS Simulators (EXPERIMENTAL)
     sim acc
       enable accessibility in all iOS Simulators
     sim device {iPad|iPad_Retina|iPhone|iPhone_Retina|iPhone_Retina_4inch}
       change the default iOS Simulator device.
+    help
+      prints more detailed help information
 EOF
 end
 

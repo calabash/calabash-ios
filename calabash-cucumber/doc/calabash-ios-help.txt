@@ -1,73 +1,93 @@
 Usage: calabash-ios <command-name> [parameters]
   <command-name> can be one of
-    help
     gen
-    setup (EXPERIMENTAL) [opt path]?
-    download [opt path]?
-    check (EXPERIMENTAL) [opt path to .ipa/.app]?
-    sim locale [lang] [regional]?
+    console
+    setup [<path>]
+    download [<path>]
+    check [{<path to .ipa>|<path to .app>}]
+    sim locale <lang> [<region>]
+    sim location {on|off} <bundleid>
     sim reset
     sim acc
-    sim device [iPad_Retina, iPhone, iPhone_Retina, iPhone_Retina_4inch]
+    sim device {iPad|iPad_Retina|iPhone|iPhone_Retina|iPhone_Retina_4inch}
+    help
 
-  Commands:
-  gen creates a skeleton features dir. This is usually used once when
-      setting up calabash to ensure that the features folder contains
-      the right step definitions and environment to run with cucumber.
+Commands:
+
+  gen
+    creates a skeleton features dir. This is usually used once when
+    setting up calabash to ensure that the features folder contains
+    the right step definitions and environment to run with cucumber.
+
   console
-      starts an interactive console to interact with your app via Calabash.
-      Copies the irb_ios5.sh and irb_ios4.sh scripts and the .irbrc file
-      then launches irb_ios5.sh.
-  setup [path]? (EXPERIMENTAL) Automates setting up your iOS Xcode project
-        with calabash-ios-server. It is your responsibility to ensure
-        that your production build does not link with calabash.framework.
-        setup will try to ensure this, but you should check manually.
+    starts an interactive console to interact with your app via Calabash.
+    Copies the irb_ios5.sh and irb_ios4.sh scripts and the .irbrc file
+    then launches irb_ios5.sh.
 
-        setup will download calabash.framework and modify you Xcode project
-        file. The parameter [path] is optional (default is the current dir).
-        If specified [path] should be the path to your iOS Xcode project
-        (i.e., the folder which contains projectname.xcodeproj).
+  setup [<path>]
+    (EXPERIMENTAL)
+    Automates setting up your iOS Xcode project
+    with calabash-ios-server. It is your responsibility to ensure
+    that your production build does not link with calabash.framework.
+    setup will try to ensure this, but you should check manually.
 
-        The following modifications are made
-          - duplicate an existing target of your choice
-          - add the calabash.framework to your Frameworks folder
-          - add $(SRCROOT) to framework search path
-          - link with calabash.framework in duped target
-          - link with Apple's CFNetwork.framework in duped target
-          - setup special linker options to ensure calabash is loaded
+    setup will download calabash.framework and modify you Xcode project
+    file. The parameter [path] is optional (default is the current dir).
+    If specified [path] should be the path to your iOS Xcode project
+    (i.e., the folder which contains projectname.xcodeproj).
 
-        Your Xcode project file will be backed up as project.pbxproj.bak.
-        The backup is placed in the .xcodeproj folder for your project.
-        If something goes wrong. Close Xcode and copy project.pbxproj.bak
-        to project.pbxproj inside your .xcodeproj folder.
+    The following modifications are made
+      - duplicate an existing target of your choice
+      - add the calabash.framework to your Frameworks folder
+      - add $(SRCROOT) to framework search path
+      - link with calabash.framework in duped target
+      - link with Apple's CFNetwork.framework in duped target
+      - setup special linker options to ensure calabash is loaded
 
-  download [opt_path]?
-        downloads latest compatible version of calabash.framework.
-        It should be run from a directory containing an Xcode project,
-        or optionally opt_path should be supplied and pointing to a
-        directory containing an Xcode project.
-        Download will download the latest version that matches the
-        currently installed calabash-cucumber gem.
-        To update Calabash for your project run
+    Your Xcode project file will be backed up as project.pbxproj.bak.
+    The backup is placed in the .xcodeproj folder for your project.
+    If something goes wrong. Close Xcode and copy project.pbxproj.bak
+    to project.pbxproj inside your .xcodeproj folder.
 
-        gem update calabash-cucumber
-        calabash-ios download
+  download [<path>]
+    downloads latest compatible version of calabash.framework.
+    It should be run from a directory containing an Xcode project,
+    or optionally opt_path should be supplied and pointing to a
+    directory containing an Xcode project.
+    Download will download the latest version that matches the
+    currently installed calabash-cucumber gem.
+    To update Calabash for your project run
 
-  check (EXPERIMENTAL) [.app or .ipa]?
-        check whether an app or ipa is linked with calabash.framework
-        if called without parameter [.app or .ipa] then pwd should be
-        a directory containing an xcodeproj. In this case we'll check
-        the default Xcode simulator build path for a Debug and Calabash
-        build configurations. We check that Debug doesn't link with
-        calabash.framework but Calabash does.
+      gem update calabash-cucumber
+      calabash-ios download
 
-  sim locale  [lang] [regional]? Changes the regional settings
-      for the iOS Simulators. You must ensure the correct format
-      for the optional regional parameter, for example,
-      da_DK, en_US.
+  check [{<path to .ipa>|<path to .app>}]
+    (EXPERIMENTAL)
+    check whether an app or ipa is linked with calabash.framework
+    if called without parameter [.app or .ipa] then pwd should be
+    a directory containing an xcodeproj. In this case we'll check
+    the default Xcode simulator build path for a Debug and Calabash
+    build configurations. We check that Debug doesn't link with
+    calabash.framework but Calabash does.
 
-  sim reset (EXPERIMENTAL) Will select "Reset Content and Settings"
-      in the iOS Simulators using AppleScript.
+  sim locale <lang> [<region>]
+    Changes the regional settings for the iOS Simulators. You must
+    ensure the correct format for the optional regional parameter,
+    for example, da_DK, en_US.
 
-  sim device [device] Will set the default iOS Simulator device.
-      [device] can be one of iPad, iPhone, iPhone_Retina.
+  sim location {on|off} <bundleid>
+    Set allow location on/off for current project or bundleid.
+
+  sim reset
+    (EXPERIMENTAL)
+    Will select "Reset Content and Settings" in the iOS Simulators
+    using AppleScript.
+
+  sim acc
+    Enable accessibility in all iOS Simulators
+
+  sim device {iPad|iPad_Retina|iPhone|iPhone_Retina|iPhone_Retina_4inch}
+    Will set the default iOS Simulator device.
+
+  help
+    This text.
