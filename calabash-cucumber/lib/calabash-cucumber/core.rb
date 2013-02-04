@@ -509,9 +509,10 @@ EOF
             break
           rescue HTTPClient::TimeoutError, HTTPClient::KeepAliveDisconnected => e
             if count < CAL_HTTP_RETRY_COUNT-1
-              sleep(0.5)
               @http.reset_all
               @http=nil
+              STDOUT.write "Waiting 5 secs before retry...\n"
+              sleep(5)
               STDOUT.write "Retrying.. #{e.class}: (#{e})\n"
               STDOUT.flush
 
@@ -547,6 +548,9 @@ EOF
         http.connect_timeout = 15
         http.send_timeout = 15
         http.receive_timeout = 15
+        if ENV['DEBUG_HTTP'] and (ENV['DEBUG_HTTP'] != "0")
+          http.debug_dev = $stdout
+        end
         http
       end
     end

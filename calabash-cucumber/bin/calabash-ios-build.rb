@@ -45,7 +45,8 @@ def build(options={:build_dir=>"Calabash",
 end
 
 def console
-  unless ENV['IRBRC']
+  path = ENV['CALABASH_IRBRC']
+  unless path
     path = File.expand_path(File.join(@script_dir,".irbrc"))
     ENV['IRBRC'] = path
   end
