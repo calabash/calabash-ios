@@ -32,7 +32,9 @@ module Calabash
           retry_frequency = options_or_timeout[:retry_frequency] || 0.2
           post_timeout = options_or_timeout[:post_timeout] || 0.1
           timeout_message = options_or_timeout[:timeout_message]
-          screenshot_on_error = options_or_timeout[:screenshot_on_error] || true
+          if options_or_timeout.key(:screenshot_on_error)
+            screenshot_on_error = options_or_timeout[:screenshot_on_error]
+          end
         end
 
         begin
