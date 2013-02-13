@@ -45,14 +45,42 @@ module Calabash
             args = args[0]
           end
         end
-        map(q, :query_all, *args)
+        map(q, :query, *args)
       end
 
       def query_all(uiquery, *args)
-        map(uiquery, :query_all, *args)
+        puts "query_all is deprecated. Use the new all/visible feature."
+        puts "see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax"
+        map("all #{uiquery}", :query, *args)
       end
 
       def touch(uiquery, options={})
+        if (uiquery.is_a?(Array))
+          raise "No elements to touch in array" if uiquery.empty?
+          uiquery = uiquery.first
+        end
+        if (uiquery.is_a?(Hash))
+          offset_x = 0
+          offset_y = 0
+          if options[:offset]
+            offset_x += options[:offset][:x] || 0
+            offset_y += options[:offset][:y] || 0
+          end
+          x = offset_x
+          y = offset_y
+          rect = uiquery["rect"] || uiquery[:rect]
+          if rect
+            x += rect['center_x'] || rect[:center_x] || rect[:x] || 0
+            y += rect['center_y'] || rect[:center_y] || rect[:y] || 0
+          else
+            x += uiquery['center_x'] || uiquery[:center_x] || uiquery[:x] || 0
+            y += uiquery['center_y'] || uiquery[:center_y] || uiquery[:y] || 0
+          end
+
+          options[:offset] = {:x => x, :y => y}
+          return touch(nil, options)
+        end
+
         options[:query] = uiquery
         views_touched = playback("touch", options)
         unless uiquery.nil?
@@ -278,7 +306,7 @@ module Calabash
       end
 
 
-      def load_recording(recording,rec_dir)
+      def load_recording(recording, rec_dir)
         data = nil
         if (File.exists?(recording))
           data = File.read(recording)
@@ -315,13 +343,13 @@ EOF
         rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/playback"
 
         recording = recording_name_for(recording_name, os, device)
-        data = load_recording(recording,rec_dir)
+        data = load_recording(recording, rec_dir)
 
         if data.nil? and os=="ios6"
           recording = recording_name_for(recording_name, "ios5", device)
         end
 
-        data = load_recording(recording,rec_dir)
+        data = load_recording(recording, rec_dir)
 
         if data.nil?
           screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
@@ -450,7 +478,7 @@ EOF
         end
         app_bundle_path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(path)
 
-        @ios_device  = RunLoop.run(:app => app_bundle_path)
+        @ios_device = RunLoop.run(:app => app_bundle_path)
       end
 
       def send_uia_command(opts ={})
@@ -462,7 +490,6 @@ EOF
         @ios_device = RunLoop.stop(stop_spec || @ios_device)
 
       end
-
 
 
       def http(options, data=nil)
