@@ -18,7 +18,7 @@ require 'calabash-cucumber/operations'
 require 'calabash-cucumber/launch/simulator_helper'
 SIM=Calabash::Cucumber::SimulatorHelper
 
-include Calabash::Cucumber::Operations
+extend Calabash::Cucumber::Operations
 
 def embed(x,y=nil,z=nil)
    puts "Screenshot at #{x}"
