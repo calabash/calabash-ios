@@ -187,14 +187,11 @@ def setup_project(project_name, project_path, path)
     end
   end
 
-
-  file = download_calabash(project_path)
+  download_calabash(project_path)
 
   msg("Info") do
     puts "Setting up project file for calabash-ios."
   end
-
-
 
   ##Backup
   msg("Info") do
