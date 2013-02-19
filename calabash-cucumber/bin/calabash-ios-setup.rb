@@ -187,6 +187,8 @@ def setup_project(project_name, project_path, path)
     exit 1
   end
 
+  FileUtils.cd pwd
+
   file = download_calabash(project_path)
 
   msg("Info") do
@@ -194,7 +196,6 @@ def setup_project(project_name, project_path, path)
   end
 
 
-  FileUtils.cd pwd
 
   ##Backup
   msg("Info") do
