@@ -174,27 +174,24 @@ def setup_project(project_name, project_path, path)
     exit 1
   end
 
-  pwd = FileUtils.pwd
-  FileUtils.cd project_path
-  ##Backup
-  if File.exists? "#{proj_file}.bak"
-    msg("Error") do
-      puts "Backup file already exists. #{proj_file}.bak"
-      puts "For safety, I won't overwrite this file."
-      puts "You must manually move this file, if you want to"
-      puts "Run calabash-ios setup again."
+  FileUtils.cd project_path do
+    ##Backup
+    if File.exists? "#{proj_file}.bak"
+      msg("Error") do
+        puts "Backup file already exists. #{proj_file}.bak"
+        puts "For safety, I won't overwrite this file."
+        puts "You must manually move this file, if you want to"
+        puts "Run calabash-ios setup again."
+      end
+      exit 1
     end
-    exit 1
   end
 
-  file = download_calabash(project_path)
+  download_calabash(project_path)
 
   msg("Info") do
     puts "Setting up project file for calabash-ios."
   end
-
-
-  FileUtils.cd pwd
 
   ##Backup
   msg("Info") do
