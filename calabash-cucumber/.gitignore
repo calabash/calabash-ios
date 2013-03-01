@@ -2,3 +2,5 @@ pkg
 Markdown.pl
 .idea
 Gemfile.lock
+staticlib
+libcalabash
