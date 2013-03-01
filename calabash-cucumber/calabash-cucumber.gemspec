@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://calaba.sh"
   s.summary     = %q{Client for calabash-ios-server for automated functional testing on iOS}
   s.description = %q{calabash-cucumber drives tests for native iOS apps. You must link your app with calabash-ios-server framework to execute tests.}
-  s.files         = `git ls-files`.split("\n")
+  s.files         = `git ls-files`.split("\n").concat(["staticlib/calabash.framework.zip"])
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = "calabash-ios"
   s.require_paths = ["lib"]

@@ -94,47 +94,9 @@ def download_calabash(project_path)
   ##Download calabash.framework
   if not File.directory?(File.join(project_path, file))
     msg("Info") do
-      zip_file = "calabash.framework-#{ENV['FRAMEWORK_VERSION']||Calabash::Cucumber::FRAMEWORK_VERSION}.zip"
-      puts "Did not find calabash.framework. I'll download it...'"
-      puts "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
-      require 'uri'
+      zip_file = File.join(@framework_dir,"calabash.framework.zip")
 
-      uri = URI.parse "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
-      success = false
-      if has_proxy?
-        proxy_url = proxy
-        connection = Net::HTTP::Proxy(proxy_url[0], proxy_url[1])
-      else
-        connection = Net::HTTP
-      end
-      begin
-      connection.start(uri.host, uri.port) do |http|
-        request = Net::HTTP::Get.new uri.request_uri
-
-        http.request request do |response|
-          if response.code == '200'
-            open zip_file, 'wb' do |io|
-              response.read_body do |chunk|
-                print "."
-                io.write chunk
-              end
-            end
-            success = true
-          else
-             puts "Got bad response code #{response.code}."
-             puts "Aborting..."
-          end
-        end
-      end
-      rescue SocketError => e
-        msg("Error") do
-          puts "Exception: #{e}"
-          puts "Unable to download Calabash. Please check connection."
-        end
-        exit 1
-      end
-      if success
-        puts "\nDownload done: #{file}. Unzipping..."
+      if File.exist?(zip_file)
         if not system("unzip -C -K -o -q -d #{project_path} #{zip_file} -x __MACOSX/* calabash.framework/.DS_Store")
           msg("Error") do
             puts "Unable to unzip file: #{zip_file}"
@@ -142,8 +104,8 @@ def download_calabash(project_path)
           end
           exit 1
         end
-        FileUtils.rm(zip_file)
       else
+        puts "Inconsistent gem state: Cannot find framework: #{zip_file}"
         exit 0
       end
     end
