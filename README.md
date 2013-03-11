@@ -6,10 +6,15 @@ This repository contains support for iOS, for Android, see [Calabash Landing Pag
 
 Calabash is a free open source project, developed and maintained by [LessPainful - automated app testing](https://www.lesspainful.com).
 
-This document explains how to install Calabash. For introductory information about the rationale behind Calabash see
+While Calabash is completely free, LessPainful provides a number of commercial services centered around Calabash and quality assurance for mobile, e.g., training, support with a SLA, consulting and finally _device labs_ which are hosted and on-site test-execution environments which let you execute Calabash tests on a large number of Android and iOS devices. 
+
+Please contact us at [contact@lesspainful.com](mailto:contact@lesspainful.com) or visit our home page [https://www.lesspainful.com](https://www.lesspainful.com).
+
+This document explains how to install Calabash iOS. For introductory information about the rationale behind Calabash see
 
 [Introducing Calabash](http://blog.lesspainful.com/2012/03/07/Calabash/).
 
+[Release Notes](calabash-cucumber/RELEASE_NOTES.md)
 
 
 This guide explains how to setup and use Calabash for iOS
