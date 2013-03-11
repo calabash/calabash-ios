@@ -4,7 +4,7 @@ Welcome to Calabash for iOS
 Calabash is an automated testing technology for Android and iOS native and hybrid applications.
 This repository contains support for iOS, for Android, see [Calabash Landing Page](http://calaba.sh/).
 
-Calabash is a free open source project, developed and maintained by [LessPainful - automated app testing](https://www.lesspainful.com). 
+Calabash is a free open source project, developed and maintained by [LessPainful - automated app testing](https://www.lesspainful.com).
 
 This document explains how to install Calabash. For introductory information about the rationale behind Calabash see
 
@@ -20,7 +20,7 @@ against the iOS Simulator. You can also interactively explore and
 interact with your application using the Calabash console.
 
 Finally, you will be able to test your app on real, non-jailbroken iOS
-devices via [the LessPainful service](http://www.lesspainful.com/). 
+devices via [the LessPainful service](http://www.lesspainful.com/).
 
 If you have any questions on Calabash iOS, please use the google group
 
@@ -29,7 +29,7 @@ If you have any questions on Calabash iOS, please use the google group
 This guide was writting using XCode 4.5, but should also work for
 XCode versions >= 4.3.
 
-*NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from 
+*NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from
 the preferences pane under "Downloads" in Xcode. Then I had to do
 
     sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
@@ -40,17 +40,17 @@ Installation
 
 ### Prerequisites
 
-You need to have Ruby installed. This is installed by default on MacOSX. 
+You need to have Ruby installed. This is installed by default on MacOSX.
 Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7" (or higher).
 
 ### Fast track
 
-Note: Fast track is EXPERIMENTAL, but in my experience it works for most iOS projects. 
-But there *are* some project setups where it does not. 
+Note: Fast track is EXPERIMENTAL, but in my experience it works for most iOS projects.
+But there *are* some project setups where it does not.
 
 If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
 
-For automatic setup: 
+For automatic setup:
 
 1. In a terminal, go to your iOS project
   - `cd path-to-my-ios-project` (i.e. directory containing .xcodeproj file)
@@ -83,7 +83,7 @@ Proceed by reading details about installation below, or moving on to the
 
 ### Note on Cocoapods
 
-Soon we will fully support Cocoapods. 
+Soon we will fully support Cocoapods.
 
 Until then, please se this nice article [http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods)
 by [@angelolloqui][https://twitter.com/angelolloqui].
@@ -99,7 +99,7 @@ described below. You also need to link with Apple's CFNetwork
 framework if you are not already using this.
 
 For functional testing with Calabash iOS, you should create a whole separate target
-by duplicating your production target in Xcode (explained below). 
+by duplicating your production target in Xcode (explained below).
 
 ### Ruby and calabash-cucumber gem.
 
@@ -170,6 +170,41 @@ Verify that you see console output like
     2012-01-19 LPSimpleExample[4318:13903] Bonjour Service Published: domain(local.) type(_http._tcp.) name(Calabash Server)
 
 
+Branches
+========
+
+Some important news about what is happening with Calabash iOS and upcoming features. This is a preliminary notice to keep everyone informed. Soon, there will be a longer blog post at http://blog.lesspainful.com/ explaining more about rationale etc.
+
+### The 0.9.x line
+[Link to 0.9.x branch](https://github.com/calabash/calabash-ios/tree/0.9.x).
+
+We've been making many small releases marked as 0.9.xyz for some time. This has been mostly bug-fixes and adding high-level functions, although some releases have added new features too. My current focus has been providing an implementation of 'query' on Calabash Android, and as this is finishing off, I'll turn attention back to Calabash iOS.
+
+Calabash iOS will now move towards what we will designate a 1.0.0 release. What we mean by '1.0.0', is that we consider Calabash a stable and reliable product with a decent feature set sufficient for testing most iOS applications. The label '1.0.0' will mean a much stronger adherence to backwards compatibility, quality and stability. Particularly, from version 1.0.0, Calabash will be adhering to the notion of Semantic Versioning: http://semver.org/, and we will use also continuous integration and automated testing on Calabash (iOS and Android) itself.
+
+But 1.0.0 won't be the next line of releases. There will be a 0.10.x line first which will incorporate significant changes.
+
+The single most significant change in the 0.10.x line will be that Calabash will be supplied as a 'plugin' to the [Frank project](https://github.com/moredip/Frank). Many of the original reasons for creating a separate project for Calabash have now vanished, and only a single remains (the license of Frank, and this is being changed).
+
+*Why?*
+
+- Calabash and Frank share so much infrastructure, and there is no longer a reason to have the work duplicated in two project. By working together both projects will benefit and increase velocity.
+
+- Frank comes with a very cool tool called Symbiote which gives a visual representation of the current screen elements as well as a playground for exploring queries. Calabash iOS (and later Android) users will get access to Symbiote.
+
+- The Frank build system has improved vastly during the last 10 months and has surpassed that of Calabash iOS.
+
+- Calabash also brings benefits to Frank users: the Calabash selector engine features selection into web views, selection by NSPredicate, selection by indexPath, better reflective method-call support. The Calabash touch engine allows synthesizing arbitrary gestures, even those not predefined by UIAutomation. Also, a bunch of other things like 'external' UIAutomation support will exist in the 0.10.x line.
+
+- Cross-pollination of communities.
+
+### What Does This Mean for Calabash users?
+
+A lot of very good things :)  In short, it will mean more features, better error messages and a more slick setup and update experience. The 0.10.x line will work at ensuring that 0.9.x Calabash tests still work with no or only minor migration needed. The 1.0.x line will be a tried and stable version of the 0.10.x line, with focus on more features.
+
+It is our goal that your current tests should still work on the 0.10.x line. If we discover things that cannot be fixed in a backwards compatible manner, we will try hard to supply a migration path.
+
+
 Updating
 ========
 
@@ -187,7 +222,7 @@ On Mountain Lion with Ruby 1.8.x, you may see an error like this:
     Building native extensions.  This could take a while...
     ERROR:  Error installing calabash-android:
     ERROR: Failed to build gem native extension.
-    
+
     /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby extconf.rb
     mkmf.rb can't find header files for ruby at /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/ruby/ruby.h
 
@@ -209,8 +244,8 @@ for the version of your app running calabash tests.
 An experimental check can be done by the calabash-ios tool
 
     calabash-ios check PATH_TO_IPA_OR_APP
-    
-But this is not guaranteed to work, and it is your responsibility to ensure.    
+
+But this is not guaranteed to work, and it is your responsibility to ensure.
 
 
 Installation details
@@ -254,7 +289,7 @@ Setup will modify your xcode project file to use Calabash iOs. You should now ha
 `calabash-ios setup` does the following:
 
 - creates a new -cal target as a copy of your primary target
-- add the calabash.framework to your Frameworks folder 
+- add the calabash.framework to your Frameworks folder
 - add $(SRCROOT) to framework search path (for that target)
 - link with calabash.framework (for that target)
 - link with Apple's CFNetwork.framework (for that target)
