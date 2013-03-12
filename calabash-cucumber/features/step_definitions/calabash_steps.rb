@@ -33,11 +33,23 @@ Then /^I (?:press|touch) the "([^\"]*)" button$/ do |name|
   sleep(STEP_PAUSE)
 end
 
+Then /^I (?:press|touch) tabBarButton number (\d+)$/ do |index|
+  index = index.to_i
+  screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
+  touch("tabBarButton index:#{index-1}")
+  sleep(STEP_PAUSE)
+end
+
+Then /^I (?:press|touch) the "([^\"]*)" tabBarButton$/ do |name|
+  touch("tabBarButton marked:'#{name}'")
+  sleep(STEP_PAUSE)
+end
+
 Then /^I (?:press|touch) (?:input|text) field number (\d+)$/ do |index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
   touch("textField index:#{index-1}")
-  sleep(STEP_PAUSE)  
+  sleep(STEP_PAUSE)
 end
 
 Then /^I (?:press|touch) the "([^\"]*)" (?:input|text) field$/ do |name|
@@ -154,6 +166,10 @@ end
 
 Then /^I wait for the "([^\"]*)" button to appear$/ do |name|
   wait_for_elements_exist([ "button marked:'#{name}'" ], :timeout => WAIT_TIMEOUT)
+end
+
+Then /^I wait for the "([^\"]*)" tabBarButton to appear$/ do |name|
+  wait_for_elements_exist([ "tabBarButton marked:'#{name}'" ], :timeout => WAIT_TIMEOUT)
 end
 
 
@@ -334,6 +350,13 @@ Then /^I should see a "([^\"]*)" button$/ do |expected_mark|
 end
 Then /^I should not see a "([^\"]*)" button$/ do |expected_mark|
   check_element_does_not_exist("button marked:'#{expected_mark}'")
+end
+
+Then /^I should see a "([^\"]*)" tabBarButton$/ do |expected_mark|
+  check_element_exists("tabBarButton marked:'#{expected_mark}'")
+end
+Then /^I should not see a "([^\"]*)" tabBarButton$/ do |expected_mark|
+  check_element_does_not_exist("tabBarButton marked:'#{expected_mark}'")
 end
 
 Then /^I don't see the text "([^\"]*)"$/ do |text|
