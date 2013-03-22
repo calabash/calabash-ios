@@ -53,7 +53,7 @@
                     (fn [] (if-let [res (action)]
                             res
                             (sleep!)))))
-        (when (> 0 (:post_timeout opts))
+        (when (pos? (:post_timeout opts))
           (Thread/sleep (* 1000 (:post_timeout opts)))))))
 
 (defmacro wait_for
