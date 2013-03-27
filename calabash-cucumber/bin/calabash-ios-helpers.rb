@@ -22,7 +22,7 @@ def print_usage
     setup [<path>]
       setup your XCode project for calabash-ios (EXPERIMENTAL)
     download
-      downloads latest compatible version of calabash.framework
+      install latest compatible version of calabash.framework
     check [{<path to .ipa>|<path to .app>}]
       check whether an app or ipa is linked with calabash.framework (EXPERIMENTAL)
     sim locale <lang> [<region>]

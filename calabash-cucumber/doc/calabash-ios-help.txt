@@ -8,7 +8,10 @@ Usage: calabash-ios <command-name> [parameters]
     sim locale [lang] [regional]?
     sim reset
     sim acc
-    sim device [iPad_Retina, iPhone, iPhone_Retina, iPhone_Retina_4inch]
+    sim device {iPad,iPad_Retina,iPhone,iPhone_Retina,iPhone_Retina_4inch}
+    sim location {on|off} <bundleid>
+
+
 
   Commands:
   gen creates a skeleton features dir. This is usually used once when
@@ -16,8 +19,8 @@ Usage: calabash-ios <command-name> [parameters]
       the right step definitions and environment to run with cucumber.
   console
       starts an interactive console to interact with your app via Calabash.
-      Copies the irb_ios5.sh and irb_ios4.sh scripts and the .irbrc file
-      then launches irb_ios5.sh.
+      Supports setting environment var CALABASH_IRBRC for custom .irbrc file.
+
   setup [path]? (EXPERIMENTAL) Automates setting up your iOS Xcode project
         with calabash-ios-server. It is your responsibility to ensure
         that your production build does not link with calabash.framework.
@@ -42,16 +45,19 @@ Usage: calabash-ios <command-name> [parameters]
         to project.pbxproj inside your .xcodeproj folder.
 
   download [opt_path]?
-        downloads latest compatible version of calabash.framework.
+        copies current compatible version of calabash.framework to your project.
         It should be run from a directory containing an Xcode project,
         or optionally opt_path should be supplied and pointing to a
         directory containing an Xcode project.
-        Download will download the latest version that matches the
+        Will copy in the latest version that matches the
         currently installed calabash-cucumber gem.
         To update Calabash for your project run
 
-        gem update calabash-cucumber
+        gem install calabash-cucumber
         calabash-ios download
+
+        Then clean and rebuild to your project.
+        Check the current server version on http://localhost:37265/version
 
   check (EXPERIMENTAL) [.app or .ipa]?
         check whether an app or ipa is linked with calabash.framework
@@ -66,8 +72,11 @@ Usage: calabash-ios <command-name> [parameters]
       for the optional regional parameter, for example,
       da_DK, en_US.
 
+  sim location {on|off} <bundleid>
+      set allow location on/off for current project or bundleid
+
   sim reset (EXPERIMENTAL) Will select "Reset Content and Settings"
       in the iOS Simulators using AppleScript.
 
   sim device [device] Will set the default iOS Simulator device.
-      [device] can be one of iPad, iPhone, iPhone_Retina.
+      [device] can be one of iPad iPad_Retina iPhone iPhone_Retina iPhone_Retina_4inch
