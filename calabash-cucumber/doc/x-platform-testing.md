@@ -1,16 +1,16 @@
-# Acceptance Testing Best Practices
+# Cross-platform Acceptance Testing Best Practices
 
 Test automation is programming - hence, well-established practices of programming apply to test automation. Ruby is object-oriented, and most Calabash tests should also follow good object-oriented design (e.g., principles of abstraction, separation of concerns, modularity, reuse...).
 
 A well-established pattern in test engineering is the *Page-Object Pattern* (POP). While originating in web testing, the ideas of POP apply equally well to native mobile. In this short article, we'll illustrate how to use the page object pattern to better architect test code and obtain better cross-platform code reuse.
 
-We've created a sample project: [X-Platform-Example](https://github.com/calabash/x-platform-example) using the open source WordPress app. If you want to follow along and try things out, go to the project page [https://github.com/calabash/x-platform-example](https://github.com/calabash/x-platform-example) and follow install and run instructions. You can also just read about the principles in this article and try to implement them in you own app.
+We've created a sample project: [X-Platform-Example](https://github.com/calabash/x-platform-example) using the open source WordPress app. If you want to follow along and try things out, go to the project page [https://github.com/calabash/x-platform-example](https://github.com/calabash/x-platform-example) and follow install and run instructions. You can also choose to just read about the principles in this article and try to implement them in you own app.
 
 LessPainful also provides both on-site and public training courses where we teach the use of Calabash as well as cross-platform and automated testing best practices. If you're interested in a two-day, hands-on course, please contact us at [contact@lesspainful.com](mailto:contact@lesspainful.com).
 
 # Page Objects
 
-A *page object* is an object that represents a single screen (page) in your application. For mobile, screen object would possibly be a better word, but Page Object is an established term that we'll stick with.
+A *page object* is an object that represents a single screen (page) in your application. For mobile, "screen object" would possibly be a better word, but Page Object is an established term that we'll stick with.
 
 A page object should abstract a single screen in your application. It should expose methods to query the state and data of the screen as well as methods to take actions on the screen. 
 
@@ -21,7 +21,7 @@ The most obvious benefit of this is abstraction and reuse. If you have several s
 # Cross-platform Core Idea
 
 
-Let's go into more detail with this last example. Suppose the follow sketch of a class (don't do it exactly like this - read on):
+Let's go into more detail with this last example. Consider the following sketch of a class (don't do it exactly like this - read on a bit):
 
 ```ruby
 
@@ -36,7 +36,7 @@ Let's go into more detail with this last example. Suppose the follow sketch of a
     end```
 
 
-Suppose you're building the same app for iPhone and Android phones. Most likely the interface of the `TalksScreen` page class makes complete sense on both platforms. This means that the calling code, which is usually in a step definition, is independent of platform - hence it can be reused across platforms. 
+Suppose you're building the same app for iPhone and Android phones. Most likely the interface of the `TalksScreen` class makes complete sense on both platforms. This means that the calling code, which is usually in a step definition, is independent of platform - hence it can be reused across platforms. 
 
 Working this way gets you complete reuse of Cucumber features as well as step definitions: the details of interacting with the screen is pushed to page object implementations.
 
@@ -44,13 +44,13 @@ The idea is that you provide an implementation of page objects for each platform
 
 # Cross-platform in practice
 
-So… The idea and design looks good. The question now is to to implement this is practice. Here we describe the mechanics and below you'll find an example extracted from [X-Platform-Example](https://github.com/calabash/x-platform-example).
+So… The idea and design looks good. The question now is how to implement this is practice. Here we describe the mechanics and below you'll find an example extracted from [X-Platform-Example](https://github.com/calabash/x-platform-example).
 
 There are a couple of ingredients we need.
 
 1. For each screen you want to automate, decide on an interface for a page object class (e.g. like `TalksScreen` above).
 2. Use only custom steps, and in each step definition *only* use page objects and their methods (no direct calls to Calabash iOS or Calabash Android APIs).
-3. For each supported platform, define implementations of the page object methods.
+3. For each supported platform, define a class with implementations of the page-object methods.
 4. Create a Cucumber profile (`config/cucumber.yml`). Define a profile for each platform (e.g. `android` and `ios`), and ensure that the profile *only* loads the page object classes for the platform.
 5. Rejoice and profit!
 
@@ -82,7 +82,7 @@ We have a feature alà
       When I enter invalid credentials
       Then I am presented with an error message to correct credentials
 
-Now here are step definitions that only use the page objects and no Calabash methods like touch, query…
+Below are step definitions that *only use the page objects* and no Calabash methods like touch, query…
 
 For the following, assume we have also a Page Object class `WelcomePage` with a method `wordpress_blog` that transitions to the `AddWordPressBlog` screen:
 
@@ -105,17 +105,17 @@ For the following, assume we have also a Page Object class `WelcomePage` with a 
       screenshot_embed
 	end```
 
-The `page` method is a helper method (described below) which initializes a page object from a class. The `await` method for now just returns the page object after waiting for the page to be loaded.
+The `page` method is a helper method in Calabash which initializes a page object from a class. The `await` method just returns the page object after waiting for the page to be loaded.
 
 We store the page object in an instance variable in the cucumber world (`@page`) and use it in the subsequent steps.
 
-Notice how the steps only use page object. This feature as well as the step definitions can be 100% reused across platforms. Great!
+Notice how the steps only use page-object methods. This feature, as well as the step definitions, can be 100% reused across platforms. Great!
 
 ## Step 3 - Platform implementations
 
 Now we need to give an implementation of the `WordPressComPage` on iOS and Android (and all other supported platforms). We put those implementations in separte directories `features/ios/pages` and `features/android/pages` and name them `word_press_com_page_ios.rb` and `word_press_com_android.rb`.
 
-Here is the implementation for iOS:
+Here is the implementation for iOS. It uses an abstract Page Object Class defined in Calabash iOS (`Calabash::IBase`).
 
 ```ruby
 require 'calabash-cucumber/ibase'
@@ -223,7 +223,7 @@ end
 
 ## Step 4 - Conditional loading
 
-The final missing part is conditionally loading page object implementations based on which platform we're running. This is done using Cucumber *profiles*. We create a file `config/cucumber.yml` 
+The final missing part is conditionally loading page-object implementations based on which platform we're running. This is done using Cucumber *profiles*. We create a file `config/cucumber.yml` 
 
     ---
     android: RESET_BETWEEN_SCENARIOS=1 PLATFORM=android -r features/support -r features/android/support -r features/android/helpers -r features/step_definitions -r features/android/pages/
