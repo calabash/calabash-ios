@@ -69,9 +69,14 @@ For automatic setup:
   (this also copies the scripts irb_iosX.sh for "interactive development" into your current dir)
 
 5. In Xcode, build your project using the <project-name>-cal scheme
-  - ![-cal scheme](calabash-ios/raw/master/documentation/images/scheme.png "-cal scheme")
+  - ![-cal scheme](documentation/images/scheme.png "-cal scheme")
 
-6. Run the generated test!
+6. Setup the verbosity of the cucumber output with the `CALABASH_FULL_CONSOLE_OUTPUT` environment variable
+  - Use `export CALABASH_FULL_CONSOLE_OUTPUT=false` for the output to be more akin to the web-testing cucumber output. Here information about connecting to the simulator, calabash version number, app build directory, etc will not be printed to the console.
+  - Use `export CALABASH_FULL_CONSOLE_OUTPUT=true` for all output to be printed; i.e. same as the [original project](https://github.com/squareware/calabash-ios).
+  - If `CALABASH_FULL_CONSOLE_OUTPUT` is not set then the default is true.
+
+7. Run the generated test!
   - `cucumber`
 
 If all goes well, you are now ready to write your first test.
