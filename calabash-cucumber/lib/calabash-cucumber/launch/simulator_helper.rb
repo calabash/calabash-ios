@@ -19,6 +19,10 @@ module Calabash
 
       DEFAULT_SIM_RETRY = 2
 
+      # Load environment variable for showing full console output
+      # If not env var set then we use true; i.e. output to console in full
+      FULL_CONSOLE_OUTPUT = ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == 'false' ? false : true
+
       def self.relaunch(path, sdk = nil, version = 'iphone', args = nil)
 
         app_bundle_path = app_bundle_or_raise(path)
@@ -176,12 +180,18 @@ module Calabash
           timeout = (ENV['CONNECT_TIMEOUT'] || DEFAULT_SIM_WAIT).to_i
           retry_count = 0
           connected = false
-          puts "Waiting at most #{timeout} seconds for simulator (CONNECT_TIMEOUT)"
-          puts "Retrying at most #{max_retry_count} times (MAX_CONNECT_RETRY)"
+
+          if FULL_CONSOLE_OUTPUT
+            puts "Waiting at most #{timeout} seconds for simulator (CONNECT_TIMEOUT)"
+            puts "Retrying at most #{max_retry_count} times (MAX_CONNECT_RETRY)"
+          end
+
           until connected do
             raise "MAX_RETRIES" if retry_count == max_retry_count
             retry_count += 1
-            puts "(#{retry_count}.) Start Simulator #{sdk}, #{version}, for #{app_bundle_path}"
+            if FULL_CONSOLE_OUTPUT
+              puts "(#{retry_count}.) Start Simulator #{sdk}, #{version}, for #{app_bundle_path}"
+            end
             begin
               Timeout::timeout(timeout, TimeoutErr) do
                 simulator = launch(app_bundle_path, sdk, version, args)
@@ -196,7 +206,9 @@ module Calabash
                     if connected
                       server_version = get_version
                       if server_version
-                        p server_version
+                        if FULL_CONSOLE_OUTPUT
+                          p server_version
+                        end
                         unless version_check(server_version)
                           msgs = ["You're running an older version of Calabash server with a newer client",
                                   "Client:#{Calabash::Cucumber::VERSION}",
@@ -241,7 +253,9 @@ module Calabash
 
       def self.ping_app
         url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
-        puts "Ping #{url}..."
+        if FULL_CONSOLE_OUTPUT
+           puts "Ping #{url}..."   
+        end
         http = Net::HTTP.new(url.host, url.port)
         res = http.start do |sess|
           sess.request Net::HTTP::Get.new url.path
@@ -260,7 +274,9 @@ module Calabash
         endpoint += "/" unless endpoint.end_with? "/"
         url = URI.parse("#{endpoint}version")
 
-        puts "Fetch version #{url}..."
+        if FULL_CONSOLE_OUTPUT
+          puts "Fetch version #{url}..."
+        end
         begin
           body = Net::HTTP.get_response(url).body
           res = JSON.parse(body)
