@@ -33,7 +33,8 @@ Let's go into more detail with this last example. Consider the following sketch 
        def details(talk)
        #touch talk…
        end
-    end```
+    end
+```
 
 
 Suppose you're building the same app for iPhone and Android phones. Most likely the interface of the `TalksScreen` class makes complete sense on both platforms. This means that the calling code, which is usually in a step definition, is independent of platform - hence it can be reused across platforms. 
@@ -69,7 +70,8 @@ For the wordpress app, let's focus on the Login/Add-WordPress Blog screen. This 
     
     def assert_invalid_login_message()
       #…
-    end```
+    end
+```
 
 For this simple screen the interface consists of just these two methods.
 
@@ -103,7 +105,8 @@ For the following, assume we have also a Page Object class `WelcomePage` with a 
     Then /^I am presented with an error message to correct credentials$/ do
       @page.assert_invalid_login_message
       screenshot_embed
-	end```
+    end
+```
 
 The `page` method is a helper method in Calabash which initializes a page object from a class. The `await` method just returns the page object after waiting for the page to be loaded.
 
