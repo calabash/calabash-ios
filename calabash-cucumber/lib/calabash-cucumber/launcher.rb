@@ -6,6 +6,7 @@ require 'run_loop'
 class Calabash::Cucumber::Launcher
   attr_accessor :run_loop
   attr_accessor :device_target
+  attr_accessor :ios_version
 
   def initialize(device_target=:simulator)
     self.device_target = device_target
@@ -30,6 +31,11 @@ class Calabash::Cucumber::Launcher
     (simulator_target? || device_target?) && (not run_loop.nil?)
   end
 
+  def ios_major_version
+    v = ios_version
+    (v && v.split('.')[0])
+  end
+
 
   def reset_app_jail(sdk, app_path)
     return if device_target?
@@ -44,13 +50,14 @@ class Calabash::Cucumber::Launcher
     end
   end
 
-  def relaunch(args=nil)
-    if run_loop
-      RunLoop.stop(run_loop)
-    end
+  def relaunch(args={})
+    RunLoop.stop(run_loop) if run_loop
+
     if device_target?
-      self.run_loop = RunLoop.run(:app => ENV['BUNDLE_ID'])
+      default_args = {:app => ENV['BUNDLE_ID']}
+      self.run_loop = RunLoop.run(default_args.merge(args))
     else
+
       sdk = ENV['SDK_VERSION'] || SimLauncher::SdkDetector.new().latest_sdk_version
       path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
       if ENV['RESET_BETWEEN_SCENARIOS']=="1"
@@ -59,7 +66,8 @@ class Calabash::Cucumber::Launcher
 
       if simulator_target?
         device = (ENV['DEVICE'] || 'iphone').to_sym
-        self.run_loop = RunLoop.run(:app => path, :device => device)
+        default_args = {:app => path, :device => device}
+        self.run_loop = RunLoop.run(default_args.merge(args))
       else
         ## sim launcher
         Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, ENV['DEVICE'] || 'iphone', args)
@@ -67,8 +75,8 @@ class Calabash::Cucumber::Launcher
 
     end
     ensure_connectivity
-
   end
+
 
   def ensure_connectivity
     begin
@@ -120,6 +128,13 @@ class Calabash::Cucumber::Launcher
 
     end
 
+    if status=='200'
+      version_body = JSON.parse(res.body)
+      if version_body['iOS_version']
+        self.ios_version = version_body['iOS_version']
+      end
+    end
+
     status
   end
 
@@ -136,6 +151,5 @@ class Calabash::Cucumber::Launcher
       world.on_launch
     end
   end
-
-
 end
+

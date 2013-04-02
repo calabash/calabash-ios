@@ -21,7 +21,7 @@
 #                                      #
 ########################################
 
-require 'calabash-cucumber/calabash_launcher'
+require 'calabash-cucumber/launcher'
 
 # Uncomment and replace ?? appropriately
 # This should point to your Simulator build
@@ -33,15 +33,15 @@ require 'calabash-cucumber/calabash_launcher'
 
 
 Before do |scenario|
-  @launcher = Calabash::Cucumber::Launcher.new
-  @launcher.relaunch
-  @launcher.calabash_notify(self)
+  @calabash_launcher = Calabash::Cucumber::Launcher.new
+  @calabash_launcher.relaunch
+  @calabash_launcher.calabash_notify(self)
 end
 
 After do |scenario|
-  unless @launcher.calabash_no_stop?
-    if @launcher.active?
-      @launcher.stop
+  unless @calabash_launcher.calabash_no_stop?
+    if @calabash_launcher.active?
+      @calabash_launcher.stop
     else
       Calabash::Cucumber::SimulatorHelper.stop
     end

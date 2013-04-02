@@ -325,7 +325,12 @@ module Calabash
         device = options["DEVICE"] || ENV["DEVICE"] || "iphone"
 
         unless os
-          major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+          if @calabash_launcher && @calabash_launcher.active?
+            major = @calabash_launcher.ios_major_version
+          else
+            major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+          end
+
           unless major
             raise <<EOF
           Unable to determine iOS major version
@@ -471,24 +476,28 @@ EOF
       end
 
 
-      def start_app_in_background(path=nil, sdk = nil, version = 'iphone', args = nil)
+      ## args :app for device bundle id, for sim path to app
+      ##
+      def start_test_server_in_background(args={})
+        target = args[:device_target] || :simulator
+        stop_test_server
+        @calabash_launcher = Calabash::Cucumber::Launcher.new(target)
+        @calabash_launcher.relaunch(args)
 
-        if path.nil?
-          path = ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
+      end
+
+      def stop_test_server
+        if @calabash_launcher
+           @calabash_launcher.stop
         end
-        app_bundle_path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(path)
-
-        @ios_device = RunLoop.run(:app => app_bundle_path)
       end
 
       def send_uia_command(opts ={})
-        RunLoop.send_command(opts[:device] ||@ios_device, opts[:command])
-      end
-
-      def stop_background_app(stop_spec = nil)
-
-        @ios_device = RunLoop.stop(stop_spec || @ios_device)
-
+        run_loop = opts[:run_loop] || (@calabash_launcher && @calabash_launcher.active? && @calabash_launcher.run_loop)
+        command = opts[:command]
+        raise ArgumentError, 'please supply :run_loop or instance var @calabash_launcher' unless run_loop
+        raise ArgumentError, 'please supply :command' unless command
+        RunLoop.send_command(run_loop, opts[:command])
       end
 
 
