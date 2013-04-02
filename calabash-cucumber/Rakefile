@@ -11,44 +11,43 @@ task :build_server do
 
   def build_server
     return if ENV['SKIP_SERVER']
-    framework_path = ENV['FRAMEWORK_PATH']
-
-    unless framework_path
-      dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
-      unless File.exist?(dir)
-        raise <<EOF
-        Unable to find calabash server checked out at #{dir}.
-        Please checkout as #{dir} or set CALABASH_SERVER_PATH to point
-        to Calabash server (branch 0.9.x).
+    framework_zip = nil
+    dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
+    unless File.exist?(dir)
+      raise <<EOF
+      Unable to find calabash server checked out at #{dir}.
+      Please checkout as #{dir} or set CALABASH_SERVER_PATH to point
+      to Calabash server (branch 0.9.x).
 EOF
+    end
+
+    FileUtils.cd(dir) do
+      puts 'Building Server'
+      cmd = 'xcodebuild build -project calabash.xcodeproj -target Framework -configuration Debug -sdk iphonesimulator6.1'
+      puts cmd
+      puts `#{cmd}`
+
+      unless File.exist?(FRAMEWORK)
+        raise 'Unable to build framework'
       end
 
-      FileUtils.cd(dir) do
-        puts 'Building Server'
-        cmd = 'xcodebuild build -project calabash.xcodeproj -target Framework -configuration Debug -sdk iphonesimulator6.1'
-        puts cmd
-        puts `#{cmd}`
+      puts "Zipping down framework"
 
-        unless File.exist?(FRAMEWORK)
-          raise 'Unable to build framework'
-        end
-        framework_path = File.expand_path(FRAMEWORK)
+
+      zip_cmd = "zip -q -r #{ZIP_FILE} #{FRAMEWORK}"
+      puts zip_cmd
+      puts `#{zip_cmd}`
+      framework_zip = File.expand_path(ZIP_FILE)
+      unless File.exist?(framework_zip)
+        raise 'Unable to zip down framework...'
       end
     end
 
-    puts "Zipping down framework #{framework_path}"
+
 
     FileUtils.mkdir_p('staticlib')
     output_path = File.join('staticlib', ZIP_FILE)
-
-    zip_cmd = "zip -q -r #{output_path} #{framework_path}"
-    puts zip_cmd
-    puts `#{zip_cmd}`
-
-    unless File.exist?(output_path)
-      raise 'Unable to zip down framework...'
-    end
-
+    FileUtils.mv(framework_zip,output_path, :force => true)
     puts "Server built to path #{output_path}"
 
   end
