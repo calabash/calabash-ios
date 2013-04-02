@@ -291,3 +291,49 @@ def validate_app(app)
   end
 
 end
+
+
+def update(args)
+  if args.length > 0
+    target = args[0]
+    unless UPDATE_TARGETS.include?(target)
+      msg("Error") do
+        puts "Invalid target #{target}. Must be one of: #{UPDATE_TARGETS.join(' ')}"
+      end
+      exit 1
+    end
+
+
+
+    target_file = "features/support/launch.rb"
+    msg("Question") do
+      puts "I'm about to update the #{target_file} file."
+      puts "Please hit return to confirm that's what you want."
+    end
+    exit 2 unless STDIN.gets.chomp == ''
+
+
+    unless File.exist?(target_file)
+      msg("Error") do
+        puts "Unable to find file #{target_file}"
+        puts "Please change directory so that #{target_file} exists."
+      end
+      exit 1
+    end
+    new_launch_script = File.join(@script_dir,"launch.rb")
+
+    FileUtils.cp(new_launch_script, target_file, :verbose => true)
+
+    msg("Info") do
+      puts "File copied.\n"
+      puts "Launch on device using environment variable DEVICE_TARGET=device."
+    end
+  else
+    msg("Error") do
+      puts "update must take one of the following targets: #{UPDATE_TARGETS.join(' ')}"
+    end
+    exit 1
+
+  end
+
+end

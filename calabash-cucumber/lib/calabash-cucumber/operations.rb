@@ -98,6 +98,20 @@ module Calabash
         res['results'].first
       end
 
+      ## args :app for device bundle id, for sim path to app
+      ##
+      def start_test_server_in_background(args={})
+        target = args[:device_target] || :simulator
+        @calabash_launcher = Calabash::CalabashLauncher.new(target)
+        @calabash_launcher.relaunch(args)
+
+      end
+
+      def stop_test_server
+        if @calabash_launcher
+           @calabash_launcher.stop
+        end
+      end
 
 
       #not officially supported yet

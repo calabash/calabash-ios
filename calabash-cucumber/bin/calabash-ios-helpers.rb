@@ -1,6 +1,7 @@
 require 'tempfile'
 require 'json'
 
+UPDATE_TARGETS = ['hooks']
 
 def msg(title, &block)
   puts "\n" + "-"*10 + title + "-"*10
@@ -21,6 +22,8 @@ def print_usage
       starts an interactive console to interact with your app via Calabash
     setup [<path>]
       setup your XCode project for calabash-ios (EXPERIMENTAL)
+    update [target]
+      updates one of the following targets: hooks
     download
       install latest compatible version of calabash.framework
     check [{<path to .ipa>|<path to .app>}]
