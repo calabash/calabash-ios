@@ -2,11 +2,17 @@ require 'calabash-cucumber/launch/simulator_helper'
 require 'sim_launcher'
 require 'run_loop'
 
-class CalabashLauncherTimeoutErr < Timeout::Error
-end
 
-class CalabashLauncher
+class Calabash::Cucumber::Launcher
   attr_accessor :run_loop
+  attr_accessor :device_target
+
+  def initialize(device_target=:simulator)
+    self.device_target = device_target
+  end
+
+  class CalabashLauncherTimeoutErr < Timeout::Error
+  end
 
   def calabash_no_stop?
     ENV['NO_LAUNCH']=="1" or ENV['NO_STOP']=="1"

@@ -3,6 +3,7 @@ require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/keyboard_helpers'
 require 'calabash-cucumber/wait_helpers'
 require 'calabash-cucumber/location'
+require 'calabash-cucumber/launcher'
 require 'net/http'
 require 'test/unit/assertions'
 require 'json'
@@ -102,7 +103,7 @@ module Calabash
       ##
       def start_test_server_in_background(args={})
         target = args[:device_target] || :simulator
-        @calabash_launcher = Calabash::CalabashLauncher.new(target)
+        @calabash_launcher = Calabash::Cucumber::Launcher.new(target)
         @calabash_launcher.relaunch(args)
 
       end

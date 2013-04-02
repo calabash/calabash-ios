@@ -33,7 +33,7 @@ require 'calabash-cucumber/calabash_launcher'
 
 
 Before do |scenario|
-  @launcher = Calabash::CalabashLauncher.new
+  @launcher = Calabash::Cucumber::Launcher.new
   @launcher.relaunch
   @launcher.calabash_notify(self)
 end
