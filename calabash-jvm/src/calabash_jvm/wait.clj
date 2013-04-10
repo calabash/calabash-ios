@@ -68,3 +68,11 @@
       (let [opts (merge {:timeout_message (str "Timed out waiting for" qs)}
                         opts)]
         (wait_for opts (every? true? (map core/exists? qs))))))
+
+(defn wait_for_not_exists
+  "Opp. of wait_for_exists"
+  ([qs] (wait_for_not_exists qs {}))
+  ([qs opts]
+     (let [opts (merge {:timeout_message (str "Timed out waiting for" qs)}
+                       opts)]
+       (wait_for opts (every? false? (map core/exists? qs))))))
