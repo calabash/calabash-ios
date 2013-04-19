@@ -40,8 +40,17 @@ Then /^I (?:press|touch) (?:input|text) field number (\d+)$/ do |index|
   sleep(STEP_PAUSE)  
 end
 
+
 Then /^I (?:press|touch) the "([^\"]*)" (?:input|text) field$/ do |name|
-  touch("textField placeholder:'#{name}'")
+  placeholder_query = "textField placeholder:'#{name}'"
+  marked_query = "textField marked:'#{name}'"
+  if !query(placeholder_query).empty?
+    touch(placeholder_query)
+  elsif !query(marked_query).empty?
+    touch(marked_query)
+  else
+    screenshot_and_raise "could not find text field with placeholder '#{name}' or marked as '#{name}'"
+  end
   sleep(STEP_PAUSE)
 end
 
