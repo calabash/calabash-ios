@@ -375,7 +375,7 @@ Then /^I should see a "([^\"]*)" (?:input|text) field$/ do |expected_mark|
   res = element_exists("textField placeholder:'#{expected_mark}'") or
           element_exists("textField marked:'#{expected_mark}'")
   unless res
-    screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{txt}"
+    screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{expected_mark}"
   end
 end
 
@@ -383,7 +383,7 @@ Then /^I should not see a "([^\"]*)" (?:input|text) field$/ do |expected_mark|
   res = query("textField placeholder:'#{expected_mark}'")
   res.concat query("textField marked:'#{expected_mark}'")
   unless res.empty?
-    screenshot_and_raise "Expected no textfield with placeholder nor accessibilityLabel: #{txt}, found #{res}"
+    screenshot_and_raise "Expected no textfield with placeholder nor accessibilityLabel: #{expected_mark}, found #{res}"
   end
 end
 
