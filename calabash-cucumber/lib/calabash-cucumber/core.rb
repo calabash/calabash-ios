@@ -496,7 +496,7 @@ EOF
         end
       end
 
-      def current_device
+      def default_device
         @calabash_launcher && @calabash_launcher.device
       end
 

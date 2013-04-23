@@ -323,10 +323,17 @@ def update(args)
     new_launch_script = File.join(@script_dir, 'launch.rb')
 
     FileUtils.cp(new_launch_script, 'features/support/01_launch.rb', :verbose => true)
+    FileUtils.rm(target_file, :force => true, :verbose => true)
+
+    hooks_file = 'features/support/hooks.rb'
+    if File.exist?(hooks_file)
+      FileUtils.mv(hooks_file, 'features/support/02_pre_stop_hooks.rb', :verbose => true)
+    end
 
     msg('Info') do
       puts "File copied.\n"
       puts 'Launch on device using environment variable DEVICE_TARGET=device.'
+      puts 'Launch on simulator by default or using environment variable DEVICE_TARGET=simulator.'
     end
   else
     msg('Error') do
