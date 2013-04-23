@@ -1,5 +1,6 @@
 require 'calabash-cucumber/launch/simulator_helper'
 require 'sim_launcher'
+require 'calabash-cucumber/device'
 require 'run_loop'
 
 

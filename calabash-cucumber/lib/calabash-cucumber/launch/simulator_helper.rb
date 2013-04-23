@@ -21,7 +21,7 @@ module Calabash
 
       # Load environment variable for showing full console output
       # If not env var set then we use true; i.e. output to console in full
-      FULL_CONSOLE_OUTPUT = ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == 'false' ? false : true
+      FULL_CONSOLE_OUTPUT = ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1' ? true : false
 
       def self.relaunch(path, sdk = nil, version = 'iphone', args = nil)
 
@@ -89,7 +89,7 @@ module Calabash
             msg << "i.e., the directory containing your .xcodeproj file."
             msg << "In Xcode, build your calabash target for simulator."
             msg << "Check that your app can be found in\n #{File.expand_path("~/Library/Developer/Xcode/DerivedData")}"
-            msg << "\n\nOption 2). In features/support/launch.rb set APP_BUNDLE_PATH to"
+            msg << "\n\nOption 2). In features/support/01_launch.rb set APP_BUNDLE_PATH to"
             msg << "the path where Xcode has built your Calabash target."
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
@@ -101,7 +101,7 @@ module Calabash
 
             msg << "\nThis means that Calabash can't automatically launch iOS simulator."
             msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
-            msg << "\nIn features/support/launch.rb set APP_BUNDLE_PATH to"
+            msg << "\nIn features/support/01_launch.rb set APP_BUNDLE_PATH to"
             msg << "the path where Xcode has built your Calabash target."
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
@@ -125,7 +125,7 @@ module Calabash
           puts "Unable to find .app bundle at #{path}. It should be an .app directory."
           dd_dir = derived_data_dir_for_project
           app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))
-          msg = "Try setting APP_BUNDLE_PATH in features/support/launch.rb to one of:\n\n"
+          msg = "Try setting APP_BUNDLE_PATH in features/support/01_launch.rb to one of:\n\n"
           msg << app_bundles.join("\n")
           raise msg
         elsif path
@@ -140,7 +140,7 @@ module Calabash
             msg << "Please build your app from Xcode"
             msg << "You should build the -cal target."
             msg << ""
-            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/launch.rb"
+            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb"
             msg << "This should point to the location of your built app linked with calabash.\n"
             raise msg.join("\n")
           end
@@ -151,7 +151,7 @@ module Calabash
             msg << "Please build your app from Xcode"
             msg << "You should build your calabash target."
             msg << ""
-            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/launch.rb"
+            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb"
             msg << "This should point to the location of your built app linked with calabash.\n"
             raise msg.join("\n")
           end
@@ -160,7 +160,7 @@ module Calabash
 
           puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
           puts "Please verify!"
-          puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/launch.rb\n"
+          puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
           puts("-"*37)
           bundle_path = sim_dirs[0]
         end
@@ -246,8 +246,7 @@ module Calabash
 
       def self.launch(app_bundle_path, sdk, version, args = nil)
         simulator = SimLauncher::Simulator.new
-        simulator.quit_simulator
-        simulator.launch_ios_app(app_bundle_path, sdk, version) #, args wait for update to sim launcher
+        simulator.launch_ios_app(app_bundle_path, sdk, version)
         simulator
       end
 

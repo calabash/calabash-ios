@@ -82,21 +82,25 @@ module Calabash
       end
 
       def wait_for_condition(options = {})
-        options[:timeout] = options[:timeout] || 10
+        options[:timeout] = options[:timeout] || 30
         options[:query] = options[:query] || "view"
+        if options.has_key?(:condition)
+          opt_condition = options[:condition]
+          if opt_condition.is_a?(Symbol)
+            target_condition = CALABASH_CONDITIONS[opt_condition]
+          elsif opt_condition.is_a?(String)
+            target_condition = options[:condition]
+          end
+          options[:condition] = target_condition
+        end
         options[:condition] = options[:condition] || CALABASH_CONDITIONS[:none_animating]
         options[:post_timeout] = options[:post_timeout] || 0.1
-        options[:frequency] = options[:frequency] || 0.2
-        options[:retry_frequency] = options[:retry_frequency] || 0.2
+        options[:frequency] = options[:frequency] || 0.3
+        options[:retry_frequency] = options[:retry_frequency] || 0.3
         options[:count] = options[:count] || 2
         options[:timeout_message] = options[:timeout_message] || "Timeout waiting for condition (#{options[:condition]})"
         options[:screenshot_on_error] = options[:screenshot_on_error] || true
 
-        if options[:condition] == CALABASH_CONDITIONS[:none_animating]
-          #puts "Waiting for none-animating has been found unreliable."
-          #puts "You are advised not to use it until this is resolved."
-          #puts "Test will continue..."
-        end
         begin
           Timeout::timeout(options[:timeout],WaitError) do
             loop do
@@ -116,8 +120,12 @@ module Calabash
       end
 
       def wait_for_none_animating(options = {})
-        #sleep(0.3)
         options[:condition] = CALABASH_CONDITIONS[:none_animating]
+        wait_for_condition(options)
+      end
+
+      def wait_for_no_network_indicator(options = {})
+        options[:condition] = CALABASH_CONDITIONS[:no_network_indicator]
         wait_for_condition(options)
       end
 

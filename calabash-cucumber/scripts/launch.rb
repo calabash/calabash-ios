@@ -22,19 +22,19 @@ require 'calabash-cucumber/launcher'
 # However the recommended approach is to let Calabash find the app itself
 # or set the environment variable APP_BUNDLE_PATH
 
-
 Before do |scenario|
   @calabash_launcher = Calabash::Cucumber::Launcher.new
-  @calabash_launcher.relaunch
-  @calabash_launcher.calabash_notify(self)
+  unless @calabash_launcher.calabash_no_launch?
+    @calabash_launcher.relaunch
+    @calabash_launcher.calabash_notify(self)
+  end
 end
 
 After do |scenario|
   unless @calabash_launcher.calabash_no_stop?
+    calabash_exit
     if @calabash_launcher.active?
       @calabash_launcher.stop
-    else
-      Calabash::Cucumber::SimulatorHelper.stop
     end
   end
 end
