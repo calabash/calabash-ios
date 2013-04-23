@@ -6,7 +6,7 @@ require 'run_loop'
 class Calabash::Cucumber::Launcher
   attr_accessor :run_loop
   attr_accessor :device_target
-  attr_accessor :ios_version
+  attr_accessor :device
 
   def initialize(device_target=:simulator)
     self.device_target = device_target
@@ -16,7 +16,11 @@ class Calabash::Cucumber::Launcher
   end
 
   def calabash_no_stop?
-    ENV['NO_LAUNCH']=="1" or ENV['NO_STOP']=="1"
+    calabash_no_launch? or ENV['NO_STOP']=="1"
+  end
+
+  def calabash_no_launch?
+    ENV['NO_LAUNCH']=='1'
   end
 
   def device_target?
@@ -32,15 +36,23 @@ class Calabash::Cucumber::Launcher
   end
 
   def ios_major_version
-    v = ios_version
-    (v && v.split('.')[0])
+    return nil if device.nil? or device.ios_version.nil?
+    device.ios_major_version
+  end
+
+  def ios_version
+    return nil if device.nil?
+    device.ios_version
   end
 
 
-  def reset_app_jail(sdk, app_path)
+  def reset_app_jail(sdk=nil, path=nil)
     return if device_target?
 
-    app = File.basename(app_path)
+    sdk = sdk || ENV['SDK_VERSION'] || SimLauncher::SdkDetector.new().latest_sdk_version
+    path = path || Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+
+    app = File.basename(path)
     bundle = `find "#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}/Applications/" -type d -depth 2 -name "#{app}" | head -n 1`
     return if bundle.empty? # Assuming we're already clean
 
@@ -130,9 +142,7 @@ class Calabash::Cucumber::Launcher
 
     if status=='200'
       version_body = JSON.parse(res.body)
-      if version_body['iOS_version']
-        self.ios_version = version_body['iOS_version']
-      end
+      self.device = Calabash::Cucumber::Device.new(url, version_body)
     end
 
     status

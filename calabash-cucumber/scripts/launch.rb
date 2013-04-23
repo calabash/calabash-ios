@@ -3,33 +3,24 @@
 #       Important Note                 #
 #                                      #
 #   When running calabash-ios tests at #
-#   www.lesspainful.com                #
+#   www.xamarin.com/test-cloud         #
 #   this file will be overwritten by   #
 #   a file which automates             #
 #   app launch on devices.             #
 #                                      #
 #   Don't rely on this file being      #
 #   present when running at            #
-#   www.lesspainful.com.               #
-#                                      #
-#  Only put stuff here to automate     #
-#  iOS Simulator.                      #
-#                                      #
-#  You can put your app bundle path    #
-#  for automating simulator app start: #
-#  Uncomment APP_BUNDLE_PATH =..       #
+#   Xamarin Test Cloud                 #
 #                                      #
 ########################################
 
 require 'calabash-cucumber/launcher'
 
-# Uncomment and replace ?? appropriately
-# This should point to your Simulator build
-# which includes calabash framework
-# this is usually the Calabash build configuration
-# of your production target.
-#APP_BUNDLE_PATH = "~/Library/Developer/Xcode/DerivedData/??/Build/Products/Calabash-iphonesimulator/??.app"
-#
+
+# APP_BUNDLE_PATH = "~/Library/Developer/Xcode/DerivedData/??/Build/Products/Calabash-iphonesimulator/??.app"
+# You may uncomment the above to overwrite the APP_BUNDLE_PATH
+# However the recommended approach is to let Calabash find the app itself
+# or set the environment variable APP_BUNDLE_PATH
 
 
 Before do |scenario|

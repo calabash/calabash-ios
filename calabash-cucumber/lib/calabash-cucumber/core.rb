@@ -21,6 +21,10 @@ module Calabash
         map(uiquery, :query, *args)
       end
 
+      def flash(uiquery, *args)
+        map(uiquery, :flash, *args)
+      end
+
       def server_version
         JSON.parse(http(:path => 'version'))
       end
@@ -454,7 +458,7 @@ EOF
         # Exiting the app shuts down the HTTP connection and generates ECONNREFUSED,
         # which needs to be suppressed.
         begin
-          http(:path => 'exit', :retryable_errors => RETRYABLE_ERRORS - [Errno::ECONNREFUSED])
+          http({:method =>:post, :path => 'exit', :retryable_errors => RETRYABLE_ERRORS - [Errno::ECONNREFUSED]})
         rescue Errno::ECONNREFUSED
           []
         end
@@ -490,6 +494,10 @@ EOF
         if @calabash_launcher
            @calabash_launcher.stop
         end
+      end
+
+      def current_device
+        @calabash_launcher && @calabash_launcher.device
       end
 
       def send_uia_command(opts ={})
