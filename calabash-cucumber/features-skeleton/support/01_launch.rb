@@ -41,5 +41,5 @@ After do |scenario|
 end
 
 at_exit do
-  Calabash::Cucumber::SimulatorHelper.stop
+  Calabash::Cucumber::SimulatorHelper.stop unless @calabash_launcher.calabash_no_stop?
 end
