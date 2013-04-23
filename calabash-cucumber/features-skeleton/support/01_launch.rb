@@ -24,7 +24,7 @@ require 'calabash-cucumber/launcher'
 
 
 Before do |scenario|
-  @calabash_launcher = Calabash::Cucumber::Launcher.new
+  @calabash_launcher =
   unless @calabash_launcher.calabash_no_launch?
     @calabash_launcher.relaunch
     @calabash_launcher.calabash_notify(self)
@@ -41,5 +41,6 @@ After do |scenario|
 end
 
 at_exit do
-  Calabash::Cucumber::SimulatorHelper.stop unless @calabash_launcher.calabash_no_stop?
+  launcher = Calabash::Cucumber::Launcher.new
+  Calabash::Cucumber::SimulatorHelper.stop unless launcher.calabash_no_stop?
 end
