@@ -39,3 +39,7 @@ After do |scenario|
     end
   end
 end
+
+at_exit do
+  Calabash::Cucumber::SimulatorHelper.stop
+end
