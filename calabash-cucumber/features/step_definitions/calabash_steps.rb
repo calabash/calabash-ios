@@ -40,8 +40,17 @@ Then /^I (?:press|touch) (?:input|text) field number (\d+)$/ do |index|
   sleep(STEP_PAUSE)  
 end
 
+
 Then /^I (?:press|touch) the "([^\"]*)" (?:input|text) field$/ do |name|
-  touch("textField placeholder:'#{name}'")
+  placeholder_query = "textField placeholder:'#{name}'"
+  marked_query = "textField marked:'#{name}'"
+  if !query(placeholder_query).empty?
+    touch(placeholder_query)
+  elsif !query(marked_query).empty?
+    touch(marked_query)
+  else
+    screenshot_and_raise "could not find text field with placeholder '#{name}' or marked as '#{name}'"
+  end
   sleep(STEP_PAUSE)
 end
 
@@ -375,7 +384,7 @@ Then /^I should see a "([^\"]*)" (?:input|text) field$/ do |expected_mark|
   res = element_exists("textField placeholder:'#{expected_mark}'") or
           element_exists("textField marked:'#{expected_mark}'")
   unless res
-    screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{txt}"
+    screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{expected_mark}"
   end
 end
 
@@ -383,7 +392,7 @@ Then /^I should not see a "([^\"]*)" (?:input|text) field$/ do |expected_mark|
   res = query("textField placeholder:'#{expected_mark}'")
   res.concat query("textField marked:'#{expected_mark}'")
   unless res.empty?
-    screenshot_and_raise "Expected no textfield with placeholder nor accessibilityLabel: #{txt}, found #{res}"
+    screenshot_and_raise "Expected no textfield with placeholder nor accessibilityLabel: #{expected_mark}, found #{res}"
   end
 end
 
