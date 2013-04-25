@@ -411,10 +411,10 @@ Then /^I see (\d+) (?:input|text) field(?:s)?$/ do |count|
 end
 
 Then /^I should see a "([^\"]*)" (?:input|text) field$/ do |expected_mark|
-  res = element_exists("textField placeholder:'#{expected_mark}'") or
+  res = element_exists("textField placeholder:'#{expected_mark}'") ||
           element_exists("textField marked:'#{expected_mark}'")
   unless res
-    screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{txt}"
+    screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{expected_mark}"
   end
 end
 
