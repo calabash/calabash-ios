@@ -171,7 +171,7 @@ Then /^I wait to see a navigation bar titled "([^\"]*)"$/ do |expected_mark|
 end
 
 Then /^I wait for the "([^\"]*)" (?:input|text) field$/ do |placeholder|
-  wait_for(WAIT_TIMEOUT) { element_exists( "textField placeholder:'#{placeholder}'") }
+  wait_for(WAIT_TIMEOUT) { element_exists( "textField placeholder:'#{placeholder}'") || element_exists( "textField marked:'#{placeholder}'") }
 end
 
 Then /^I wait for (\d+) (?:input|text) field(?:s)?$/ do |count|
@@ -381,7 +381,7 @@ Then /^I see (\d+) (?:input|text) field(?:s)?$/ do |count|
 end
 
 Then /^I should see a "([^\"]*)" (?:input|text) field$/ do |expected_mark|
-  res = element_exists("textField placeholder:'#{expected_mark}'") or
+  res = element_exists("textField placeholder:'#{expected_mark}'") ||
           element_exists("textField marked:'#{expected_mark}'")
   unless res
     screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{expected_mark}"
