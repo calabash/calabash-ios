@@ -48,8 +48,8 @@ def console
   path = ENV['CALABASH_IRBRC']
   unless path
     path = File.expand_path(File.join(@script_dir,".irbrc"))
-    ENV['IRBRC'] = path
   end
+  ENV['IRBRC'] = path
   puts "Running irb..."
   exec("irb")
 end
