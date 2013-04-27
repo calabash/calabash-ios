@@ -356,9 +356,17 @@ EOF
 
         if data.nil? and os=="ios6"
           recording = recording_name_for(recording_name, "ios5", device)
+          data = load_recording(recording, rec_dir)
         end
 
-        data = load_recording(recording, rec_dir)
+        if data.nil? and device=='ipad'
+          if ENV['FULL_CONSOLE_OUTPUT'] == '1'
+            puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
+          end
+          recording = recording_name_for(recording_name, os, 'iphone')
+          data = load_recording(recording, rec_dir)
+        end
+
 
         if data.nil?
           screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
