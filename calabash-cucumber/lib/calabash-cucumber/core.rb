@@ -53,8 +53,10 @@ module Calabash
       end
 
       def query_all(uiquery, *args)
-        puts "query_all is deprecated. Use the new all/visible feature."
-        puts "see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax"
+        unless ENV['CALABASH_NO_DEPRECATION'] == '1'
+          puts "query_all is deprecated. Use the new all/visible feature."
+          puts "see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax"
+        end
         map("all #{uiquery}", :query, *args)
       end
 

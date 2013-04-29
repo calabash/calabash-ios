@@ -198,11 +198,6 @@ module Calabash
                 until connected
                   begin
                     connected = (ping_app == '405')
-                    if ENV['POST_START_BREAK']
-                      puts "Environment var POST_START_BREAK is deprecated and should no longer be necessary."
-                      post_connect_sleep = (ENV['POST_START_BREAK'] || "2").to_f
-                      sleep(post_connect_sleep) unless post_connect_sleep <= 0
-                    end
                     if connected
                       server_version = get_version
                       if server_version
