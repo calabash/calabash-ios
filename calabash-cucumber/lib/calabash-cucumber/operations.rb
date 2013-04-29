@@ -55,7 +55,9 @@ module Calabash
         query(uiquery, :accessibilityLabel)
       end
 
-
+      def identifier(uiquery)
+        query(uiquery, :accessibilityIdentifier)
+      end
 
       def simple_touch(label, *args)
         touch("view marked:'#{label}'", *args)
