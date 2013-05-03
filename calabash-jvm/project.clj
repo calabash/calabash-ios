@@ -14,6 +14,7 @@
                  [org.clojure/data.json "0.1.3"]
                  [clj-http "0.5.3"]
                  [slingshot "0.10.3"]
+                 [me.raynes/conch "0.5.0"]
                  [org.slf4j/slf4j-log4j12 "1.6.4"]
                  [log4j "1.2.16" :exclusions [javax.mail/mail
                                               javax.jms/jms
