@@ -31,6 +31,15 @@
   [q & selectors]
   (apply core/query* q selectors))
 
+(defn flash
+  [q & selectors]
+  "Example : (flash [:UIButton {:marked \"accessiblity-label\"}])"
+  (logging
+   {:query q
+    :extras selectors
+    :action "query*"}
+   (apply http/map-views  q :flash selectors)))
+
 (defn query-all*
   "query views (optionally applying selectors to results)
    Does not filter out non-visible views"
