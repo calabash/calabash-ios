@@ -2,6 +2,7 @@
       :author "Mayank Jain <mayank@helpshift.com>"}
   calabash-jvm.launcher
   (:require [me.raynes.conch :refer [programs with-programs let-programs]]
+            [calabash-jvm.env :as calenv]
             [clojure.data.json :as json]))
 
 ;;; Required for fresh-start-simulator & getting device details.
@@ -22,7 +23,7 @@
 (defn get-device-details-all
   "Returns a map of details"
   []
-  (json/read-json (curl (str calabash-jvm.env/*endpoint* "/version"))))
+  (json/read-json (curl (str calenv/*endpoint* "/version"))))
 
 (defn get-device-details-app-id
   "Returns app-id"

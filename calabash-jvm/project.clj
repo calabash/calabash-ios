@@ -1,4 +1,4 @@
-(defproject org.clojars.firesofmay/calabash-jvm "0.0.5"
+(defproject calabash-jvm "0.0.5"
   :description "JVM client for calabash-ios-server for automated iOS functional testing"
   :url "https://github.com/calabash/calabash-ios"
   :repositories {"sonatype"
