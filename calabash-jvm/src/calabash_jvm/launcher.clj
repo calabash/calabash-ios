@@ -1,7 +1,8 @@
 (ns ^{:doc "Contains methods to get device details and clean start the simulator."
       :author "Mayank Jain <mayank@helpshift.com>"}
   calabash-jvm.launcher
-  (:require [me.raynes.conch :refer [programs with-programs let-programs]]))
+  (:require [me.raynes.conch :refer [programs with-programs let-programs]]
+            [clojure.data.json :as json]))
 
 ;;; Required for fresh-start-simulator & getting device details.
 (programs rm)
@@ -21,7 +22,7 @@
 (defn get-device-details-all
   "Returns a map of details"
   []
-  (clojure.data.json/read-json (curl (str calabash-jvm.env/*endpoint* "/version"))))
+  (json/read-json (curl (str calabash-jvm.env/*endpoint* "/version"))))
 
 (defn get-device-details-app-id
   "Returns app-id"
