@@ -11,8 +11,6 @@
              [events :as events]])
   (:use [calabash-jvm.utils :only [logging]]))
 
-
-
 (l4j/set-loggers!
 
     ["org.apache.http"]
@@ -23,7 +21,7 @@
      :pattern "%p %m (query=%X{query}, action=%X{action}, :extras=%X{extras}) %n"})
 
 
-;; Public API ;;
+;;; Public API Start ;;;
 
 (defn query*
   "query views and optionally apply selectors to the results
@@ -33,7 +31,8 @@
 
 (defn flash
   [q & selectors]
-  "Example : (flash [:UIButton {:marked \"accessiblity-label\"}])"
+  "Flashes a given query.
+   Example : (flash [:UIButton {:marked \"accessiblity-label\"}])"
   (logging
    {:query q
     :extras selectors
@@ -45,6 +44,51 @@
    Does not filter out non-visible views"
   [q & selectors]
   (apply core/query-all* q selectors))
+
+(defn rotate
+  "Rotates the simulator.
+   Accepts -> :left, :right"
+  [dir]
+  (if-not (dir #{:left :right})
+    (println "Incorrect dir given. Accepts only :left, :right")
+    (let [rotate_cmd (str "rotate_"
+                          (name dir)
+                          "_home_"
+                          (name (env/get-current-rotation)))]
+      (print rotate_cmd "\n")
+      (events/playback rotate_cmd)
+      (env/new-current-rotation dir))))
+
+(defn set-orientation
+  "Rotates the device to given orientation"
+  [orientation]
+  (let [rotate-while #(while (not= (env/get-current-rotation) %)
+                        (rotate :left))]
+    (condp = orientation
+      :portrait (rotate-while :down)
+      :portrait-upside-down (rotate-while :up)
+      :landscape-left (rotate-while :left)
+      :landscape-right (rotate-while :right))))
+
+(defn set-orientation-portrait
+  "Rotates the device to portait - Home button is down"
+  []
+  (set-orientation :portrait))
+
+(defn set-orientation-portrait-upside-down
+  "Rotates the device to portait - Home button is up"
+  []
+  (set-orientation :portrait-upside-down))
+
+(defn set-orientation-landscape-left
+  "Rotates the device to portait - Home button is left"
+  []
+  (set-orientation :landscape-left))
+
+(defn set-orientation-landscape-right
+  "Rotates the device to portait - Home button is right"
+  []
+  (set-orientation :landscape-right))
 
 (defn touch*
   "touch the center of the view that results from performing query q.
@@ -91,7 +135,6 @@
        (core/pinch q in-out)
        (pinch in-out))))
 
-
 (defn enter-char
   "Enters a single character (char) using the iOS keyboard.
    The character must be visible. char must be a string of length one or one of
@@ -115,7 +158,6 @@
   []  (enter-char "Return"))
 
 (defn search "Touches return/done/search on keyboard" [] (done))
-
 
 (defn screenshot
   "Takes a screenshot of the current view (keyword args :prefix and :name determine output file)"
@@ -144,17 +186,13 @@
   ([recname options]
      (events/interpolate recname options)))
 
-
-
-
-
 (defn set-http-log-level!
   [level] (l4j/set-logger-level! "org.apache.http" level))
 
 (defn set-calabash-log-level!
   [level] (l4j/set-logger-level! "calabash-jvm" level))
 
-;;;; PUBLIC DSL ;;;;
+;;; PUBLIC DSL End ;;;
 
 (defn- dsl-op
   [key val]

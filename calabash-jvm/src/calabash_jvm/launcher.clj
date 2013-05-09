@@ -2,7 +2,7 @@
       :author "Mayank Jain <mayank@helpshift.com>"}
   calabash-jvm.launcher
   (:require [me.raynes.conch :refer [programs with-programs let-programs]]
-            [calabash-jvm.env :as calenv]
+            [calabash-jvm.env :as env]
             [clojure.data.json :as json]))
 
 ;;; Required for fresh-start-simulator & getting device details.
@@ -23,7 +23,7 @@
 (defn get-device-details-all
   "Returns a map of details"
   []
-  (json/read-json (curl (str calenv/*endpoint* "/version"))))
+  (json/read-json (curl (str env/*endpoint* "/version"))))
 
 (defn get-device-details-app-id
   "Returns app-id"
@@ -99,4 +99,5 @@
   (rm "-rf" (get-user-path "/Users/%s/Library/Application Support/iPhone Simulator/"))
   (Thread/sleep 2000)
   (apply ios-sim "launch" (get-app-full-path project-name app-name) "--sdk" version "--exit" "--family" family extras)
-  (apply str "Fresh Simulator Started : " family " " version " " project-name " " app-name " " extras))
+  (apply str "Fresh Simulator Started : " family " " version " " project-name " " app-name " " extras)
+  (env/set-current-rotation :down))
