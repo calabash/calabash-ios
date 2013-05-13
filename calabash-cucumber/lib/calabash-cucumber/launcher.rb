@@ -25,7 +25,7 @@ class Calabash::Cucumber::Launcher
   end
 
   def device_target?
-    ENV['DEVICE_TARGET'] == 'device'
+    (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
   end
 
   def simulator_target?
@@ -68,7 +68,10 @@ class Calabash::Cucumber::Launcher
 
     if device_target?
       default_args = {:app => ENV['BUNDLE_ID']}
-      default_args[:udid] = ENV['UDID_TARGET'] if ENV['UDID_TARGET']
+      target = ENV['DEVICE_TARGET']
+      if target != 'DEVICE'
+        default_args[:udid] = target
+      end
       self.run_loop = RunLoop.run(default_args.merge(args))
     else
 
