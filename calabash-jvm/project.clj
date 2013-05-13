@@ -1,4 +1,4 @@
-(defproject calabash-jvm "0.0.6"
+(defproject calabash-jvm "0.0.7"
   :description "JVM client for calabash-ios-server for automated iOS functional testing"
   :url "https://github.com/calabash/calabash-ios"
   :repositories {"sonatype"
@@ -26,9 +26,9 @@
                  [org.clojure/tools.nrepl "0.2.0-beta9"]]
 
   :aot [calabash-jvm]
+  :resource-paths ["src/resources/events"]  ;Playback events files included in classpath/jar
 
   :plugins [[lein-swank "1.4.4"]]
 
-  :resources-path "resources"
   :dev-dependencies [[org.clojure/clojure "1.4.0"]
                      [org.clojure/clojure-source "1.4.0"]])
