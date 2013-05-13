@@ -67,7 +67,7 @@ class Calabash::Cucumber::Launcher
     RunLoop.stop(run_loop) if run_loop
 
     if device_target?
-      default_args = {:app => ENV['BUNDLE_ID']}
+      default_args = {:app => ENV['BUNDLE_ID'], :udid => ENV['UDID_TARGET']}
       self.run_loop = RunLoop.run(default_args.merge(args))
     else
 
