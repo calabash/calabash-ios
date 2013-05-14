@@ -16,7 +16,8 @@ Gem::Specification.new do |s|
   s.executables   = "calabash-ios"
   s.require_paths = ["lib"]
 
-  s.add_dependency( "cucumber" )
+  s.add_dependency( "cucumber", "~> 1.3.0" )
+  s.add_dependency( "calabash-common", "~> 0.0.1" )
   s.add_dependency( "json" )
   s.add_dependency( "CFPropertyList" )
   s.add_dependency( "sim_launcher", "0.4.6")
