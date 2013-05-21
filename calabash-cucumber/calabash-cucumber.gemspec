@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency( "location-one", "~>0.0.9")
   s.add_dependency( "httpclient","2.3.2")
   s.add_dependency( "bundler", "~> 1.1")
-  s.add_dependency( "run_loop", "0.0.9" )
+  s.add_dependency( "run_loop", "~> 0.0.10" )
   s.add_dependency( "awesome_print")
 
 end

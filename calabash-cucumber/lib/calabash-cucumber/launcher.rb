@@ -123,7 +123,7 @@ class Calabash::Cucumber::Launcher
           puts "Timed out...Retry.."
         end
       end
-    rescue e
+    rescue RuntimeError => e
       p e
       msg = "Unable to make connection to Calabash Server at #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}\n"
       msg << "Make sure you don't have a firewall blocking traffic to #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}.\n"
@@ -136,7 +136,7 @@ class Calabash::Cucumber::Launcher
 
     http = Net::HTTP.new(url.host, url.port)
     res = http.start do |sess|
-      sess.request Net::HTTP::Get.new "version"
+      sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || "version")
     end
     status = res.code
     begin
