@@ -226,10 +226,10 @@ module Calabash
                 end
               end
             rescue TimeoutErr => e
-              puts "Timed out..."
+              puts 'Timed out...'
             end
           end
-        rescue e
+        rescue RuntimeError => e
           p e
           msg = "Unable to make connection to Calabash Server at #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}\n"
           msg << "Make sure you've' linked correctly with calabash.framework and set Other Linker Flags.\n"
