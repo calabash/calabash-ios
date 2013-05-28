@@ -190,6 +190,31 @@ module Calabash
         views_touched
       end
 
+
+      def scroll_to_row_with_mark(row_id, options={:query => 'tableView',
+                                                   :scroll_position => :middle,
+                                                   :animate => true})
+        uiquery = options[:query] || 'tableView'
+
+        args = []
+        if options.has_key?(:scroll_position)
+          args << options[:scroll_position]
+        else
+          args << 'middle'
+        end
+        if options.has_key?(:animate)
+          args << options[:animate]
+        end
+
+        views_touched=map(uiquery, :scrollToRowWithMark, row_id, *args)
+
+        if views_touched.empty? or views_touched.member? '<VOID>'
+          msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
+          screenshot_and_raise msg
+        end
+        views_touched
+      end
+
       def pinch(in_out, options={})
         file = "pinch_in"
         if in_out.to_sym==:out
