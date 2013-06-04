@@ -7,6 +7,7 @@ end
 
 def calabash_sim_reset
   reset_script = File.expand_path("#{@script_dir}/reset_simulator.scpt")
+  app_path = File.expand_path("#{@script_dir}/EmptyAppHack.app")
   launcher = SimLauncher::Simulator.new
 
   sdks = ENV['SDK_VERSIONS']
@@ -16,7 +17,12 @@ def calabash_sim_reset
     sdks = SimLauncher::SdkDetector.new(launcher).available_sdk_versions
   end
 
-  launcher.reset(sdks)
+
+  sdks.each do |sdk|
+    Calabash::Cucumber::SimulatorHelper.relaunch(app_path, sdk, ENV['DEVICE'] || 'iphone')
+    puts `osascript #{reset_script}`
+  end
+
 
 end
 
