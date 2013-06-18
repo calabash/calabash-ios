@@ -390,7 +390,7 @@ EOF
         end
 
         if data.nil? and device=='ipad'
-          if ENV['FULL_CONSOLE_OUTPUT'] == '1'
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
             puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
           end
           recording = recording_name_for(recording_name, os, 'iphone')

@@ -101,7 +101,9 @@ class Calabash::Cucumber::Launcher
       timeout = (ENV['CONNECT_TIMEOUT'] || 30).to_i
       retry_count = 0
       connected = false
-      puts "Waiting for App to be ready"
+      if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+        puts "Waiting for App to be ready"
+      end
       until connected do
         raise "MAX_RETRIES" if retry_count == max_retry_count
         retry_count += 1
