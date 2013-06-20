@@ -1,9 +1,11 @@
 require 'httpclient'
 require 'calabash-cucumber/launch/simulator_helper'
+require 'calabash-cucumber/uia'
 
 module Calabash
   module Cucumber
     module Core
+      include Calabash::Cucumber::UIA
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
       CAL_HTTP_RETRY_COUNT=3
@@ -91,11 +93,18 @@ module Calabash
         end
 
         options[:query] = uiquery
-        views_touched = playback("touch", options)
+        views_touched = do_touch(options)
         unless uiquery.nil?
           screenshot_and_raise "could not find view to touch: '#{uiquery}', args: #{options}" if views_touched.empty?
         end
         views_touched
+      end
+
+      def do_touch(options)
+        if ENV['OS']=='ios7' || @calabash_launcher && @calabash_launcher.ios_major_version == "7"
+          options[:uia_gesture] = :tap
+        end
+        playback("touch", options)
       end
 
       def swipe(dir, options={})
@@ -412,6 +421,7 @@ EOF
         post_data<< %Q|,"query":"#{escape_quotes(options[:query])}"| if options[:query]
         post_data<< %Q|,"offset":#{options[:offset].to_json}| if options[:offset]
         post_data<< %Q|,"reverse":#{options[:reverse]}| if options[:reverse]
+        post_data<< %Q|,"uia_gesture":"#{options[:uia_gesture]}"| if options[:uia_gesture]
         post_data<< %Q|,"prototype":"#{options[:prototype]}"| if options[:prototype]
         post_data << "}"
 
@@ -537,14 +547,6 @@ EOF
 
       def default_device
         @calabash_launcher && @calabash_launcher.device
-      end
-
-      def send_uia_command(opts ={})
-        run_loop = opts[:run_loop] || (@calabash_launcher && @calabash_launcher.active? && @calabash_launcher.run_loop)
-        command = opts[:command]
-        raise ArgumentError, 'please supply :run_loop or instance var @calabash_launcher' unless run_loop
-        raise ArgumentError, 'please supply :command' unless command
-        RunLoop.send_command(run_loop, opts[:command])
       end
 
 

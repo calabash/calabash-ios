@@ -72,6 +72,7 @@ class Calabash::Cucumber::Launcher
       if target != 'DEVICE'
         default_args[:udid] = target
       end
+      default_args
       self.run_loop = RunLoop.run(default_args.merge(args))
     else
 
