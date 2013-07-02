@@ -255,29 +255,23 @@ module Calabash
         status
       end
 
-      def self.get_version
+      VERSION_ENDPOINT = "/version"
+
+      def self.version_info
         endpoint = ENV['DEVICE_ENDPOINT']|| "http://localhost:37265"
-        endpoint += "/" unless endpoint.end_with? "/"
-        url = URI.parse("#{endpoint}version")
+        url = URI.parse(endpoint.chomp("/") + VERSION_ENDPOINT)
 
         puts "Fetch version #{url}..."
         begin
           body = Net::HTTP.get_response(url).body
-          res = JSON.parse(body)
-          if res['iOS_version']
-            @ios_version = res['iOS_version']
-          end
-          res
+          JSON.parse(body)
         rescue
           nil
         end
       end
 
       def self.ios_version
-        unless @ios_version
-          get_version
-        end
-        @ios_version
+        @_ios_version ||= (version_info || {})['iOS_version']
       end
 
       def self.ios_major_version

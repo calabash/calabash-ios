@@ -22,7 +22,7 @@ module Calabash
       end
 
       def server_version
-        JSON.parse(http(:path => 'version'))
+        SimulatorHelper.version_info
       end
 
       def client_version
