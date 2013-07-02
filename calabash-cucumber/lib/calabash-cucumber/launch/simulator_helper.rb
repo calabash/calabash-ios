@@ -255,7 +255,7 @@ module Calabash
         status
       end
 
-      VERSION_ENDPOINT = "/version"
+      VERSION_ENDPOINT = ENV['CALABASH_WITH_FRANK'] ? "/calabash_version" : "/version"
 
       def self.version_info
         endpoint = ENV['DEVICE_ENDPOINT']|| "http://localhost:37265"
