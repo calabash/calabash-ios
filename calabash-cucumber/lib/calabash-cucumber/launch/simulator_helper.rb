@@ -19,8 +19,8 @@ module Calabash
 
       DEFAULT_SIM_RETRY = 2
 
-      # Load environment variable for showing full console output
-      # If not env var set then we use true; i.e. output to console in full
+      # Load environment variable for showing full console output.
+      # If not env var set then we use false, i.e. output to console is limited.
       FULL_CONSOLE_OUTPUT = ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1' ? true : false
 
       def self.relaunch(path, sdk = nil, version = 'iphone', args = nil)
@@ -155,13 +155,15 @@ module Calabash
             msg << "This should point to the location of your built app linked with calabash.\n"
             raise msg.join("\n")
           end
-          puts("-"*37)
-          puts "Auto detected APP_BUNDLE_PATH:\n\n"
+          if FULL_CONSOLE_OUTPUT
+            puts("-"*37)
+            puts "Auto detected APP_BUNDLE_PATH:\n\n"
 
-          puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
-          puts "Please verify!"
-          puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
-          puts("-"*37)
+            puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
+            puts "Please verify!"
+            puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
+            puts("-"*37)
+          end
           bundle_path = sim_dirs[0]
         end
         bundle_path
