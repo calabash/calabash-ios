@@ -63,8 +63,14 @@ Then /^I (?:press|touch) list item number (\d+)$/ do |index|
 end
 
 Then /^I (?:press|touch) list item "([^\"]*)"$/ do |cell_name|
-   touch("tableViewCell marked:'#{cell_name}'")
-   sleep(STEP_PAUSE)
+  if
+  query("tableViewCell marked:'#{cell_name}'").empty?
+  then
+    touch("tableViewCell text:'#{cell_name}'")
+  else
+    touch("tableViewCell marked:'#{cell_name}'")
+  end
+  sleep(STEP_PAUSE)
 end
 
 Then /^I toggle the switch$/ do
