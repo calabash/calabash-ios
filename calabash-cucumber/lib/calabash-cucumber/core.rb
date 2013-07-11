@@ -399,7 +399,7 @@ EOF
 
         file_name = "#{file_name}_#{os}_#{device}.base64"
         system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
-        system("openssl base64 -in _recording_binary.plist -out #{file_name}")
+        system("openssl base64 -in _recording_binary.plist -out '#{file_name}'")
         system("rm _recording.plist _recording_binary.plist")
         file_name
       end
