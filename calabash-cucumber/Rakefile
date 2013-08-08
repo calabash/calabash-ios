@@ -56,7 +56,9 @@ EOF
 
 end
 
-task :build => [:build_server]
-task :install => [:build_server]
-task :release => [:build_server]
+task :build_server => [:build_server]
+task :install_server => [:build_server]
+task :release_server => [:build_server]
+
+
 
