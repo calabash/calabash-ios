@@ -72,6 +72,10 @@ module Calabash
         version_hash(ios_version)[:major_version]
       end
 
+      def ios7?
+        ios_major_version.eql?('7')
+      end
+
       def ios6?
         ios_major_version.eql?('6')
       end
