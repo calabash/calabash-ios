@@ -10,7 +10,7 @@ module Calabash
 
       GESTALT_IPHONE = 'iPhone'
       GESTALT_IPAD = 'iPad'
-      GESTALT_IPHONE5 = 'Retina 4-inch'
+      GESTALT_IPHONE5 = '4-inch'
       GESTALT_SIM_SYS = 'x86_64'
       GESTALT_IPOD = 'iPod'
 
@@ -55,7 +55,7 @@ module Calabash
 
       def iphone_5?
         if simulator?
-          simulator_details.split(/[(),]/)[3].eql? GESTALT_IPHONE5
+          simulator_details.split(/[(),]/)[3].split(/ /).last.eql? GESTALT_IPHONE5
         else
           system.split(/[\D]/).delete_if { |x| x.eql?('') }.first.eql?('5')
         end
@@ -70,6 +70,10 @@ module Calabash
 
       def ios_major_version
         version_hash(ios_version)[:major_version]
+      end
+
+      def ios7?
+        ios_major_version.eql?('7')
       end
 
       def ios6?
