@@ -55,7 +55,7 @@ module Calabash
 
       def iphone_5?
         if simulator?
-          simulator_details.split(/[(),]/)[3].split(/ /).last.eql? GESTALT_IPHONE5
+          !simulator_details.scan(GESTALT_IPHONE5).empty?
         else
           system.split(/[\D]/).delete_if { |x| x.eql?('') }.first.eql?('5')
         end
