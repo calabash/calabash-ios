@@ -393,14 +393,16 @@ EOF
         recording = recording_name_for(recording_name, os, device)
         data = load_recording(recording, rec_dir)
 
-        version_counter = os[-1,1].to_i
-        loop do
-          version_counter = version_counter - 1
-          break if version_counter < 5
-          loop_os = "ios#{version_counter}"
-          recording = recording_name_for(recording_name, loop_os, device)
-          data = load_recording(recording, rec_dir)
-          break if !data.nil?
+        if data.nil?
+          version_counter = os[-1,1].to_i
+          loop do
+            version_counter = version_counter - 1
+            break if version_counter < 5
+            loop_os = "ios#{version_counter}"
+            recording = recording_name_for(recording_name, loop_os, device)
+            data = load_recording(recording, rec_dir)
+            break if !data.nil?
+          end
         end
 
         if data.nil? and device=='ipad'
