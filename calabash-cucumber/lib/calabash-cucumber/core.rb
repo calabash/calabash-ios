@@ -455,6 +455,7 @@ EOF
         res['results']
       end
 
+      # not called? -jjm 2013-08-16
       def interpolate(recording, options={})
         data = load_playback_data(recording)
 
