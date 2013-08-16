@@ -349,10 +349,6 @@ module Calabash
       end
 
       def load_recording(recording, rec_dir)
-        if File.exists?(recording)
-          return File.read(recording)
-        end
-
         directories = playback_file_directories(rec_dir)
         directories.each { |dir|
           path = "#{dir}/#{recording}"
@@ -360,14 +356,17 @@ module Calabash
             return File.read(path)
           end
         }
-
         nil
       end
 
       def playback_file_directories (rec_dir)
-        [rec_dir, "#{Dir.pwd}", "#{Dir.pwd}/features", "#{DATA_PATH}/resources/"].uniq
+        # rec_dir is either ENV['PLAYBACK_DIR'] or ./playback
+        [File.expand_path(rec_dir),
+         "#{Dir.pwd}",
+         "#{Dir.pwd}/features",
+         "#{Dir.pwd}/features/playback",
+         "#{DATA_PATH}/resources/"].uniq
       end
-
 
       def load_playback_data(recording_name, options={})
         os = options["OS"] || ENV["OS"]
@@ -394,6 +393,7 @@ EOF
           os = "ios#{major}"
         end
 
+        # this should probably default to ./features/playback and not to ./playback
         rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/playback"
 
         recording = recording_name_for(recording_name, os, device)
@@ -429,7 +429,7 @@ EOF
           candidates.each { |file| searched_for.concat("    * '#{file}'\n") }
           searched_in = "  in directories =>\n"
           playback_file_directories(rec_dir).each { |dir| searched_in.concat("    * '#{dir}'\n") }
-          screenshot_and_raise "Playback file not found for: '#{recording_name}' =>\n#{searched_for}#{searched_in}"
+          screenshot_and_raise "Playback file not found for: '#{recording_name}'\n#{searched_for}#{searched_in}"
         end
 
         data
