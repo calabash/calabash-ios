@@ -348,20 +348,26 @@ module Calabash
         end
       end
 
-
       def load_recording(recording, rec_dir)
-        data = nil
-        if (File.exists?(recording))
-          data = File.read(recording)
-        elsif (File.exists?("features/#{recording}"))
-          data = File.read("features/#{recording}")
-        elsif (File.exists?("#{rec_dir}/#{recording}"))
-          data = File.read("#{rec_dir}/#{recording}")
-        elsif (File.exists?("#{DATA_PATH}/resources/#{recording}"))
-          data = File.read("#{DATA_PATH}/resources/#{recording}")
+        if File.exists?(recording)
+          return File.read(recording)
         end
-        data
+
+        directories = playback_file_directories(rec_dir)
+        directories.each { |dir|
+          path = "#{dir}/#{recording}"
+          if File.exists?(path)
+            return File.read(path)
+          end
+        }
+
+        nil
       end
+
+      def playback_file_directories (rec_dir)
+        [rec_dir, "#{Dir.pwd}", "#{Dir.pwd}/features", "#{DATA_PATH}/resources/"].uniq
+      end
+
 
       def load_playback_data(recording_name, options={})
         os = options["OS"] || ENV["OS"]
@@ -393,14 +399,20 @@ EOF
         recording = recording_name_for(recording_name, os, device)
         data = load_recording(recording, rec_dir)
 
-        version_counter = os[-1,1].to_i
-        loop do
-          version_counter = version_counter - 1
-          break if version_counter < 5
-          loop_os = "ios#{version_counter}"
-          recording = recording_name_for(recording_name, loop_os, device)
-          data = load_recording(recording, rec_dir)
-          break if !data.nil?
+        candidates = []
+
+        if data.nil?
+          candidates << recording
+          version_counter = os[-1,1].to_i
+          loop do
+            version_counter = version_counter - 1
+            break if version_counter < 5
+            loop_os = "ios#{version_counter}"
+            recording = recording_name_for(recording_name, loop_os, device)
+            candidates << recording
+            data = load_recording(recording, rec_dir)
+            break if !data.nil?
+          end
         end
 
         if data.nil? and device=='ipad'
@@ -408,12 +420,16 @@ EOF
             puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
           end
           recording = recording_name_for(recording_name, os, 'iphone')
+          candidates << recording
           data = load_recording(recording, rec_dir)
         end
 
-
         if data.nil?
-          screenshot_and_raise "Playback not found: #{recording} (searched for #{recording} in #{Dir.pwd}, #{rec_dir}, #{DATA_PATH}/resources"
+          searched_for = "  searched for => \n"
+          candidates.each { |file| searched_for.concat("    * '#{file}'\n") }
+          searched_in = "  in directories =>\n"
+          playback_file_directories(rec_dir).each { |dir| searched_in.concat("    * '#{dir}'\n") }
+          screenshot_and_raise "Playback file not found for: '#{recording_name}' =>\n#{searched_for}#{searched_in}"
         end
 
         data
