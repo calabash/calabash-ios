@@ -388,7 +388,7 @@ EOF
           os = "ios#{major}"
         end
 
-        rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/playback"
+        rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
 
         recording = recording_name_for(recording_name, os, device)
         data = load_recording(recording, rec_dir)
