@@ -493,7 +493,18 @@ EOF
         system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
         system("openssl base64 -in _recording_binary.plist -out '#{file_name}'")
         system("rm _recording.plist _recording_binary.plist")
-        file_name
+
+        rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
+        unless Dir.exists?(rec_dir)
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            puts "creating playback directory at '#{rec_dir}'"
+          end
+          system("mkdir -p #{rec_dir}")
+        end
+
+        system("mv #{file_name} #{rec_dir}")
+        "#{file_name} ==> '#{rec_dir}/#{file_name}'"
+
       end
 
       def backdoor(sel, arg)
