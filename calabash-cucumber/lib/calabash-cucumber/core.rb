@@ -360,7 +360,7 @@ module Calabash
       end
 
       def playback_file_directories (rec_dir)
-        # rec_dir is either ENV['PLAYBACK_DIR'] or ./playback
+        # rec_dir is either ENV['PLAYBACK_DIR'] or ./features/playback
         [File.expand_path(rec_dir),
          "#{Dir.pwd}",
          "#{Dir.pwd}/features",
@@ -393,14 +393,32 @@ EOF
           os = "ios#{major}"
         end
 
-        # this should probably default to ./features/playback and not to ./playback
-        rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/playback"
-
-        recording = recording_name_for(recording_name, os, device)
-        data = load_recording(recording, rec_dir)
+        rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
 
         candidates = []
+        data = find_compatible_recording(recording_name, os, rec_dir, device, candidates)
 
+        if data.nil? and device=='ipad'
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
+          end
+          data = find_compatible_recording(recording_name, os, rec_dir, 'iphone', candidates)
+        end
+
+        if data.nil?
+          searched_for = "  searched for => \n"
+          candidates.each { |file| searched_for.concat("    * '#{file}'\n") }
+          searched_in = "  in directories =>\n"
+          playback_file_directories(rec_dir).each { |dir| searched_in.concat("    * '#{dir}'\n") }
+          screenshot_and_raise "Playback file not found for: '#{recording_name}'\n#{searched_for}#{searched_in}"
+        end
+
+        data
+      end
+
+      def find_compatible_recording (recording_name, os, rec_dir, device, candidates)
+        recording = recording_name_for(recording_name, os, device)
+        data = load_recording(recording, rec_dir)
         if data.nil?
           candidates << recording
           version_counter = os[-1,1].to_i
@@ -414,24 +432,11 @@ EOF
             break if !data.nil?
           end
         end
-
-        if data.nil? and device=='ipad'
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
-          end
-          recording = recording_name_for(recording_name, os, 'iphone')
-          candidates << recording
-          data = load_recording(recording, rec_dir)
-        end
-
-        if data.nil?
-          searched_for = "  searched for => \n"
-          candidates.each { |file| searched_for.concat("    * '#{file}'\n") }
-          searched_in = "  in directories =>\n"
-          playback_file_directories(rec_dir).each { |dir| searched_in.concat("    * '#{dir}'\n") }
-          screenshot_and_raise "Playback file not found for: '#{recording_name}'\n#{searched_for}#{searched_in}"
-        end
-
+        # useful for debugging recordings, but too verbose for release
+        # suggest (yet) another variable CALABASH_DEBUG_PLAYBACK ?
+        #if !data.nil? && ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+        #  puts "found compatible playback: '#{rec_dir}/#{recording}'"
+        #end
         data
       end
 
@@ -508,7 +513,18 @@ EOF
         system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
         system("openssl base64 -in _recording_binary.plist -out '#{file_name}'")
         system("rm _recording.plist _recording_binary.plist")
-        file_name
+
+        rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
+        unless File.directory?(rec_dir)
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            puts "creating playback directory at '#{rec_dir}'"
+          end
+          system("mkdir -p #{rec_dir}")
+        end
+
+        system("mv #{file_name} #{rec_dir}")
+        "#{file_name} ==> '#{rec_dir}/#{file_name}'"
+
       end
 
       def backdoor(sel, arg)
