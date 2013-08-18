@@ -82,6 +82,12 @@ module Calabash
         text_fields_modified
       end
 
+      def clear_text(uiquery)
+        views_modified = map(uiquery, :setText, '')
+        screenshot_and_raise "could not find text field #{uiquery}" if views_modified.empty?
+        views_modified
+      end
+
 
       def set_user_pref(key, val)
         res = http({:method => :post, :path => 'userprefs'},
