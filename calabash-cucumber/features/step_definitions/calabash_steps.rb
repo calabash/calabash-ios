@@ -97,12 +97,16 @@ end
 ## -- Entering text -- ##
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" field$/ do |text_to_type, field_name|
-  set_text("textField marked:'#{field_name}'", text_to_type)
+  touch("textField marked:'#{field_name}'")
+  await_keyboard
+  keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
-  set_text("textField placeholder:'#{field_name}'", text_to_type)
+  touch("textField marked:'#{field_name}'")
+  await_keyboard
+  keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
 
@@ -127,24 +131,33 @@ end
 Then /^I enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text, index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
-  set_text("textField index:#{index-1}",text)
+  touch("textField index:#{index-1}")
+  await_keyboard()
+  keyboard_enter_text text
+  sleep(STEP_PAUSE)
 end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text_to_type, index|
-  macro %Q|I touch text field number #{index}|
+  idx = index.to_i
+  macro %Q|I touch text field number #{idx}|
   await_keyboard()
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
 
 When /^I clear "([^\"]*)"$/ do |name|
-  macro %Q|I enter "" into the "#{name}" text field|
+  # definition changed - now uses keyboard_enter_text instead of (deprecated) set_text
+  # macro %Q|I enter "" into the "#{name}" text field|
+  unless ENV['CALABASH_NO_DEPRECATION'] == '1'
+    warn "WARNING: 'When I clear <name>' will be deprecated because it is ambiguous - what should be cleared?"
+  end
+  clear_text("textField marked:'#{name}'")
 end
 
 Then /^I clear (?:input|text) field number (\d+)$/ do |index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
-  set_text("textField index:#{index-1}","")
+  clear_text("textField index:#{index-1}")
 end
 
 # -- See -- #
@@ -176,8 +189,11 @@ Then /^I wait to see a navigation bar titled "([^\"]*)"$/ do |expected_mark|
   end
 end
 
-Then /^I wait for the "([^\"]*)" (?:input|text) field$/ do |placeholder|
-  wait_for(WAIT_TIMEOUT) { element_exists( "textField placeholder:'#{placeholder}'") || element_exists( "textField marked:'#{placeholder}'") }
+Then /^I wait for the "([^\"]*)" (?:input|text) field$/ do |placeholder_or_view_mark|
+  wait_for(WAIT_TIMEOUT) {
+    element_exists( "textField placeholder:'#{placeholder_or_view_mark}'") ||
+          element_exists( "textField marked:'#{placeholder_or_view_mark}'")
+  }
 end
 
 Then /^I wait for (\d+) (?:input|text) field(?:s)?$/ do |count|

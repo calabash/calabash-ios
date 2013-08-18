@@ -74,12 +74,18 @@ module Calabash
 
       def set_text(uiquery, txt)
         unless ENV['CALABASH_NO_DEPRECATION'] == '1'
-          puts 'set_text is deprecated, please use keyboard_enter_text'
-          puts 'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API'
+          warn "WARNING: set_text will be deprecated.\n  * to enter text using the native keyboard use 'keyboard_enter_text'\n  * to clear a text field or text view use 'clear_text'"
+          warn 'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API'
         end
         text_fields_modified = map(uiquery, :setText, txt)
         screenshot_and_raise "could not find text field #{uiquery}" if text_fields_modified.empty?
         text_fields_modified
+      end
+
+      def clear_text(uiquery)
+        views_modified = map(uiquery, :setText, '')
+        screenshot_and_raise "could not find text field #{uiquery}" if views_modified.empty?
+        views_modified
       end
 
 
