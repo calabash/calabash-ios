@@ -93,8 +93,11 @@ module Calabash
       end
 
       def keyboard_enter_text(text)
+        # check for iOS 7 - ATM this will send the app into an infinite loop
+        if ENV['OS']=='ios7' || @calabash_launcher && @calabash_launcher.ios_major_version == "7"
+          pending "'keyboard_enter_text' is not available for iOS 7 (yet)"
+        end
         fail("No visible keyboard") if element_does_not_exist("view:'UIKBKeyplaneView'")
-
         text.each_char do |ch|
           begin
             keyboard_enter_char(ch, false)
