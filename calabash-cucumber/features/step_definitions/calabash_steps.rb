@@ -140,7 +140,7 @@ Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field n
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
   touch("textField index:#{index-1}")
   await_keyboard
-  keyboard_enter_text(text)
+  keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
 
