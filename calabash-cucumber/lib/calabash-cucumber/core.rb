@@ -109,8 +109,8 @@ module Calabash
 
       def swipe(dir, options={})
         dir = dir.to_sym
-        @current_rotation = @current_rotation || :down
-        if @current_rotation == :left
+        current_orientation = device_orientation().to_sym
+        if current_orientation == :left
           case dir
             when :left then
               dir = :down
@@ -123,7 +123,7 @@ module Calabash
             else
           end
         end
-        if @current_rotation == :right
+        if current_orientation == :right
           case dir
             when :left then
               dir = :up
@@ -136,7 +136,7 @@ module Calabash
             else
           end
         end
-        if @current_rotation == :up
+        if current_orientation == :up
           case dir
             when :left then
               dir = :right
@@ -232,49 +232,101 @@ module Calabash
         playback(file, options)
       end
 
-      #Current position of home button
-      def current_rotation
-        @current_rotation
+      def rotation_candidates
+        ['rotate_left_home_down', 'rotate_left_home_left',
+         'rotate_left_home_right', 'rotate_left_home_up',
+         'rotate_right_home_down', 'rotate_right_home_left',
+         'rotate_right_home_right', 'rotate_right_home_up']
+      end
+
+      # orientations refer to home button position
+      #  down ==> bottom
+      #    up ==> top
+      #  left ==> landscape with left home button AKA: _right_ landscape*
+      # right ==> landscape with right home button AKA: _left_ landscape*
+      #
+      # * see apple documentation for clarification about where the home button
+      #   is in left and right landscape orientations
+      def rotate_home_button_to(dir)
+        dir = dir.to_s
+        res = device_orientation
+        return res if res.eql? dir
+        rotation_candidates.each { |candidate|
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            puts "Try to rotate to '#{dir}' using '#{candidate}'"
+          end
+          playback(candidate)
+          # need a longer sleep for cloud testing
+          sleep(0.5)
+          res = device_orientation
+
+          ### UNEXPECTED ###
+          # device orientation changes when rotation playback is performed
+          # _regardless_ of whether or not the rotation succeeded
+          #
+          # this is an attempt to sync to the device and status bar orientation
+          if res.eql? dir
+            status_bar = status_bar_orientation
+            if status_bar.eql? res
+              return res
+            else
+              return rotate_home_button_to status_bar
+            end
+          end
+
+          # return res if res.eql? dir
+        }
+        if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+          puts "Could not rotate device.  Is rotation enabled in app? Will return 'down'"
+        end
+        'down'
+      end
+
+      def device_orientation(force_down=false)
+        res = map(nil, :orientation, :device).first
+        return res if !res.eql?('unknown')
+        return res if !force_down
+        rotate_home_button_to(:down)
+      end
+
+      def status_bar_orientation
+        map(nil, :orientation, :status_bar).first
       end
 
       def rotate(dir)
-        @current_rotation = @current_rotation || :down
+        dir = dir.to_sym
+        current_orientation = device_orientation(true).to_sym
         rotate_cmd = nil
         case dir
           when :left then
-            if @current_rotation == :down
+            if current_orientation == :down
               rotate_cmd = "left_home_down"
-              @current_rotation = :right
-            elsif @current_rotation == :right
+            elsif current_orientation == :right
               rotate_cmd = "left_home_right"
-              @current_rotation = :up
-            elsif @current_rotation == :left
+            elsif current_orientation == :left
               rotate_cmd = "left_home_left"
-              @current_rotation = :down
-            elsif @current_rotation == :up
+            elsif current_orientation == :up
               rotate_cmd = "left_home_up"
-              @current_rotation = :left
             end
           when :right then
-            if @current_rotation == :down
+            if current_orientation == :down
               rotate_cmd = "right_home_down"
-              @current_rotation = :left
-            elsif @current_rotation == :left
+            elsif current_orientation == :left
               rotate_cmd = "right_home_left"
-              @current_rotation = :up
-            elsif @current_rotation == :right
+            elsif current_orientation == :right
               rotate_cmd = "right_home_right"
-              @current_rotation = :down
-            elsif @current_rotation == :up
+            elsif current_orientation == :up
               rotate_cmd = "right_home_up"
-              @current_rotation = :right
             end
         end
 
+        # should this really throw an exception?  shouldn't it just report a
+        # warning and do nothing?
         if rotate_cmd.nil?
-          screenshot_and_raise "Does not support rotating #{dir} when home button is pointing #{@current_rotation}"
+          screenshot_and_raise "Does not support rotating '#{dir}' when home button is pointing '#{current_orientation}'"
         end
         playback("rotate_#{rotate_cmd}")
+        puts "current orientation => '#{device_orientation().to_sym}'"
       end
 
       def background(secs)
