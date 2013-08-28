@@ -131,22 +131,18 @@ Instructions:
  - Optionally, set the Product name to ..-cal in Build settings for the new target.
 
 * Step 2/3: Link with framework.
- - Download the latest version of calabash-ios at
- [https://github.com/calabash/calabash-ios/downloads](https://github.com/calabash/calabash-ios/downloads).
- - Unzip the file.
- - Use Finder to open the folder that contains `calabash.framework`.
- - Drag `calabash.framework` from Finder into you project's
-   `Frameworks` folder in Xcode.
-   Make sure that (i) `Copy items into
-   destination group's folder (if needed)` *is checked* and (ii) _only_
-   your "-cal " target is checked in `Add to targets`.
-![Linking with calabash.framework](documentation/images/Frameworks.png "Linking with frameworks")
+    - Download the latest version of calabash.framework with calabash-ios gem command:
+    - `calabash-ios download`
+    - Use Finder to open the folder that contains `calabash.framework`.
+    - Drag `calabash.framework` from Finder into your project's  `Frameworks` folder in Xcode.
+        * **Make sure that**
+            1. `Copy items into destination group's folder (if needed)` *is checked* and 
+            2.  _only_ your "-cal " target is checked in `Add to targets`.
 
- - You must also link you -cal target with `CFNetwork.framework`
-   (unless your production target is already linking with
-   `CFNetwork`). To do this click on your -cal target in XCode. Click
-   on Build Phases, expand Link Binary with Libraries, click `+` to
-   add `CFNetwork.framework`.
+      ![Linking with calabash.framework](documentation/images/Frameworks.png "Linking with frameworks")
+    - You must also link you -cal target with `CFNetwork.framework` (unless your production target
+      is  already linking with `CFNetwork`). To do this click on your -cal target in XCode. Click on 
+      Build Phases, expand Link Binary with Libraries, click `+` to add `CFNetwork.framework`.
 
 
 * Step 3/3: cal-Target Build Settings
