@@ -353,6 +353,11 @@ module Calabash
         directories.each { |dir|
           path = "#{dir}/#{recording}"
           if File.exists?(path)
+            # useful for debugging recordings, but too verbose for release
+            # suggest (yet) another variable CALABASH_DEBUG_PLAYBACK ?
+            #if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            #  puts "compatible playback: '#{dir}/#{recording}'"
+            #end
             return File.read(path)
           end
         }
@@ -432,11 +437,6 @@ EOF
             break if !data.nil?
           end
         end
-        # useful for debugging recordings, but too verbose for release
-        # suggest (yet) another variable CALABASH_DEBUG_PLAYBACK ?
-        #if !data.nil? && ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-        #  puts "found compatible playback: '#{rec_dir}/#{recording}'"
-        #end
         data
       end
 
