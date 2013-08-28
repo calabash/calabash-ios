@@ -252,9 +252,9 @@ module Calabash
         res = device_orientation
         return res if res.eql? dir
         rotation_candidates.each { |candidate|
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            puts "Try to rotate to '#{dir}' using '#{candidate}'"
-          end
+          #if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+          #  puts "try to rotate to '#{dir}' using '#{candidate}'"
+          #end
           playback(candidate)
           # need a longer sleep for cloud testing
           sleep(0.5)
@@ -326,7 +326,6 @@ module Calabash
           screenshot_and_raise "Does not support rotating '#{dir}' when home button is pointing '#{current_orientation}'"
         end
         playback("rotate_#{rotate_cmd}")
-        puts "current orientation => '#{device_orientation().to_sym}'"
       end
 
       def background(secs)
@@ -407,9 +406,9 @@ module Calabash
           if File.exists?(path)
             # useful for debugging recordings, but too verbose for release
             # suggest (yet) another variable CALABASH_DEBUG_PLAYBACK ?
-            if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-              puts "found compatible playback: '#{path}'"
-            end
+            #if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            #  puts "found compatible playback: '#{path}'"
+            #end
             return File.read(path)
           end
         }
