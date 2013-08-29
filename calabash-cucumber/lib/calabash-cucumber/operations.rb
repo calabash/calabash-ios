@@ -9,6 +9,7 @@ require 'test/unit/assertions'
 require 'json'
 require 'set'
 require 'calabash-cucumber/version'
+require 'calabash-cucumber/date_picker'
 
 
 if not Object.const_defined?(:CALABASH_COUNT)
@@ -26,8 +27,7 @@ module Calabash
       include Calabash::Cucumber::WaitHelpers
       include Calabash::Cucumber::KeyboardHelpers
       include Calabash::Cucumber::Location
-
-
+      include Calabash::Cucumber::DatePicker
 
       def page(clz,*args)
         clz.new(self,*args)
@@ -50,7 +50,6 @@ module Calabash
       def escape_quotes(str)
         str.gsub("'", "\\\\'")
       end
-
 
       def label(uiquery)
         query(uiquery, :accessibilityLabel)
@@ -111,51 +110,6 @@ module Calabash
         res['results'].first
       end
 
-      # ha!  i recognize this code - jjm
-      #not officially supported yet
-      #def change_slider_value_to(q, value)
-      #  target = value.to_f
-      #  if target < 0
-      #    pending "value '#{value}' must be >= 0"
-      #  end
-      #  min_val = query(q, :minimumValue).first
-      #  # will not work for min_val != 0
-      #  if min_val != 0
-      #    screenshot_and_raise "sliders with non-zero minimum values are not supported - slider '#{q}' has minimum value of '#{min_val}'"
-      #  end
-      #  max_val = query(q, :maximumValue).first
-      #  if target > max_val
-      #    screenshot_and_raise "cannot change slider '#{q}' to '#{value}' because the maximum allowed value is '#{max_val}'"
-      #  end
-      #
-      #  val = query(q, :value).first
-      #  # the x offset is from the middle of the slider.
-      #  # ex.  slider from 0 to 5
-      #  #      to touch 3, x must be 0
-      #  #      to touch 0, x must be -2.5
-      #  #      to touch 5, x must be 2.5
-      #  width = query(q, :frame).first["width"] - 10
-      #
-      #  cur_x = -width/2.0 + val*width
-      #  tgt_x = -width/2.0 + target*width
-      #
-      #  interpolate("slide", :start =>q, :end => q,
-      #              :offset_end => {:x => tgt_x, :y => 1},
-      #              :offset_start => {:x => cur_x, :y => -1})
-      #  sleep(0.1)
-      #
-      #  val = query(q, :value).first
-      #  cur_x = -width/2.0 + val*width
-      #  tgt_x = -width/2.0 + target*width
-      #
-      #  interpolate("slide", :start =>q, :end => q,
-      #              :offset_end => {:x => tgt_x, :y => 1},
-      #              :offset_start => {:x => cur_x, :y => -1})
-      #
-      #
-      #end
-
-
       #def screencast_begin
       #   http({:method=>:post, :path=>'screencast'}, {:action => :start})
       #end
@@ -167,8 +121,6 @@ module Calabash
       #  end
       #  file_name
       #end
-
-
     end
   end
 end
