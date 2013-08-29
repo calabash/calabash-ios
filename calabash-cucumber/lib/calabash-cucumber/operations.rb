@@ -38,7 +38,7 @@ module Calabash
       end
 
       def home_direction
-        @current_rotation = @current_rotation || :down
+        device_orientation().to_sym
       end
 
       def assert_home_direction(expected)
@@ -111,7 +111,7 @@ module Calabash
         res['results'].first
       end
 
-
+      # ha!  i recognize this code - jjm
       #not officially supported yet
       #def change_slider_value_to(q, value)
       #  target = value.to_f
