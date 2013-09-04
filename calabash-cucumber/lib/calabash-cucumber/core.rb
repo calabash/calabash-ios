@@ -1,11 +1,13 @@
 require 'httpclient'
 require 'calabash-cucumber/launch/simulator_helper'
 require 'calabash-cucumber/uia'
+require 'calabash-cucumber/ios7_operations'
 
 module Calabash
   module Cucumber
     module Core
       include Calabash::Cucumber::UIA
+      include Calabash::Cucumber::IOS7Operations
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
       CAL_HTTP_RETRY_COUNT=3
@@ -13,6 +15,7 @@ module Calabash
                           HTTPClient::KeepAliveDisconnected,
                           Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ECONNABORTED,
                           Errno::ETIMEDOUT]
+
 
       def macro(txt)
         if self.respond_to? :step
@@ -65,7 +68,10 @@ module Calabash
         map("all #{uiquery}", :query, *args)
       end
 
+
       def touch(uiquery, options={})
+
+
         if (uiquery.is_a?(Array))
           raise "No elements to touch in array" if uiquery.empty?
           uiquery = uiquery.first
@@ -101,10 +107,11 @@ module Calabash
       end
 
       def do_touch(options)
-        if ENV['OS']=='ios7' || @calabash_launcher && @calabash_launcher.ios_major_version == "7"
-          options[:uia_gesture] = :tap
+        if ios7?
+          touch_ios7(options)
+        else
+          playback("touch", options)
         end
-        playback("touch", options)
       end
 
       def swipe(dir, options={})
@@ -477,7 +484,7 @@ EOF
         data = load_recording(recording, rec_dir)
         if data.nil?
           candidates << recording
-          version_counter = os[-1,1].to_i
+          version_counter = os[-1, 1].to_i
           loop do
             version_counter = version_counter - 1
             break if version_counter < 5
@@ -596,7 +603,7 @@ EOF
         # or HTTPClient::KeepAliveDisconnected
         # which needs to be suppressed.
         begin
-          http({:method =>:post, :path => 'exit', :retryable_errors => RETRYABLE_ERRORS - [Errno::ECONNREFUSED,HTTPClient::KeepAliveDisconnected]})
+          http({:method => :post, :path => 'exit', :retryable_errors => RETRYABLE_ERRORS - [Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected]})
         rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected
           []
         end
@@ -630,7 +637,7 @@ EOF
 
       def stop_test_server
         if @calabash_launcher
-           @calabash_launcher.stop
+          @calabash_launcher.stop
         end
       end
 
@@ -684,7 +691,7 @@ EOF
             break
           rescue Exception => e
 
-            if retryable_errors.include?(e) || retryable_errors.any?{|c| e.is_a?(c)}
+            if retryable_errors.include?(e) || retryable_errors.any? { |c| e.is_a?(c) }
 
               if count < CAL_HTTP_RETRY_COUNT-1
                 if e.is_a?(HTTPClient::TimeoutError)

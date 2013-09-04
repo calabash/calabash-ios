@@ -31,6 +31,10 @@ module Calabash
         uia_handle_command(:tapMark, mark)
       end
 
+      def uia_tap_offset(offset)
+        uia_handle_command(:tapOffset, offset)
+      end
+
       def uia_pan(from_q, to_q)
         uia_handle_command(:pan, from_q, to_q)
       end

@@ -32,6 +32,18 @@ class Calabash::Cucumber::Launcher
     ENV['DEVICE_TARGET'] == 'simulator'
   end
 
+  def sdk_version
+    ENV['SDK_VERSION']
+  end
+
+  def reset_between_scenarios?
+    ENV['RESET_BETWEEN_SCENARIOS']=="1"
+  end
+
+  def device_env
+    ENV['DEVICE'] || 'iphone'
+  end
+
   def active?
     (simulator_target? || device_target?) && (not run_loop.nil?)
   end
@@ -76,25 +88,23 @@ class Calabash::Cucumber::Launcher
       self.run_loop = RunLoop.run(default_args.merge(args))
     else
 
-      sdk = ENV['SDK_VERSION'] || SimLauncher::SdkDetector.new().latest_sdk_version
+      sdk = sdk_version || SimLauncher::SdkDetector.new().latest_sdk_version
       path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
-      if ENV['RESET_BETWEEN_SCENARIOS']=="1"
+      if reset_between_scenarios?
         reset_app_jail(sdk, path)
       end
 
       if simulator_target?
-        device = (ENV['DEVICE'] || 'iphone').to_sym
-        default_args = {:app => path, :device => device}
+        default_args = {:app => path, :device => device_env.to_sym}
         self.run_loop = RunLoop.run(default_args.merge(args))
       else
         ## sim launcher
-        Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, ENV['DEVICE'] || 'iphone', args)
+        Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, device_env, args)
       end
 
     end
     ensure_connectivity
   end
-
 
   def ensure_connectivity
     begin
