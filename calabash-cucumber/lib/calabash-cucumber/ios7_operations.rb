@@ -8,7 +8,8 @@ module Calabash
       include Calabash::Cucumber::UIA
 
       def ios7?
-        ENV['OS']=='ios7' || @calabash_launcher && @calabash_launcher.device.ios7?
+        launcher = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
+        ENV['OS']=='ios7' || (launcher && launcher.device.ios7?)
       end
 
       def touch_ios7(options)

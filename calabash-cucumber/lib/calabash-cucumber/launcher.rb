@@ -9,8 +9,28 @@ class Calabash::Cucumber::Launcher
   attr_accessor :device_target
   attr_accessor :device
 
+  class StartError < RuntimeError
+    attr_accessor :error
+    def initialize(err)
+      self.error= err
+    end
+
+    def to_s
+      "#{super.to_s}: #{error}"
+    end
+  end
+
+  def self.launcher(device_target=:simulator)
+    @@launcher ||= Launcher.new(device_target)
+  end
+
+  def self.launcher_if_used
+    @@launcher
+  end
+
   def initialize(device_target=:simulator)
     self.device_target = device_target
+    @@launcher = self
   end
 
   class CalabashLauncherTimeoutErr < Timeout::Error
@@ -85,7 +105,7 @@ class Calabash::Cucumber::Launcher
         default_args[:udid] = target
       end
       default_args
-      self.run_loop = RunLoop.run(default_args.merge(args))
+      self.run_loop = new_run_loop(default_args.merge(args))
     else
 
       sdk = sdk_version || SimLauncher::SdkDetector.new().latest_sdk_version
@@ -96,7 +116,7 @@ class Calabash::Cucumber::Launcher
 
       if simulator_target?
         default_args = {:app => path, :device => device_env.to_sym}
-        self.run_loop = RunLoop.run(default_args.merge(args))
+        self.run_loop = new_run_loop(default_args.merge(args))
       else
         ## sim launcher
         Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, device_env, args)
@@ -104,6 +124,20 @@ class Calabash::Cucumber::Launcher
 
     end
     ensure_connectivity
+  end
+
+  def new_run_loop(args)
+    last_err = nil
+    3.times do
+      begin
+        return RunLoop.run(args)
+      rescue RunLoop::TimeoutError => e
+        if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+          puts "retrying run loop..."
+        end
+      end
+    end
+    raise StartError.new(last_err)
   end
 
   def ensure_connectivity

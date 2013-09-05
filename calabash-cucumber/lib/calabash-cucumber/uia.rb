@@ -6,7 +6,8 @@ module Calabash
     module UIA
 
       def send_uia_command(opts ={})
-        run_loop = opts[:run_loop] || (@calabash_launcher && @calabash_launcher.active? && @calabash_launcher.run_loop)
+        launcher = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
+        run_loop = opts[:run_loop] || (launcher && launcher.active? && launcher.run_loop)
         command = opts[:command]
         raise ArgumentError, 'please supply :run_loop or instance var @calabash_launcher' unless run_loop
         raise ArgumentError, 'please supply :command' unless command
