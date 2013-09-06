@@ -40,6 +40,22 @@ module Calabash
         uia_handle_command(:pan, from_q, to_q)
       end
 
+      def uia_swipe(*queryparts)
+        uia_handle_command(:swipe, queryparts)
+      end
+
+      def uia_swipe_offset(offset, options)
+        uia_handle_command(:swipeOffset, offset, options)
+      end
+
+      def uia_pinch(*queryparts)
+        uia_handle_command(:pinch, queryparts)
+      end
+
+      def uia_pinch_offset(in_or_out, offset, duration)
+        uia_handle_command(:pinchOffset, in_or_out, offset, duration)
+      end
+
       def uia_scroll_to(*queryparts)
         uia_handle_command(:scrollTo, queryparts)
       end
@@ -74,6 +90,10 @@ module Calabash
         uia_handle_command(:setLocation, loc_data)
       end
 
+      def uia_send_app_to_background(secs)
+        uia_handle_command(:deactivate, secs)
+      end
+
       def uia_handle_command(cmd, *query_args)
         args = query_args.map do |part|
           if part.is_a?(String)
@@ -101,7 +121,7 @@ module Calabash
 
       def escape_uia_string(string)
         #TODO escape '\n in query
-        string
+        escape_quotes string
       end
 
     end

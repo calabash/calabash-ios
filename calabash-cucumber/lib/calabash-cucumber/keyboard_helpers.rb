@@ -14,6 +14,15 @@ module Calabash
           :numbers_and_punctuation_alternate => "numbers-and-punctuation-alternate"
       }
 
+
+      IOS7_SUPPORTED_CHARS = {
+          'Dictation' => nil,
+          'Shift' => nil,
+          'Delete' => '\b',
+          'International' => nil,
+          'More' => nil,
+          'Return' => '\n'
+      }
       #Possible values
       # 'Dictation'
       # 'Shift'
@@ -23,17 +32,31 @@ module Calabash
       # 'Return'
       def keyboard_enter_char(chr, should_screenshot=true)
         #map(nil, :keyboard, load_playback_data("touch_done"), chr)
-        res = http({:method => :post, :path => 'keyboard'},
-                   {:key => chr, :events => load_playback_data("touch_done")})
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          msg = "Keyboard enter failed failed because: #{res['reason']}\n#{res['details']}"
-          if should_screenshot
-            screenshot_and_raise msg
+        if ios7?
+          if chr.length == 1
+            uia_type_string chr
           else
-            raise msg
+            code = IOS7_SUPPORTED_CHARS[chr]
+            if code
+              uia_type_string code
+            else
+              raise "Char #{chr} is not yet supported in iOS7"
+            end
+          end
+        else
+          res = http({:method => :post, :path => 'keyboard'},
+                     {:key => chr, :events => load_playback_data("touch_done")})
+          res = JSON.parse(res)
+          if res['outcome'] != 'SUCCESS'
+            msg = "Keyboard enter failed failed because: #{res['reason']}\n#{res['details']}"
+            if should_screenshot
+              screenshot_and_raise msg
+            else
+              raise msg
+            end
           end
         end
+
         if ENV['POST_ENTER_KEYBOARD']
           w = ENV['POST_ENTER_KEYBOARD'].to_f
           if w > 0

@@ -77,24 +77,7 @@ module Calabash
           uiquery = uiquery.first
         end
         if (uiquery.is_a?(Hash))
-          offset_x = 0
-          offset_y = 0
-          if options[:offset]
-            offset_x += options[:offset][:x] || 0
-            offset_y += options[:offset][:y] || 0
-          end
-          x = offset_x
-          y = offset_y
-          rect = uiquery["rect"] || uiquery[:rect]
-          if rect
-            x += rect['center_x'] || rect[:center_x] || rect[:x] || 0
-            y += rect['center_y'] || rect[:center_y] || rect[:y] || 0
-          else
-            x += uiquery['center_x'] || uiquery[:center_x] || uiquery[:x] || 0
-            y += uiquery['center_y'] || uiquery[:center_y] || uiquery[:y] || 0
-          end
-
-          options[:offset] = {:x => x, :y => y}
+          options[:offset] = point_from(uiquery, options)
           return touch(nil, options)
         end
 
@@ -115,51 +98,58 @@ module Calabash
       end
 
       def swipe(dir, options={})
-        dir = dir.to_sym
-        current_orientation = device_orientation().to_sym
-        if current_orientation == :left
-          case dir
-            when :left then
-              dir = :down
-            when :right then
-              dir = :up
-            when :up then
-              dir = :left
-            when :down then
-              dir = :right
-            else
+        if ios7?
+          swipe_ios7(options.merge(:direction => dir))
+        else
+          dir = dir.to_sym
+          current_orientation = device_orientation().to_sym
+          if current_orientation == :left
+            case dir
+              when :left then
+                dir = :down
+              when :right then
+                dir = :up
+              when :up then
+                dir = :left
+              when :down then
+                dir = :right
+              else
+            end
           end
-        end
-        if current_orientation == :right
-          case dir
-            when :left then
-              dir = :up
-            when :right then
-              dir = :down
-            when :up then
-              dir = :right
-            when :down then
-              dir = :left
-            else
+          if current_orientation == :right
+            case dir
+              when :left then
+                dir = :up
+              when :right then
+                dir = :down
+              when :up then
+                dir = :right
+              when :down then
+                dir = :left
+              else
+            end
           end
-        end
-        if current_orientation == :up
-          case dir
-            when :left then
-              dir = :right
-            when :right then
-              dir = :left
-            when :up then
-              dir = :down
-            when :down then
-              dir = :up
-            else
+          if current_orientation == :up
+            case dir
+              when :left then
+                dir = :right
+              when :right then
+                dir = :left
+              when :up then
+                dir = :down
+              when :down then
+                dir = :up
+              else
+            end
           end
+          playback("swipe_#{dir}", options)
         end
-        playback("swipe_#{dir}", options)
       end
 
       def cell_swipe(options={})
+        if ios7?
+          raise "cell_swipe not supported on iOS7, simply use swipe with a query that matches the cell"
+        end
         playback("cell_swipe", options)
       end
 
@@ -232,11 +222,15 @@ module Calabash
       end
 
       def pinch(in_out, options={})
-        file = "pinch_in"
-        if in_out.to_sym==:out
-          file = "pinch_out"
+        if ios7?
+          pinch_ios7(in_out.to_sym, options)
+        else
+          file = "pinch_in"
+          if in_out.to_sym==:out
+            file = "pinch_out"
+          end
+          playback(file, options)
         end
-        playback(file, options)
       end
 
       def rotation_candidates
@@ -301,52 +295,46 @@ module Calabash
       end
 
       def rotate(dir)
-        dir = dir.to_sym
-        current_orientation = device_orientation(true).to_sym
-        rotate_cmd = nil
-        case dir
-          when :left then
-            if current_orientation == :down
-              rotate_cmd = "left_home_down"
-            elsif current_orientation == :right
-              rotate_cmd = "left_home_right"
-            elsif current_orientation == :left
-              rotate_cmd = "left_home_left"
-            elsif current_orientation == :up
-              rotate_cmd = "left_home_up"
-            end
-          when :right then
-            if current_orientation == :down
-              rotate_cmd = "right_home_down"
-            elsif current_orientation == :left
-              rotate_cmd = "right_home_left"
-            elsif current_orientation == :right
-              rotate_cmd = "right_home_right"
-            elsif current_orientation == :up
-              rotate_cmd = "right_home_up"
-            end
-        end
+        if ios7?
+          rotate_ios7(dir)
+        else
+          dir = dir.to_sym
+          current_orientation = device_orientation(true).to_sym
+          rotate_cmd = nil
+          case dir
+            when :left then
+              if current_orientation == :down
+                rotate_cmd = "left_home_down"
+              elsif current_orientation == :right
+                rotate_cmd = "left_home_right"
+              elsif current_orientation == :left
+                rotate_cmd = "left_home_left"
+              elsif current_orientation == :up
+                rotate_cmd = "left_home_up"
+              end
+            when :right then
+              if current_orientation == :down
+                rotate_cmd = "right_home_down"
+              elsif current_orientation == :left
+                rotate_cmd = "right_home_left"
+              elsif current_orientation == :right
+                rotate_cmd = "right_home_right"
+              elsif current_orientation == :up
+                rotate_cmd = "right_home_up"
+              end
+          end
 
-        # should this really throw an exception?  shouldn't it just report a
-        # warning and do nothing?
-        if rotate_cmd.nil?
-          screenshot_and_raise "Does not support rotating '#{dir}' when home button is pointing '#{current_orientation}'"
+          # should this really throw an exception?  shouldn't it just report a
+          # warning and do nothing?
+          if rotate_cmd.nil?
+            screenshot_and_raise "Does not support rotating '#{dir}' when home button is pointing '#{current_orientation}'"
+          end
+          playback("rotate_#{rotate_cmd}")
         end
-        playback("rotate_#{rotate_cmd}")
       end
 
       def background(secs)
-        set_user_pref("__calabash_action", {:action => :background, :duration => secs})
-      end
-
-      def prepare_dialog_action(opts={:dialog => nil, :answer => "Ok"})
-        if opts[:dialog].nil? || opts[:dialog].length < 1
-          raise ":dialog must be specified as a non-empty string (used as regexp to match dialog text)"
-        end
-        txt = opts[:answer] || 'Ok'
-        set_user_pref("__calabash_action", {:action => :dialog,
-                                            :text => opts[:dialog],
-                                            :answer => txt})
+        uia_send_app_to_background(secs)
       end
 
       def move_wheel(opts={})
@@ -583,6 +571,27 @@ EOF
         system("mv #{file_name} #{rec_dir}")
         "#{file_name} ==> '#{rec_dir}/#{file_name}'"
 
+      end
+
+      def point_from(query_result, options)
+        offset_x = 0
+        offset_y = 0
+        if options[:offset]
+          offset_x += options[:offset][:x] || 0
+          offset_y += options[:offset][:y] || 0
+        end
+        x = offset_x
+        y = offset_y
+        rect = query_result["rect"] || query_result[:rect]
+        if rect
+          x += rect['center_x'] || rect[:center_x] || rect[:x] || 0
+          y += rect['center_y'] || rect[:center_y] || rect[:y] || 0
+        else
+          x += query_result['center_x'] || query_result[:center_x] || query_result[:x] || 0
+          y += query_result['center_y'] || query_result[:center_y] || query_result[:y] || 0
+        end
+
+        {:x => x, :y => y}
       end
 
       def backdoor(sel, arg)
