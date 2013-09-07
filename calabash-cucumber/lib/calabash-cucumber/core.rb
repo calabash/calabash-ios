@@ -146,6 +146,14 @@ module Calabash
         end
       end
 
+      def pan(from, to, options={})
+        if ios7?
+          pan_ios7(from, to, options)
+        else
+          interpolate "pan", options.merge(:start => from, :end => to)
+        end
+      end
+
       def cell_swipe(options={})
         if ios7?
           raise "cell_swipe not supported on iOS7, simply use swipe with a query that matches the cell"

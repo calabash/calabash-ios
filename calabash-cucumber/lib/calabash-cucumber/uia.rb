@@ -40,6 +40,10 @@ module Calabash
         uia_handle_command(:pan, from_q, to_q)
       end
 
+      def uia_pan_offset(from, to, options)
+        uia_handle_command(:panOffset, from, to, options)
+      end
+
       def uia_swipe(*queryparts)
         uia_handle_command(:swipe, queryparts)
       end

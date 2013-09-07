@@ -51,6 +51,13 @@ module Calabash
         end
       end
 
+      def pan_ios7(from, to, options={})
+        from_result = find_or_raise from
+        to_result = find_or_raise to
+        uia_pan_offset(point_from(from_result, options), point_from(to_result, options), options)
+        [to_result]
+      end
+
       def rotate_ios7(dir)
         throw NotImplementedError
       end
