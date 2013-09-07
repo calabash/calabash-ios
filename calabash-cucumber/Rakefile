@@ -23,7 +23,7 @@ EOF
 
     FileUtils.cd(dir) do
       puts 'Building Server'
-      cmd = 'xcodebuild build -project calabash.xcodeproj -target Framework -configuration Debug -sdk iphonesimulator6.1'
+      cmd = 'xcodebuild build -project calabash.xcodeproj -target Framework -configuration Debug -sdk iphonesimulator7.0'
       puts cmd
       puts `#{cmd}`
 
@@ -58,6 +58,3 @@ end
 
 task :install_server => [:build_server]
 task :release_server => [:build_server]
-
-
-
