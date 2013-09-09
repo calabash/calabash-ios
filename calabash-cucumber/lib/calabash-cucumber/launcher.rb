@@ -122,6 +122,10 @@ class Calabash::Cucumber::Launcher
 
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
+    if File.directory?(args[:app])
+      args[:app] = File.expand_path(args[:app])
+    end
+
     args[:bundle_id] ||= detect_bundle_id_from_app_bundle(args)
     
     args[:device] ||= detect_device_from_args(args)
