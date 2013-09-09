@@ -43,6 +43,7 @@ module Calabash
               raise "Char #{chr} is not yet supported in iOS7"
             end
           end
+          res = {'results' => []}
         else
           res = http({:method => :post, :path => 'keyboard'},
                      {:key => chr, :events => load_playback_data("touch_done")})
