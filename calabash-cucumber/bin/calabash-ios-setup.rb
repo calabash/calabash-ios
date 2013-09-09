@@ -186,8 +186,8 @@ def validate_setup(args)
   else
     dd_dir = Calabash::Cucumber::SimulatorHelper.derived_data_dir_for_project
       if not dd_dir
-        puts "Unable to find iOS project."
-        puts "You should run this command from an iOS project directory."
+        puts "Unable to find iOS XCode project."
+        puts "You should run this command from an XCode project directory."
         exit 1
       end
       app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))

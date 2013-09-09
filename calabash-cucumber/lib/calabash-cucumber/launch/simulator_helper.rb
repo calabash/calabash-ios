@@ -35,7 +35,6 @@ module Calabash
         simulator.quit_simulator
       end
 
-
       def self.derived_data_dir_for_project
         dir = project_dir
         xcode_workspace_name = ''
@@ -117,19 +116,39 @@ module Calabash
         File.expand_path(ENV['PROJECT_DIR'] || Dir.pwd)
       end
 
-      def self.app_bundle_or_raise(path)
+      def self.detect_app_bundle(path=nil,device_build_dir='iPhoneSimulator')
+        begin
+          app_bundle_or_raise(path,device_build_dir)
+        rescue =>e
+          nil
+        end
+      end
+
+      def self.app_bundle_or_raise(path=nil, device_build_dir='iPhoneSimulator')
         bundle_path = nil
         path = File.expand_path(path) if path
 
         if path and not File.directory?(path)
-          puts "Unable to find .app bundle at #{path}. It should be an .app directory."
-          dd_dir = derived_data_dir_for_project
-          app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))
-          msg = "Try setting APP_BUNDLE_PATH in features/support/01_launch.rb to one of:\n\n"
-          msg << app_bundles.join("\n")
-          raise msg
+          raise "Unable to find .app bundle at #{path}. It should be an .app directory."
         elsif path
           bundle_path = path
+        elsif xamarin_project?
+          bundle_path = bundle_path_from_xamarin_project(device_build_dir)
+          unless bundle_path
+            msg = ["Detected Xamarin project, but did not detect built app linked with Calabash"]
+            msg << "You should build your project from Xamarin Studio"
+            msg << "Make sure you build for Simulator and that you're using the Calabash components"
+            raise msg.join("\n")
+          end
+          if FULL_CONSOLE_OUTPUT
+            puts("-"*37)
+            puts "Auto detected APP_BUNDLE_PATH:\n\n"
+
+            puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
+            puts "Please verify!"
+            puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
+            puts("-"*37)
+          end
         else
           dd_dir = derived_data_dir_for_project
           sim_dirs = Dir.glob(File.join(dd_dir, "Build", "Products", "*-iphonesimulator", "*.app"))
@@ -169,10 +188,50 @@ module Calabash
         bundle_path
       end
 
+      def self.xamarin_project?
+        xamarin_ios_csproj_path != nil
+      end
+
+      def self.xamarin_ios_csproj_path
+        solution_path = Dir['*.Xamarin.sln'].first
+        if solution_path
+          project_dir = Dir.pwd
+        else
+          solution_path = Dir[File.join('..','*.Xamarin.sln')].first
+          project_dir = File.expand_path('..') if solution_path
+        end
+        return nil unless project_dir
+
+        ios_project_dir = Dir[File.join(project_dir,'*.iOS')].first
+        return nil unless ios_project_dir && File.directory?(ios_project_dir)
+        ios_project_dir
+      end
+
+      def self.bundle_path_from_xamarin_project(device_build_dir='iPhoneSimulator')
+        ios_project_path = xamarin_ios_csproj_path
+        conf_glob = File.join(ios_project_path,'bin',device_build_dir,'*')
+        built_confs = Dir[conf_glob]
+
+        calabash_build = built_confs.find {|path| File.basename(path) == 'Calabash'}
+        debug_build = built_confs.find {|path| File.basename(path) == 'Debug'}
+
+        bundle_path = [calabash_build, debug_build, *built_confs].find do |path|
+          next unless path && File.directory?(path)
+          app_dir = Dir[File.join(path,'*.app')].first
+          app_dir && linked_with_calabash?(app_dir)
+        end
+
+        Dir[File.join(bundle_path,'*.app')].first if bundle_path
+      end
+
+      def self.linked_with_calabash?(d)
+        out = `otool "#{File.expand_path(d)}"/* -o 2> /dev/null | grep CalabashServer`
+        /CalabashServer/.match(out)
+      end
+
       def self.find_preferred_dir(sim_dirs)
         sim_dirs.find do |d|
-          out = `otool "#{File.expand_path(d)}"/* -o 2> /dev/null | grep CalabashServer`
-          /CalabashServer/.match(out)
+          linked_with_calabash?(d)
         end
       end
 

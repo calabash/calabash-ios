@@ -341,7 +341,7 @@ module Calabash
         end
       end
 
-      def background(secs)
+      def send_app_to_background(secs)
         uia_send_app_to_background(secs)
       end
 
@@ -514,7 +514,6 @@ EOF
         res['results']
       end
 
-      # not called? -jjm 2013-08-16
       def interpolate(recording, options={})
         data = load_playback_data(recording)
 
@@ -548,7 +547,12 @@ EOF
         os = ENV['OS']
 
         unless os
-          major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+          if @calabash_launcher && @calabash_launcher.active?
+            major = @calabash_launcher.ios_major_version
+          else
+            major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+          end
+
           unless major
             raise <<EOF
           Unable to determine iOS major version
@@ -645,11 +649,10 @@ EOF
       ## args :app for device bundle id, for sim path to app
       ##
       def start_test_server_in_background(args={})
-        target = args[:device_target] || :simulator
         stop_test_server
-        @calabash_launcher = Calabash::Cucumber::Launcher.new(target)
+        @calabash_launcher = Calabash::Cucumber::Launcher.new()
         @calabash_launcher.relaunch(args)
-
+        @calabash_launcher
       end
 
       def stop_test_server

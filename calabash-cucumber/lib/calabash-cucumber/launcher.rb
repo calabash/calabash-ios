@@ -2,15 +2,17 @@ require 'calabash-cucumber/launch/simulator_helper'
 require 'sim_launcher'
 require 'calabash-cucumber/device'
 require 'run_loop'
-
+require 'cfpropertylist'
 
 class Calabash::Cucumber::Launcher
   attr_accessor :run_loop
-  attr_accessor :device_target
   attr_accessor :device
+
+  @@launcher = nil
 
   class StartError < RuntimeError
     attr_accessor :error
+
     def initialize(err)
       self.error= err
     end
@@ -20,52 +22,19 @@ class Calabash::Cucumber::Launcher
     end
   end
 
-  def self.launcher(device_target=:simulator)
-    @@launcher ||= Launcher.new(device_target)
+  class CalabashLauncherTimeoutErr < Timeout::Error
+  end
+
+  def self.launcher
+    @@launcher ||= Launcher.new
   end
 
   def self.launcher_if_used
     @@launcher
   end
 
-  def initialize(device_target=:simulator)
-    self.device_target = device_target
+  def initialize
     @@launcher = self
-  end
-
-  class CalabashLauncherTimeoutErr < Timeout::Error
-  end
-
-  def calabash_no_stop?
-    calabash_no_launch? or ENV['NO_STOP']=="1"
-  end
-
-  def calabash_no_launch?
-    ENV['NO_LAUNCH']=='1'
-  end
-
-  def device_target?
-    (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
-  end
-
-  def simulator_target?
-    ENV['DEVICE_TARGET'] == 'simulator'
-  end
-
-  def sdk_version
-    ENV['SDK_VERSION']
-  end
-
-  def reset_between_scenarios?
-    ENV['RESET_BETWEEN_SCENARIOS']=="1"
-  end
-
-  def device_env
-    ENV['DEVICE'] || 'iphone'
-  end
-
-  def active?
-    (simulator_target? || device_target?) && (not run_loop.nil?)
   end
 
   def ios_major_version
@@ -78,12 +47,9 @@ class Calabash::Cucumber::Launcher
     device.ios_version
   end
 
-
   def reset_app_jail(sdk=nil, path=nil)
-    return if device_target?
-
-    sdk = sdk || ENV['SDK_VERSION'] || SimLauncher::SdkDetector.new().latest_sdk_version
-    path = path || Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+    sdk ||= sdk_version || SimLauncher::SdkDetector.new().latest_sdk_version
+    path ||= Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
 
     app = File.basename(path)
     bundle = `find "#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}/Applications/" -type d -depth 2 -name "#{app}" | head -n 1`
@@ -95,35 +61,132 @@ class Calabash::Cucumber::Launcher
     end
   end
 
+  def default_launch_args
+    # APP_BUNDLE_PATH
+    # BUNDLE_ID
+    # APP (unifies APP_BUNDLE_PATH, BUNDLE_ID)
+    # DEVICE_TARGET
+    # SDK_VERSION
+    # RESET_BETWEEN_SCENARIOS
+    # DEVICE
+    # NO_LAUNCH
+    # NO_STOP
+
+    args = {
+        :launch_method => default_launch_method,
+        :reset => reset_between_scenarios?,
+        :bundle_id => ENV['BUNDLE_ID'],
+        :device => device_env,
+        :no_stop => calabash_no_stop?,
+        :no_launch => calabash_no_launch?,
+        :sdk_version => sdk_version
+    }
+
+    #:device_target will be set
+
+    if run_with_instruments?(args) && !simulator_target?
+      device_tgt = ENV['DEVICE_TARGET']
+      if device_tgt.nil? || device_tgt.downcase == 'device'
+        device_tgt = RunLoop::Core.detect_connected_device
+      end
+
+      if device_tgt
+        args[:device_target] = args[:udid] = device_tgt
+      else
+        args[:device_target] = 'simulator'
+      end
+    else
+      args[:device_target] = 'simulator'
+    end
+
+
+    args
+  end
+
+  def default_launch_method
+    return :instruments unless sdk_version
+    return :instruments if sdk_version.start_with?('7') # Only instruments supported for iOS7+
+    sim_detector = SimLauncher::SdkDetector.new()
+    available = sim_detector.available_sdk_versions.reject {|v| v.start_with?('7')}
+    if available.include?(sdk_version)
+      :sim_launcher
+    else
+      :instruments
+    end
+  end
+
   def relaunch(args={})
     RunLoop.stop(run_loop) if run_loop
 
-    if device_target?
-      default_args = {:app => ENV['BUNDLE_ID']}
-      target = ENV['DEVICE_TARGET']
-      if target != 'DEVICE'
-        default_args[:udid] = target
-      end
-      default_args
-      self.run_loop = new_run_loop(default_args.merge(args))
+    args = default_launch_args.merge(args)
+
+    args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
+
+    args[:bundle_id] ||= detect_bundle_id_from_app_bundle(args)
+    
+    args[:device] ||= detect_device_from_args(args)
+
+
+    reset_app_jail if args[:reset]
+
+    if run_with_instruments?(args)
+      self.run_loop = new_run_loop(args)
     else
-
-      sdk = sdk_version || SimLauncher::SdkDetector.new().latest_sdk_version
+      # run with sim launcher
+      sdk = sdk_version || SimLauncher::SdkDetector.new().available_sdk_versions.reverse.find { |x| !x.start_with?('7') }
       path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
-      if reset_between_scenarios?
-        reset_app_jail(sdk, path)
-      end
-
-      if simulator_target?
-        default_args = {:app => path, :device => device_env.to_sym}
-        self.run_loop = new_run_loop(default_args.merge(args))
-      else
-        ## sim launcher
-        Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, device_env, args)
-      end
-
+      Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, args[:device].to_s, args)
     end
+    before = Time.now
     ensure_connectivity
+  end
+
+  def detect_device_from_args(args)
+    if args[:app] && File.directory?(args[:app])
+      # Derive bundle id from bundle_dir
+      plist_as_hash = info_plist_from_bundle_path(args[:app])
+      if plist_as_hash
+        device_family = plist_as_hash['UIDeviceFamily']
+        if device_family
+          first_device = device_family.first
+          if first_device == 2
+            return 'ipad'
+          else
+            return 'iphone'
+          end
+        end
+      end
+    else
+      args[:app]
+    end
+
+
+  end
+
+  def detect_app_bundle_from_args(args)
+    if args[:device_target]=='simulator'
+      device_xamarin_build_dir = 'iPhoneSimulator'
+    else
+      device_xamarin_build_dir = 'iPhone'
+    end
+    Calabash::Cucumber::SimulatorHelper.detect_app_bundle(nil, device_xamarin_build_dir)
+  end
+
+  def detect_bundle_id_from_app_bundle(args)
+    if args[:app] && File.directory?(args[:app])
+      # Derive bundle id from bundle_dir
+      plist_as_hash = info_plist_from_bundle_path(args[:app])
+      if plist_as_hash
+        plist_as_hash['CFBundleIdentifier']
+      end
+    else
+      args[:app]
+    end
+  end
+
+  def info_plist_from_bundle_path(bundle_path)
+    plist_path = File.join(bundle_path, 'Info.plist')
+    info_plist_as_hash(plist_path) if File.exist?(plist_path)
   end
 
   def new_run_loop(args)
@@ -132,6 +195,7 @@ class Calabash::Cucumber::Launcher
       begin
         return RunLoop.run(args)
       rescue RunLoop::TimeoutError => e
+        last_err = e
         if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
           puts "retrying run loop..."
         end
@@ -192,7 +256,7 @@ class Calabash::Cucumber::Launcher
 
     end
 
-    if status=='200'
+    if status == '200'
       version_body = JSON.parse(res.body)
       self.device = Calabash::Cucumber::Device.new(url, version_body)
     end
@@ -204,14 +268,72 @@ class Calabash::Cucumber::Launcher
     RunLoop.stop(run_loop)
   end
 
-  def app_path
-    ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
-  end
-
   def calabash_notify(world)
     if world.respond_to?(:on_launch)
       world.on_launch
     end
   end
+
+
+
+  def info_plist_as_hash(plist_path)
+    unless File.exist?(plist_path)
+      raise "Unable to find Info.plist: #{plist_path}"
+    end
+    parsedplist = CFPropertyList::List.new(:file => plist_path)
+    CFPropertyList.native_types(parsedplist.value)
+  end
+
+  def detect_bundle_id
+    begin
+      bundle_path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+      plist_path = File.join(bundle_path, 'Info.plist')
+      info_plist_as_hash(plist_path)['CFBundleIdentifier']
+    rescue => e
+      raise "Unable to automatically find bundle id. Please set BUNDLE_ID environment variable. #{e}"
+    end
+  end
+
+  def calabash_no_stop?
+    calabash_no_launch? or ENV['NO_STOP']=="1"
+  end
+
+  def calabash_no_launch?
+    ENV['NO_LAUNCH']=='1'
+  end
+
+  def device_target?
+    (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
+  end
+
+  def simulator_target?
+    ENV['DEVICE_TARGET'] == 'simulator'
+  end
+
+  def sdk_version
+    ENV['SDK_VERSION']
+  end
+
+  def reset_between_scenarios?
+    ENV['RESET_BETWEEN_SCENARIOS']=="1"
+  end
+
+  def device_env
+    ENV['DEVICE']
+  end
+
+  def app_path
+    ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH) || ENV['APP']
+  end
+
+  def run_with_instruments?(args)
+    args[:launch_method] == :instruments
+  end
+
+  def active?
+    not run_loop.nil?
+  end
+
+
 end
 
