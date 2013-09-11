@@ -98,6 +98,7 @@ module Calabash
       end
 
       def swipe(dir, options={})
+        dir = dir.to_sym
         if ios7?
           swipe_ios7(options.merge(:direction => dir))
         else
@@ -230,11 +231,12 @@ module Calabash
       end
 
       def pinch(in_out, options={})
+        in_out = in_out.to_sym
         if ios7?
           pinch_ios7(in_out.to_sym, options)
         else
           file = "pinch_in"
-          if in_out.to_sym==:out
+          if in_out==:out
             file = "pinch_out"
           end
           playback(file, options)
