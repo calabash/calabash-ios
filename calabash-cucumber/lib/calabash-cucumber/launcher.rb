@@ -122,6 +122,10 @@ class Calabash::Cucumber::Launcher
 
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
+    unless args[:app]
+      args[:app] = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+    end
+
     if File.directory?(args[:app])
       args[:app] = File.expand_path(args[:app])
     end
