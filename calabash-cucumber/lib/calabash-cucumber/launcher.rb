@@ -123,7 +123,12 @@ class Calabash::Cucumber::Launcher
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
     unless args[:app]
-      args[:app] = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+      if args[:device_target]=='simulator'
+        device_xamarin_build_dir = 'iPhoneSimulator'
+      else
+        device_xamarin_build_dir = 'iPhone'
+      end
+      args[:app] = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path, device_xamarin_build_dir)
     end
 
     if File.directory?(args[:app])
