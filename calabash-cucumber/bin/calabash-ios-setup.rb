@@ -25,32 +25,28 @@ end
 def calabash_setup(args)
   puts "Checking if Xcode is running..."
   res = `ps x -o pid,command | grep -v grep | grep Contents/MacOS/Xcode`
-  if res==""
-    puts "Xcode not running."
-    project_name, project_path, xpath = find_project_files(args)
-    setup_project(project_name, project_path, xpath)
+  unless res==""
+    puts "Detected running Xcode. You may need to restart Xcode after setup."
+  end
 
-    detect_accessibility_support
+  project_name, project_path, xpath = find_project_files(args)
+  setup_project(project_name, project_path, xpath)
 
-    msg("Setup done") do
+  detect_accessibility_support
 
-      puts "Please validate by running the -cal target"
-      puts "from Xcode."
-      puts "When starting the iOS Simulator using the"
-      puts "new -cal target, you should see:\n\n"
-      puts '  "Started LPHTTP server on port 37265"'
-      puts "\nin the application log in Xcode."
-      puts "\n\n"
-      puts "After validating, you can generate a features folder:"
-      puts "Go to your project (the dir containing the .xcodeproj file)."
-      puts "Then run calabash-ios gen"
-      puts "(if you don't already have a features folder)."
-    end
+  msg("Setup done") do
 
-  else
-    puts "Xcode is running. We'll be changing the project file so we'd better stop it."
-    puts "Please stop XCode and run setup again"
-    exit(0)
+    puts "Please validate by running the -cal target"
+    puts "from Xcode."
+    puts "When starting the iOS Simulator using the"
+    puts "new -cal target, you should see:\n\n"
+    puts '  "Started LPHTTP server on port 37265"'
+    puts "\nin the application log in Xcode."
+    puts "\n\n"
+    puts "After validating, you can generate a features folder:"
+    puts "Go to your project (the dir containing the .xcodeproj file)."
+    puts "Then run calabash-ios gen"
+    puts "(if you don't already have a features folder)."
   end
 end
 
@@ -134,19 +130,6 @@ def setup_project(project_name, project_path, path)
       puts "Directory #{path} doesn't contain #{proj_file}"
     end
     exit 1
-  end
-
-  FileUtils.cd project_path do
-    ##Backup
-    if File.exists? "#{proj_file}.bak"
-      msg("Error") do
-        puts "Backup file already exists. #{proj_file}.bak"
-        puts "For safety, I won't overwrite this file."
-        puts "You must manually move this file, if you want to"
-        puts "Run calabash-ios setup again."
-      end
-      exit 1
-    end
   end
 
   download_calabash(project_path)
