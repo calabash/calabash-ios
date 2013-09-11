@@ -193,11 +193,11 @@ module Calabash
       end
 
       def self.xamarin_ios_csproj_path
-        solution_path = Dir['*.Xamarin.sln'].first
+        solution_path = Dir['*.sln'].first
         if solution_path
           project_dir = Dir.pwd
         else
-          solution_path = Dir[File.join('..','*.Xamarin.sln')].first
+          solution_path = Dir[File.join('..','*.sln')].first
           project_dir = File.expand_path('..') if solution_path
         end
         return nil unless project_dir
