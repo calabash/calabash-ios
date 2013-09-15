@@ -107,7 +107,7 @@ class Calabash::Cucumber::Launcher
     return :instruments unless sdk_version
     return :instruments if sdk_version.start_with?('7') # Only instruments supported for iOS7+
     sim_detector = SimLauncher::SdkDetector.new()
-    available = sim_detector.available_sdk_versions.reject {|v| v.start_with?('7')}
+    available = sim_detector.available_sdk_versions.reject { |v| v.start_with?('7') }
     if available.include?(sdk_version)
       :sim_launcher
     else
@@ -122,6 +122,18 @@ class Calabash::Cucumber::Launcher
 
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
+
+    if args[:app]
+      if File.directory?(args[:app])
+        args[:app] = File.expand_path(args[:app])
+      else
+        # args[:app] is not a directory so must be a bundle id
+        if args[:device_target] == 'simulator' ## bundle id set, but simulator target
+          args[:app] = app_path || detect_app_bundle_from_args(args)
+        end
+      end
+    end
+
     unless args[:app]
       if args[:device_target]=='simulator'
         device_xamarin_build_dir = 'iPhoneSimulator'
@@ -131,12 +143,8 @@ class Calabash::Cucumber::Launcher
       args[:app] = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path, device_xamarin_build_dir)
     end
 
-    if File.directory?(args[:app])
-      args[:app] = File.expand_path(args[:app])
-    end
-
     args[:bundle_id] ||= detect_bundle_id_from_app_bundle(args)
-    
+
     args[:device] ||= detect_device_from_args(args)
 
 
@@ -286,7 +294,6 @@ class Calabash::Cucumber::Launcher
       world.on_launch
     end
   end
-
 
 
   def info_plist_as_hash(plist_path)
