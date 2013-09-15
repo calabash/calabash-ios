@@ -203,8 +203,18 @@ module Calabash
         return nil unless project_dir
 
         ios_project_dir = Dir[File.join(project_dir,'*.iOS')].first
-        return nil unless ios_project_dir && File.directory?(ios_project_dir)
-        ios_project_dir
+        return ios_project_dir if ios_project_dir && File.directory?(ios_project_dir)
+        # ios_project_dir does not exist
+        # Detect case where there is no such sub directory
+        # (i.e. iOS only Xamarin project)
+        bin_dir = File.join(project_dir, 'bin')
+        if File.directory?(bin_dir) &&
+            (File.directory?(File.join(bin_dir,'iPhoneSimulator')) ||
+             File.directory?(File.join(bin_dir,'iPhone')))
+            return project_dir ## Looks like iOS bin dir is here
+        end
+
+
       end
 
       def self.bundle_path_from_xamarin_project(device_build_dir='iPhoneSimulator')
