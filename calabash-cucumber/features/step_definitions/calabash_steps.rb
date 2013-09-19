@@ -185,7 +185,13 @@ end
 
 Then /^I wait to see a navigation bar titled "([^\"]*)"$/ do |expected_mark|
   wait_for(WAIT_TIMEOUT) do
-     query('navigationItemView', :accessibilityLabel).include?(expected_mark)
+    # old code:
+    # query('navigationItemView', :accessibilityLabel).include?(expected_mark)
+
+    # new code: ignores back button but doesn't use accessibility label...
+    non_buttons = query('navigationItemView').find_all{|item| item['class']!='UINavigationItemButtonView'}
+    labels = non_buttons.map{|item| item['label']}
+    labels.include?(expected_mark)
   end
 end
 
