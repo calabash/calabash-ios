@@ -28,5 +28,6 @@ Gem::Specification.new do |s|
   s.add_dependency( "bundler", "~> 1.1")
   s.add_dependency( "run_loop", "~> 0.0.20" )
   s.add_dependency( "awesome_print")
+  s.add_dependency( "xamarin-test-cloud", "~> 0.9.25")
 
 end
