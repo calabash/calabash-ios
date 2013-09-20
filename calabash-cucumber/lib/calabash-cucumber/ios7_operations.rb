@@ -58,10 +58,6 @@ module Calabash
         [to_result]
       end
 
-      def rotate_ios7(dir)
-        throw NotImplementedError
-      end
-
       def find_or_raise(ui_query)
         results = query(ui_query)
         if results.empty?

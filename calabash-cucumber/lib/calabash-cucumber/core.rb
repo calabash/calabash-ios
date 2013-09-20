@@ -305,42 +305,38 @@ module Calabash
       end
 
       def rotate(dir)
-        if ios7?
-          rotate_ios7(dir)
-        else
-          dir = dir.to_sym
-          current_orientation = device_orientation(true).to_sym
-          rotate_cmd = nil
-          case dir
-            when :left then
-              if current_orientation == :down
-                rotate_cmd = "left_home_down"
-              elsif current_orientation == :right
-                rotate_cmd = "left_home_right"
-              elsif current_orientation == :left
-                rotate_cmd = "left_home_left"
-              elsif current_orientation == :up
-                rotate_cmd = "left_home_up"
-              end
-            when :right then
-              if current_orientation == :down
-                rotate_cmd = "right_home_down"
-              elsif current_orientation == :left
-                rotate_cmd = "right_home_left"
-              elsif current_orientation == :right
-                rotate_cmd = "right_home_right"
-              elsif current_orientation == :up
-                rotate_cmd = "right_home_up"
-              end
-          end
-
-          # should this really throw an exception?  shouldn't it just report a
-          # warning and do nothing?
-          if rotate_cmd.nil?
-            screenshot_and_raise "Does not support rotating '#{dir}' when home button is pointing '#{current_orientation}'"
-          end
-          playback("rotate_#{rotate_cmd}")
+        dir = dir.to_sym
+        current_orientation = device_orientation(true).to_sym
+        rotate_cmd = nil
+        case dir
+          when :left then
+            if current_orientation == :down
+              rotate_cmd = "left_home_down"
+            elsif current_orientation == :right
+              rotate_cmd = "left_home_right"
+            elsif current_orientation == :left
+              rotate_cmd = "left_home_left"
+            elsif current_orientation == :up
+              rotate_cmd = "left_home_up"
+            end
+          when :right then
+            if current_orientation == :down
+              rotate_cmd = "right_home_down"
+            elsif current_orientation == :left
+              rotate_cmd = "right_home_left"
+            elsif current_orientation == :right
+              rotate_cmd = "right_home_right"
+            elsif current_orientation == :up
+              rotate_cmd = "right_home_up"
+            end
         end
+
+        # should this really throw an exception?  shouldn't it just report a
+        # warning and do nothing?
+        if rotate_cmd.nil?
+          screenshot_and_raise "Does not support rotating '#{dir}' when home button is pointing '#{current_orientation}'"
+        end
+        playback("rotate_#{rotate_cmd}")
       end
 
       def send_app_to_background(secs)
