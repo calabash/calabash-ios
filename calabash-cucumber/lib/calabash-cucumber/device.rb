@@ -83,6 +83,12 @@ module Calabash
       def ios5?
         ios_major_version.eql?('5')
       end
+
+      def screen_size
+        return { :width => 768, :height => 1024 } if ipad?
+        return { :width => 320, :height => 568 } if iphone_5?
+        { :width => 320, :height => 480 }
+      end
     end
   end
 end
