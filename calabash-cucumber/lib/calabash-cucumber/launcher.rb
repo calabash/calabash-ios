@@ -7,6 +7,7 @@ require 'cfpropertylist'
 class Calabash::Cucumber::Launcher
   attr_accessor :run_loop
   attr_accessor :device
+  attr_accessor :launch_args
 
   @@launcher = nil
 
@@ -104,7 +105,7 @@ class Calabash::Cucumber::Launcher
   end
 
   def default_launch_method
-    return :instruments unless sdk_version
+    return :instruments unless sdk_version || use_instruments_env?
     return :instruments if sdk_version.start_with?('7') # Only instruments supported for iOS7+
     sim_detector = SimLauncher::SdkDetector.new()
     available = sim_detector.available_sdk_versions.reject { |v| v.start_with?('7') }
@@ -158,7 +159,7 @@ class Calabash::Cucumber::Launcher
       path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
       Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, args[:device].to_s, args)
     end
-    before = Time.now
+    self.launch_args = args
     ensure_connectivity
   end
 
@@ -334,6 +335,10 @@ class Calabash::Cucumber::Launcher
     ENV['SDK_VERSION']
   end
 
+  def use_instruments_env?
+    ENV['LAUNCH_VIA'] == 'instruments'
+  end
+
   def reset_between_scenarios?
     ENV['RESET_BETWEEN_SCENARIOS']=="1"
   end
@@ -352,6 +357,14 @@ class Calabash::Cucumber::Launcher
 
   def active?
     not run_loop.nil?
+  end
+
+  def inspect
+    msg = ["#{self.class}: Launch Method #{launch_args[:launch_method]}"]
+    if run_with_instruments?(self.launch_args) && self.run_loop
+      msg << "Log file: #{self.run_loop[:log_file]}"
+    end
+    msg.join("\n")
   end
 
 
