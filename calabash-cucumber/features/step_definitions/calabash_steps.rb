@@ -182,16 +182,14 @@ Then /^I wait for the "([^\"]*)" button to appear$/ do |name|
   wait_for(WAIT_TIMEOUT) { element_exists( "button marked:'#{name}'" ) }
 end
 
-
 Then /^I wait to see a navigation bar titled "([^\"]*)"$/ do |expected_mark|
-  wait_for(WAIT_TIMEOUT) do
-    # old code:
-    # query('navigationItemView', :accessibilityLabel).include?(expected_mark)
-
-    # new code: ignores back button but doesn't use accessibility label...
-    non_buttons = query('navigationItemView').find_all{|item| item['class']!='UINavigationItemButtonView'}
-    labels = non_buttons.map{|item| item['label']}
-    labels.include?(expected_mark)
+  msg = "waited for '#{WAIT_TIMEOUT}' seconds but did not see the navbar with title '#{expected_mark}'"
+  wait_for(:timeout => WAIT_TIMEOUT,
+           :timeout_message => msg ) do
+    all_items = query("navigationItemView marked:'#{expected_mark}'")
+    button_items = query("navigationItemButtonView")
+    non_button_items = all_items.delete_if { |item| button_items.include?(item) }
+    !non_button_items.empty?
   end
 end
 
