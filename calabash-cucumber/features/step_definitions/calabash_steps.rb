@@ -1,3 +1,4 @@
+
 WAIT_TIMEOUT = (ENV['WAIT_TIMEOUT'] || 30).to_f
 STEP_PAUSE = (ENV['STEP_PAUSE'] || 0.5).to_f
 
@@ -429,4 +430,43 @@ end
 
 Then /^I should see (?:the)? user location$/ do
   check_element_exists("view:'MKUserLocationView'")
+end
+
+### Date Picker ###
+
+# time_str can be in any format that Time can parse
+Then(/^I change the date picker time to "([^"]*)"$/) do |time_str|
+  target_time = Time.parse(time_str)
+  current_date = date_time_from_picker()
+  current_date = DateTime.new(current_date.year,
+                              current_date.mon,
+                              current_date.day,
+                              target_time.hour,
+                              target_time.min,
+                              0,
+                              target_time.gmt_offset)
+  picker_set_date_time current_date
+  sleep(STEP_PAUSE)
+end
+
+# date_str can be in any format that Date can parse
+Then(/^I change the date picker date to "([^"]*)"$/) do |date_str|
+  target_date = Date.parse(date_str)
+  current_time = date_time_from_picker()
+  date_time = DateTime.new(target_date.year,
+                           target_date.mon,
+                           target_date.day,
+                           current_time.hour,
+                           current_time.min,
+                           0,
+                           Time.now.sec,
+                           current_time.offset)
+  picker_set_date_time date_time
+  sleep(STEP_PAUSE)
+end
+
+# date_str can be in any format that Date can parse
+Then(/^I change the date picker date to "([^"]*)" at "([^"]*)"$/) do |date_str, time_str|
+  macro %Q|I change the date picker time to "#{time_str}"|
+  macro %Q|I change the date picker date to "#{date_str}"|
 end
