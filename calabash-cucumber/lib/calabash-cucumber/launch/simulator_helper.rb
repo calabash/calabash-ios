@@ -208,13 +208,23 @@ module Calabash
         # Detect case where there is no such sub directory
         # (i.e. iOS only Xamarin project)
         bin_dir = File.join(project_dir, 'bin')
-        if File.directory?(bin_dir) &&
-            (File.directory?(File.join(bin_dir,'iPhoneSimulator')) ||
-             File.directory?(File.join(bin_dir,'iPhone')))
+        if xamarin_ios_bin_dir?(bin_dir)
             return project_dir ## Looks like iOS bin dir is here
         end
 
+        sub_dirs = Dir[File.join(project_dir,'*')].select {|dir| File.directory?(dir)}
 
+        sub_dirs.find do |sub_dir|
+          contains_csproj = Dir[File.join(sub_dir,'*.csproj')].first
+          contains_csproj && xamarin_ios_bin_dir?(File.join(sub_dir,'bin'))
+        end
+
+      end
+
+      def self.xamarin_ios_bin_dir?(bin_dir)
+        File.directory?(bin_dir) &&
+            (File.directory?(File.join(bin_dir,'iPhoneSimulator')) ||
+                File.directory?(File.join(bin_dir,'iPhone')))
       end
 
       def self.bundle_path_from_xamarin_project(device_build_dir='iPhoneSimulator')
