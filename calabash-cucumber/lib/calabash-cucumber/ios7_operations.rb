@@ -19,8 +19,28 @@ module Calabash
           uia_tap_offset(offset)
         else
           el_to_touch = find_or_raise(ui_query)
+          rect = el_to_touch['rect']
+          normalize_rect_for_orientation(rect)
           touch(el_to_touch, options)
           [el_to_touch]
+        end
+      end
+
+      def normalize_rect_for_orientation(rect)
+        orientation = device_orientation.to_sym
+        launcher = Calabash::Cucumber::Launcher.launcher
+        screen_size = launcher.device.screen_size
+        case orientation
+          when :right
+            cx = rect['center_x']
+            rect['center_x'] = rect['center_y']
+            rect['center_y'] = screen_size[:width] - cx
+          when :left
+            cx = rect['center_x']
+            rect['center_x'] = screen_size[:height] - rect['center_y']
+            rect['center_y'] = cx
+          else
+            # no-op by design.
         end
       end
 
@@ -56,10 +76,6 @@ module Calabash
         to_result = find_or_raise to
         uia_pan_offset(point_from(from_result, options), point_from(to_result, options), options)
         [to_result]
-      end
-
-      def rotate_ios7(dir)
-        throw NotImplementedError
       end
 
       def find_or_raise(ui_query)
