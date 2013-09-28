@@ -260,22 +260,32 @@ module Calabash
       #   is in left and right landscape orientations
       def rotate_home_button_to(dir)
         dir = dir.to_s
-        res = device_orientation
+        # *** UNEXPECTED ***
+        # do not call device_orientation function here because it does a number
+        # of checks that will lead to inconsistent and confusing warnings
+        # ******************
+        res = map(nil, :orientation, :device).first
         return res if res.eql? dir
         rotation_candidates.each { |candidate|
-          #if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-          #  puts "try to rotate to '#{dir}' using '#{candidate}'"
-          #end
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            puts "try to rotate to '#{dir}' using '#{candidate}'"
+          end
           playback(candidate)
           # need a longer sleep for cloud testing
           sleep(0.5)
-          res = device_orientation
 
-          ### UNEXPECTED ###
-          # device orientation changes when rotation playback is performed
+          # *** UNEXPECTED ***
+          # do not call device_orientation function here because it does a number
+          # of checks that will lead to inconsistent and confusing warnings
+          # ******************
+          res = map(nil, :orientation, :device).first
+
+          # *** UNEXPECTED ***
+          # the device orientation changes when rotation playback is performed
           # _regardless_ of whether or not the rotation succeeded
           #
           # this is an attempt to sync to the device and status bar orientation
+          # ******************
           if res.eql? dir
             status_bar = status_bar_orientation
             if status_bar.eql? res
@@ -285,7 +295,6 @@ module Calabash
             end
           end
 
-          # return res if res.eql? dir
         }
         if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
           puts "Could not rotate device.  Is rotation enabled in app? Will return 'down'"
@@ -295,6 +304,23 @@ module Calabash
 
       def device_orientation(force_down=false)
         res = map(nil, :orientation, :device).first
+
+        if ['face up', 'face down'].include?(res)
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            if force_down
+              puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
+            else
+              puts "WARN  found orientation '#{res}'"
+              puts '      if you did not expect this, you have two options:'
+              puts '      1. position your device in the upright position'
+              puts "      2. call device_orientation(true) to force a 'down' orientation"
+            end
+          end
+
+          return res if !force_down
+          return rotate_home_button_to :down
+        end
+
         return res if !res.eql?('unknown')
         return res if !force_down
         rotate_home_button_to(:down)
@@ -331,12 +357,13 @@ module Calabash
             end
         end
 
-        # should this really throw an exception?  shouldn't it just report a
-        # warning and do nothing?
         if rotate_cmd.nil?
-          screenshot_and_raise "Does not support rotating '#{dir}' when home button is pointing '#{current_orientation}'"
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            puts "Could not rotate device in direction '#{dir}' with orientation '#{current_orientation} - will do nothing"
+          end
+        else
+          playback("rotate_#{rotate_cmd}")
         end
-        playback("rotate_#{rotate_cmd}")
       end
 
       def send_app_to_background(secs)

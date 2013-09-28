@@ -27,7 +27,7 @@ module Calabash
       end
 
       def normalize_rect_for_orientation(rect)
-        orientation = device_orientation.to_sym
+        orientation = device_orientation(true).to_sym
         launcher = Calabash::Cucumber::Launcher.launcher
         screen_size = launcher.device.screen_size
         case orientation
@@ -39,6 +39,11 @@ module Calabash
             cx = rect['center_x']
             rect['center_x'] = screen_size[:height] - rect['center_y']
             rect['center_y'] = cx
+          when :up
+            cy = rect['center_y']
+            cx = rect['center_x']
+            rect['center_y'] = screen_size[:height] - cy
+            rect['center_x'] = screen_size[:width]  - cx
           else
             # no-op by design.
         end
