@@ -87,7 +87,7 @@ class Calabash::Cucumber::Launcher
 
     if run_with_instruments?(args) && !simulator_target?
       device_tgt = ENV['DEVICE_TARGET']
-      if device_tgt.nil? || device_tgt.downcase == 'device'
+      if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
         device_tgt = RunLoop::Core.detect_connected_device
       end
 
@@ -102,6 +102,10 @@ class Calabash::Cucumber::Launcher
 
 
     args
+  end
+
+  def detect_connected_device?
+      return ENV['DETECT_CONNECTED_DEVICE'] != 'false'
   end
 
   def default_launch_method
