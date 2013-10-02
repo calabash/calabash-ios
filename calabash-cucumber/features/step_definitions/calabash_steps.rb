@@ -120,6 +120,7 @@ Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text
   touch("textField placeholder:'#{field_name}'")
   await_keyboard
   keyboard_enter_text(text_to_type)
+  done
   sleep(STEP_PAUSE)
 end
 
@@ -141,6 +142,7 @@ Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field n
   touch("textField index:#{index-1}")
   await_keyboard
   keyboard_enter_text(text_to_type)
+  done
   sleep(STEP_PAUSE)
 end
 
