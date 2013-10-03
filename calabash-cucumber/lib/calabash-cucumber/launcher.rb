@@ -105,7 +105,7 @@ class Calabash::Cucumber::Launcher
   end
 
   def detect_connected_device?
-      return ENV['DETECT_CONNECTED_DEVICE'] != 'false'
+      return ENV['DETECT_CONNECTED_DEVICE'] != '0'
   end
 
   def default_launch_method
