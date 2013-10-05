@@ -1,4 +1,3 @@
-
 WAIT_TIMEOUT = (ENV['WAIT_TIMEOUT'] || 30).to_f
 STEP_PAUSE = (ENV['STEP_PAUSE'] || 0.5).to_f
 
@@ -336,7 +335,7 @@ end
 
 Then /^I send app to background for (\d+) seconds$/ do |secs|
   secs = secs.to_f
-  background(secs)
+  send_app_to_background(secs)
   sleep(secs+10)
 end
 
