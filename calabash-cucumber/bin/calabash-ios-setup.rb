@@ -93,7 +93,7 @@ def download_calabash(project_path)
       zip_file = File.join(@framework_dir,"calabash.framework.zip")
 
       if File.exist?(zip_file)
-        if not system("unzip -C -K -o -q -d #{project_path} #{zip_file} -x __MACOSX/* calabash.framework/.DS_Store")
+        if not system("unzip -C -K -o -q -d '#{project_path}' '#{zip_file}' -x __MACOSX/* calabash.framework/.DS_Store")
           msg("Error") do
             puts "Unable to unzip file: #{zip_file}"
             puts "You must install manually."
