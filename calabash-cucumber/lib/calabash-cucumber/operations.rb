@@ -10,6 +10,7 @@ require 'json'
 require 'set'
 require 'calabash-cucumber/version'
 require 'calabash-cucumber/date_picker'
+require 'calabash-cucumber/slider'
 
 
 if not Object.const_defined?(:CALABASH_COUNT)
@@ -28,6 +29,7 @@ module Calabash
       include Calabash::Cucumber::KeyboardHelpers
       include Calabash::Cucumber::Location
       include Calabash::Cucumber::DatePicker
+      include Calabash::Cucumber::Slider
 
       def page(clz,*args)
         clz.new(self,*args)
