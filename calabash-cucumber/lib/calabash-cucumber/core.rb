@@ -71,7 +71,6 @@ module Calabash
 
       def touch(uiquery, options={})
 
-
         if (uiquery.is_a?(Array))
           raise "No elements to touch in array" if uiquery.empty?
           uiquery = uiquery.first
@@ -102,8 +101,7 @@ module Calabash
         if ios7?
           swipe_ios7(options.merge(:direction => dir))
         else
-          dir = dir.to_sym
-          current_orientation = device_orientation().to_sym
+          current_orientation = status_bar_orientation.to_sym
           if current_orientation == :left
             case dir
               when :left then
@@ -117,6 +115,7 @@ module Calabash
               else
             end
           end
+
           if current_orientation == :right
             case dir
               when :left then
@@ -130,6 +129,7 @@ module Calabash
               else
             end
           end
+
           if current_orientation == :up
             case dir
               when :left then
@@ -143,6 +143,7 @@ module Calabash
               else
             end
           end
+
           playback("swipe_#{dir}", options)
         end
       end
@@ -259,47 +260,59 @@ module Calabash
       # * see apple documentation for clarification about where the home button
       #   is in left and right landscape orientations
       def rotate_home_button_to(dir)
-        dir = dir.to_s
-        # *** UNEXPECTED ***
-        # do not call device_orientation function here because it does a number
-        # of checks that will lead to inconsistent and confusing warnings
-        # ******************
-        res = map(nil, :orientation, :device).first
-        return res if res.eql? dir
+        dir_sym = dir.to_sym
+        if dir_sym.eql?(:top)
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            warn "converting '#{dir}' to ':up' - please adjust your code"
+          end
+          dir_sym = :up
+        end
+
+        if dir_sym.eql?(:bottom)
+          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+            warn "converting '#{dir}' to ':down' - please adjust your code"
+          end
+          dir_sym = :down
+        end
+
+        directions = [:down, :up, :left, :right]
+        unless directions.include?(dir_sym)
+          screenshot_and_raise "expected one of '#{directions}' as an arg to 'rotate_home_button_to but found '#{dir}'"
+        end
+
+        res = status_bar_orientation()
+        if res.nil?
+          screenshot_and_raise "expected 'status_bar_orientation' to return a non-nil value"
+        else
+          res = res.to_sym
+        end
+
+        return res if res.eql? dir_sym
+
         rotation_candidates.each { |candidate|
           if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            puts "try to rotate to '#{dir}' using '#{candidate}'"
+            puts "try to rotate to '#{dir_sym}' using '#{candidate}'"
           end
           playback(candidate)
           # need a longer sleep for cloud testing
-          sleep(0.5)
+          sleep(0.4)
 
-          # *** UNEXPECTED ***
-          # do not call device_orientation function here because it does a number
-          # of checks that will lead to inconsistent and confusing warnings
-          # ******************
-          res = map(nil, :orientation, :device).first
-
-          # *** UNEXPECTED ***
-          # the device orientation changes when rotation playback is performed
-          # _regardless_ of whether or not the rotation succeeded
-          #
-          # this is an attempt to sync to the device and status bar orientation
-          # ******************
-          if res.eql? dir
-            status_bar = status_bar_orientation
-            if status_bar.eql? res
-              return res
-            else
-              return rotate_home_button_to status_bar
-            end
+          res = status_bar_orientation
+          if res.nil?
+            screenshot_and_raise "expected 'status_bar_orientation' to return a non-nil value"
+          else
+            res = res.to_sym
           end
 
+          return if res.eql? dir_sym
         }
+
         if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-          puts "Could not rotate device.  Is rotation enabled in app? Will return 'down'"
+          warn "Could not rotate home button to '#{dir}'."
+          warn 'Is rotation enabled for this controller?'
+          warn "Will return 'down'"
         end
-        'down'
+        :down
       end
 
       def device_orientation(force_down=false)
@@ -309,11 +322,6 @@ module Calabash
           if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
             if force_down
               puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
-            else
-              puts "WARN  found orientation '#{res}'"
-              puts '      if you did not expect this, you have two options:'
-              puts '      1. position your device in the upright position'
-              puts "      2. call device_orientation(true) to force a 'down' orientation"
             end
           end
 
@@ -332,7 +340,7 @@ module Calabash
 
       def rotate(dir)
         dir = dir.to_sym
-        current_orientation = device_orientation(true).to_sym
+        current_orientation = status_bar_orientation().to_sym
         rotate_cmd = nil
         case dir
           when :left then
