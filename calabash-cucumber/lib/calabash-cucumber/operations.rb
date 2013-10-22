@@ -38,7 +38,7 @@ module Calabash
       end
 
       def home_direction
-        device_orientation().to_sym
+        status_bar_orientation.to_sym
       end
 
       def assert_home_direction(expected)

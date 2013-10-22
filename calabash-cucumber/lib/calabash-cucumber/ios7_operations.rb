@@ -27,7 +27,7 @@ module Calabash
       end
 
       def normalize_rect_for_orientation(rect)
-        orientation = device_orientation().to_sym
+        orientation = status_bar_orientation().to_sym
         launcher = Calabash::Cucumber::Launcher.launcher
         screen_size = launcher.device.screen_size
         case orientation
