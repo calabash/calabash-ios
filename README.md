@@ -4,34 +4,39 @@ Welcome to Calabash for iOS
 Calabash is an automated testing technology for Android and iOS native and hybrid applications.
 This repository contains support for iOS, for Android, see [Calabash Landing Page](http://calaba.sh/).
 
-Calabash is a free open source project, developed and maintained by [LessPainful - automated app testing](https://www.lesspainful.com).
+Calabash is a free open source project, developed and maintained by [Xamarin](http://xamarin.com).
 
-While Calabash is completely free, LessPainful provides a number of commercial services centered around Calabash and quality assurance for mobile, e.g., training, support with a SLA, consulting and finally _device labs_ which are hosted and on-site test-execution environments which let you execute Calabash tests on a large number of Android and iOS devices. 
+While Calabash is completely free, Xamarin provides a number of commercial services centered around Calabash and quality assurance for mobile, namely Xamarin Test Cloud consisting of hosted test-execution environments which let you execute Calabash tests on a large number of Android and iOS devices. 
 
-Please contact us at [contact@lesspainful.com](mailto:contact@lesspainful.com) or visit our home page [https://www.lesspainful.com](https://www.lesspainful.com).
+Please see [xamarin.com/test-cloud](http://xamarin.com/test-cloud).
 
 This document explains how to install Calabash iOS. For introductory information about the rationale behind Calabash see
 
 [Introducing Calabash](http://blog.lesspainful.com/2012/03/07/Calabash/).
 
-[Release Notes](calabash-cucumber/RELEASE_NOTES.md)
+[Change log](https://github.com/calabash/calabash-ios/tree/0.9.x/changelog)
 
 
 This guide explains how to setup and use Calabash for iOS
 =========================================================
 
-After completing this guide you will be able to run tests locally
+Running Calabash requires Mac OSX.  After completing this guide you will be able to run tests locally
 against the iOS Simulator. You can also interactively explore and
 interact with your application using the Calabash console.
-
-Finally, you will be able to test your app on real, non-jailbroken iOS
-devices via [the LessPainful service](http://www.lesspainful.com/).
 
 If you have any questions on Calabash iOS, please use the google group
 
 [http://groups.google.com/group/calabash-ios](http://groups.google.com/group/calabash-ios)
 
-This guide was writting using XCode 4.5, but should also work for
+For Xamarin users, we recommend the free Xamarin [Calabash component](https://components.xamarin.com/view/calabash/) which replaces
+the `calabash-ios setup` step below.
+
+Also the Calabash.app is an OS X app containing precompiled versions of Ruby, Calabash and the Xamarin Test Cloud gem.
+
+[https://s3.amazonaws.com/calabashapp/Calabash.zip](https://s3.amazonaws.com/calabashapp/Calabash.zip)
+
+
+The rest of this guide was writting using XCode 5, but should also work for
 XCode versions >= 4.3.
 
 *NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from
@@ -46,7 +51,7 @@ Installation
 ### Prerequisites
 
 You need to have Ruby installed. This is installed by default on MacOSX.
-Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7" (or higher).
+Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7" (or higher). We do recommend using Ruby 2.0+.
 
 ### Fast track
 
