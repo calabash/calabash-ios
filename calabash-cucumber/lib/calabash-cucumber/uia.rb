@@ -73,7 +73,7 @@ module Calabash
       end
 
       def uia_screenshot(name)
-        uia_handle_command(:elementDoesNotExist, name)
+        uia_handle_command(:screenshot, name)
       end
 
       def uia_type_string(string)
