@@ -20,13 +20,13 @@ module Calabash
         else
           el_to_touch = find_or_raise(ui_query)
           rect = el_to_touch['rect']
-          normalize_rect_for_orientation(rect)
+          normalize_rect_for_orientation!(rect)
           touch(el_to_touch, options)
           [el_to_touch]
         end
       end
 
-      def normalize_rect_for_orientation(rect)
+      def normalize_rect_for_orientation!(rect)
         orientation = status_bar_orientation().to_sym
         launcher = Calabash::Cucumber::Launcher.launcher
         screen_size = launcher.device.screen_size
@@ -56,6 +56,8 @@ module Calabash
           uia_swipe_offset(offset, options)
         else
           el_to_swipe = find_or_raise(ui_query)
+          rect = el_to_swipe['rect']
+          normalize_rect_for_orientation!(rect)
           offset = point_from(el_to_swipe, options)
           uia_swipe_offset(offset, options)
           [el_to_swipe]
