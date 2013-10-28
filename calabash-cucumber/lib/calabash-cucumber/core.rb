@@ -714,9 +714,18 @@ EOF
         res
       end
 
+      def set_current_device_number(current_device_number)
+         $current_device_number = current_device_number
+      end
 
       def url_for(verb)
-        url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265")
+        if $current_device_number.nil?
+          # used for single device tests
+          url = URI.parse(ENV["DEVICE_ENDPOINT"] || "http://localhost:37265")
+        else
+          # used for multiple device tests
+          url = URI.parse(ENV["DEVICE_ENDPOINT_#{$current_device_number}"])
+        end
         path = url.path
         if path.end_with? "/"
           path = "#{path}#{verb}"
