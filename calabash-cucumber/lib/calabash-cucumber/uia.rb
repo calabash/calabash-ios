@@ -6,12 +6,19 @@ module Calabash
     module UIA
 
       def send_uia_command(opts ={})
-        launcher = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
-        run_loop = opts[:run_loop] || (launcher && launcher.active? && launcher.run_loop)
+        #launcher = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
+        #run_loop = opts[:run_loop] || (launcher && launcher.active? && launcher.run_loop)
         command = opts[:command]
-        raise ArgumentError, 'please supply :run_loop or instance var @calabash_launcher' unless run_loop
-        raise ArgumentError, 'please supply :command' unless command
-        RunLoop.send_command(run_loop, opts[:command])
+        #raise ArgumentError, 'please supply :run_loop or instance var @calabash_launcher' unless run_loop
+        #raise ArgumentError, 'please supply :command' unless command
+        #RunLoop.send_command(run_loop, opts[:command])
+        res = http({:method => :post, :path => 'uia'}, {command:command})
+        res = JSON.parse(res)
+        if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "uia send failed because: #{res['reason']}\n#{res['details']}"
+        end
+        res['results'].first
+
       end
 
       def uia_query(*queryparts)

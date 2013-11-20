@@ -5,6 +5,7 @@ require 'run_loop'
 require 'cfpropertylist'
 
 class Calabash::Cucumber::Launcher
+
   attr_accessor :run_loop
   attr_accessor :device
   attr_accessor :launch_args
@@ -217,7 +218,7 @@ class Calabash::Cucumber::Launcher
 
   def new_run_loop(args)
     last_err = nil
-    3.times do
+    5.times do
       begin
         return RunLoop.run(args)
       rescue RunLoop::TimeoutError => e
