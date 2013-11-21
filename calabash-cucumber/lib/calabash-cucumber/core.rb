@@ -1,4 +1,5 @@
 require 'httpclient'
+require 'geocoder'
 require 'calabash-cucumber/launch/simulator_helper'
 require 'calabash-cucumber/uia'
 require 'calabash-cucumber/ios7_operations'
@@ -378,6 +379,47 @@ module Calabash
         uia_send_app_to_background(secs)
       end
 
+      def console_attach
+        Calabash::Cucumber::Launcher.attach
+      end
+
+      def set_location(options)
+        if Calabash::Cucumber::Launcher.instruments?
+          uia_set_location(options)
+        else
+          if options[:place]
+            res = location_for_place(options[:place])
+            lat = res.latitude
+            lon = res.longitude
+          else
+            lat = options[:latitude]
+            lon = options[:longitude]
+          end
+          body_data = {:action => :change_location,
+                       :latitude => lat,
+                       :longitude => lon}
+
+          body = http({:method => :post, :path => 'location'}, body_data)
+
+          res = JSON.parse(res)
+          if res['outcome'] != 'SUCCESS'
+            screenshot_and_raise "Set location change failed, for #{lat}, #{lon} (#{body})."
+          end
+          res['results']
+
+        end
+      end
+
+      def location_for_place(place)
+        search_results = locations_for_place(place)
+        raise "Got no results for #{place}" if search_results.empty?
+        search_results.first
+      end
+
+      def locations_for_place(place)
+        Geocoder.search(place)
+      end
+
       def move_wheel(opts={})
         q = opts[:query] || "pickerView"
         wheel = opts[:wheel] || 0
@@ -388,6 +430,8 @@ module Calabash
 
         if ENV['OS'] == "ios4"
           playback "wheel_#{dir}", :query => "#{q} pickerTable index:#{wheel}"
+        elsif ios7?
+          raise NotImplementedError
         else
           playback "wheel_#{dir}", :query => "#{q} pickerTableView index:#{wheel}"
         end

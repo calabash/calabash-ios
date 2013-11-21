@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency( "CFPropertyList" )
   s.add_dependency( "sim_launcher", "0.4.6")
   s.add_dependency( "slowhandcuke" )
-  s.add_dependency( "location-one", "~>0.0.10")
+  s.add_dependency( "geocoder", "~>1.1.8")
   s.add_dependency( "httpclient","~> 2.3.3")
   s.add_dependency( "bundler", "~> 1.1")
   s.add_dependency( "run_loop", "~> 0.1.0.pre1" )
