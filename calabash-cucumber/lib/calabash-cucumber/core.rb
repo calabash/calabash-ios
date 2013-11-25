@@ -401,7 +401,7 @@ module Calabash
 
           body = http({:method => :post, :path => 'location'}, body_data)
 
-          res = JSON.parse(res)
+          res = JSON.parse(body)
           if res['outcome'] != 'SUCCESS'
             screenshot_and_raise "Set location change failed, for #{lat}, #{lon} (#{body})."
           end

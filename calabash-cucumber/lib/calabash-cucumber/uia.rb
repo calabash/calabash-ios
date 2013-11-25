@@ -128,7 +128,7 @@ module Calabash
         if s['status'] == 'success'
           s['value']
         else
-          raise s
+          s
         end
       end
 
