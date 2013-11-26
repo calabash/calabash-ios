@@ -164,10 +164,21 @@ module Calabash
       end
 
       def self.find_preferred_dir(sim_dirs)
-        sim_dirs.find do |d|
-          out = `otool "#{File.expand_path(d)}"/* -o 2> /dev/null | grep CalabashServer`
-          /CalabashServer/.match(out)
+        skipped_formats = [".png", ".jpg", ".jpeg", ".plist", ".nib", ".lproj"]
+        dir = File.expand_path(d)
+
+        # For every file on that .app directory
+        Dir.entries(d).each do |file|
+          # If this is an asset or any of those skipped formats, skip it.
+          next if skipped_formats.include? File.extname(file)
+
+          # If its not, try to run otool against that file, check whether we are linked against calabash framework.
+          out = `otool #{dir}/#{file} -o 2> /dev/null | grep CalabashServer`
+          return true if /CalabashServer/.match(out)
         end
+
+        # Defaulted to false
+        false
       end
 
       def self.ensure_connectivity(app_bundle_path, sdk, version, args = nil)
