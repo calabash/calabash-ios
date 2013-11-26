@@ -100,7 +100,7 @@ class Calabash::Cucumber::Launcher
       args[:device_target] = 'simulator'
     end
 
-
+    puts "Default launch argument: #{args}" if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
     args
   end
 
