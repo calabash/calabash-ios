@@ -5,6 +5,7 @@ require 'run_loop'
 require 'cfpropertylist'
 
 class Calabash::Cucumber::Launcher
+
   attr_accessor :run_loop
   attr_accessor :device
   attr_accessor :launch_args
@@ -26,8 +27,34 @@ class Calabash::Cucumber::Launcher
   class CalabashLauncherTimeoutErr < Timeout::Error
   end
 
+  def self.attach
+    l = launcher
+    return l if l && l.active?
+    l.attach
+
+  end
+
+  def attach
+    pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
+    pids = pids_str.split(',').map { |pid| pid.to_i }
+    pid = pids.first
+    rl = {}
+    rl[:pid] = pid if pid
+
+    self.run_loop= rl
+    ensure_connectivity
+
+    self
+  end
+
+  def self.instruments?
+    l = launcher_if_used
+    return false unless l
+    l.active?
+  end
+
   def self.launcher
-    @@launcher ||= Launcher.new
+    @@launcher ||= Calabash::Cucumber::Launcher.new
   end
 
   def self.launcher_if_used
@@ -217,7 +244,7 @@ class Calabash::Cucumber::Launcher
 
   def new_run_loop(args)
     last_err = nil
-    3.times do
+    5.times do
       begin
         return RunLoop.run(args)
       rescue RunLoop::TimeoutError => e
@@ -356,7 +383,7 @@ class Calabash::Cucumber::Launcher
   end
 
   def run_with_instruments?(args)
-    args[:launch_method] == :instruments
+    args && args[:launch_method] == :instruments
   end
 
   def active?
@@ -364,7 +391,7 @@ class Calabash::Cucumber::Launcher
   end
 
   def inspect
-    msg = ["#{self.class}: Launch Method #{launch_args[:launch_method]}"]
+    msg = ["#{self.class}: Launch Method #{launch_args && launch_args[:launch_method]}"]
     if run_with_instruments?(self.launch_args) && self.run_loop
       msg << "Log file: #{self.run_loop[:log_file]}"
     end

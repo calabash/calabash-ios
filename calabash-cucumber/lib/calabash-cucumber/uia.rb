@@ -1,17 +1,22 @@
 require 'edn'
-require 'location-one'
 
 module Calabash
   module Cucumber
     module UIA
 
+      def uia(command,options={})
+        res = http({:method => :post, :path => 'uia'}, {command:command}.merge(options))
+        res = JSON.parse(res)
+        if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "uia send failed because: #{res['reason']}\n#{res['details']}"
+        end
+        res['results'].first
+      end
+
       def send_uia_command(opts ={})
-        launcher = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
-        run_loop = opts[:run_loop] || (launcher && launcher.active? && launcher.run_loop)
-        command = opts[:command]
-        raise ArgumentError, 'please supply :run_loop or instance var @calabash_launcher' unless run_loop
-        raise ArgumentError, 'please supply :command' unless command
-        RunLoop.send_command(run_loop, opts[:command])
+        #deprecated, poor method signature
+        #use uia("uia-js...",options)
+        uia(opts[:command], opts)
       end
 
       def uia_query(*queryparts)
@@ -80,16 +85,20 @@ module Calabash
         uia_handle_command(:typeString, string)
       end
 
-      def uia_enter()
+      def uia_enter
         uia_handle_command(:enter)
       end
 
-      def uia_set_location(place)
-        if place.is_a?(String)
-          loc = LocationOne::Client.location_by_place(place)
-          loc_data = {"latitude"=>loc.latitude, "longitude"=>loc.longitude}
-        else
-          loc_data = place
+      def uia_set_location(options)
+        validate_hash_is_location!(options)
+        if options[:place]
+          place = options[:place]
+          search_results = Geocoder.search(place)
+          raise "Got no results for #{place}" if search_results.empty?
+          loc = search_results.first
+          loc_data = {'latitude'=>loc.latitude, 'longitude'=>loc.longitude}
+        elsif options.is_a?(Hash)
+          loc_data = options
         end
         uia_handle_command(:setLocation, loc_data)
       end
@@ -111,7 +120,7 @@ module Calabash
           puts "Sending UIA command"
           puts command
         end
-        s=send_uia_command :command => command
+        s = uia(command)
         if ENV['DEBUG'] == '1'
           puts "Result"
           p s
@@ -119,7 +128,7 @@ module Calabash
         if s['status'] == 'success'
           s['value']
         else
-          raise s
+          s
         end
       end
 
@@ -127,6 +136,18 @@ module Calabash
         #TODO escape '\n in query
         escape_quotes string
       end
+
+      private
+      def validate_hash_is_location!(options)
+        return if options[:latitude] and options[:longitude]
+        if (options[:latitude] and not options[:longitude]) ||
+            (options[:longitude] and not options[:latitude])
+          raise 'Both latitude and longitude must be specified if either is.'
+        elsif not options[:place]
+            raise 'Either :place or :latitude and :longitude must be specified.'
+        end
+      end
+
 
     end
   end

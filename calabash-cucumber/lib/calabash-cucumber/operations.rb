@@ -2,7 +2,6 @@ require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/keyboard_helpers'
 require 'calabash-cucumber/wait_helpers'
-require 'calabash-cucumber/location'
 require 'calabash-cucumber/launcher'
 require 'net/http'
 require 'test/unit/assertions'
@@ -26,7 +25,6 @@ module Calabash
       include Calabash::Cucumber::TestsHelpers
       include Calabash::Cucumber::WaitHelpers
       include Calabash::Cucumber::KeyboardHelpers
-      include Calabash::Cucumber::Location
       include Calabash::Cucumber::DatePicker
 
       def page(clz,*args)
