@@ -169,7 +169,7 @@ module Calabash
 
         # For every file on that .app directory
         Dir.entries(d).each do |file|
-          # If this is an aassets, skip it.
+          # If this is an asset or any of those skipped formats, skip it.
           next if skipped_formats.include? File.extname(file)
 
           # If its not, try to run otool against that file, check whether we are linked against calabash framework.
