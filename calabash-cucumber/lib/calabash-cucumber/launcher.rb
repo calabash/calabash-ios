@@ -132,7 +132,21 @@ class Calabash::Cucumber::Launcher
   end
 
   def detect_connected_device?
+    if ENV['DETECT_CONNECTED_DEVICE'] == '1'
+      return true
+    end
+
+    if ENV['BUNDLE_ID'].nil? && ENV['DETECT_CONNECTED_DEVICE'].nil?
+      return false
+    end
+    if ENV['BUNDLE_ID'] && ENV['DETECT_CONNECTED_DEVICE'].nil?
+      return true
+    end
+    if ENV['DETECT_CONNECTED_DEVICE']
       return ENV['DETECT_CONNECTED_DEVICE'] != '0'
+    end
+
+    return false
   end
 
   def default_launch_method
