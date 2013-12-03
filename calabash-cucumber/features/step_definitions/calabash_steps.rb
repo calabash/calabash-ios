@@ -469,3 +469,20 @@ Then(/^I change the date picker date to "([^"]*)" at "([^"]*)"$/) do |date_str, 
   macro %Q|I change the date picker time to "#{time_str}"|
   macro %Q|I change the date picker date to "#{date_str}"|
 end
+
+# Multiple device support
+Then /^I use device ([a-zA-Z0-9.:\/]+)$/ do |device_number|
+  set_current_device_number(device_number)
+end
+
+Then /^on device ([a-zA-Z0-9.:\/]+) do:$/ do |device_number|
+  set_current_device_number(device_number)
+end
+
+Then /^I use default device$/ do
+  set_current_device_number(nil)
+end
+
+Then /^on default device do:$/ do
+  set_current_device_number(nil)
+end 
