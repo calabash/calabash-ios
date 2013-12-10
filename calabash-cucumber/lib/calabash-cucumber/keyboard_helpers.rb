@@ -101,15 +101,20 @@ module Calabash
           known = KEYPLANE_NAMES.values
 
           found = false
-          ["shift", "more"].each do |key|
+          keyplane_selection_keys = ["shift", "more"]
+          keyplane_selection_keys.each do |key|
             plane = props["#{key}-alternate"]
             if (known.member?(plane) and
                 not visited.member?(plane))
               keyboard_enter_char(key.capitalize, false)
               found = search_keyplanes_and_enter_char(chr, visited)
               return true if found
-              #not found => go back
-              keyboard_enter_char(key.capitalize, false)
+              #not found => try with other keyplane selection key
+              keyplane_selection_keys.delete(key)
+              other_key = keyplane_selection_keys.last
+              keyboard_enter_char(other_key.capitalize, false)
+              found = search_keyplanes_and_enter_char(chr, visited)
+              return true if found
             end
           end
           return false
