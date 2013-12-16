@@ -738,6 +738,11 @@ EOF
         end
       end
 
+      def shutdown_test_server
+        # Compat with Calabash Android
+        stop_test_server
+      end
+
       def default_device
         @calabash_launcher && @calabash_launcher.device
       end
