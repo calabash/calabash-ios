@@ -127,7 +127,6 @@ class Calabash::Cucumber::Launcher
       args[:device_target] = 'simulator'
     end
 
-
     args
   end
 
