@@ -6,6 +6,8 @@ require 'cfpropertylist'
 
 class Calabash::Cucumber::Launcher
 
+  KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
+
   attr_accessor :run_loop
   attr_accessor :device
   attr_accessor :launch_args
@@ -80,13 +82,84 @@ class Calabash::Cucumber::Launcher
     path ||= Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
 
     app = File.basename(path)
-    bundle = `find "#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}/Applications/" -type d -depth 2 -name "#{app}" | head -n 1`
-    return if bundle.empty? # Assuming we're already clean
-
-    sandbox = File.dirname(bundle)
-    ['Library', 'Documents', 'tmp'].each do |dir|
-      FileUtils.rm_rf(File.join(sandbox, dir))
+    directories_for_sdk_prefix(sdk).each do |dir|
+      bundle = `find "#{dir}/Applications" -type d -depth 2 -name "#{app}" | head -n 1`
+      next if bundle.empty? # Assuming we're already clean
+      if ENV['DEBUG']=='1'
+        puts "Reset app state for #{bundle}"
+      end
+      sandbox = File.dirname(bundle)
+      ['Library', 'Documents', 'tmp'].each do |dir|
+        FileUtils.rm_rf(File.join(sandbox, dir))
+      end
     end
+
+
+  end
+
+  def directories_for_sdk_prefix(sdk)
+    Dir["#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}*"]
+  end
+
+  # Call as update_privacy_settings('com.my.app', {:photo => {:allow => true}})
+  def update_privacy_settings(bundle_id, opts={})
+    if ENV['DEBUG']=='1'
+      puts "Update privacy settings #{bundle_id}, #{opts}"
+    end
+    unless File.exist?(`which sqlite3`.strip)
+      raise 'Error: Unable to find sqlite3. The binary sqlite3 must be installed and on path.'
+    end
+    opts.each do |setting_name, setting_options|
+
+      setting_name = KNOWN_PRIVACY_SETTINGS[setting_name] || setting_name
+      allow = setting_options[:allow] == false ? false : true
+      sdk = setting_options[:sdk] || SimLauncher::SdkDetector.new().latest_sdk_version
+
+      dirs = directories_for_sdk_prefix(sdk)
+      if ENV['DEBUG']=='1'
+        puts "About to update privacy setting #{setting_name} for #{bundle_id}, allow: #{allow} in sdk #{sdk}, #{dirs}"
+      end
+
+      dirs.each do |dir|
+        if ENV['DEBUG']=='1'
+          puts "Setting access for #{bundle_id} for permission #{setting_name} to allow: #{allow}"
+        end
+        path_to_tcc_db = tcc_database_for_sdk_dir(dir)
+        unless File.exist?(path_to_tcc_db)
+          puts "Warning: No TCC.db in location #{path_to_tcc_db}"
+          next
+        end
+        allowed_as_i = allow ? 1 : 0
+        if privacy_setting(dir, bundle_id,setting_name).nil?
+          sql = %Q['INSERT INTO access (service, client, client_type, allowed, prompt_count) VALUES ("#{setting_name}","#{bundle_id}",0,#{allowed_as_i},1);']
+        else
+          sql = %Q['UPDATE access SET allowed=#{allowed_as_i} where client="#{bundle_id}" AND service="#{setting_name}";']
+        end
+
+        if ENV['DEBUG']=='1'
+          puts "Executing sql #{sql} on #{path_to_tcc_db}"
+        end
+
+        unless system(%Q[sqlite3 "#{path_to_tcc_db}" #{sql}]) && privacy_setting(dir,bundle_id,setting_name) == allowed_as_i
+          puts "Warning: Error executing sql: #{sql} against #{path_to_tcc_db} (Setting is #{privacy_setting(dir,bundle_id,setting_name)}). Continuing..."
+          next
+        end
+      end
+    end
+
+  end
+
+  def tcc_database_for_sdk_dir(dir)
+    File.join(dir,'Library', 'TCC', 'TCC.db')
+  end
+
+  def privacy_setting(sdk_dir, bundle_id, setting_name)
+    setting_name = KNOWN_PRIVACY_SETTINGS[setting_name] || setting_name
+    path_to_tcc_db = tcc_database_for_sdk_dir(sdk_dir)
+    sql = %Q['SELECT allowed FROM access WHERE client="#{bundle_id}" and service="#{setting_name}";']
+    output = `sqlite3 "#{path_to_tcc_db}" #{sql}`.strip
+
+    (output == '0' || output == '1') ? output.to_i : nil
   end
 
   def default_launch_args
@@ -194,6 +267,9 @@ class Calabash::Cucumber::Launcher
 
 
     reset_app_jail if args[:reset]
+
+
+    update_privacy_settings(args[:bundle_id], args[:privacy_settings]) if args[:privacy_settings]
 
     if run_with_instruments?(args)
       self.run_loop = new_run_loop(args)
