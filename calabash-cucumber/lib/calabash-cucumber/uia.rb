@@ -82,7 +82,12 @@ module Calabash
       end
 
       def uia_type_string(string)
-        uia_handle_command(:typeString, string)
+        res = uia_handle_command(:typeString, string)
+        status = res['status']
+        if status.eql?('error')
+          value = res['value']
+          screenshot_and_raise "could not type '#{string}' - '#{value}'"
+        end
       end
 
       def uia_enter
