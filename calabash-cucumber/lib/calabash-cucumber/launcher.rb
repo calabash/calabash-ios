@@ -269,7 +269,14 @@ class Calabash::Cucumber::Launcher
     reset_app_jail if args[:reset]
 
 
-    update_privacy_settings(args[:bundle_id], args[:privacy_settings]) if args[:privacy_settings]
+    if args[:privacy_settings]
+      if args[:device_target]=='simulator'
+        update_privacy_settings(args[:bundle_id], args[:privacy_settings])
+      else
+        #Not supported on device
+        puts 'Warning: :privacy_settings not supported on device'
+      end
+    end
 
     if run_with_instruments?(args)
       self.run_loop = new_run_loop(args)
