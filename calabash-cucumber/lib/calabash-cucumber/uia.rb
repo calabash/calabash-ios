@@ -1,4 +1,5 @@
 require 'edn'
+require 'json'
 
 module Calabash
   module Cucumber
@@ -24,6 +25,16 @@ module Calabash
         uia_handle_command(:query, queryparts)
       end
 
+      def uia_query_el(*queryparts)
+        #TODO escape '\n etc in query
+        uia_handle_command(:queryEl, queryparts)
+      end
+
+      def uia_query_windows(*queryparts)
+        #TODO escape '\n etc in query
+        uia_handle_command(:queryWindows, queryparts)
+      end
+
       def uia_names(*queryparts)
         #TODO escape '\n etc in query
         uia_handle_command(:names, queryparts)
@@ -39,6 +50,38 @@ module Calabash
 
       def uia_tap_offset(offset)
         uia_handle_command(:tapOffset, offset)
+      end
+
+      def uia_double_tap(*queryparts)
+        uia_handle_command(:doubleTap, queryparts)
+      end
+
+      def uia_double_tap_mark(mark)
+        uia_double_tap(:view, marked:mark)
+      end
+
+      def uia_double_tap_offset(offset)
+        uia_handle_command(:doubleTapOffset, offset)
+      end
+
+      def uia_two_finger_tap(*queryparts)
+        uia_handle_command(:twoFingerTap, queryparts)
+      end
+
+      def uia_two_finger_tap_offset(offset)
+        uia_handle_command(:twoFingerTapOffset, offset)
+      end
+
+      def uia_flick_offset(from, to)
+        uia_handle_command(:flickOffset, from, to)
+      end
+
+      def uia_touch_hold(duration, *queryparts)
+        uia_handle_command(:touchHold, duration, queryparts)
+      end
+
+      def uia_touch_hold_offset(duration, offset)
+        uia_handle_command(:touchHoldOffset, duration, offset)
       end
 
       def uia_pan(from_q, to_q)
@@ -107,28 +150,73 @@ module Calabash
         uia_handle_command(:deactivate, secs)
       end
 
-      def uia_handle_command(cmd, *query_args)
-        args = query_args.map do |part|
-          if part.is_a?(String)
-            "'#{escape_uia_string(part)}'"
-          else
-            "'#{escape_uia_string(part.to_edn)}'"
+      def uia_call(args_arr, *opts)
+        uia_call_method(:queryEl, args_arr, *opts)
+      end
+
+      def uia_call_method(cmd, args_arr, *opts)
+        if opts.empty?
+          return uia_handle_command(cmd, args_arr)
+        end
+        js_cmd = uia_serialize_command(cmd, args_arr)
+
+        js_args = []
+        opts.each do |invocation|
+          js_args << case invocation
+                       when Symbol
+                         "#{invocation}()"
+                       when Hash
+                         m = invocation.keys.first
+                         args = invocation[m]
+
+                         if args.is_a?(Array)
+                           serialized_args = (args.map &:to_json).join(',')
+                         else
+                           serialized_args = args.to_json
+                         end
+
+
+                         "#{m}(#{serialized_args})"
+                       else
+                         raise "Invalid invocation spec #{invocation}"              
           end
         end
-        command = %Q[uia.#{cmd}(#{args.join(', ')})]
+        command = "#{js_cmd}.#{js_args.join('.')}"
+        if ENV['DEBUG'] == '1'
+          puts "Sending UIA command"
+          puts command
+        end
+
+        uia_result(uia(command))
+
+      end
+
+      def uia_handle_command(cmd, *query_args)
+        command = uia_serialize_command(cmd, *query_args)
         if ENV['DEBUG'] == '1'
           puts "Sending UIA command"
           puts command
         end
         s = uia(command)
-        if ENV['DEBUG'] == '1'
-          puts "Result"
-          p s
+        uia_result(s)
+      end
+
+      def uia_serialize_command(cmd, *query_args)
+        args = uia_serialize_arguments(query_args)
+        %Q[uia.#{cmd}(#{args.join(', ')})]
+      end
+
+      def uia_serialize_arguments(args)
+        args.map do |part|
+          uia_serialize_argument(part)
         end
-        if s['status'] == 'success'
-          s['value']
+      end
+
+      def uia_serialize_argument(part)
+        if part.is_a?(String)
+          "'#{escape_uia_string(part)}'"
         else
-          s
+          "'#{escape_uia_string(part.to_edn)}'"
         end
       end
 
@@ -147,6 +235,19 @@ module Calabash
             raise 'Either :place or :latitude and :longitude must be specified.'
         end
       end
+
+      def uia_result(s)
+        if ENV['DEBUG'] == '1'
+          puts "Result"
+          p s
+        end
+        if s['status'] == 'success'
+          s['value']
+        else
+          s
+        end
+      end
+
 
 
     end
