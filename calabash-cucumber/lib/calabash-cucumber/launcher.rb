@@ -1,6 +1,8 @@
 require 'calabash-cucumber/launch/simulator_helper'
 require 'sim_launcher'
 require 'calabash-cucumber/device'
+require 'calabash-cucumber/actions/instruments_actions'
+require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
 
@@ -10,6 +12,7 @@ class Calabash::Cucumber::Launcher
 
   attr_accessor :run_loop
   attr_accessor :device
+  attr_accessor :actions
   attr_accessor :launch_args
 
   @@launcher = nil
@@ -29,6 +32,12 @@ class Calabash::Cucumber::Launcher
   class CalabashLauncherTimeoutErr < Timeout::Error
   end
 
+
+  def actions
+    attach if @actions.nil?
+    @actions
+  end
+
   def self.attach
     l = launcher
     return l if l && l.active?
@@ -36,15 +45,32 @@ class Calabash::Cucumber::Launcher
 
   end
 
-  def attach
+  def attach(max_retry=1, timeout=10)
     pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
     pids = pids_str.split(',').map { |pid| pid.to_i }
     pid = pids.first
     rl = {}
-    rl[:pid] = pid if pid
+    if pid
+      rl[:pid] = pid
+      self.actions= Calabash::Cucumber::InstrumentsActions.new
+    else
+      self.actions= Calabash::Cucumber::PlaybackActions.new
+    end
 
     self.run_loop= rl
-    ensure_connectivity
+
+    ensure_connectivity(max_retry, timeout)
+
+    major = self.device.ios_major_version
+    if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
+      puts "\n\n WARNING \n\n"
+      puts 'Warning Trying to connect to simulator that was not launched by Calabash/instruments.'
+      puts 'To fix this you must let Calabash or instruments launch the app'
+      puts 'Continuing... query et al will work.'
+      puts "\n\n WARNING \n\n"
+      puts "Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems"
+    end
+
 
     self
   end
@@ -52,7 +78,7 @@ class Calabash::Cucumber::Launcher
   def self.instruments?
     l = launcher_if_used
     return false unless l
-    l.active?
+    l.instruments?
   end
 
   def self.launcher
@@ -66,6 +92,8 @@ class Calabash::Cucumber::Launcher
   def initialize
     @@launcher = self
   end
+
+
 
   def ios_major_version
     return nil if device.nil? or device.ios_version.nil?
@@ -280,10 +308,12 @@ class Calabash::Cucumber::Launcher
 
     if run_with_instruments?(args)
       self.run_loop = new_run_loop(args)
+      self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
       # run with sim launcher
       sdk = sdk_version || SimLauncher::SdkDetector.new().available_sdk_versions.reverse.find { |x| !x.start_with?('7') }
       path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+      self.actions= Calabash::Cucumber::PlaybackActions.new
       Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, args[:device].to_s, args)
     end
     self.launch_args = args
@@ -353,10 +383,10 @@ class Calabash::Cucumber::Launcher
     raise StartError.new(last_err)
   end
 
-  def ensure_connectivity
+  def ensure_connectivity(max_retry=10, timeout=30)
     begin
-      max_retry_count = (ENV['MAX_CONNECT_RETRY'] || 10).to_i
-      timeout = (ENV['CONNECT_TIMEOUT'] || 30).to_i
+      max_retry_count = (ENV['MAX_CONNECT_RETRY'] || max_retry).to_i
+      timeout = (ENV['CONNECT_TIMEOUT'] || timeout).to_i
       retry_count = 0
       connected = false
       if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
@@ -414,7 +444,7 @@ class Calabash::Cucumber::Launcher
   end
 
   def stop
-    RunLoop.stop(run_loop)
+    RunLoop.stop(run_loop) if run_loop && run_loop[:pid]
   end
 
   def calabash_notify(world)
@@ -484,6 +514,10 @@ class Calabash::Cucumber::Launcher
 
   def active?
     not run_loop.nil?
+  end
+
+  def instruments?
+    !!(active? && run_loop[:pid])
   end
 
   def inspect

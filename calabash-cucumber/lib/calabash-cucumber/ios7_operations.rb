@@ -1,6 +1,7 @@
 require 'calabash-cucumber/launcher'
 require 'calabash-cucumber/uia'
-
+require 'calabash-cucumber/actions/instruments_actions'
+require 'calabash-cucumber/actions/playback_actions'
 
 module Calabash
   module Cucumber
@@ -60,42 +61,56 @@ module Calabash
         [to_result]
       end
 
-      private
-      def find_and_normalize_or_raise(ui_query)
-        res = find_or_raise(ui_query)
-        normalize_rect_for_orientation!(res['rect']) if res['rect']
-        res
-      end
-
-      def find_or_raise(ui_query)
-        results = query(ui_query)
-        if results.empty?
-          screenshot_and_raise "Unable to find element matching query #{ui_query}"
+      def double_tap_ios7(options)
+        ui_query = options[:query]
+        offset =  options[:offset]
+        if ui_query.nil?
+          uia_double_tap_offset(offset)
         else
-          results.first
+          el_to_swipe = find_and_normalize_or_raise(ui_query)
+          offset = point_from(el_to_swipe, options)
+          uia_double_tap_offset(offset)
+          [el_to_swipe]
         end
       end
 
-      def normalize_rect_for_orientation!(rect)
-        orientation = status_bar_orientation().to_sym
-        launcher = Calabash::Cucumber::Launcher.launcher
-        screen_size = launcher.device.screen_size
-        case orientation
-          when :right
-            cx = rect['center_x']
-            rect['center_x'] = rect['center_y']
-            rect['center_y'] = screen_size[:width] - cx
-          when :left
-            cx = rect['center_x']
-            rect['center_x'] = screen_size[:height] - rect['center_y']
-            rect['center_y'] = cx
-          when :up
-            cy = rect['center_y']
-            cx = rect['center_x']
-            rect['center_y'] = screen_size[:height] - cy
-            rect['center_x'] = screen_size[:width]  - cx
-          else
-            # no-op by design.
+      def two_finger_tap_ios7(options)
+        ui_query = options[:query]
+        offset =  options[:offset]
+        if ui_query.nil?
+          uia_two_finger_tap_offset(offset)
+        else
+          el_to_swipe = find_and_normalize_or_raise(ui_query)
+          offset = point_from(el_to_swipe, options)
+          uia_two_finger_tap_offset(offset)
+          [el_to_swipe]
+        end
+      end
+
+      def flick_ios7(options, delta)
+        ui_query = options[:query]
+        offset =  options[:offset]
+        if ui_query.nil?
+          uia_flick_offset(offset, add_offset(offset, delta))
+        else
+          el_to_swipe = find_and_normalize_or_raise(ui_query)
+          offset = point_from(el_to_swipe, options)
+          uia_flick_offset(offset, add_offset(offset, delta))
+          [el_to_swipe]
+        end
+      end
+
+      def touch_hold_ios7(options)
+        ui_query = options[:query]
+        offset =  options[:offset]
+        duration = options[:duration] || 4
+        if ui_query.nil?
+          uia_touch_hold_offset(duration, offset)
+        else
+          el_to_swipe = find_and_normalize_or_raise(ui_query)
+          offset = point_from(el_to_swipe, options)
+          uia_touch_hold_offset(duration, offset)
+          [el_to_swipe]
         end
       end
 

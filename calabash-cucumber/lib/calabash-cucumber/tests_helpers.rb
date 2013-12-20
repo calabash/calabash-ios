@@ -1,9 +1,9 @@
-require 'calabash-cucumber/core'
+require 'calabash-cucumber/failure_helpers'
 
 module Calabash
   module Cucumber
-    module TestsHelpers
-      include Calabash::Cucumber::Core
+    module TestsHelpers #=> http
+      include Calabash::Cucumber::FailureHelpers
 
       def navigation_path(*args)
 
@@ -51,15 +51,6 @@ module Calabash
         check_element_exists("view marked:'#{expected_mark}'")
       end
 
-      def screenshot_and_raise(msg, options={:prefix => nil, :name => nil, :label => nil})
-        screenshot_embed(options)
-        raise(msg)
-      end
-
-      def fail(msg="Error. Check log for details.", options={:prefix => nil, :name => nil, :label => nil})
-        screenshot_and_raise(msg, options)
-      end
-
       def each_cell(opts={:query => "tableView", :post_scroll => 0.3, :animate => true}, &block)
         uiquery = opts[:query] || "tableView"
         skip = opts[:skip_if]
@@ -100,36 +91,6 @@ module Calabash
 
         end
       end
-
-
-      def screenshot_embed(options={:prefix => nil, :name => nil, :label => nil})
-        path = screenshot(options)
-        embed(path, "image/png", options[:label] || File.basename(path))
-      end
-
-      def screenshot(options={:prefix => nil, :name => nil})
-        prefix = options[:prefix]
-        name = options[:name]
-
-        @@screenshot_count ||= 0
-        res = http({:method => :get, :path => 'screenshot'})
-        prefix = prefix || ENV['SCREENSHOT_PATH'] || ""
-        if name.nil?
-          name = "screenshot"
-        else
-          if File.extname(name).downcase == ".png"
-            name = name.split(".png")[0]
-          end
-        end
-
-        path = "#{prefix}#{name}_#{@@screenshot_count}.png"
-        File.open(path, 'wb') do |f|
-          f.write res
-        end
-        @@screenshot_count += 1
-        path
-      end
-
 
     end
   end

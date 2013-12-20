@@ -1,21 +1,27 @@
 require 'httpclient'
+require 'json'
 require 'geocoder'
+require 'calabash-cucumber/connection'
+require 'calabash-cucumber/connection_helpers'
 require 'calabash-cucumber/launch/simulator_helper'
 require 'calabash-cucumber/uia'
-require 'calabash-cucumber/ios7_operations'
+require 'calabash-cucumber/query_helpers'
+require 'calabash-cucumber/playback_helpers'
+require 'calabash-cucumber/failure_helpers'
+require 'calabash-cucumber/status_bar_helpers'
+require 'calabash-cucumber/rotation_helpers'
+require 'calabash-cucumber/map'
 
 module Calabash
   module Cucumber
     module Core
+      include Calabash::Cucumber::ConnectionHelpers
+      include Calabash::Cucumber::QueryHelpers
+      include Calabash::Cucumber::FailureHelpers
+      include Calabash::Cucumber::Map
       include Calabash::Cucumber::UIA
-      include Calabash::Cucumber::IOS7Operations
-
-      DATA_PATH = File.expand_path(File.dirname(__FILE__))
-      CAL_HTTP_RETRY_COUNT=3
-      RETRYABLE_ERRORS = [HTTPClient::TimeoutError,
-                          HTTPClient::KeepAliveDisconnected,
-                          Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ECONNABORTED,
-                          Errno::ETIMEDOUT]
+      include Calabash::Cucumber::StatusBarHelpers
+      include Calabash::Cucumber::RotationHelpers
 
 
       def macro(txt)
@@ -42,25 +48,6 @@ module Calabash
         Calabash::Cucumber::VERSION
       end
 
-      def perform(*args)
-        if args.length == 1
-          #simple selector
-          hash = args.first
-          q = hash[:on]
-          hash = hash.dup
-          hash.delete(:on)
-          args = [hash]
-        elsif args.length == 2
-          q = args[1][:on]
-          if args[0].is_a? Hash
-            args = [args[0]]
-          else
-            args = args[0]
-          end
-        end
-        map(q, :query, *args)
-      end
-
       def query_all(uiquery, *args)
         unless ENV['CALABASH_NO_DEPRECATION'] == '1'
           puts "query_all is deprecated. Use the new all/visible feature."
@@ -69,99 +56,53 @@ module Calabash
         map("all #{uiquery}", :query, *args)
       end
 
-
       def touch(uiquery, options={})
+        query_action_with_options(:touch, uiquery, options)
+      end
 
-        if (uiquery.is_a?(Array))
-          raise "No elements to touch in array" if uiquery.empty?
-          uiquery = uiquery.first
-        end
-        if (uiquery.is_a?(Hash))
-          options[:offset] = point_from(uiquery, options)
-          return touch(nil, options)
-        end
+      def double_tap(uiquery, options={})
+        query_action_with_options(:double_tap, uiquery, options)
+      end
 
-        options[:query] = uiquery
-        views_touched = do_touch(options)
+      def two_finger_tap(uiquery,options={})
+        query_action_with_options(:two_finger_tap, uiquery, options)
+      end
+
+      def flick(uiquery, delta, options={})
+        uiquery, options = extract_query_and_options(uiquery, options)
+        options[:delta] = delta
+        views_touched = launcher.actions.flick(options)
         unless uiquery.nil?
-          screenshot_and_raise "could not find view to touch: '#{uiquery}', args: #{options}" if views_touched.empty?
+          screenshot_and_raise "flick could not find view: '#{uiquery}', args: #{options}" if views_touched.empty?
         end
         views_touched
       end
 
-      def do_touch(options)
-        if ios7?
-          touch_ios7(options)
-        else
-          playback("touch", options)
-        end
+      def touch_hold(uiquery, options={})
+        query_action_with_options(:touch_hold, uiquery, options)
       end
 
       def swipe(dir, options={})
-        dir = dir.to_sym
-        if ios7?
-          swipe_ios7(options.merge(:direction => dir))
-        else
-          current_orientation = status_bar_orientation.to_sym
-          if current_orientation == :left
-            case dir
-              when :left then
-                dir = :down
-              when :right then
-                dir = :up
-              when :up then
-                dir = :left
-              when :down then
-                dir = :right
-              else
-            end
-          end
-
-          if current_orientation == :right
-            case dir
-              when :left then
-                dir = :up
-              when :right then
-                dir = :down
-              when :up then
-                dir = :right
-              when :down then
-                dir = :left
-              else
-            end
-          end
-
-          if current_orientation == :up
-            case dir
-              when :left then
-                dir = :right
-              when :right then
-                dir = :left
-              when :up then
-                dir = :down
-              when :down then
-                dir = :up
-              else
-            end
-          end
-
-          playback("swipe_#{dir}", options)
+        unless uia?
+          options = options.merge(:status_bar_orientation => status_bar_orientation)
         end
+        launcher.actions.swipe(dir.to_sym, options)
       end
 
       def pan(from, to, options={})
-        if ios7?
-          pan_ios7(from, to, options)
-        else
-          interpolate "pan", options.merge(:start => from, :end => to)
-        end
+        launcher.actions.pan(from, to, options)
       end
 
+      def pinch(in_out, options={})
+        launcher.actions.pinch(in_out.to_sym,options)
+      end
+
+
       def cell_swipe(options={})
-        if ios7?
-          raise "cell_swipe not supported on iOS7, simply use swipe with a query that matches the cell"
+        if uia?
+          raise "cell_swipe not supported with instruments, simply use swipe with a query that matches the cell"
         end
-        playback("cell_swipe", options)
+        playback('cell_swipe', options)
       end
 
       def scroll(uiquery, direction)
@@ -232,159 +173,12 @@ module Calabash
         views_touched
       end
 
-      def pinch(in_out, options={})
-        in_out = in_out.to_sym
-        if ios7?
-          pinch_ios7(in_out.to_sym, options)
-        else
-          file = "pinch_in"
-          if in_out==:out
-            file = "pinch_out"
-          end
-          playback(file, options)
-        end
-      end
-
-      def rotation_candidates
-        ['rotate_left_home_down', 'rotate_left_home_left',
-         'rotate_left_home_right', 'rotate_left_home_up',
-         'rotate_right_home_down', 'rotate_right_home_left',
-         'rotate_right_home_right', 'rotate_right_home_up']
-      end
-
-      # orientations refer to home button position
-      #  down ==> bottom
-      #    up ==> top
-      #  left ==> landscape with left home button AKA: _right_ landscape*
-      # right ==> landscape with right home button AKA: _left_ landscape*
-      #
-      # * see apple documentation for clarification about where the home button
-      #   is in left and right landscape orientations
-      def rotate_home_button_to(dir)
-        dir_sym = dir.to_sym
-        if dir_sym.eql?(:top)
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            warn "converting '#{dir}' to ':up' - please adjust your code"
-          end
-          dir_sym = :up
-        end
-
-        if dir_sym.eql?(:bottom)
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            warn "converting '#{dir}' to ':down' - please adjust your code"
-          end
-          dir_sym = :down
-        end
-
-        directions = [:down, :up, :left, :right]
-        unless directions.include?(dir_sym)
-          screenshot_and_raise "expected one of '#{directions}' as an arg to 'rotate_home_button_to but found '#{dir}'"
-        end
-
-        res = status_bar_orientation()
-        if res.nil?
-          screenshot_and_raise "expected 'status_bar_orientation' to return a non-nil value"
-        else
-          res = res.to_sym
-        end
-
-        return res if res.eql? dir_sym
-
-        rotation_candidates.each { |candidate|
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            puts "try to rotate to '#{dir_sym}' using '#{candidate}'"
-          end
-          playback(candidate)
-          # need a longer sleep for cloud testing
-          sleep(0.4)
-
-          res = status_bar_orientation
-          if res.nil?
-            screenshot_and_raise "expected 'status_bar_orientation' to return a non-nil value"
-          else
-            res = res.to_sym
-          end
-
-          return if res.eql? dir_sym
-        }
-
-        if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-          warn "Could not rotate home button to '#{dir}'."
-          warn 'Is rotation enabled for this controller?'
-          warn "Will return 'down'"
-        end
-        :down
-      end
-
-      def device_orientation(force_down=false)
-        res = map(nil, :orientation, :device).first
-
-        if ['face up', 'face down'].include?(res)
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            if force_down
-              puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
-            end
-          end
-
-          return res if !force_down
-          return rotate_home_button_to :down
-        end
-
-        return res if !res.eql?('unknown')
-        return res if !force_down
-        rotate_home_button_to(:down)
-      end
-
-      def status_bar_orientation
-        map(nil, :orientation, :status_bar).first
-      end
-
-      def rotate(dir)
-        dir = dir.to_sym
-        current_orientation = status_bar_orientation().to_sym
-        rotate_cmd = nil
-        case dir
-          when :left then
-            if current_orientation == :down
-              rotate_cmd = "left_home_down"
-            elsif current_orientation == :right
-              rotate_cmd = "left_home_right"
-            elsif current_orientation == :left
-              rotate_cmd = "left_home_left"
-            elsif current_orientation == :up
-              rotate_cmd = "left_home_up"
-            end
-          when :right then
-            if current_orientation == :down
-              rotate_cmd = "right_home_down"
-            elsif current_orientation == :left
-              rotate_cmd = "right_home_left"
-            elsif current_orientation == :right
-              rotate_cmd = "right_home_right"
-            elsif current_orientation == :up
-              rotate_cmd = "right_home_up"
-            end
-        end
-
-        if rotate_cmd.nil?
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            puts "Could not rotate device in direction '#{dir}' with orientation '#{current_orientation} - will do nothing"
-          end
-        else
-          playback("rotate_#{rotate_cmd}")
-        end
-      end
-
       def send_app_to_background(secs)
-        uia_send_app_to_background(secs)
-      end
-
-      def console_attach
-        Calabash::Cucumber::Launcher.attach
+        launcher.actions.send_app_to_background(secs)
       end
 
       def set_location(options)
-        if Calabash::Cucumber::Launcher.instruments?
+        if uia?
           uia_set_location(options)
         else
           if options[:place]
@@ -471,217 +265,6 @@ module Calabash
         texts
       end
 
-      def recording_name_for(recording_name, os, device)
-        if !recording_name.end_with? ".base64"
-          "#{recording_name}_#{os}_#{device}.base64"
-        else
-          recording_name
-        end
-      end
-
-      def load_recording(recording, rec_dir)
-        directories = playback_file_directories(rec_dir)
-        directories.each { |dir|
-          path = "#{dir}/#{recording}"
-          if File.exists?(path)
-            # useful for debugging recordings, but too verbose for release
-            # suggest (yet) another variable CALABASH_DEBUG_PLAYBACK ?
-            #if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            #  puts "found compatible playback: '#{path}'"
-            #end
-            return File.read(path)
-          end
-        }
-        nil
-      end
-
-      def playback_file_directories (rec_dir)
-        # rec_dir is either ENV['PLAYBACK_DIR'] or ./features/playback
-        [File.expand_path(rec_dir),
-         "#{Dir.pwd}",
-         "#{Dir.pwd}/features",
-         "#{Dir.pwd}/features/playback",
-         "#{DATA_PATH}/resources/"].uniq
-      end
-
-      def load_playback_data(recording_name, options={})
-        os = options["OS"] || ENV["OS"]
-        device = options["DEVICE"] || ENV["DEVICE"] || "iphone"
-
-        unless os
-          if @calabash_launcher && @calabash_launcher.active?
-            major = @calabash_launcher.ios_major_version
-          else
-            major = Calabash::Cucumber::SimulatorHelper.ios_major_version
-          end
-
-          unless major
-            raise <<EOF
-          Unable to determine iOS major version
-          Most likely you have updated your calabash-cucumber client
-          but not your server. Please follow closely:
-
-https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version
-
-          If you are running version 0.9.120+ then please report this message as a bug.
-EOF
-          end
-          os = "ios#{major}"
-        end
-
-        rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
-
-        candidates = []
-        data = find_compatible_recording(recording_name, os, rec_dir, device, candidates)
-
-        if data.nil? and device=='ipad'
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
-          end
-          data = find_compatible_recording(recording_name, os, rec_dir, 'iphone', candidates)
-        end
-
-        if data.nil?
-          searched_for = "  searched for => \n"
-          candidates.each { |file| searched_for.concat("    * '#{file}'\n") }
-          searched_in = "  in directories =>\n"
-          playback_file_directories(rec_dir).each { |dir| searched_in.concat("    * '#{dir}'\n") }
-          screenshot_and_raise "Playback file not found for: '#{recording_name}'\n#{searched_for}#{searched_in}"
-        end
-
-        data
-      end
-
-      def find_compatible_recording (recording_name, os, rec_dir, device, candidates)
-        recording = recording_name_for(recording_name, os, device)
-        data = load_recording(recording, rec_dir)
-        if data.nil?
-          candidates << recording
-          version_counter = os[-1, 1].to_i
-          loop do
-            version_counter = version_counter - 1
-            break if version_counter < 5
-            loop_os = "ios#{version_counter}"
-            recording = recording_name_for(recording_name, loop_os, device)
-            candidates << recording
-            data = load_recording(recording, rec_dir)
-            break if !data.nil?
-          end
-        end
-        data
-      end
-
-      def playback(recording, options={})
-        data = load_playback_data(recording)
-
-        post_data = %Q|{"events":"#{data}"|
-        post_data<< %Q|,"query":"#{escape_quotes(options[:query])}"| if options[:query]
-        post_data<< %Q|,"offset":#{options[:offset].to_json}| if options[:offset]
-        post_data<< %Q|,"reverse":#{options[:reverse]}| if options[:reverse]
-        post_data<< %Q|,"uia_gesture":"#{options[:uia_gesture]}"| if options[:uia_gesture]
-        post_data<< %Q|,"prototype":"#{options[:prototype]}"| if options[:prototype]
-        post_data << "}"
-
-        res = http({:method => :post, :raw => true, :path => 'play'}, post_data)
-
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "playback failed because: #{res['reason']}\n#{res['details']}"
-        end
-        res['results']
-      end
-
-      def interpolate(recording, options={})
-        data = load_playback_data(recording)
-
-        post_data = %Q|{"events":"#{data}"|
-        post_data<< %Q|,"start":"#{escape_quotes(options[:start])}"| if options[:start]
-        post_data<< %Q|,"end":"#{escape_quotes(options[:end])}"| if options[:end]
-        post_data<< %Q|,"offset_start":#{options[:offset_start].to_json}| if options[:offset_start]
-        post_data<< %Q|,"offset_end":#{options[:offset_end].to_json}| if options[:offset_end]
-        post_data << "}"
-
-        res = http({:method => :post, :raw => true, :path => 'interpolate'}, post_data)
-
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "interpolate failed because: #{res['reason']}\n#{res['details']}"
-        end
-        res['results']
-      end
-
-      def record_begin
-        http({:method => :post, :path => 'record'}, {:action => :start})
-      end
-
-      def record_end(file_name)
-        res = http({:method => :post, :path => 'record'}, {:action => :stop})
-        File.open("_recording.plist", 'wb') do |f|
-          f.write res
-        end
-
-        device = ENV['DEVICE'] || 'iphone'
-        os = ENV['OS']
-
-        unless os
-          if @calabash_launcher && @calabash_launcher.active?
-            major = @calabash_launcher.ios_major_version
-          else
-            major = Calabash::Cucumber::SimulatorHelper.ios_major_version
-          end
-
-          unless major
-            raise <<EOF
-          Unable to determine iOS major version
-          Most likely you have updated your calabash-cucumber client
-          but not your server. Please follow closely:
-
-https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version
-
-          If you are running version 0.9.120+ then please report this message as a bug.
-EOF
-          end
-          os = "ios#{major}"
-        end
-
-        file_name = "#{file_name}_#{os}_#{device}.base64"
-        system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
-        system("openssl base64 -in _recording_binary.plist -out '#{file_name}'")
-        system("rm _recording.plist _recording_binary.plist")
-
-        rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
-        unless File.directory?(rec_dir)
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            puts "creating playback directory at '#{rec_dir}'"
-          end
-          system("mkdir -p #{rec_dir}")
-        end
-
-        system("mv #{file_name} #{rec_dir}")
-        "#{file_name} ==> '#{rec_dir}/#{file_name}'"
-
-      end
-
-      def point_from(query_result, options)
-        offset_x = 0
-        offset_y = 0
-        if options[:offset]
-          offset_x += options[:offset][:x] || 0
-          offset_y += options[:offset][:y] || 0
-        end
-        x = offset_x
-        y = offset_y
-        rect = query_result["rect"] || query_result[:rect]
-        if rect
-          x += rect['center_x'] || rect[:center_x] || rect[:x] || 0
-          y += rect['center_y'] || rect[:center_y] || rect[:y] || 0
-        else
-          x += query_result['center_x'] || query_result[:center_x] || query_result[:x] || 0
-          y += query_result['center_y'] || query_result[:center_y] || query_result[:y] || 0
-        end
-
-        {:x => x, :y => y}
-      end
 
       def backdoor(sel, arg)
         json = {
@@ -707,22 +290,6 @@ EOF
         end
       end
 
-      def map(query, method_name, *method_args)
-        operation_map = {
-            :method_name => method_name,
-            :arguments => method_args
-        }
-        res = http({:method => :post, :path => 'map'},
-                   {:query => query, :operation => operation_map})
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "map #{query}, #{method_name} failed because: #{res['reason']}\n#{res['details']}"
-        end
-
-        res['results']
-      end
-
-
       ## args :app for device bundle id, for sim path to app
       ##
       def start_test_server_in_background(args={})
@@ -733,9 +300,8 @@ EOF
       end
 
       def stop_test_server
-        if @calabash_launcher
-          @calabash_launcher.stop
-        end
+        l = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
+        l.stop if l
       end
 
       def shutdown_test_server
@@ -744,90 +310,51 @@ EOF
       end
 
       def default_device
-        @calabash_launcher && @calabash_launcher.device
+        l = Calabash::Cucumber::Launcher.launcher_if_used
+        l && l.device
       end
 
+      def uia?
+        Calabash::Cucumber::Launcher.instruments?
+      end
 
-      def http(options, data=nil)
-        options[:uri] = url_for(options[:path])
-        options[:method] = options[:method] || :get
-        if data
-          if options[:raw]
-            options[:body] = data
-          else
-            options[:body] = data.to_json
-          end
+      def console_attach
+        launcher.attach
+      end
+
+      def launcher
+        Calabash::Cucumber::Launcher.launcher
+      end
+
+      def query_action_with_options(action, uiquery, options)
+        uiquery, options = extract_query_and_options(uiquery, options)
+        views_touched = launcher.actions.send(action, options)
+        unless uiquery.nil?
+          screenshot_and_raise "#{action} could not find view: '#{uiquery}', args: #{options}" if views_touched.empty?
         end
-        res = make_http_request(options)
-        res.force_encoding("UTF-8") if res.respond_to?(:force_encoding)
-        res
+        views_touched
       end
 
+      def extract_query_and_options(uiquery, options)
+        options = prepare_query_options(uiquery, options)
+        return options[:query], options
+      end
 
-      def url_for(verb)
-        url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265")
-        path = url.path
-        if path.end_with? "/"
-          path = "#{path}#{verb}"
-        else
-          path = "#{path}/#{verb}"
+      def prepare_query_options(uiquery, options)
+        opts = options.dup
+        if (uiquery.is_a?(Array))
+          raise 'No elements in array' if uiquery.empty?
+          uiquery = uiquery.first
+        end #this is deliberately not elsif (uiquery.first could be a hash)
+
+        if (uiquery.is_a?(Hash))
+          opts[:offset] = point_from(uiquery, options)
+          uiquery = nil
         end
-        url.path = path
-        url
+        opts[:query] = uiquery
+        opts
       end
 
-      def make_http_request(options)
-
-        body = nil
-        retryable_errors = options[:retryable_errors] || RETRYABLE_ERRORS
-        CAL_HTTP_RETRY_COUNT.times do |count|
-          begin
-            if not @http
-              @http = init_request(options)
-            end
-            if options[:method] == :post
-              body = @http.post(options[:uri], options[:body]).body
-            else
-              body = @http.get(options[:uri], options[:body]).body
-            end
-            break
-          rescue Exception => e
-
-            if retryable_errors.include?(e) || retryable_errors.any? { |c| e.is_a?(c) }
-
-              if count < CAL_HTTP_RETRY_COUNT-1
-                if e.is_a?(HTTPClient::TimeoutError)
-                  sleep(3)
-                else
-                  sleep(0.5)
-                end
-                @http.reset_all
-                @http=nil
-                STDOUT.write "Retrying.. #{e.class}: (#{e})\n"
-                STDOUT.flush
-              else
-                puts "Failing... #{e.class}"
-                raise e
-              end
-            else
-              raise e
-            end
-          end
-        end
-
-        body
-      end
-
-      def init_request(url)
-        http = HTTPClient.new
-        http.connect_timeout = 15
-        http.send_timeout = 15
-        http.receive_timeout = 15
-        if ENV['DEBUG_HTTP'] and (ENV['DEBUG_HTTP'] != "0")
-          http.debug_dev = $stdout
-        end
-        http
-      end
     end
   end
 end

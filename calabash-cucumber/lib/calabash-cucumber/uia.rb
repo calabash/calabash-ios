@@ -9,15 +9,9 @@ module Calabash
         res = http({:method => :post, :path => 'uia'}, {command:command}.merge(options))
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "uia send failed because: #{res['reason']}\n#{res['details']}"
+          screenshot_and_raise "uia action failed because: #{res['reason']}\n#{res['details']}"
         end
         res['results'].first
-      end
-
-      def send_uia_command(opts ={})
-        #deprecated, poor method signature
-        #use uia("uia-js...",options)
-        uia(opts[:command], opts)
       end
 
       def uia_query(*queryparts)
@@ -229,6 +223,13 @@ module Calabash
         #TODO escape '\n in query
         escape_quotes string
       end
+
+      def send_uia_command(opts ={})
+        #deprecated, poor method signature
+        #use uia("uia-js...",options)
+        uia(opts[:command], opts)
+      end
+
 
       private
       def validate_hash_is_location!(options)

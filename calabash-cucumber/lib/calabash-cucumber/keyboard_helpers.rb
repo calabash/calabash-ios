@@ -1,21 +1,23 @@
+require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
+require 'calabash-cucumber/playback_helpers'
 
 module Calabash
   module Cucumber
     module KeyboardHelpers
-      include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
+      include Calabash::Cucumber::PlaybackHelpers
 
       KEYPLANE_NAMES = {
-          :small_letters => "small-letters",
-          :capital_letters => "capital-letters",
-          :numbers_and_punctuation => "numbers-and-punctuation",
-          :first_alternate => "first-alternate",
-          :numbers_and_punctuation_alternate => "numbers-and-punctuation-alternate"
+          :small_letters => 'small-letters',
+          :capital_letters => 'capital-letters',
+          :numbers_and_punctuation => 'numbers-and-punctuation',
+          :first_alternate => 'first-alternate',
+          :numbers_and_punctuation_alternate => 'numbers-and-punctuation-alternate'
       }
 
 
-      IOS7_SUPPORTED_CHARS = {
+      UIA_SUPPORTED_CHARS = {
           'Dictation' => nil,
           'Shift' => nil,
           'Delete' => '\b',
@@ -32,11 +34,11 @@ module Calabash
       # 'Return'
       def keyboard_enter_char(chr, should_screenshot=true)
         #map(nil, :keyboard, load_playback_data("touch_done"), chr)
-        if ios7?
+        if uia?
           if chr.length == 1
             uia_type_string chr
           else
-            code = IOS7_SUPPORTED_CHARS[chr]
+            code = UIA_SUPPORTED_CHARS[chr]
             if code
               uia_type_string code
             else
@@ -46,7 +48,7 @@ module Calabash
           res = {'results' => []}
         else
           res = http({:method => :post, :path => 'keyboard'},
-                     {:key => chr, :events => load_playback_data("touch_done")})
+                     {:key => chr, :events => load_playback_data('touch_done')})
           res = JSON.parse(res)
           if res['outcome'] != 'SUCCESS'
             msg = "Keyboard enter failed failed because: #{res['reason']}\n#{res['details']}"
@@ -68,10 +70,10 @@ module Calabash
       end
 
       def done
-        if ios7?
+        if uia?
           uia_type_string '\n'
         else
-          keyboard_enter_char "Return"
+          keyboard_enter_char 'Return'
         end
 
       end
@@ -122,13 +124,21 @@ module Calabash
       end
 
       def await_keyboard
-        wait_for_elements_exist(["view:'UIKBKeyplaneView'"])
-        sleep(0.3)
+        #deprecated inconsistent wait naming
+        # use wait_for_keyboard
+        wait_for_keyboard
+      end
+
+      #noinspection RubyLiteralArrayInspection
+      def wait_for_keyboard
+        wait_for_elements_exist(["view:'UIKBKeyplaneView'"], :timeout_message => 'No visible keyboard')
+        sleep(0.5)
       end
 
       def keyboard_enter_text(text)
-        fail("No visible keyboard") if element_does_not_exist("view:'UIKBKeyplaneView'")
-        if ios7?
+        wait_for_keyboard if element_does_not_exist("view:'UIKBKeyplaneView'")
+
+        if uia?
           uia_type_string(text)
         else
           text.each_char do |ch|

@@ -45,10 +45,6 @@ module Calabash
         end
       end
 
-      def escape_quotes(str)
-        str.gsub("'", "\\\\'")
-      end
-
       def label(uiquery)
         query(uiquery, :accessibilityLabel)
       end
