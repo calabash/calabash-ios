@@ -118,9 +118,6 @@ module Calabash
           [el_to_swipe]
         end
       end
-
-
-
     end
   end
 end

@@ -98,14 +98,14 @@ end
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" field$/ do |text_to_type, field_name|
   touch("textField marked:'#{field_name}'")
-  await_keyboard
+  wait_for_keyboard()
   keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
   touch("textField marked:'#{field_name}'")
-  await_keyboard
+  wait_for_keyboard()
   keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
@@ -117,7 +117,7 @@ end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
   macro %Q|I touch the "#{field_name}" text field|
-  await_keyboard()
+  wait_for_keyboard()
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
@@ -132,7 +132,7 @@ Then /^I enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text, ind
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
   touch("textField index:#{index-1}")
-  await_keyboard()
+  wait_for_keyboard()
   keyboard_enter_text text
   sleep(STEP_PAUSE)
 end
@@ -140,7 +140,7 @@ end
 Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text_to_type, index|
   idx = index.to_i
   macro %Q|I touch text field number #{idx}|
-  await_keyboard()
+  wait_for_keyboard()
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
@@ -148,9 +148,8 @@ end
 When /^I clear "([^\"]*)"$/ do |name|
   # definition changed - now uses keyboard_enter_text instead of (deprecated) set_text
   # macro %Q|I enter "" into the "#{name}" text field|
-  unless ENV['CALABASH_NO_DEPRECATION'] == '1'
-    warn "WARNING: 'When I clear <name>' will be deprecated because it is ambiguous - what should be cleared?"
-  end
+  msg = "When I clear <name>' will be deprecated because it is ambiguous - what should be cleared?"
+  _deprecated('0.9.151', msg, :warn)
   clear_text("textField marked:'#{name}'")
 end
 

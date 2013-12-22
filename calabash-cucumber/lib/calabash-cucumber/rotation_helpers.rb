@@ -78,23 +78,23 @@ module Calabash
         case dir
           when :left then
             if current_orientation == :down
-              rotate_cmd = "left_home_down"
+              rotate_cmd = 'left_home_down'
             elsif current_orientation == :right
-              rotate_cmd = "left_home_right"
+              rotate_cmd = 'left_home_right'
             elsif current_orientation == :left
-              rotate_cmd = "left_home_left"
+              rotate_cmd = 'left_home_left'
             elsif current_orientation == :up
-              rotate_cmd = "left_home_up"
+              rotate_cmd = 'left_home_up'
             end
           when :right then
             if current_orientation == :down
-              rotate_cmd = "right_home_down"
+              rotate_cmd = 'right_home_down'
             elsif current_orientation == :left
-              rotate_cmd = "right_home_left"
+              rotate_cmd = 'right_home_left'
             elsif current_orientation == :right
-              rotate_cmd = "right_home_right"
+              rotate_cmd = 'right_home_right'
             elsif current_orientation == :up
-              rotate_cmd = "right_home_up"
+              rotate_cmd = 'right_home_up'
             end
         end
 

@@ -12,6 +12,7 @@ require 'calabash-cucumber/status_bar_helpers'
 require 'calabash-cucumber/rotation_helpers'
 require 'calabash-cucumber/map'
 
+#noinspection RubyQuotedStringsInspection
 module Calabash
   module Cucumber
     module Core
@@ -50,10 +51,10 @@ module Calabash
       end
 
       def query_all(uiquery, *args)
-        unless ENV['CALABASH_NO_DEPRECATION'] == '1'
-          puts "query_all is deprecated. Use the new all/visible feature."
-          puts "see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax"
-        end
+        msg0 = "use the 'all' or 'visible' query language feature"
+        msg1 = 'see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax'
+        msg = "#{msg0}\n#{msg1}"
+        _deprecated('0.9.133', msg, :warn)
         map("all #{uiquery}", :query, *args)
       end
 
@@ -175,11 +176,11 @@ module Calabash
       end
 
       def send_app_to_background(secs)
-        launcher.actions.send_app_to_background(secs)
+        uia_send_app_to_background(secs)
       end
 
       def set_location(options)
-        if uia?
+        if Calabash::Cucumber::Launcher.instruments?
           uia_set_location(options)
         else
           if options[:place]
@@ -269,8 +270,8 @@ module Calabash
 
       def backdoor(sel, arg)
         json = {
-            :selector => sel,
-            :arg => arg
+              :selector => sel,
+              :arg => arg
         }
         res = http({:method => :post, :path => 'backdoor'}, json)
         res = JSON.parse(res)
@@ -320,11 +321,11 @@ module Calabash
       end
 
       def console_attach
-        launcher.attach
+        @calabash_launcher = launcher.attach
       end
 
       def launcher
-        Calabash::Cucumber::Launcher.launcher
+        @calabash_launcher = Calabash::Cucumber::Launcher.launcher
       end
 
       def query_action_with_options(action, uiquery, options)
@@ -359,3 +360,4 @@ module Calabash
     end
   end
 end
+

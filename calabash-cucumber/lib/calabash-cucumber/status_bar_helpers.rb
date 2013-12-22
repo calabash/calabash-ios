@@ -25,6 +25,18 @@ module Calabash
         map(nil, :orientation, :status_bar).first
       end
 
+      # returns +true+ if orientation is portrait
+      def portrait?
+        o = status_bar_orientation
+        o.eql?('up') or o.eql?('down')
+      end
+
+      # returns +true+ if orientation is landscape
+      def landscape?
+        o = status_bar_orientation
+        o.eql?('right') or o.eql?('left')
+      end
+
     end
   end
 end

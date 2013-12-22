@@ -1,3 +1,4 @@
+#noinspection RubyQuotedStringsInspection
 module Calabash
   module Cucumber
     module PlaybackHelpers
