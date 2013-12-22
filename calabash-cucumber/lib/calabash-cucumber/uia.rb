@@ -182,7 +182,7 @@ module Calabash
         end
         command = "#{js_cmd}.#{js_args.join('.')}"
         if ENV['DEBUG'] == '1'
-          puts "Sending UIA command"
+          puts 'Sending UIA command'
           puts command
         end
 
@@ -193,7 +193,7 @@ module Calabash
       def uia_handle_command(cmd, *query_args)
         command = uia_serialize_command(cmd, *query_args)
         if ENV['DEBUG'] == '1'
-          puts "Sending UIA command"
+          puts 'Sending UIA command'
           puts command
         end
         s = uia(command)
@@ -224,12 +224,19 @@ module Calabash
         escape_quotes string
       end
 
+      # <b>DEPRECATED:</b> Use <tt>uia("...javascript..", options)</tt> instead.
+      # deprecated because the method signature is poor
       def send_uia_command(opts ={})
-        #deprecated, poor method signature
-        #use uia("uia-js...",options)
+
+        # TODO formally deprecate send_uia_command with _deprecated function
+        #cmd = opts[:command]
+        #new_opts = cmd.select{|x| x != :command}
+        #_deprecated('0.9.163',
+        #            "use 'uia(#{cmd}, #{new_opts})' instead",
+        #            :warn)
+
         uia(opts[:command], opts)
       end
-
 
       private
       def validate_hash_is_location!(options)
@@ -244,7 +251,7 @@ module Calabash
 
       def uia_result(s)
         if ENV['DEBUG'] == '1'
-          puts "Result"
+          puts 'Result'
           p s
         end
         if s['status'] == 'success'
