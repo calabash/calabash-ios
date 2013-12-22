@@ -98,8 +98,6 @@ class Calabash::Cucumber::Launcher
     @@launcher = self
   end
 
-
-
   def ios_major_version
     return nil if device.nil? or device.ios_version.nil?
     device.ios_major_version

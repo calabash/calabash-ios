@@ -2,22 +2,22 @@ require 'calabash-cucumber/launcher'
 require 'calabash-cucumber/uia'
 require 'calabash-cucumber/actions/instruments_actions'
 require 'calabash-cucumber/actions/playback_actions'
+require 'calabash-cucumber/environment_helpers'
+
+
 
 module Calabash
   module Cucumber
     module IOS7Operations
       include Calabash::Cucumber::UIA
+      include Calabash::Cucumber::EnvironmentHelpers
 
-      def ios7?
-        launcher = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
-        ENV['OS']=='ios7' || (launcher && launcher.device && launcher.device.ios7?)
-      end
+      # todo deprecate the Calabash::Cucumber::IOS7Operations
 
-
-
-      # Deprecated - abstracted into
-      # actions/instruments_actions.rb - actions that can be performed under instruments
+      # <b>DEPRECATED</b>
       #
+      # abstracted into <tt>actions/instruments_actions.rb</tt> - actions that
+      # can be performed under instruments
       def touch_ios7(options)
         ui_query = options[:query]
         offset =  options[:offset]
@@ -118,9 +118,6 @@ module Calabash
           [el_to_swipe]
         end
       end
-
-
-
     end
   end
 end
