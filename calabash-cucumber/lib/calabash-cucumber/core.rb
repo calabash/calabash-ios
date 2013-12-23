@@ -284,7 +284,7 @@ module Calabash
         # or HTTPClient::KeepAliveDisconnected
         # which needs to be suppressed.
         begin
-          http({:method => :post, :path => 'exit', :retryable_errors => RETRYABLE_ERRORS - [Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected]})
+          http({:method => :post, :path => 'exit', :retryable_errors => Calabash::Cucumber::HTTPHelpers::RETRYABLE_ERRORS - [Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected]})
         rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected
           []
         end
