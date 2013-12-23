@@ -18,7 +18,7 @@ module Calabash
           {:timeout => 10,
            :retry_frequency => 0.2,
            :post_timeout => 0.1,
-           :timeout_message => "Timed out waiting...",
+           :timeout_message => 'Timed out waiting...',
            :screenshot_on_error => true}, &block)
         #note Hash is preferred, number acceptable for backwards compat
         timeout=options_or_timeout
@@ -43,7 +43,21 @@ module Calabash
           end
           sleep(post_timeout) if post_timeout > 0
         rescue WaitError => e
-          handle_error_with_options(e,timeout_message, screenshot_on_error)
+          msg = timeout_message || e
+          if screenshot_on_error
+            sleep(retry_frequency)
+            path  = screenshot
+            res = yield
+            # Validate after taking screenshot
+            if res
+              return res
+            else
+              embed(path)
+              raise msg
+            end
+          else
+            raise msg
+          end
         rescue Exception => e
           handle_error_with_options(e, nil, screenshot_on_error)
         end
@@ -68,6 +82,9 @@ module Calabash
 
       #options for wait_for apply
       def wait_for_elements_exist(elements_arr, options={})
+        if elements_arr.is_a?(String)
+          elements_arr = [elements_arr]
+        end
         options[:timeout_message] = options[:timeout_message] || "Timeout waiting for elements: #{elements_arr.join(",")}"
         wait_for(options) do
           elements_arr.all? { |q| element_exists(q) }
