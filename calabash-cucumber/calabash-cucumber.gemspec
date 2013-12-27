@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency( "geocoder", "~>1.1.8")
   s.add_dependency( "httpclient","~> 2.3.3")
   s.add_dependency( "bundler", "~> 1.1")
-  s.add_dependency( "run_loop", "~> 0.1.0.pre5" )
+  s.add_dependency( "run_loop", "~> 0.1.0.pre7" )
   s.add_dependency( "awesome_print")
   s.add_dependency( "xamarin-test-cloud", "~> 0.9.25")
 
