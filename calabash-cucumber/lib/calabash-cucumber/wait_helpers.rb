@@ -1,5 +1,6 @@
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
+require 'fileutils'
 
 module Calabash
   module Cucumber
@@ -7,9 +8,9 @@ module Calabash
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
 
-
       class WaitError < RuntimeError
       end
+
       CALABASH_CONDITIONS = {:none_animating => "NONE_ANIMATING",
                              :no_network_indicator => "NO_NETWORK_INDICATOR"}
 
@@ -45,21 +46,27 @@ module Calabash
         rescue WaitError => e
           msg = timeout_message || e
           if screenshot_on_error
-            sleep(retry_frequency)
-            path  = screenshot
-            res = yield
-            # Validate after taking screenshot
-            if res
-              return res
-            else
-              embed(path)
-              raise msg
-            end
+           sleep(retry_frequency)
+           return screenshot_and_retry(msg, &block)
           else
-            raise msg
-          end
+           raise msg
+         end
         rescue Exception => e
           handle_error_with_options(e, nil, screenshot_on_error)
+        end
+      end
+
+      def screenshot_and_retry(msg, &block)
+        path  = screenshot
+        res = yield
+        # Validate after taking screenshot
+        if res
+          p path
+          FileUtils.rm_f(path)
+          return res
+        else
+          embed(path)
+          raise msg
         end
       end
 
@@ -67,7 +74,7 @@ module Calabash
         test = opts[:until]
         if test.nil?
           cond = opts[:until_exists]
-          raise "Must provide :until or :until_exists" unless cond
+          raise 'Must provide :until or :until_exists' unless cond
           test = lambda { element_exists(cond) }
         end
         wait_for(opts) do
@@ -113,10 +120,10 @@ module Calabash
         options[:condition] = options[:condition] || CALABASH_CONDITIONS[:none_animating]
         options[:post_timeout] = options[:post_timeout] || 0.1
         options[:frequency] = options[:frequency] || 0.3
-        options[:retry_frequency] = options[:retry_frequency] || 0.3
+        retry_frequency = options[:retry_frequency] = options[:retry_frequency] || 0.3
         options[:count] = options[:count] || 2
-        options[:timeout_message] = options[:timeout_message] || "Timeout waiting for condition (#{options[:condition]})"
-        options[:screenshot_on_error] = options[:screenshot_on_error] || true
+        timeout_message = options[:timeout_message] = options[:timeout_message] || "Timeout waiting for condition (#{options[:condition]})"
+        screenshot_on_error = options[:screenshot_on_error] = options[:screenshot_on_error] || true
 
         begin
           Timeout::timeout(options[:timeout],WaitError) do
@@ -130,7 +137,18 @@ module Calabash
             sleep(options[:post_timeout]) if options[:post_timeout] > 0
           end
         rescue WaitError => e
-          handle_error_with_options(e,options[:timeout_message], options[:screenshot_on_error])
+          msg = timeout_message || e
+          if screenshot_on_error
+            sleep(retry_frequency)
+            return screenshot_and_retry(msg) do
+              res = http({:method => :post, :path => 'condition'},
+                         options)
+              res = JSON.parse(res)
+              res['outcome'] == 'SUCCESS'
+            end
+          else
+            raise msg
+          end
         rescue Exception => e
           handle_error_with_options(e,nil, options[:screenshot_on_error])
         end

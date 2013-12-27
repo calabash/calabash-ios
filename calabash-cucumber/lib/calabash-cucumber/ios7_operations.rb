@@ -13,6 +13,11 @@ module Calabash
         ENV['OS']=='ios7' || (launcher && launcher.device && launcher.device.ios7?)
       end
 
+
+
+      # Deprecated - abstracted into
+      # actions/instruments_actions.rb - actions that can be performed under instruments
+      #
       def touch_ios7(options)
         ui_query = options[:query]
         offset =  options[:offset]
