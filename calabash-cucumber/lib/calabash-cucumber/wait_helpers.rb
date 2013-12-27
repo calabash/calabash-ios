@@ -61,7 +61,6 @@ module Calabash
         res = yield
         # Validate after taking screenshot
         if res
-          p path
           FileUtils.rm_f(path)
           return res
         else
