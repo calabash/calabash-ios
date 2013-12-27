@@ -16,22 +16,23 @@ module Calabash
 
 
       def wait_for(options_or_timeout=
-          {:timeout => 10,
-           :retry_frequency => 0.2,
-           :post_timeout => 0.1,
+          {:timeout => 30,
+           :retry_frequency => 0.3,
+           :post_timeout => 0,
            :timeout_message => 'Timed out waiting...',
            :screenshot_on_error => true}, &block)
         #note Hash is preferred, number acceptable for backwards compat
-        timeout=options_or_timeout
-        post_timeout=0.1
-        retry_frequency=0.2
+        default_timeout = 30
+        timeout=options_or_timeout || default_timeout
+        post_timeout=0
+        retry_frequency=0.3
         timeout_message = nil
         screenshot_on_error = true
 
         if options_or_timeout.is_a?(Hash)
-          timeout = options_or_timeout[:timeout] || 10
-          retry_frequency = options_or_timeout[:retry_frequency] || 0.2
-          post_timeout = options_or_timeout[:post_timeout] || 0.1
+          timeout = options_or_timeout[:timeout] || default_timeout
+          retry_frequency = options_or_timeout[:retry_frequency] || retry_frequency
+          post_timeout = options_or_timeout[:post_timeout] || post_timeout
           timeout_message = options_or_timeout[:timeout_message]
           if options_or_timeout.key?(:screenshot_on_error)
             screenshot_on_error = options_or_timeout[:screenshot_on_error]
@@ -39,7 +40,7 @@ module Calabash
         end
 
         begin
-          Timeout::timeout(timeout,WaitError) do
+          Timeout::timeout(timeout, WaitError) do
             sleep(retry_frequency) until yield
           end
           sleep(post_timeout) if post_timeout > 0
@@ -49,7 +50,7 @@ module Calabash
            sleep(retry_frequency)
            return screenshot_and_retry(msg, &block)
           else
-           raise msg
+           raise wait_error(msg)
          end
         rescue Exception => e
           handle_error_with_options(e, nil, screenshot_on_error)
@@ -65,7 +66,7 @@ module Calabash
           return res
         else
           embed(path)
-          raise msg
+          raise wait_error(msg)
         end
       end
 
@@ -117,7 +118,7 @@ module Calabash
           options[:condition] = target_condition
         end
         options[:condition] = options[:condition] || CALABASH_CONDITIONS[:none_animating]
-        options[:post_timeout] = options[:post_timeout] || 0.1
+        options[:post_timeout] = options[:post_timeout] || 0
         options[:frequency] = options[:frequency] || 0.3
         retry_frequency = options[:retry_frequency] = options[:retry_frequency] || 0.3
         options[:count] = options[:count] || 2
@@ -146,7 +147,7 @@ module Calabash
               res['outcome'] == 'SUCCESS'
             end
           else
-            raise msg
+            raise wait_error(msg)
           end
         rescue Exception => e
           handle_error_with_options(e,nil, options[:screenshot_on_error])
@@ -185,6 +186,10 @@ module Calabash
         else
           raise msg
         end
+      end
+
+      def wait_error(msg)
+        (msg.is_a?(String) ? WaitError.new(msg) : msg)
       end
 
 
