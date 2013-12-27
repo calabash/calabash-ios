@@ -22,6 +22,7 @@ module Calabash
       include Calabash::Cucumber::UIA
       include Calabash::Cucumber::StatusBarHelpers
       include Calabash::Cucumber::RotationHelpers
+      include Calabash::Cucumber::PlaybackHelpers
 
 
       def macro(txt)
