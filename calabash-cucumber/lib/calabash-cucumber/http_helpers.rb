@@ -49,18 +49,18 @@ module Calabash
             if not @http
               @http = init_request(options)
             end
-            if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
-              previous_debug_dev = @http.debug_dev
-              @http.debug_dev = $stdout
-            end
+            #if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
+            #  previous_debug_dev = @http.debug_dev
+            #  @http.debug_dev = $stdout
+            #end
             if options[:method] == :post
               body = @http.post(options[:uri], options[:body]).body
             else
               body = @http.get(options[:uri], options[:body]).body
             end
-            if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
-              @http.debug_dev = previous_debug_dev
-            end
+            #if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
+            #  @http.debug_dev = previous_debug_dev
+            #end
             break
           rescue Exception => e
 
@@ -89,11 +89,14 @@ module Calabash
         body
       end
 
-      def init_request(url=nil)
+      def init_request(options={})
         http = HTTPClient.new
         http.connect_timeout = 30
         http.send_timeout = 30
         http.receive_timeout = 30
+        if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
+          http.debug_dev = $stdout
+        end
         http
       end
 
