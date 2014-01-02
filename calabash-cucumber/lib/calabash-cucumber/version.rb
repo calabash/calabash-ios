@@ -1,6 +1,6 @@
 module Calabash
   module Cucumber
-    VERSION = '0.9.163.pre9'
-    FRAMEWORK_VERSION = '0.9.163.pre7'
+    VERSION = '0.9.163.pre10'
+    FRAMEWORK_VERSION = '0.9.163.pre10'
   end
 end
