@@ -2,10 +2,8 @@ require 'json'
 
 module Calabash
   module Cucumber
-    # Class device encapsulates information about the device or devices
-    # we are interacting with during a test.
-    # Credit: Due to jmoody's briar: https://github.com/jmoody/briar/blob/master/lib/briar/gestalt.rb
-
+    # Class device encapsulates information about the device or devices we are
+    # interacting with during a test.
     class Device
 
       GESTALT_IPHONE = 'iPhone'
