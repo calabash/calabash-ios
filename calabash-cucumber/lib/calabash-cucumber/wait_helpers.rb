@@ -23,7 +23,7 @@ module Calabash
            :screenshot_on_error => true}, &block)
         #note Hash is preferred, number acceptable for backwards compat
         default_timeout = 30
-        timeout=options_or_timeout || default_timeout
+        timeout = options_or_timeout || default_timeout
         post_timeout=0
         retry_frequency=0.3
         timeout_message = nil
@@ -65,7 +65,7 @@ module Calabash
           FileUtils.rm_f(path)
           return res
         else
-          embed(path)
+          embed(path, 'image/png', msg)
           raise wait_error(msg)
         end
       end
