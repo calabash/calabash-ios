@@ -79,7 +79,7 @@ EOF
           candidates.each { |file| searched_for.concat("    * '#{file}'\n") }
           searched_in = "  in directories =>\n"
           playback_file_directories(rec_dir).each { |dir| searched_in.concat("    * '#{dir}'\n") }
-          screenshot_and_raise "Playback file not found for: '#{recording_name}'\n#{searched_for}#{searched_in}"
+          raise "Playback file not found for: '#{recording_name}'\n#{searched_for}#{searched_in}"
         end
 
         data
@@ -119,7 +119,7 @@ EOF
 
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "playback failed because: #{res['reason']}\n#{res['details']}"
+          raise "playback failed because: #{res['reason']}\n#{res['details']}"
         end
         res['results']
       end
@@ -138,7 +138,7 @@ EOF
 
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "interpolate failed because: #{res['reason']}\n#{res['details']}"
+          raise "interpolate failed because: #{res['reason']}\n#{res['details']}"
         end
         res['results']
       end

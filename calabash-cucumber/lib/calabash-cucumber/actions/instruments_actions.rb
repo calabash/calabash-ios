@@ -1,13 +1,11 @@
 require 'calabash-cucumber/uia'
 require 'calabash-cucumber/connection_helpers'
-require 'calabash-cucumber/failure_helpers'
 require 'calabash-cucumber/query_helpers'
 require 'calabash-cucumber/map'
 
 class Calabash::Cucumber::InstrumentsActions
   include Calabash::Cucumber::UIA
   include Calabash::Cucumber::ConnectionHelpers
-  include Calabash::Cucumber::FailureHelpers
   include Calabash::Cucumber::QueryHelpers
   include Calabash::Cucumber::Map
 
@@ -71,7 +69,9 @@ class Calabash::Cucumber::InstrumentsActions
     ui_query = options[:query]
     offset = options[:offset]
     if ui_query
-      el = find_and_normalize_or_raise(ui_query)
+      res = find_and_normalize(ui_query)
+      return res if res.empty?
+      el = res.first
       final_offset = point_from(el, options)
       if block_given?
         yield final_offset
@@ -89,23 +89,17 @@ class Calabash::Cucumber::InstrumentsActions
     end
   end
 
-  def find_and_normalize_or_raise(ui_query)
-    raw_result = find_or_raise(ui_query)
+  def find_and_normalize(ui_query)
+    raw_result = raw_map(ui_query, :query)
     orientation = raw_result['status_bar_orientation']
-    res = raw_result['results'].first
+    res = raw_result['results']
 
-    normalize_rect_for_orientation!(orientation, res['rect']) if res['rect']
+    return res if res.empty?
+
+    first_res = res.first
+    normalize_rect_for_orientation!(orientation, first_res['rect']) if first_res['rect']
 
     res
-  end
-
-  def find_or_raise(ui_query)
-    raw_result = raw_map(ui_query, :query)
-    if raw_result['results'].empty?
-      screenshot_and_raise "Unable to find element matching query #{ui_query}"
-    else
-      raw_result
-    end
   end
 
   def normalize_rect_for_orientation!(orientation, rect)

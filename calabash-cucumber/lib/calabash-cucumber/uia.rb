@@ -9,7 +9,7 @@ module Calabash
         res = http({:method => :post, :path => 'uia'}, {command:command}.merge(options))
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "uia action failed because: #{res['reason']}\n#{res['details']}"
+          raise "uia action failed because: #{res['reason']}\n#{res['details']}"
         end
         res['results'].first
       end
@@ -123,7 +123,7 @@ module Calabash
         status = res['status']
         if status.eql?('error')
           value = res['value']
-          screenshot_and_raise "could not type '#{string}' - '#{value}'"
+          raise "could not type '#{string}' - '#{value}'"
         end
       end
 

@@ -1,14 +1,11 @@
-require 'calabash-cucumber/connection'
 require 'calabash-cucumber/playback_helpers'
 require 'calabash-cucumber/connection_helpers'
-require 'calabash-cucumber/failure_helpers'
 require 'calabash-cucumber/query_helpers'
 
 
 class Calabash::Cucumber::PlaybackActions
   include Calabash::Cucumber::PlaybackHelpers
   include Calabash::Cucumber::ConnectionHelpers
-  include Calabash::Cucumber::FailureHelpers
   include Calabash::Cucumber::QueryHelpers
 
 
