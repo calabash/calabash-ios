@@ -131,12 +131,16 @@ module Calabash
       # returns +docked+ if the device is an iPhone and a keyboard is visible;
       # all keyboards on the iPhone are +docked+
       #
+      # raises an error if the device is not an iPad
+      #
       # raises an error if the <tt>:raise_on_no_visible_keyboard</tt> is +true+
       # (default) and no keyboard is visible
       #
       # set <tt>:raise_on_no_visible_keyboard</tt> to +false+ to use in +wait+
       # functions
       def ipad_keyboard_mode(opts = {})
+        raise 'the keyboard mode does not exist on the iphone' if iphone?
+
         default_opts = {:raise_on_no_visible_keyboard => true}
         opts = default_opts.merge(opts)
         if opts[:raise_on_no_visible_keyboard]
@@ -151,7 +155,6 @@ module Calabash
           :unknown
         end
       end
-
 
       # ensures that there is a keyboard to enter text
       #
