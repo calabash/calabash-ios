@@ -46,6 +46,11 @@ class Calabash::Cucumber::Launcher
   end
 
   def attach(max_retry=1, timeout=10)
+    if calabash_no_launch?
+      self.actions= Calabash::Cucumber::PlaybackActions.new
+      return
+    end
+
     pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
     pids = pids_str.split(',').map { |pid| pid.to_i }
     pid = pids.first
