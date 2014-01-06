@@ -1,10 +1,11 @@
 require 'httpclient'
 require 'json'
 require 'geocoder'
+require 'calabash-cucumber/uia'
+require 'calabash-cucumber/environment_helpers'
 require 'calabash-cucumber/connection'
 require 'calabash-cucumber/connection_helpers'
 require 'calabash-cucumber/launch/simulator_helper'
-require 'calabash-cucumber/uia'
 require 'calabash-cucumber/query_helpers'
 require 'calabash-cucumber/playback_helpers'
 require 'calabash-cucumber/failure_helpers'
@@ -15,6 +16,7 @@ require 'calabash-cucumber/map'
 module Calabash
   module Cucumber
     module Core
+      include Calabash::Cucumber::EnvironmentHelpers
       include Calabash::Cucumber::ConnectionHelpers
       include Calabash::Cucumber::QueryHelpers
       include Calabash::Cucumber::FailureHelpers
@@ -50,10 +52,10 @@ module Calabash
       end
 
       def query_all(uiquery, *args)
-        unless ENV['CALABASH_NO_DEPRECATION'] == '1'
-          puts "query_all is deprecated. Use the new all/visible feature."
-          puts "see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax"
-        end
+        msg0 = "use the 'all' or 'visible' query language feature"
+        msg1 = 'see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax'
+        msg = "#{msg0}\n#{msg1}"
+        _deprecated('0.9.133', msg, :warn)
         map("all #{uiquery}", :query, *args)
       end
 
@@ -84,7 +86,7 @@ module Calabash
       end
 
       def swipe(dir, options={})
-        unless uia?
+        unless uia_available?
           options = options.merge(:status_bar_orientation => status_bar_orientation)
         end
         launcher.actions.swipe(dir.to_sym, options)
@@ -100,8 +102,8 @@ module Calabash
 
 
       def cell_swipe(options={})
-        if uia?
-          raise "cell_swipe not supported with instruments, simply use swipe with a query that matches the cell"
+        if uia_available?
+          raise 'cell_swipe not supported with instruments, simply use swipe with a query that matches the cell'
         end
         playback('cell_swipe', options)
       end
@@ -114,36 +116,36 @@ module Calabash
 
       def scroll_to_row(uiquery, number)
         views_touched=map(uiquery, :scrollToRow, number)
-        if views_touched.empty? or views_touched.member? "<VOID>"
+        if views_touched.empty? or views_touched.member? '<VOID>'
           screenshot_and_raise "Unable to scroll: '#{uiquery}' to: #{number}"
         end
         views_touched
       end
 
-      def scroll_to_cell(options={:query => "tableView",
+      def scroll_to_cell(options={:query => 'tableView',
                                   :row => 0,
                                   :section => 0,
                                   :scroll_position => :top,
                                   :animate => true})
-        uiquery = options[:query] || "tableView"
+        uiquery = options[:query] || 'tableView'
         row = options[:row]
         sec = options[:section]
         if row.nil? or sec.nil?
-          raise "You must supply both :row and :section keys to scroll_to_cell"
+          raise 'You must supply both :row and :section keys to scroll_to_cell'
         end
 
         args = []
         if options.has_key?(:scroll_position)
           args << options[:scroll_position]
         else
-          args << "top"
+          args << 'top'
         end
         if options.has_key?(:animate)
           args << options[:animate]
         end
         views_touched=map(uiquery, :scrollToRow, row.to_i, sec.to_i, *args)
 
-        if views_touched.empty? or views_touched.member? "<VOID>"
+        if views_touched.empty? or views_touched.member? '<VOID>'
           screenshot_and_raise "Unable to scroll: '#{uiquery}' to: #{options}"
         end
         views_touched
@@ -179,7 +181,7 @@ module Calabash
       end
 
       def set_location(options)
-        if uia?
+        if uia_available?
           uia_set_location(options)
         else
           if options[:place]
@@ -216,14 +218,14 @@ module Calabash
       end
 
       def move_wheel(opts={})
-        q = opts[:query] || "pickerView"
+        q = opts[:query] || 'pickerView'
         wheel = opts[:wheel] || 0
         dir = opts[:dir] || :down
 
-        raise "Wheel index must be non negative" if wheel < 0
+        raise 'Wheel index must be non negative' if wheel < 0
         raise "Only up and down supported :dir (#{dir})" unless [:up, :down].include?(dir)
 
-        if ENV['OS'] == "ios4"
+        if ENV['OS'] == 'ios4'
           playback "wheel_#{dir}", :query => "#{q} pickerTable index:#{wheel}"
         elsif ios7?
           raise NotImplementedError
@@ -233,8 +235,8 @@ module Calabash
 
       end
 
-      def picker(opts={:query => "pickerView", :action => :texts})
-        raise "Not implemented" unless opts[:action] == :texts
+      def picker(opts={:query => 'pickerView', :action => :texts})
+        raise 'Not implemented' unless opts[:action] == :texts
 
         q = opts[:query]
 
@@ -269,8 +271,8 @@ module Calabash
 
       def backdoor(sel, arg)
         json = {
-            :selector => sel,
-            :arg => arg
+              :selector => sel,
+              :arg => arg
         }
         res = http({:method => :post, :path => 'backdoor'}, json)
         res = JSON.parse(res)
@@ -310,21 +312,15 @@ module Calabash
         stop_test_server
       end
 
-      def default_device
-        l = Calabash::Cucumber::Launcher.launcher_if_used
-        l && l.device
-      end
-
-      def uia?
-        Calabash::Cucumber::Launcher.instruments?
-      end
 
       def console_attach
-        launcher.attach
+        # setting the @calabash_launcher here for backward compatibility
+        @calabash_launcher = launcher.attach
       end
 
       def launcher
-        Calabash::Cucumber::Launcher.launcher
+        # setting the @calabash_launcher here for backward compatibility
+        @calabash_launcher = Calabash::Cucumber::Launcher.launcher
       end
 
       def query_action_with_options(action, uiquery, options)
@@ -343,12 +339,12 @@ module Calabash
 
       def prepare_query_options(uiquery, options)
         opts = options.dup
-        if (uiquery.is_a?(Array))
+        if uiquery.is_a?(Array)
           raise 'No elements in array' if uiquery.empty?
           uiquery = uiquery.first
         end #this is deliberately not elsif (uiquery.first could be a hash)
 
-        if (uiquery.is_a?(Hash))
+        if uiquery.is_a?(Hash)
           opts[:offset] = point_from(uiquery, options)
           uiquery = nil
         end
@@ -359,3 +355,4 @@ module Calabash
     end
   end
 end
+

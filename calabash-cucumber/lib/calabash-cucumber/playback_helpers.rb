@@ -1,3 +1,4 @@
+
 module Calabash
   module Cucumber
     module PlaybackHelpers
@@ -5,7 +6,8 @@ module Calabash
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
 
       def recording_name_for(recording_name, os, device)
-        if !recording_name.end_with? ".base64"
+        #noinspection RubyControlFlowConversionInspection
+        if !recording_name.end_with? '.base64'
           "#{recording_name}_#{os}_#{device}.base64"
         else
           recording_name
@@ -38,8 +40,8 @@ module Calabash
       end
 
       def load_playback_data(recording_name, options={})
-        os = options["OS"] || ENV["OS"]
-        device = options["DEVICE"] || ENV["DEVICE"] || "iphone"
+        os = options['OS'] || ENV['OS']
+        device = options['DEVICE'] || ENV['DEVICE'] || 'iphone'
 
         unless os
           if @calabash_launcher && @calabash_launcher.active?
@@ -98,6 +100,7 @@ EOF
             recording = recording_name_for(recording_name, loop_os, device)
             candidates << recording
             data = load_recording(recording, rec_dir)
+            #noinspection RubyControlFlowConversionInspection
             break if !data.nil?
           end
         end
@@ -113,7 +116,7 @@ EOF
         post_data<< %Q|,"reverse":#{options[:reverse]}| if options[:reverse]
         post_data<< %Q|,"uia_gesture":"#{options[:uia_gesture]}"| if options[:uia_gesture]
         post_data<< %Q|,"prototype":"#{options[:prototype]}"| if options[:prototype]
-        post_data << "}"
+        post_data << '}'
 
         res = http({:method => :post, :raw => true, :path => 'play'}, post_data)
 
@@ -132,7 +135,7 @@ EOF
         post_data<< %Q|,"end":"#{escape_quotes(options[:end])}"| if options[:end]
         post_data<< %Q|,"offset_start":#{options[:offset_start].to_json}| if options[:offset_start]
         post_data<< %Q|,"offset_end":#{options[:offset_end].to_json}| if options[:offset_end]
-        post_data << "}"
+        post_data << '}'
 
         res = http({:method => :post, :raw => true, :path => 'interpolate'}, post_data)
 
@@ -149,7 +152,7 @@ EOF
 
       def record_end(file_name)
         res = http({:method => :post, :path => 'record'}, {:action => :stop})
-        File.open("_recording.plist", 'wb') do |f|
+        File.open('_recording.plist', 'wb') do |f|
           f.write res
         end
 
@@ -178,9 +181,9 @@ EOF
         end
 
         file_name = "#{file_name}_#{os}_#{device}.base64"
-        system("/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist")
+        system('/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist')
         system("openssl base64 -in _recording_binary.plist -out '#{file_name}'")
-        system("rm _recording.plist _recording_binary.plist")
+        system('rm _recording.plist _recording_binary.plist')
 
         rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
         unless File.directory?(rec_dir)

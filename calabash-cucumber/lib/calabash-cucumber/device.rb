@@ -2,10 +2,8 @@ require 'json'
 
 module Calabash
   module Cucumber
-    # Class device encapsulates information about the device or devices
-    # we are interacting with during a test.
-    # Credit: Due to jmoody's briar: https://github.com/jmoody/briar/blob/master/lib/briar/gestalt.rb
-
+    # Class device encapsulates information about the device or devices we are
+    # interacting with during a test.
     class Device
 
       GESTALT_IPHONE = 'iPhone'
@@ -14,12 +12,12 @@ module Calabash
       GESTALT_SIM_SYS = 'x86_64'
       GESTALT_IPOD = 'iPod'
 
-
       attr_reader :endpoint
       attr_reader :device_family
       attr_reader :simulator_details, :ios_version
       attr_reader :system
       attr_reader :framework_version
+      attr_reader :iphone_app_emulated_on_ipad
 
       attr_accessor :udid
 
@@ -31,6 +29,7 @@ module Calabash
         @simulator_details = version_data['simulator']
         @ios_version = version_data['iOS_version']
         @framework_version = version_data['version']
+        @iphone_app_emulated_on_ipad = version_data['iphone_app_emulated_on_ipad']
       end
 
       def simulator?
@@ -88,6 +87,10 @@ module Calabash
         return { :width => 768, :height => 1024 } if ipad?
         return { :width => 320, :height => 568 } if iphone_5?
         { :width => 320, :height => 480 }
+      end
+
+      def iphone_app_emulated_on_ipad?
+        iphone_app_emulated_on_ipad
       end
     end
   end

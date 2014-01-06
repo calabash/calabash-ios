@@ -12,17 +12,29 @@ module Calabash
             end
           end
 
-          return res if !force_down
+          return res unless force_down
           return rotate_home_button_to :down
         end
 
-        return res if !res.eql?('unknown')
-        return res if !force_down
+        return res unless res.eql?('unknown')
+        return res unless force_down
         rotate_home_button_to(:down)
       end
 
       def status_bar_orientation
         map(nil, :orientation, :status_bar).first
+      end
+
+      # returns +true+ if orientation is portrait
+      def portrait?
+        o = status_bar_orientation
+        o.eql?('up') or o.eql?('down')
+      end
+
+      # returns +true+ if orientation is landscape
+      def landscape?
+        o = status_bar_orientation
+        o.eql?('right') or o.eql?('left')
       end
 
     end
