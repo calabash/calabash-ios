@@ -39,12 +39,12 @@ module Calabash
       #
       # a +docked+ keyboard is pinned to the bottom of the view.
       #
-      # all keyboards on the iPhone are +docked+.
+      # keyboards on the iPhone and iPod are +docked+.
       def docked_keyboard_visible?
         res = query(_qstr_for_keyboard).first
         return false if res.nil?
 
-        return true if iphone?
+        return true if device_family_iphone?
 
         # ipad
         rect = res['rect']
@@ -68,10 +68,10 @@ module Calabash
       #
       # a +undocked+ keyboard is floats in the middle of the view
       #
-      # returns +false+ if the device is an iPhone; all keyboards on the iPhone
-      # are +docked+
+      # returns +false+ if the device is not an iPad; all keyboards on the
+      # iPhone and iPod are +docked+
       def undocked_keyboard_visible?
-        return false if iphone?
+        return false if device_family_iphone?
 
         res = query(_qstr_for_keyboard).first
         return false if res.nil?
@@ -84,10 +84,10 @@ module Calabash
       # a +split+ keyboard is floats in the middle of the view and is split to
       # allow faster thumb typing
       #
-      # returns +false+ if the device is an iPhone; all keyboards on the iPhone
-      # are +docked+
+      # returns +false+ if the device is not an iPad; all keyboards on the
+      # iPhone and iPod are +docked+
       def split_keyboard_visible?
-        return false if iphone?
+        return false if device_family_iphone?
         query("view:'UIKBKeyView'").count > 0 and
               element_does_not_exist(_qstr_for_keyboard)
       end
@@ -128,9 +128,6 @@ module Calabash
       #                             keyboard is floating and split #=> :split
       #   no keyboard and :raise_on_no_visible_keyboard == +false+ #=> :unknown
       #
-      # returns +docked+ if the device is an iPhone and a keyboard is visible;
-      # all keyboards on the iPhone are +docked+
-      #
       # raises an error if the device is not an iPad
       #
       # raises an error if the <tt>:raise_on_no_visible_keyboard</tt> is +true+
@@ -139,7 +136,7 @@ module Calabash
       # set <tt>:raise_on_no_visible_keyboard</tt> to +false+ to use in +wait+
       # functions
       def ipad_keyboard_mode(opts = {})
-        raise 'the keyboard mode does not exist on the iphone' if iphone?
+        raise 'the keyboard mode does not exist on the iphone or ipod' if device_family_iphone?
 
         default_opts = {:raise_on_no_visible_keyboard => true}
         opts = default_opts.merge(opts)
@@ -400,9 +397,11 @@ module Calabash
       # dismisses a iPad keyboard by touching the 'Hide keyboard' button and waits
       # for the keyboard to disappear
       #
-      # raises an error if the device is an iPhone
+      # raises an error if the device is not an iPad.  the dismiss keyboard
+      # key does not exist on the iPhone or iPod
       def dismiss_ipad_keyboard
-        screenshot_and_raise 'cannot dismiss keyboard on iphone' if iphone?
+        screenshot_and_raise 'cannot dismiss keyboard on iphone' if device_family_iphone?
+
         if uia_available?
           send_uia_command({:command =>  "#{_query_uia_hide_keyboard_button}.tap()"})
         else
@@ -420,18 +419,18 @@ module Calabash
       # the +mode+ key is also known as the <tt>Hide keyboard</tt> key.
       #
       # raises an error when
-      # * the device is an iPhone
+      # * the device is not an iPad
       # * the app was not launched with instruments i.e. there is no <tt>run_loop</tt>
       def _point_for_ipad_keyboard_mode_key
-        raise 'the keyboard mode does not exist on the on the iphone' if iphone?
+        raise 'the keyboard mode does not exist on the on the iphone' if device_family_iphone?
         raise 'cannot detect keyboard mode key without launching with instruments' unless uia_available?
         res = send_uia_command({:command => "#{_query_uia_hide_keyboard_button}.rect()"})
         origin = res['value']['origin']
         {:x => origin['x'], :y => origin['y']}
 
+        # this did not work.
         #size = res['value']['size']
         #{:x => (origin['x'] + (size['width']/2)), :y => (origin['y'] + (size['height']/2))}
-
       end
 
 
@@ -448,11 +447,11 @@ module Calabash
       # available
       #
       # raises an error when
-      # * the device is an iPhone
+      # * the device is not an iPad
       # * the app was launched with Instruments i.e. there is a <tt>run_loop</tt>
       # * it is passed invalid arguments
       def _query_for_touch_for_keyboard_mode_option(top_or_bottom, mode)
-        raise 'the keyboard mode does not exist on the iphone' if iphone?
+        raise 'the keyboard mode does not exist on the iphone' if device_family_iphone?
 
         if uia_available?
           raise "UIA is available, use '_point_for_keyboard_mode_key' instead"
@@ -486,10 +485,10 @@ module Calabash
       # available
       #
       # raises an error when
-      # * the device is an iPhone
+      # * the device is not an iPad
       # * the app was launched with Instruments i.e. there is a <tt>run_loop</tt>
       def _query_for_keyboard_mode_key
-        raise 'cannot detect keyboard mode key on iphone' if iphone?
+        raise 'cannot detect keyboard mode key on iphone' if device_family_iphone?
         if uia_available?
           raise "UIA is available, use '_point_for_keyboard_mode_key' instead"
         end
@@ -548,13 +547,17 @@ module Calabash
       #
       # +docked+ means the keyboard is pinned to bottom of the view
       #
-      # if the device is an iPhone, this is a nop.
+      # if the device is not an iPad, this is behaves like a call to
+      # <tt>wait_for_keyboard</tt>
+      #
       # raises an error when
       # * there is no visible keyboard or
       # * the +docked+ keyboard cannot be achieved
       def ensure_docked_keyboard
         wait_for_keyboard
-        return if iphone?
+
+        return if device_family_iphone?
+
         mode = ipad_keyboard_mode
         case mode
           when :split then
@@ -583,14 +586,17 @@ module Calabash
       #
       # +undocked+ means the keyboard is floating in the middle of the view
       #
-      # if the device is an iPhone, this is a nop.
+      # if the device is not an iPad, this is behaves like a call to
+      # <tt>wait_for_keyboard</tt>
       #
       # raises an error when
       # * there is no visible keyboard or
       # * the an +undocked+ keyboard cannot be achieved
       def ensure_undocked_keyboard
         wait_for_keyboard()
-        return if iphone?
+
+        return if device_family_iphone?
+
         mode = ipad_keyboard_mode
         case mode
           when :split then
@@ -625,14 +631,17 @@ module Calabash
       # +split+ means the keyboard is floating in the middle of the view and is
       # split into two sections to enable faster thumb typing.
       #
-      # if the device is an iPhone, this is a nop.
+      # if the device is not an iPad, this is behaves like a call to
+      # <tt>wait_for_keyboard</tt>
       #
       # raises an error when
       # * there is no visible keyboard or
       # * the an +undocked+ keyboard cannot be achieved
       def ensure_split_keyboard
         wait_for_keyboard
-        return if iphone?
+
+        return if device_family_iphone?
+
         mode = ipad_keyboard_mode
         case mode
           when :split then

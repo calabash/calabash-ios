@@ -47,6 +47,20 @@ module Calabash
         _default_device_or_create().iphone?
       end
 
+      # returns +true+ if the target device is an ipod
+      #
+      # raises an error if the server cannot be reached
+      def ipod?
+        _default_device_or_create().ipod?
+      end
+      
+      # returns +true+ if the target device is an iphone or ipod
+      #
+      # raises an error if the server cannot be reached
+      def device_family_iphone?
+        iphone? or ipod?
+      end
+
       # returns +true+ if the target device is a simulator (not a physical device)
       #
       # raises an error if the server cannot be reached
