@@ -134,7 +134,7 @@ class Calabash::Cucumber::Launcher
     Dir["#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}*"]
   end
 
-  # Call as update_privacy_settings('com.my.app', {:photo => {:allow => true}})
+  # Call as update_privacy_settings('com.my.app', {:photos => {:allow => true}})
   def update_privacy_settings(bundle_id, opts={})
     if ENV['DEBUG']=='1'
       puts "Update privacy settings #{bundle_id}, #{opts}"
