@@ -228,10 +228,18 @@ module Calabash
             uia_type_string chr
           else
             code = UIA_SUPPORTED_CHARS[chr]
-            if code
-              uia_type_string code
-            else
+
+            unless code
               raise "Char #{chr} is not yet supported in when typing with Instruments"
+            end
+
+            # on iOS 6, the char code is _not_ \b
+            #
+            # as an aside, on iOS 7, the same approach (tap the 'Delete' key) also works
+            if ios6? and code.eql?(UIA_SUPPORTED_CHARS['Delete'])
+              uia("uia.keyboard().keys().firstWithName('Delete').tap()")
+            else
+              uia_type_string(code)
             end
           end
           res = {'results' => []}
