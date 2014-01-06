@@ -78,6 +78,9 @@ module Calabash
             end
           end
 
+          # todo analyze `self.derived_data_dir_for_project` to see if it contains dead code
+          # todo assuming this is not dead code, the documentation around derived data for project needs to be updated
+
           if (build_dirs.count == 0)
             msg = ["Unable to find your built app."]
             msg << "This means that Calabash can't automatically launch iOS simulator."
@@ -154,7 +157,7 @@ module Calabash
           sim_dirs = Dir.glob(File.join(dd_dir, "Build", "Products", "*-iphonesimulator", "*.app"))
           if sim_dirs.empty?
             msg = ["Unable to auto detect APP_BUNDLE_PATH."]
-            msg << "Have you built your app for simulator?."
+            msg << "Have you built your app for simulator?"
             msg << "Searched dir: #{dd_dir}/Build/Products"
             msg << "Please build your app from Xcode"
             msg << "You should build the -cal target."
