@@ -239,8 +239,8 @@ def validate_ipa(ipa)
     end
 
     app_dir = Dir.foreach("#{dir}/Payload").find {|d| /\.app$/.match(d)}
-    app = app_dir.split(".")[0]
-    res = `otool "#{File.expand_path(dir)}/Payload/#{app_dir}/#{app}" -o 2> /dev/null | grep CalabashServer`
+
+    res = `otool "#{File.expand_path(dir)}/Payload/#{app_dir}/"* -o 2> /dev/null | grep CalabashServer`
     msg("Info") do
       if /CalabashServer/.match(res)
         puts "Ipa: #{ipa} *contains* calabash.framework"
