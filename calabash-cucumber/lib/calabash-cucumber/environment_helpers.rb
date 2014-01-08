@@ -138,7 +138,6 @@ module Calabash
       end
 
 
-
       # prints a deprecated message that includes the line number
       #   +version+ string indicating when the feature was deprecated
       #   +msg+ deprecation message (possibly suggesting alternatives)
@@ -154,13 +153,20 @@ module Calabash
 
         unless no_deprecation_warnings?
 
-          stack = Kernel.caller(0, 6)[1..-1].join("\n")
+
+          if RUBY_VERSION < '2.0'
+            stack = Kernel.caller()[1..6].join("\n")
+          else
+            stack = Kernel.caller(0, 6)[1..-1].join("\n")
+          end
+
           msg = "deprecated '#{version}' - '#{msg}'\n#{stack}"
 
           if type.eql?(:pending)
             pending(msg)
           else
             # todo deprecated function does not output on a new line when called within cucumber
+            # todo should the _deprecated function be colored?
             begin
               warn "\033[34m\nWARN: #{msg}\033[0m"
             rescue

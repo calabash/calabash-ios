@@ -6,7 +6,7 @@ module Calabash
     module UIA
 
       def uia(command,options={})
-        res = http({:method => :post, :path => 'uia'}, {command:command}.merge(options))
+        res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
           raise "uia action failed because: #{res['reason']}\n#{res['details']}"
@@ -51,7 +51,7 @@ module Calabash
       end
 
       def uia_double_tap_mark(mark)
-        uia_double_tap(:view, marked:mark)
+        uia_double_tap(:view, {:marked => mark})
       end
 
       def uia_double_tap_offset(offset)
