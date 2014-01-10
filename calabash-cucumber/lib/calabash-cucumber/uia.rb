@@ -118,8 +118,8 @@ module Calabash
         uia_handle_command(:screenshot, name)
       end
 
-      def uia_type_string(string)
-        res = uia_handle_command(:typeString, string)
+      def uia_type_string(string, opt_text_before="")
+        res = uia_handle_command(:typeString, string, opt_text_before)
         status = res['status']
         if status.eql?('error')
           value = res['value']
@@ -177,7 +177,7 @@ module Calabash
 
                          "#{m}(#{serialized_args})"
                        else
-                         raise "Invalid invocation spec #{invocation}"              
+                         raise "Invalid invocation spec #{invocation}"
           end
         end
         command = "#{js_cmd}.#{js_args.join('.')}"

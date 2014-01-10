@@ -274,7 +274,8 @@ module Calabash
       def keyboard_enter_text(text)
         _ensure_can_enter_text
         if uia_available?
-          uia_type_string(text)
+          text_before = query("textField isFirstResponder:1",:text).first
+          uia_type_string(text, text_before)
         else
           text.each_char do |ch|
             begin
