@@ -275,7 +275,7 @@ module Calabash
       def keyboard_enter_text(text)
         _ensure_can_enter_text
         if uia_available?
-          text_before = query("textField isFirstResponder:1",:text).first
+          text_before = _text_from_first_responder()
           uia_type_string(text, text_before)
         else
           text.each_char do |ch|
@@ -287,7 +287,6 @@ module Calabash
           end
         end
       end
-
 
       # touches the keyboard +action+ key
       #
@@ -729,6 +728,29 @@ module Calabash
         wait_for(opts) do
           uia_keyboard_visible?
         end
+      end
+
+
+      private
+
+      # returns the the text in the first responder
+      #
+      # the first responder will be the +UITextField+ or +UITextView+ instance
+      # that is associated with the visible keyboard.
+      #
+      # returns +nil+ if there no +textField+ or +testView+ is found to be
+      # the first responder.  it is extremely unlikely that this will happen.
+      #
+      # raises an exception if there is no visible keyboard
+      def _text_from_first_responder
+        raise 'there must be a visible keyboard' unless keyboard_visible?
+
+        ['textField', 'textView'].each do |ui_class|
+          res = query("#{ui_class} isFirstResponder:1", :text)
+          return res.first unless res.empty?
+        end
+        #noinspection RubyUnnecessaryReturnStatement
+        return nil
       end
 
     end
