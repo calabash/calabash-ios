@@ -1,5 +1,7 @@
 require 'edn'
 require 'json'
+# required for ruby 1.8
+require 'enumerator'
 
 module Calabash
   module Cucumber
@@ -119,6 +121,10 @@ module Calabash
       end
 
       def uia_type_string(string, opt_text_before='')
+        if string.index(/\\/)
+          indexes = string.enum_for(:scan,/\\/).map { Regexp.last_match.begin(0) }
+          indexes.reverse.each { |idx| string = string.insert(idx, '\\') }
+        end
         res = uia_handle_command(:typeString, string, opt_text_before)
         status = res['status']
         if status.eql?('error')
