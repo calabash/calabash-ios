@@ -700,8 +700,7 @@ module Calabash
         unless uia_available?
           screenshot_and_raise 'only available if there is a run_loop i.e. the app was launched with Instruments'
         end
-        # TODO refactor keyboard detection to use uia() function conventions (instead of UIATarget...)
-        res = uia('UIATarget.localTarget().frontMostApp().keyboard()')['value']
+        res = uia_query_windows(:keyboard)
         not res.eql?(':nil')
       end
 
