@@ -74,13 +74,15 @@ module Calabash
         _deprecated('0.9.145', msg, :warn)
 
         text_fields_modified = map(uiquery, :setText, txt)
-        screenshot_and_raise "could not find text field #{uiquery}" if text_fields_modified.empty?
+        msg = "could not find text field #{uiquery}"
+        expect_map_results(text_fields_modified, msg)
         text_fields_modified
       end
 
       def clear_text(uiquery)
         views_modified = map(uiquery, :setText, '')
-        screenshot_and_raise "could not find text field #{uiquery}" if views_modified.empty?
+        msg = "could not find text field #{uiquery}" if views_modified.empty?
+        expect_map_results(views_modified, msg)
         views_modified
       end
 

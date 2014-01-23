@@ -142,11 +142,8 @@ module Calabash
         query_str = query_string_for_picker picker_id
 
         views_touched = map(query_str, :changeDatePickerDate, target_str, fmt_str, *args)
-
-        if views_touched.empty? or views_touched.member? '<VOID>'
-          screenshot_and_raise "could not change date on picker to '#{target_dt}' using query '#{query_str}' with options '#{options}'"
-        end
-
+        msg = "could not change date on picker to '#{target_dt}' using query '#{query_str}' with options '#{options}'"
+        expect_map_results(views_touched,msg)
         views_touched
       end
     end
