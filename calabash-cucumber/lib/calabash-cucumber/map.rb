@@ -23,6 +23,12 @@ module Calabash
         res
       end
 
+      def expect_map_results(views_touched, msg)
+        compact = views_touched.compact
+        if compact.empty? or compact.member? '<VOID>'
+          screenshot_and_raise msg
+        end
+      end
     end
   end
 end

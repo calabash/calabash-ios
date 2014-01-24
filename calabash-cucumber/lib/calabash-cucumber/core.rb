@@ -110,15 +110,15 @@ module Calabash
 
       def scroll(uiquery, direction)
         views_touched=map(uiquery, :scroll, direction)
-        screenshot_and_raise "could not find view to scroll: '#{uiquery}', args: #{direction}" if views_touched.empty?
+        msg = "could not find view to scroll: '#{uiquery}', args: #{direction}"
+        expect_map_results(views_touched, msg)
         views_touched
       end
 
       def scroll_to_row(uiquery, number)
         views_touched=map(uiquery, :scrollToRow, number)
-        if views_touched.empty? or views_touched.member? '<VOID>'
-          screenshot_and_raise "Unable to scroll: '#{uiquery}' to: #{number}"
-        end
+        msg = "unable to scroll: '#{uiquery}' to: #{number}"
+        expect_map_results(views_touched, msg)
         views_touched
       end
 
@@ -144,10 +144,8 @@ module Calabash
           args << options[:animate]
         end
         views_touched=map(uiquery, :scrollToRow, row.to_i, sec.to_i, *args)
-
-        if views_touched.empty? or views_touched.member? '<VOID>'
-          screenshot_and_raise "Unable to scroll: '#{uiquery}' to: #{options}"
-        end
+        msg = "unable to scroll: '#{uiquery}' to '#{options}'"
+        expect_map_results(views_touched, msg)
         views_touched
       end
 
@@ -172,11 +170,8 @@ module Calabash
         end
 
         views_touched=map(uiquery, :scrollToRowWithMark, row_id, *args)
-
-        if views_touched.empty? or views_touched.member? '<VOID>'
-          msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
-          screenshot_and_raise msg
-        end
+        msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
+        expect_map_results(views_touched, msg)
         views_touched
       end
 
