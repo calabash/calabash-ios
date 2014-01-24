@@ -155,6 +155,10 @@ module Calabash
       def scroll_to_row_with_mark(row_id, options={:query => 'tableView',
                                                    :scroll_position => :middle,
                                                    :animate => true})
+        if row_id.nil?
+          screenshot_and_raise 'row_id argument cannot be nil'
+        end
+
         uiquery = options[:query] || 'tableView'
 
         args = []
