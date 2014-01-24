@@ -143,6 +143,16 @@ module Calabash
         end
       end
 
+        # Performs a lambda action until the elment appears.
+        # The default action is to do nothing.
+      def until_element_exists(opts = {})
+        raise "No element given." if opts[:element].nil?
+        timeout = opts[:timeout] || 10
+        action = opts[:action] || lambda { ; }
+        wait_poll(until_exists: opts[:element], timeout: timeout) do 
+          action.call
+        end
+      end
 
     end
   end
