@@ -68,6 +68,48 @@ module Calabash
         res
       end
 
+      # asserts the result of a calabash +map+ call and raises an error with
+      # +msg+ if no valid results are found.
+      #
+      # casual gem users should never need to call this method; this is a
+      # convenience method for gem maintainers.
+      #
+      # raises an error if +map_results+:
+      #
+      #              is an empty list #=> []
+      #    contains a '<VOID>' string #=> [ "<VOID>" ]
+      #       contains '*****' string #=> [ "*****"  ]
+      #         contains a single nil #=> [ nil ]
+      #
+      # when evaluating whether a +map+ call is successful it is important to
+      # note that sometimes a <tt>[ nil ]</tt> or <tt>[nil, <val>, nil]</tt> is
+      # a valid result.
+      #
+      # consider a controller with 3 labels:
+      #
+      #    label @ index 0 has text "foo"
+      #    label @ index 1 has text nil (the [label text] => nil)
+      #    label @ index 2 has text "bar"
+      #
+      #    map('label', :text) => ['foo', nil, 'bar']
+      #    map('label index:1', :text) => [nil]
+      #
+      # in other cases, <tt>[ nil ]</tt> should be treated as an invalid result
+      #
+      #    # invalid
+      #    > mark = 'mark does not exist'
+      #    > map('tableView', :scrollToRowWithMark, mark, args) => [ nil ]
+      #
+      # here a <tt>[ nil ]</tt> should be considered invalid because the
+      # the operation could not be performed because there is not row that
+      # matches +mark+
+      def assert_map_results(map_results, msg)
+        compact = map_results.compact
+        if compact.empty? or compact.member? '<VOID>' or compact.member? '*****'
+          screenshot_and_raise msg
+        end
+      end
+
     end
   end
 end
