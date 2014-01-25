@@ -50,6 +50,7 @@ module Calabash
       # NB: the +args+ argument is ignored and should be deprecated
       def flash(uiquery, *args)
         # todo deprecate the *args argument in the flash method
+        # todo :flash operation should return views as JSON objects
         map(uiquery, :flash, *args).compact
       end
 
