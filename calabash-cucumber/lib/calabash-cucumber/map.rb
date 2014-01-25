@@ -9,7 +9,15 @@ module Calabash
       # +method_args+ on all the views matched by the +query+
       #
       # the query language is documented here: https://github.com/calabash/calabash-ios/wiki
+      #
+      # returns a JSON representation of each view that is matched
+      #
+      # when the +method_name+ is a calabash operation, returns an array that
+      # contains the result of calling the objc selector +description+ on each
+      # matched view.  these are examples of calabash operations: +:flash+,
+      # +:scrollToRowWithMark+, +:changeDatePickerDate+.
       def map(query, method_name, *method_args)
+        #todo calabash operations should return 'views touched' in JSON format
         raw_map(query, method_name, *method_args)['results']
       end
 
