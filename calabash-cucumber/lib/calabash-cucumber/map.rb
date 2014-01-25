@@ -4,8 +4,13 @@ module Calabash
   module Cucumber
     module Map #=> Connection
 
+      # returns an array of views matched by the +query+ or the result of
+      # performing the Objective-C sequence defined by the +method_name+ and
+      # +method_args+ on all the views matched by the +query+
+      #
+      # the query language is documented here: https://github.com/calabash/calabash-ios/wiki
       def map(query, method_name, *method_args)
-        raw_map(query,method_name, *method_args)['results']
+        raw_map(query, method_name, *method_args)['results']
       end
 
       # returns a JSON object the represents the result of performing an http
