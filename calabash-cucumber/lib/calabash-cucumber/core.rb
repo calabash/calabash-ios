@@ -39,8 +39,18 @@ module Calabash
         map(uiquery, :query, *args)
       end
 
+      # causes all views matched by the +query+ to briefly change colors making
+      # them visually identifiable.
+      #
+      # returns <tt>[]</tt> if no views are matched
+      #
+      # if there are matching views, returns an array of that contains the
+      # result of calling the objc selector +description+ on each matching view.
+      #
+      # NB: the +args+ argument is ignored and should be deprecated
       def flash(uiquery, *args)
-        map(uiquery, :flash, *args)
+        # todo deprecate the *args argument in the flash method
+        map(uiquery, :flash, *args).compact
       end
 
       def server_version
