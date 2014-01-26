@@ -137,9 +137,18 @@ module Calabash
       # when <tt>:notify_targets = true</tt> this operation iterates through the
       # target/action pairs on the objc +UIDatePicker+ instance and calls
       # <tt>performSelector:<action> object:<target></tt> to simulate a +UIEvent+
+      #
+      # raises an error if
+      # * no UIDatePicker can be found
+      # * the target date is greater than the picker's maximum date
+      # * the target date is less than the picker's minimum date
+      # * the target date is not a DateTime object
       def picker_set_date_time (target_dt, options = {:animate => true,
                                                       :picker_id => nil,
                                                       :notify_targets => true})
+        unless target_dt.is_a?(DateTime)
+          raise "target_dt must be a DateTime but found '#{target_dt.class}'"
+        end
 
         picker_id = options == nil ? nil : options[:picker_id]
 
