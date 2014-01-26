@@ -130,7 +130,6 @@ module Calabash
       # will clear the text on _all_ visible views that respond to 'setText'
       def clear_text(uiquery)
         views_modified = map(uiquery, :setText, '')
-        puts "views modified '#{views_modified}'"
         msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
         assert_map_results(views_modified, msg)
         views_modified
