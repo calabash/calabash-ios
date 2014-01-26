@@ -65,22 +65,74 @@ module Calabash
         query(q).map { |e| e['html'] }
       end
 
+      # sets the text value of the views matched by +uiquery+ to +txt+
+      #
+      # @deprecated since 0.9.145
+      #
+      # we have stopped testing this method.  you have been warned.
+      #
+      # * to enter text using the native keyboard use 'keyboard_enter_text'
+      # * to delete text use 'keyboard_enter_text('Delete')"
+      # * to clear a text field or text view:
+      #   - RECOMMENDED: use queries and touches to replicate what the user would do
+      #     - for text fields, implement a clear text button and touch it
+      #     - for text views, use touches to reveal text editing popup
+      #       see https://github.com/calabash/calabash-ios/issues/151
+      #   - use 'clear_text'
+      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
+      #
+      # raises an error if the +uiquery+ finds no matching queries or finds
+      # a view that does not respond to the objc selector 'setText'
       def set_text(uiquery, txt)
-        msgs = ["'set_text' will be deprecated.",
+        msgs = ["'set_text' is deprecated and its behavior is now unpredictable",
                 "* to enter text using the native keyboard use 'keyboard_enter_text'",
-                "* to clear a text field or text view use 'clear_text'",
+                "* to delete text use 'keyboard_enter_text('Delete')",
+                '* to clear a text field or text view:',
+                '  - RECOMMENDED: use queries and touches to replicate what the user would do',
+                '    * for text fields, implement a clear text button and touch it',
+                '    * for text views, use touches to reveal text editing popup',
+                '    see https://github.com/calabash/calabash-ios/issues/151',
+                "  - use 'clear_text'",
                 'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API']
         msg = msgs.join("\n")
         _deprecated('0.9.145', msg, :warn)
 
         text_fields_modified = map(uiquery, :setText, txt)
-        screenshot_and_raise "could not find text field #{uiquery}" if text_fields_modified.empty?
+
+        msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
+        assert_map_results(text_fields_modified, msg)
         text_fields_modified
       end
 
+      # sets the text value of the views matched by +uiquery+ to <tt>''</tt>
+      # (the empty string)
+      #
+      # using this sparingly and with caution
+      #
+      #
+      # it is recommended that you instead do some combination of the following
+      #
+      # * use queries and touches to replicate with the user would
+      #   - for text fields, implement a clear text button and touch it
+      #   - for text views, use touches to reveal text editing popup
+      #   see https://github.com/calabash/calabash-ios/issues/151
+      #
+      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
+      #
+      # raises an error if the +uiquery+ finds no matching queries or finds
+      # a _single_ view that does not respond to the objc selector 'setText'
+      #
+      # IMPORTANT
+      # calling:
+      #
+      #     > clear_text("view")
+      #
+      # will clear the text on _all_ visible views that respond to 'setText'
       def clear_text(uiquery)
         views_modified = map(uiquery, :setText, '')
-        screenshot_and_raise "could not find text field #{uiquery}" if views_modified.empty?
+        puts "views modified '#{views_modified}'"
+        msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
+        assert_map_results(views_modified, msg)
         views_modified
       end
 
