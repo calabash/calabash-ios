@@ -111,7 +111,6 @@ module Calabash
         launcher.actions.pinch(in_out.to_sym,options)
       end
 
-
       def cell_swipe(options={})
         if uia_available?
           raise 'cell_swipe not supported with instruments, simply use swipe with a query that matches the cell'
@@ -121,15 +120,15 @@ module Calabash
 
       def scroll(uiquery, direction)
         views_touched=map(uiquery, :scroll, direction)
-        screenshot_and_raise "could not find view to scroll: '#{uiquery}', args: #{direction}" if views_touched.empty?
+        msg = "could not find view to scroll: '#{uiquery}', args: #{direction}"
+        assert_map_results(views_touched, msg)
         views_touched
       end
 
       def scroll_to_row(uiquery, number)
         views_touched=map(uiquery, :scrollToRow, number)
-        if views_touched.empty? or views_touched.member? '<VOID>'
-          screenshot_and_raise "Unable to scroll: '#{uiquery}' to: #{number}"
-        end
+        msg = "unable to scroll: '#{uiquery}' to: #{number}"
+        assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -155,10 +154,8 @@ module Calabash
           args << options[:animate]
         end
         views_touched=map(uiquery, :scrollToRow, row.to_i, sec.to_i, *args)
-
-        if views_touched.empty? or views_touched.member? '<VOID>'
-          screenshot_and_raise "Unable to scroll: '#{uiquery}' to: #{options}"
-        end
+        msg = "unable to scroll: '#{uiquery}' to '#{options}'"
+        assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -183,11 +180,8 @@ module Calabash
         end
 
         views_touched=map(uiquery, :scrollToRowWithMark, row_id, *args)
-
-        if views_touched.empty? or views_touched.member? '<VOID>'
-          msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
-          screenshot_and_raise msg
-        end
+        msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
+        assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -283,7 +277,6 @@ module Calabash
         texts
       end
 
-
       def backdoor(sel, arg)
         json = {
               :selector => sel,
@@ -327,7 +320,6 @@ module Calabash
         stop_test_server
       end
 
-
       def console_attach
         # setting the @calabash_launcher here for backward compatibility
         @calabash_launcher = launcher.attach
@@ -342,7 +334,8 @@ module Calabash
         uiquery, options = extract_query_and_options(uiquery, options)
         views_touched = launcher.actions.send(action, options)
         unless uiquery.nil?
-          screenshot_and_raise "#{action} could not find view: '#{uiquery}', args: #{options}" if views_touched.empty?
+          msg = "#{action} could not find view: '#{uiquery}', args: #{options}"
+          assert_map_results(views_touched, msg)
         end
         views_touched
       end
