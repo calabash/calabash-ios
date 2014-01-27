@@ -12,14 +12,18 @@ module Calabash
       end
       CALABASH_CONDITIONS = {:none_animating => "NONE_ANIMATING",
                              :no_network_indicator => "NO_NETWORK_INDICATOR"}
+      DEFAULT_OPTS = { 
+        :timeout => 10,
+        :frequency => 0.2,
+        :count => 2,
+        :retry_frequency => 0.2,
+        :post_timeout => 0.1,
+        :timeout_message => "Timed out waiting...",
+        :screenshot_on_error => true
+      }
 
 
-      def wait_for(options_or_timeout=
-          {:timeout => 10,
-           :retry_frequency => 0.2,
-           :post_timeout => 0.1,
-           :timeout_message => "Timed out waiting...",
-           :screenshot_on_error => true}, &block)
+      def wait_for(options_or_timeout = DEFAULT_OPTS, &block)
         #note Hash is preferred, number acceptable for backwards compat
         timeout=options_or_timeout
         post_timeout=0.1
@@ -28,15 +32,16 @@ module Calabash
         screenshot_on_error = true
 
         if options_or_timeout.is_a?(Hash)
-          timeout = options_or_timeout[:timeout] || 10
-          retry_frequency = options_or_timeout[:retry_frequency] || 0.2
-          post_timeout = options_or_timeout[:post_timeout] || 0.1
+          options_or_timeout = DEFAULT_OPTS.merge(options_or_timeout)
+          timeout = options_or_timeout[:timeout]
+          retry_frequency = options_or_timeout[:retry_frequency]
+          post_timeout = options_or_timeout[:post_timeout]
           timeout_message = options_or_timeout[:timeout_message]
-          screenshot_on_error = options_or_timeout[:screenshot_on_error] || true
+          screenshot_on_error = options_or_timeout[:screenshot_on_error]
         end
 
         begin
-          Timeout::timeout(timeout,WaitError) do
+          Timeout::timeout(timeout, WaitError) do
             sleep(retry_frequency) until yield
           end
           sleep(post_timeout) if post_timeout > 0
@@ -80,15 +85,12 @@ module Calabash
       end
 
       def wait_for_condition(options = {})
-        options[:timeout] = options[:timeout] || 10
-        options[:query] = options[:query] || "view"
-        options[:condition] = options[:condition] || CALABASH_CONDITIONS[:none_animating]
-        options[:post_timeout] = options[:post_timeout] || 0.1
-        options[:frequency] = options[:frequency] || 0.2
-        options[:retry_frequency] = options[:retry_frequency] || 0.2
-        options[:count] = options[:count] || 2
-        options[:timeout_message] = options[:timeout_message] || "Timeout waiting for condition (#{options[:condition]})"
-        options[:screenshot_on_error] = options[:screenshot_on_error] || true
+        extra_opts = { 
+          :query => "view", 
+          :condition => CALABASH_CONDITIONS[:none_animating], 
+          :timeout_message => "Timeout waiting for condition (#{options[:condition]})"
+        }
+        options = DEFAULT_OPTS.merge(extra_opts).merge(options)
 
         if options[:condition] == CALABASH_CONDITIONS[:none_animating]
           #puts "Waiting for none-animating has been found unreliable."
@@ -143,15 +145,23 @@ module Calabash
         end
       end
 
-        # Performs a lambda action until the elment appears.
-        # The default action is to do nothing.
-      def until_element_exists(opts = {})
-        raise "No element given." if opts[:element].nil?
-        timeout = opts[:timeout] || 10
-        action = opts[:action] || lambda { ; }
-        wait_poll(until_exists: opts[:element], timeout: timeout) do 
+      # Performs a lambda action until the elment appears.
+      # The default action is to do nothing.
+      def until_element_exists(element, opts = {})
+        extra_opts = { :until_exists => element, :action => lambda { ; } }
+        opts = DEFAULT_OPTS.merge(extra_opts).merge(opts)
+        wait_poll(opts) do 
           action.call
         end
+      end
+
+      # Performs a lambda action once the element exists.
+      # The default behavior is to touch the specified element.
+      def once_element_exists(element, opts = {})
+        action = { :action => lambda { touch element } }
+        opts = DEFAULT_OPTS.merge(action).merge(opts)
+        wait_for_elements_exists([opts[:element]], opts)
+        opts[:action].call
       end
 
     end
