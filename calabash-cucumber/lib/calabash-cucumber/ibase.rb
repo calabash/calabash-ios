@@ -20,6 +20,26 @@ class Calabash::IBase
     "navigationItemView marked:'#{self.title}'"
   end
 
+  # If you have multiple acceptable traits
+  # you can pass in an array of acceptable
+  # query strings.
+  def multiple_traits(traits = ["*"], opts = {})
+    opts = DEFAULT_OPTS.merge(opts)
+    trait = ''
+    action = lambda do 
+      traits.each do |element|
+        if element_exists(element)
+          trait = element
+          break
+        end
+      end
+      !trait.empty?
+    end
+    opts = opts.merge({ until: action })
+    wait_poll(opts) do ; end
+    trait # Returns first successful trait
+  end
+
   def page(clz,*args)
     clz.new(@world,*args)
   end
