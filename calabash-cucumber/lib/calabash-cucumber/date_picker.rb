@@ -122,12 +122,33 @@ module Calabash
         args
       end
 
-      # expects a DateTime object
-      # notify_targets = true iterates through the target/action pairs and
-      # calls performSelector:<action> object:<target> to simulate a UIEvent
+
+      # sets the date and time on picker identified by <tt>options[:picker_id]</tt>
+      # using the DateTime +target_dt+
+      #
+      # valid options are:
+      #
+      #        :animate - animate the change - default is +true+
+      #      :picker_id - the id (or mark) of the date picker - default is +nil+ which
+      #                   will target the first visible date picker
+      # :notify_targets - notify all objc targets that the date picker has changed
+      #                   default is +true+
+      #
+      # when <tt>:notify_targets = true</tt> this operation iterates through the
+      # target/action pairs on the objc +UIDatePicker+ instance and calls
+      # <tt>performSelector:<action> object:<target></tt> to simulate a +UIEvent+
+      #
+      # raises an error if
+      # * no UIDatePicker can be found
+      # * the target date is greater than the picker's maximum date
+      # * the target date is less than the picker's minimum date
+      # * the target date is not a DateTime object
       def picker_set_date_time (target_dt, options = {:animate => true,
                                                       :picker_id => nil,
                                                       :notify_targets => true})
+        unless target_dt.is_a?(DateTime)
+          raise "target_dt must be a DateTime but found '#{target_dt.class}'"
+        end
 
         picker_id = options == nil ? nil : options[:picker_id]
 
@@ -142,11 +163,8 @@ module Calabash
         query_str = query_string_for_picker picker_id
 
         views_touched = map(query_str, :changeDatePickerDate, target_str, fmt_str, *args)
-
-        if views_touched.empty? or views_touched.member? '<VOID>'
-          screenshot_and_raise "could not change date on picker to '#{target_dt}' using query '#{query_str}' with options '#{options}'"
-        end
-
+        msg = "could not change date on picker to '#{target_dt}' using query '#{query_str}' with options '#{options}'"
+        assert_map_results(views_touched,msg)
         views_touched
       end
     end
