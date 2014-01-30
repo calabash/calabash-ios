@@ -120,8 +120,8 @@ module Calabash
         uia_handle_command(:screenshot, name)
       end
 
-      def uia_type_string(string, opt_text_before='')
-        if string.index(/\\/)
+      def uia_type_string(string, opt_text_before='', escape=true)
+        if escape && string.index(/\\/)
           indexes = string.enum_for(:scan,/\\/).map { Regexp.last_match.begin(0) }
           indexes.reverse.each { |idx| string = string.insert(idx, '\\') }
         end
@@ -131,6 +131,7 @@ module Calabash
           value = res['value']
           raise "could not type '#{string}' - '#{value}'"
         end
+        status
       end
 
       def uia_enter

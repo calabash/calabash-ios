@@ -301,7 +301,7 @@ module Calabash
       # raises an error if the key cannot be entered
       def tap_keyboard_action_key
         if uia_available?
-          uia_type_string '\n'
+          uia_type_string '\n', '', false
         else
           keyboard_enter_char 'Return'
         end
