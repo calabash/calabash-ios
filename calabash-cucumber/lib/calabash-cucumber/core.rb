@@ -301,6 +301,21 @@ module Calabash
         end
       end
 
+      def server_debug_level
+        _debug_level_response(http(:method => :get, :path => 'debug'))
+      end
+
+      def set_server_debug_level(level)
+        _debug_level_response(http({:method => :post, :path => 'debug'}, {:level => level}))
+      end
+
+      def _debug_level_response(json)
+        res = JSON.parse(json)
+        if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "debug_level #{json} failed because: #{res['reason']}\n#{res['details']}"
+        end
+        res['results'].first
+      end
       ## args :app for device bundle id, for sim path to app
       ##
       def start_test_server_in_background(args={})
