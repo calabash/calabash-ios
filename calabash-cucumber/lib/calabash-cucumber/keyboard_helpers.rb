@@ -239,8 +239,10 @@ module Calabash
             #           keyboard and not a key
             if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
               uia("uia.keyboard().elements().firstWithName('Delete').tap()")
+            elsif code.eql?(UIA_SUPPORTED_CHARS['Return'])
+              tap_keyboard_action_key
             else
-              uia_type_string(code)
+              uia_type_string(code, '')
             end
           end
           res = {'results' => []}
