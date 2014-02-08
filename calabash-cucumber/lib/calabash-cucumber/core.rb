@@ -132,6 +132,7 @@ module Calabash
         views_touched
       end
 
+      # todo for 1.0 version - scroll_to_cell should expose required arguments +section+ and +row+
       def scroll_to_cell(options={:query => 'tableView',
                                   :row => 0,
                                   :section => 0,
