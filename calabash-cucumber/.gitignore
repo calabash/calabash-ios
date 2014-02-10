@@ -1,6 +1,13 @@
-pkg
 Markdown.pl
 .idea
 Gemfile.lock
 staticlib
 libcalabash
+
+# ruby, bundler, rbenv
+pkg
+.bundle
+vendor
+pkg
+*.gem
+.ruby-version
