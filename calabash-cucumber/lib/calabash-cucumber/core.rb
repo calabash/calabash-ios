@@ -132,6 +132,7 @@ module Calabash
         views_touched
       end
 
+      # todo for 1.0 version - scroll_to_cell should expose required arguments +section+ and +row+
       def scroll_to_cell(options={:query => 'tableView',
                                   :row => 0,
                                   :section => 0,
@@ -181,6 +182,64 @@ module Calabash
 
         views_touched=map(uiquery, :scrollToRowWithMark, row_id, *args)
         msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
+        assert_map_results(views_touched, msg)
+        views_touched
+      end
+
+      # scrolls to +item+ in +section+ in a UICollectionView
+      #
+      # calls the +:collectionViewScroll+ server route
+      #
+      # +item+ and +section+ are zero-indexed
+      #
+      #    scroll_to_collection_view_item(0, 2, {:scroll_position => :top}) #=> scroll to item 0 in section 2 to top
+      # scroll_to_collection_view_item(5, 0, {:scroll_position => :bottom}) #=> scroll to item 5 in section 0 to bottom
+      #
+      # allowed options
+      #     :query => a query string
+      #         default => 'collectionView'
+      #         example => "collectionView marked:'hit songs'"
+      #
+      #     :scroll_position => the position to scroll to
+      #         default => :top
+      #         allowed => {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
+      #
+      #     :animate => animate the scrolling
+      #         default => true
+      #         allowed => {true | false}
+      #
+      #     :failed_message => the message to display on failure
+      #         default => nil - will display a default failure message
+      #         allowed => any string
+      #
+      # raises an exception if the scroll cannot be performed.
+      # * the +:query+ finds no collection view
+      # * collection view does not contain a cell at +item+/+section+
+      # * +:scroll_position+ is invalid
+      def scroll_to_collection_view_item(item, section, opts={})
+        default_options = {:query => 'collectionView',
+                           :scroll_position => :top,
+                           :animate => true,
+                           :failed_message => nil}
+        opts = default_options.merge(opts)
+        uiquery = opts[:query]
+
+        scroll_position = opts[:scroll_position]
+        candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
+        unless candidates.include?(scroll_position)
+          raise "scroll_position '#{scroll_position}' is not one of '#{candidates}'"
+        end
+
+        animate = opts[:animate]
+
+        views_touched=map(uiquery, :collectionViewScroll, item.to_i, section.to_i, scroll_position, animate)
+
+        if opts[:failed_message]
+          msg = opts[:failed_message]
+        else
+          msg = "unable to scroll: '#{uiquery}' to row '#{item}' in section '#{section}'"
+        end
+
         assert_map_results(views_touched, msg)
         views_touched
       end
