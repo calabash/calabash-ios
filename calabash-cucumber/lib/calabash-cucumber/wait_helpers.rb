@@ -13,6 +13,7 @@ module Calabash
 
       CALABASH_CONDITIONS = {:none_animating => "NONE_ANIMATING",
                              :no_network_indicator => "NO_NETWORK_INDICATOR"}
+      # 'post_timeout' is the time to wait after a wait function returns true
       DEFAULT_OPTS = {
         :timeout => 30,
         :retry_frequency => 0.3,
@@ -201,7 +202,7 @@ module Calabash
 
       # Performs a lambda action until the element (a query string) appears.
       # The default action is to do nothing.
-      def until_element_exists(element, opts = {})
+      def until_element_exists(uiquery, opts = {})
         extra_opts = { :until_exists => element, :action => lambda { ; } }
         opts = DEFAULT_OPTS.merge(extra_opts).merge(opts)
         wait_poll(opts) do 
@@ -212,7 +213,7 @@ module Calabash
 
       # Performs a lambda action until the element (a query string) disappears.
       # The default action is to do nothing. 
-      def until_element_does_not_exist(element, opts = {})
+      def until_element_does_not_exist(uiquery, opts = {})
         condition = lambda { element_exists(element) ? false : true }
         extra_opts = { :until => condition, :action => lambda { ; } }
         opts = DEFAULT_OPTS.merge(extra_opts).merge(opts)
@@ -223,7 +224,7 @@ module Calabash
 
       # Performs a lambda action once the element exists.
       # The default behavior is to touch the specified element.
-      def once_element_exists(element, opts = {})
+      def when_element_exists(uiquery, opts = {})
         action = { :action => lambda { touch element } }
         opts = DEFAULT_OPTS.merge(action).merge(opts)
         wait_for_elements_exists([opts[:element]], opts)
