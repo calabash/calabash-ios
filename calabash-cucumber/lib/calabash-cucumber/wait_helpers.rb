@@ -203,7 +203,7 @@ module Calabash
       # Performs a lambda action until the element (a query string) appears.
       # The default action is to do nothing.
       def until_element_exists(uiquery, opts = {})
-        extra_opts = { :until_exists => element, :action => lambda { ; } }
+        extra_opts = { :until_exists => uiquery, :action => lambda { ; } }
         opts = DEFAULT_OPTS.merge(extra_opts).merge(opts)
         wait_poll(opts) do 
           opts[:action].call
@@ -214,7 +214,7 @@ module Calabash
       # Performs a lambda action until the element (a query string) disappears.
       # The default action is to do nothing. 
       def until_element_does_not_exist(uiquery, opts = {})
-        condition = lambda { element_exists(element) ? false : true }
+        condition = lambda { element_exists(uiquery) ? false : true }
         extra_opts = { :until => condition, :action => lambda { ; } }
         opts = DEFAULT_OPTS.merge(extra_opts).merge(opts)
         wait_poll(opts) do 
@@ -225,9 +225,9 @@ module Calabash
       # Performs a lambda action once the element exists.
       # The default behavior is to touch the specified element.
       def when_element_exists(uiquery, opts = {})
-        action = { :action => lambda { touch element } }
+        action = { :action => lambda { touch uiquery } }
         opts = DEFAULT_OPTS.merge(action).merge(opts)
-        wait_for_elements_exists([opts[:element]], opts)
+        wait_for_elements_exists([uiquery], opts)
         opts[:action].call
       end
 
