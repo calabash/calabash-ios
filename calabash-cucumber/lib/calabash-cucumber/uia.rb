@@ -160,6 +160,10 @@ module Calabash
         uia_call_method(:queryEl, args_arr, *opts)
       end
 
+      def uia_call_windows(args_arr, *opts)
+        uia_call_method(:queryElWindows, args_arr, *opts)
+      end
+
       def uia_call_method(cmd, args_arr, *opts)
         if opts.empty?
           return uia_handle_command(cmd, args_arr)
