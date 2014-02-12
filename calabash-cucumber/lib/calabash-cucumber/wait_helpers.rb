@@ -202,6 +202,13 @@ module Calabash
 
       # Performs a lambda action until the element (a query string) appears.
       # The default action is to do nothing.
+      #
+      # Raises an error if no uiquery is specified. Same options as wait_for
+      # which are timeout, retry frequency, post_timeout, timeout_message, and 
+      # screenshot on error.
+      #
+      # Example usage: 
+      # until_element_exists("Button", :action => lambda { swipe("up") })
       def until_element_exists(uiquery, opts = {})
         extra_opts = { :until_exists => uiquery, :action => lambda { ; } }
         opts = DEFAULT_OPTS.merge(extra_opts).merge(opts)
@@ -213,6 +220,13 @@ module Calabash
 
       # Performs a lambda action until the element (a query string) disappears.
       # The default action is to do nothing. 
+      #
+      # Raises an error if no uiquery is specified. Same options as wait_for
+      # which are timeout, retry frequency, post_timeout, timeout_message, and
+      # screenshot on error.
+      #
+      # Example usage: 
+      # until_element_does_not_exist("Button", :action => lambda { swipe("up") })
       def until_element_does_not_exist(uiquery, opts = {})
         condition = lambda { element_exists(uiquery) ? false : true }
         extra_opts = { :until => condition, :action => lambda { ; } }
@@ -224,6 +238,12 @@ module Calabash
 
       # Performs a lambda action once the element exists.
       # The default behavior is to touch the specified element.
+      #
+      # Raises an error if no uiquery is specified. Same options as wait_for
+      # which are timeout, retry frequency, post_timeout, timeout_message, and
+      # screenshot on error.
+      #
+      # Example usage: when_element_exists("Button", :timeout => 10)
       def when_element_exists(uiquery, opts = {})
         action = { :action => lambda { touch uiquery } }
         opts = DEFAULT_OPTS.merge(action).merge(opts)
