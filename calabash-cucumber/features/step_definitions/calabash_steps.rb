@@ -103,7 +103,7 @@ end
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" field$/ do |text_to_type, field_name|
   touch("textField placeholder:'#{field_name}'")
-  wait_for_keyboard()
+  wait_for_keyboard
   keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
@@ -119,7 +119,7 @@ end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
   touch("textField placeholder:'#{field_name}'")
-  await_keyboard
+  wait_for_keyboard
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
@@ -134,7 +134,7 @@ Then /^I enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text_to_t
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
   touch("textField index:#{index-1}",index)
-  await_keyboard
+  wait_for_keyboard
   keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
@@ -143,7 +143,7 @@ Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field n
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
   touch("textField index:#{index-1}")
-  await_keyboard
+  wait_for_keyboard
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
