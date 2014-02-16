@@ -102,13 +102,14 @@ end
 ## -- Entering text -- ##
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" field$/ do |text_to_type, field_name|
-  set_text("textField marked:'#{field_name}'", text_to_type)
+  touch("textField placeholder:'#{field_name}'")
+  wait_for_keyboard
+  keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
-  set_text("textField placeholder:'#{field_name}'", text_to_type)
-  sleep(STEP_PAUSE)
+  macro %Q|I enter "#{text_to_type}" into the "#{text_field}" field|
 end
 
 # alias
@@ -118,7 +119,7 @@ end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
   touch("textField placeholder:'#{field_name}'")
-  await_keyboard
+  wait_for_keyboard
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
@@ -129,29 +130,38 @@ Then /^I fill in text fields as follows:$/ do |table|
   end
 end
 
-Then /^I enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text, index|
+Then /^I enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text_to_type, index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
-  set_text("textField index:#{index-1}",text)
+  touch("textField index:#{index-1}",index)
+  wait_for_keyboard
+  keyboard_enter_text text_to_type
+  sleep(STEP_PAUSE)
 end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text_to_type, index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
   touch("textField index:#{index-1}")
-  await_keyboard
+  wait_for_keyboard
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
 
 When /^I clear "([^\"]*)"$/ do |name|
-  macro %Q|I enter "" into the "#{name}" text field|
+  text = query("textField placeholder:'#{name}'", :text)[0]
+  touch("textField placeholder:#{name}")
+  wait_for_keyboard
+  text.length.times { keyboard_enter_char 'Delete' }
 end
 
 Then /^I clear (?:input|text) field number (\d+)$/ do |index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
-  set_text("textField index:#{index-1}","")
+  text = query("textField index:#{index}", :text)[0]
+  touch("textField index:#{index}")
+  wait_for_keyboard
+  text.length.times { keyboard_enter_char 'Delete' }
 end
 
 # -- See -- #
