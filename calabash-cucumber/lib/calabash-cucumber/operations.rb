@@ -9,7 +9,7 @@ require 'json'
 require 'set'
 require 'calabash-cucumber/version'
 require 'calabash-cucumber/date_picker'
-
+require 'calabash-cucumber/ipad_1x_2x'
 
 if not Object.const_defined?(:CALABASH_COUNT)
   #compatability with IRB
@@ -26,6 +26,7 @@ module Calabash
       include Calabash::Cucumber::WaitHelpers
       include Calabash::Cucumber::KeyboardHelpers
       include Calabash::Cucumber::DatePicker
+      include Calabash::Cucumber::IPad
 
       def page(clz,*args)
         clz.new(self,*args)
