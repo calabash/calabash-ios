@@ -13,7 +13,7 @@ This document explains how to install Calabash iOS. For introductory informatio
 
 [Introducing Calabash](http://blog.lesspainful.com/2012/03/07/Calabash/).
 
-[Change log](https://github.com/calabash/calabash-ios/tree/0.9.x/changelog)
+[Change log](https://github.com/calabash/calabash-ios/changelog)
 
 # This guide explains how to setup and use Calabash for iOS
 
