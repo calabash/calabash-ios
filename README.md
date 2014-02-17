@@ -13,7 +13,7 @@ This document explains how to install Calabash iOS. For introductory informatio
 
 [Introducing Calabash](http://blog.lesspainful.com/2012/03/07/Calabash/).
 
-[Change log](https://github.com/calabash/calabash-ios/changelog)
+[Change log](https://github.com/calabash/calabash-ios/tree/master/changelog)
 
 # This guide explains how to setup and use Calabash for iOS
 
@@ -173,7 +173,7 @@ Branches
 Some important news about what is happening with Calabash iOS and upcoming features. This is a preliminary notice to keep everyone informed. Soon, there will be a longer blog post at http://blog.lesspainful.com/ explaining more about rationale etc.
 
 ### The 0.9.x line
-[Link to master branch](https://github.com/calabash/calabash-ios/).
+[Link to master branch](https://github.com/calabash/calabash-ios/tree/master).
 
 We've been making many small releases marked as 0.9.xyz for some time. This has been mostly bug-fixes and adding high-level functions, although some releases have added new features too. My current focus has been providing an implementation of 'query' on Calabash Android, and as this is finishing off, I'll turn attention back to Calabash iOS.
 
