@@ -45,7 +45,7 @@ module Calabash
           key = @scale
           name = @button_names_hash[key]
 
-          res = uia_call_windows([:view, {marked:"#{name}"}], :tap)
+          res = uia_call_windows([:view, {:marked => "#{name}"}], :tap)
 
           # ':nil' is a very strange success return value...
           if res.is_a?(Hash) or res != ':nil'
@@ -58,7 +58,7 @@ module Calabash
           hash = @button_names_hash
           val = nil
           hash.values.each do |button_name|
-            res = uia_call_windows([:view, {marked:"#{button_name}"}], :name)
+            res = uia_call_windows([:view, {:marked => "#{button_name}"}], :name)
 
             if res == button_name
               val = button_name
