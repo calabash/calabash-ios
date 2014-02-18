@@ -237,9 +237,39 @@ module Calabash
         if opts[:failed_message]
           msg = opts[:failed_message]
         else
-          msg = "unable to scroll: '#{uiquery}' to row '#{item}' in section '#{section}'"
+          msg = "unable to scroll: '#{uiquery}' to item '#{item}' in section '#{section}'"
         end
 
+        assert_map_results(views_touched, msg)
+        views_touched
+      end
+
+      def scroll_to_collection_view_item_with_mark(item_id, opts={})
+        default_options = {:query => 'collectionView',
+                           :scroll_position => :top,
+                           :animate => true,
+                           :failed_message => nil}
+        opts = default_options.merge(opts)
+        uiquery = opts[:query] || 'collectionView'
+
+        if item_id.nil?
+          screenshot_and_raise 'item_id argument cannot be nil'
+        end
+
+        args = []
+        scroll_position = opts[:scroll_position]
+        candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
+        unless candidates.include?(scroll_position)
+          raise "scroll_position '#{scroll_position}' is not one of '#{candidates}'"
+        end
+
+        args << scroll_position
+        if opts.has_key?(:animate)
+          args << opts[:animate]
+        end
+
+        views_touched=map(uiquery, :collectionViewScrollToItemWithMark, item_id, *args)
+        msg = opts[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{opts}"
         assert_map_results(views_touched, msg)
         views_touched
       end
