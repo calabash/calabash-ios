@@ -1,6 +1,7 @@
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/keyboard_helpers'
+require 'calabash-cucumber/keychain_helpers'
 require 'calabash-cucumber/wait_helpers'
 require 'calabash-cucumber/launcher'
 require 'net/http'
@@ -25,6 +26,7 @@ module Calabash
       include Calabash::Cucumber::TestsHelpers
       include Calabash::Cucumber::WaitHelpers
       include Calabash::Cucumber::KeyboardHelpers
+      include Calabash::Cucumber::KeychainHelpers
       include Calabash::Cucumber::DatePicker
       include Calabash::Cucumber::IPad
 
