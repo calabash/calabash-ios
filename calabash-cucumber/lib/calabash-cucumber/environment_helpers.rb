@@ -72,14 +72,15 @@ module Calabash
       #
       # raises an error if the server cannot be reached
       def iphone_5?
-        _default_device_or_create().iphone_5?
+        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
+        iphone_4in?
       end
 
       # returns +true+ if the target device or simulator is a 4in model
       #
       # raises an error if the server cannot be reached
       def iphone_4in?
-        iphone_5?
+        _default_device_or_create().iphone_4in?
       end
 
       # returns +true+ if the OS major version is 5
