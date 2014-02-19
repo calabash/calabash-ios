@@ -18,6 +18,7 @@ module Calabash
       attr_reader :system
       attr_reader :framework_version
       attr_reader :iphone_app_emulated_on_ipad
+      attr_reader :iphone_4in
 
       attr_accessor :udid
 
@@ -30,6 +31,7 @@ module Calabash
         @ios_version = version_data['iOS_version']
         @framework_version = version_data['version']
         @iphone_app_emulated_on_ipad = version_data['iphone_app_emulated_on_ipad']
+        @iphone_4in = version_data['4inch']
       end
 
       def simulator?
@@ -52,12 +54,13 @@ module Calabash
         device_family.eql? GESTALT_IPAD
       end
 
+      def iphone_4in?
+        @iphone_4in
+      end
+
       def iphone_5?
-        if simulator?
-          !simulator_details.scan(GESTALT_IPHONE5).empty?
-        else
-          system.split(/[\D]/).delete_if { |x| x.eql?('') }.first.eql?('5')
-        end
+        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
+        iphone_4in?
       end
 
       def version_hash (version_str)
@@ -85,7 +88,7 @@ module Calabash
 
       def screen_size
         return { :width => 768, :height => 1024 } if ipad?
-        return { :width => 320, :height => 568 } if iphone_5?
+        return { :width => 320, :height => 568 } if iphone_4in?
         { :width => 320, :height => 480 }
       end
 
