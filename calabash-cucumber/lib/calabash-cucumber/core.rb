@@ -160,12 +160,36 @@ module Calabash
         views_touched
       end
 
-
-      def scroll_to_row_with_mark(row_id, options={:query => 'tableView',
+      # scrolls to +mark+ in a UITableView
+      #
+      # calls the +:scrollToRowWithMark+ server route
+      #
+      #    scroll_to_row_with_mark(mark, {:scroll_position => :top}) #=> scroll to the top of the item with the given +mark+
+      # scroll_to_row_with_mark(mark, {:scroll_position => :bottom}) #=> scroll to the bottom of the item with the given +mark+
+      #
+      # allowed options
+      #     :query => a query string
+      #         default => 'tableView'
+      #         example => "tableView marked:'hit songs'"
+      #
+      #     :scroll_position => the position to scroll to
+      #         default => :middle
+      #         allowed => {:top | :middle | :bottom}
+      #
+      #     :animate => animate the scrolling
+      #         default => true
+      #         allowed => {true | false}
+      #
+      # raises an exception if the scroll cannot be performed.
+      # * the +mark+ is nil
+      # * the +:query+ finds no table view
+      # * table view does not contain a cell with the given +mark+
+      # * +:scroll_position+ is invalid
+      def scroll_to_row_with_mark(mark, options={:query => 'tableView',
                                                    :scroll_position => :middle,
                                                    :animate => true})
-        if row_id.nil?
-          screenshot_and_raise 'row_id argument cannot be nil'
+        if mark.nil?
+          screenshot_and_raise 'mark argument cannot be nil'
         end
 
         uiquery = options[:query] || 'tableView'
@@ -180,7 +204,7 @@ module Calabash
           args << options[:animate]
         end
 
-        views_touched=map(uiquery, :scrollToRowWithMark, row_id, *args)
+        views_touched=map(uiquery, :scrollToRowWithMark, mark, *args)
         msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
         assert_map_results(views_touched, msg)
         views_touched
@@ -244,16 +268,45 @@ module Calabash
         views_touched
       end
 
-      def scroll_to_collection_view_item_with_mark(item_id, opts={})
+      # scrolls to +mark+ in a UICollectionView
+      #
+      # calls the +:collectionViewScrollToItemWithMark+ server route
+      #
+      #    scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :top}) #=> scroll to the top of the item with the given +mark+
+      # scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :bottom}) #=> scroll to the bottom of the item with the given +mark+
+      #
+      # allowed options
+      #     :query => a query string
+      #         default => 'collectionView'
+      #         example => "collectionView marked:'hit songs'"
+      #
+      #     :scroll_position => the position to scroll to
+      #         default => :top
+      #         allowed => {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
+      #
+      #     :animate => animate the scrolling
+      #         default => true
+      #         allowed => {true | false}
+      #
+      #     :failed_message => the message to display on failure
+      #         default => nil - will display a default failure message
+      #         allowed => any string
+      #
+      # raises an exception if the scroll cannot be performed.
+      # * the +mark+ is nil
+      # * the +:query+ finds no collection view
+      # * collection view does not contain a cell with the given +mark+
+      # * +:scroll_position+ is invalid
+      def scroll_to_collection_view_item_with_mark(mark, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
                            :animate => true,
                            :failed_message => nil}
         opts = default_options.merge(opts)
-        uiquery = opts[:query] || 'collectionView'
+        uiquery = opts[:query]
 
-        if item_id.nil?
-          screenshot_and_raise 'item_id argument cannot be nil'
+        if mark.nil?
+          screenshot_and_raise 'mark argument cannot be nil'
         end
 
         args = []
@@ -264,12 +317,10 @@ module Calabash
         end
 
         args << scroll_position
-        if opts.has_key?(:animate)
-          args << opts[:animate]
-        end
+        args << opts[:animate]
 
-        views_touched=map(uiquery, :collectionViewScrollToItemWithMark, item_id, *args)
-        msg = opts[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{opts}"
+        views_touched=map(uiquery, :collectionViewScrollToItemWithMark, mark, *args)
+        msg = opts[:failed_message] || "Unable to scroll: '#{uiquery}' to cell with mark: '#{mark}' with #{opts}"
         assert_map_results(views_touched, msg)
         views_touched
       end
