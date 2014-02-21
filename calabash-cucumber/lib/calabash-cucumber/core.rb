@@ -306,7 +306,7 @@ module Calabash
         uiquery = opts[:query]
 
         if mark.nil?
-          screenshot_and_raise 'mark argument cannot be nil'
+          raise 'mark argument cannot be nil'
         end
 
         args = []
