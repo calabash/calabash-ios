@@ -10,73 +10,122 @@ module Calabash
     # applications like it is on a real device. These methods will return
     # keychain records from *all* applications on the simulator, which may
     # result in strange behavior if you aren't expecting it.
+    #
+    # @see http://goo.gl/JrFJMM for details about why some operations report
+    # +FAILURE+ and what can be done on the client side mitigate
     module KeychainHelpers
 
-      # sends appropriately-configured +GET+ request to the +keychain+ endpoint
+
+      # sends appropriately-configured +GET+ request to the +keychain+ server
+      # endpoint.  do not call this function directly; use one of the helper
+      # functions provided.
+      #
+      # @see keychain_accounts
+      # @see keychain_account_for_service
+      # @return [Array<Hash>] contents of the iOS keychain
+      # @param [Hash] options
+      # @raise [RuntimeError] if http request does not report success
       def _keychain_get(options={})
         res = http({:method => :get, :raw => true, :path => 'keychain'}, options)
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "get keychain with options '#{options}' failed because: #{res['reason']}\n#{res['details']}"
+          raise "get keychain with options '#{options}' failed because: '#{res['reason']}'\n'#{res['details']}'"
         end
 
         res['results']
       end
 
-      # Get a list of all account records saved in the iOS keychain. This
-      # method returns a list of hashes; its keys are defined by
-      # the +SSKeychain+ library; particular keys of note:
+      # @return [Array<Hash>] of all account records saved in the iOS keychain.
       #
-      # * +svce+ is the service
-      # * +acct+ is the account (often a username)
-      # * +cdat+ is the creation date
-      # * +mdat+ is the last-modified date
+      # The hash keys are defined by the +SSKeychain+ library.
+      #
+      # The following keys are the most commonly useful:
+      #
+      #     +svce+ #=> the service
+      #     +acct+ #=> the account (often a username)
+      #     +cdat+ #=> the creation date
+      #     +mdat+ #=> the last-modified date
+      # @raise [RuntimeError] if http request does not report success
       def keychain_accounts
         _keychain_get
       end
 
-      # Get a list of all account records saved in the iOS keychain,
-      # restricted to a single service. See +keychain_accounts+ for a
-      # description of the returned array, although for this method all
-      # returned hashes will have the same value for +svce+.
+      # @return [Array<Hash>] of all account records saved in the iOS keychain
+      # filtered by +service+.
+      #
+      # @see keychain_accounts
+      #
+      # @raise [RuntimeError] if http request does not report success
       def keychain_accounts_for_service(service)
-        _keychain_get(:service => service)
+        _keychain_get({:service => service})
       end
 
-      # Look up the password stored in the keychain for a given service
-      # and account.
+      # @return [String] password stored in keychain for +service+ and +account+
+      # and nil if no password is stored.
+      #
+      # @raise [RuntimeError] if http request does not report success
+      # @raise [RuntimeError] if +service+ and +account+ pair does not contain a
+      # password
       def keychain_password(service, account)
-        _keychain_get(:service => service, :account => account).first
+        _keychain_get({:service => service, :account => account}).first
       end
 
-      # sends appropriately-configured +POST+ request to the +keychain+ endpoint
+      # @return [nil]
+      #
+      # sends appropriately-configured +POST+ request to the +keychain+ server
+      # endpoint.  do not call this function directly; use one of the helper
+      # functions provided.
+      #
+      # @see keychain_clear
+      # @see keychain_clear_accounts_for_service
+      # @see keychain_delete_password
+      # @see keychain_set_password
+      #
+      # @raise [RuntimeError] if http request does not report success
       def _keychain_post(options={})
-        res = http({:method => :post, :path => 'keychain'}, options)
-        res = JSON.parse(res)
+        raw = http({:method => :post, :path => 'keychain'}, options)
+        res = JSON.parse(raw)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "post keychain with options '#{options}' failed because: #{res['reason']}\n#{res['details']}"
+          raise "post keychain with options '#{options}' failed because: #{res['reason']}\n#{res['details']}"
         end
+        nil
       end
 
-      # Clear all entries in the keychain. *NOTE*: On the simulator, this
-      # will clear *all* entries for *all* applications. On a real device,
-      # this will clear all entries for just the current application.
+      # On the iOS Simulator this clears *all* keychain entries for *all*
+      # applications.
+      #
+      # On a physical device, this will clear all entries for the target
+      # application.
+      #
+      # @return [nil]
+      #
+      # @raise [RuntimeError] if http request does not report success
       def keychain_clear
         _keychain_post
       end
 
-      # Clear all entries in the keychain restricted to a single service.
+      # Clear all entries in the keychain restricted to a single +service+.
+      #
+      # @return [nil]
+      #
+      # @raise [RuntimeError] if http request does not report success
       def keychain_clear_accounts_for_service(service)
-        _keychain_post(:service => service)
+        _keychain_post({:service => service})
       end
 
-      # Delete a single keychain record for the given service and account
+      # Delete a single keychain record for the given +service+ and +account+
       # pair.
+      #
+      # @raise [RuntimeError] if http request does not report success
       def keychain_delete_password(service, account)
         _keychain_post(:service => service, :account => account)
       end
 
       # Set the password for a given service and account pair.
+      #
+      # @return nil
+      #
+      # @raise [RuntimeError] if http request does not report success
       def keychain_set_password(service, account, password)
         _keychain_post(:service => service, :account => account, :password => password)
       end
