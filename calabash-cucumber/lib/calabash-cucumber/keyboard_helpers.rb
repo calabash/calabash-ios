@@ -278,6 +278,7 @@ module Calabash
         _ensure_can_enter_text
         if uia_available?
           text_before = _text_from_first_responder()
+          text_before = text_before.gsub("\n","\\n") if text_before
           uia_type_string(text, text_before)
         else
           text.each_char do |ch|
