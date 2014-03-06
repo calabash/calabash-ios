@@ -11,8 +11,10 @@ module Calabash
     # keychain records from *all* applications on the simulator, which may
     # result in strange behavior if you aren't expecting it.
     #
-    # @see http://goo.gl/JrFJMM for details about why some operations report
-    # +FAILURE+ and what can be done on the client side mitigate
+    # @see http://goo.gl/JrFJMM Details about why some operations report
+    #   +FAILURE+ and what can be done on the client side mitigate
+    #
+    # @see https://github.com/soffes/sskeychain SSKeychain
     module KeychainHelpers
 
 
@@ -35,9 +37,11 @@ module Calabash
         res['results']
       end
 
-      # @return [Array<Hash>] of all account records saved in the iOS keychain.
+      # asks the keychain for all of the account records
       #
       # The hash keys are defined by the +SSKeychain+ library.
+      #
+      # @see https://github.com/soffes/sskeychain SSKeychain
       #
       # The following keys are the most commonly useful:
       #
@@ -45,7 +49,9 @@ module Calabash
       #     +acct+ #=> the account (often a username)
       #     +cdat+ #=> the creation date
       #     +mdat+ #=> the last-modified date
+      #
       # @raise [RuntimeError] if http request does not report success
+      # @return [Array<Hash>] of all account records saved in the iOS keychain.
       def keychain_accounts
         _keychain_get
       end
@@ -60,18 +66,25 @@ module Calabash
         _keychain_get({:service => service})
       end
 
-      # @return [String] password stored in keychain for +service+ and +account+
-      # and nil if no password is stored.
+      # ask the keychain for an account password
+      #
+      #     *IMPORTANT*
+      #     On the XTC, the password cannot returned as plain text.
+      #     When using this keychain_password in your steps you can condition on
+      #     the XTC environment using +xamarin_test_cloud?+
+      #
+      # @see Calabash::Cucumber::EnvironmentHelpers
       #
       # @raise [RuntimeError] if http request does not report success
-      # @raise [RuntimeError] if +service+ and +account+ pair does not contain a
-      # password
+      # @raise [RuntimeError] if +service+ and +account+ pair does not contain
+      #   a password
+      #
+      # @return [String,Array<Hash>] password stored in keychain for +service+
+      #   and +account+.  *NB* on the XTC this returns an Array with one Hash
       def keychain_password(service, account)
         _keychain_get({:service => service, :account => account}).first
       end
 
-      # @return [nil]
-      #
       # sends appropriately-configured +POST+ request to the +keychain+ server
       # endpoint.  do not call this function directly; use one of the helper
       # functions provided.
@@ -81,6 +94,7 @@ module Calabash
       # @see keychain_delete_password
       # @see keychain_set_password
       #
+      # @return [nil]
       # @raise [RuntimeError] if http request does not report success
       def _keychain_post(options={})
         raw = http({:method => :post, :path => 'keychain'}, options)
@@ -129,7 +143,6 @@ module Calabash
       def keychain_set_password(service, account, password)
         _keychain_post(:service => service, :account => account, :password => password)
       end
-
 
     end
   end
