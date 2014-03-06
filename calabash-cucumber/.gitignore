@@ -11,3 +11,7 @@ vendor
 pkg
 *.gem
 .ruby-version
+
+# yard
+.yardoc
+doc
