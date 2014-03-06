@@ -131,7 +131,7 @@ class WordPressComPage < Calabash::IBase
 
   def login(user)
      touch("view marked:'Username'")
-     await_keyboard
+     wait_for_keyboard
 
      keyboard_enter_text user[:email]
 
