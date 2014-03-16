@@ -253,8 +253,12 @@ class Calabash::Cucumber::Launcher
   end
 
   def default_launch_method
-    return :instruments unless sdk_version || use_instruments_env?
+    if RunLoop::Core.above_or_eql_version?('5.1', RunLoop::Core.xcode_version)
+      return use_sim_launcher_env? ? :sim_launcher : :instruments
+    end
+
     return :instruments if sdk_version.start_with?('7') # Only instruments supported for iOS7+
+
     sim_detector = SimLauncher::SdkDetector.new()
     available = sim_detector.available_sdk_versions.reject { |v| v.start_with?('7') }
     if available.include?(sdk_version)
@@ -379,10 +383,11 @@ class Calabash::Cucumber::Launcher
       rescue RunLoop::TimeoutError => e
         last_err = e
         if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-          puts "retrying run loop..."
+          puts 'retrying run loop...'
         end
       end
     end
+    Calabash::Cucumber::SimulatorHelper.stop
     raise StartError.new(last_err)
   end
 
@@ -497,6 +502,10 @@ class Calabash::Cucumber::Launcher
 
   def use_instruments_env?
     ENV['LAUNCH_VIA'] == 'instruments'
+  end
+
+  def use_sim_launcher_env?
+    ENV['LAUNCH_VIA'] == 'sim_launcher'
   end
 
   def reset_between_scenarios?

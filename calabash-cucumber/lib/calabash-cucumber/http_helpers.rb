@@ -40,8 +40,6 @@ module Calabash
       end
 
       def make_http_request(options)
-
-        body = nil
         retryable_errors = options[:retryable_errors] || RETRYABLE_ERRORS
         CAL_HTTP_RETRY_COUNT.times do |count|
           previous_debug_dev = nil
@@ -49,19 +47,16 @@ module Calabash
             if not @http
               @http = init_request(options)
             end
-            #if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
-            #  previous_debug_dev = @http.debug_dev
-            #  @http.debug_dev = $stdout
-            #end
-            if options[:method] == :post
-              body = @http.post(options[:uri], options[:body]).body
+
+            response = if options[:method] == :post
+              @http.post(options[:uri], options[:body])
             else
-              body = @http.get(options[:uri], options[:body]).body
+              @http.get(options[:uri], options[:body])
             end
-            #if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
-            #  @http.debug_dev = previous_debug_dev
-            #end
-            break
+
+            raise Errno::ECONNREFUSED if response.status_code == 502
+
+            return response.body
           rescue Exception => e
 
             if retryable_errors.include?(e) || retryable_errors.any? { |c| e.is_a?(c) }
@@ -85,8 +80,6 @@ module Calabash
             end
           end
         end
-
-        body
       end
 
       def init_request(options={})

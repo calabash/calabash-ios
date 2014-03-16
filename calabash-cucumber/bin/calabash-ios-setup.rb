@@ -7,9 +7,11 @@ def detect_accessibility_support
   dirs = Dir.glob(File.join(File.expand_path("~/Library"),"Application Support","iPhone Simulator","*.*","Library","Preferences"))
   dirs.each do |sim_pref_dir|
     fp = File.expand_path("#{sim_pref_dir}/com.apple.Accessibility.plist")
+    out = `defaults read "#{fp}" AXInspectorEnabled`
+    ax_inspector = out.split("\n")[0]=="0"
     out = `defaults read "#{fp}" ApplicationAccessibilityEnabled`
-
-    if not(File.exists?(fp)) || out.split("\n")[0] == "0"
+    app_acc = out.split("\n")[0]=="0"
+    if not(File.exists?(fp)) || ax_inspector == "0" || app_acc == "0"
         msg("Warn") do
           puts "Accessibility is not enabled for simulator: #{sim_pref_dir}"
           puts "Enabled accessibility as described here:"
@@ -32,6 +34,7 @@ def calabash_setup(args)
   project_name, project_path, xpath = find_project_files(args)
   setup_project(project_name, project_path, xpath)
 
+  calabash_sim_accessibility
   detect_accessibility_support
 
   msg("Setup done") do

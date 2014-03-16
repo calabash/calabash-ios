@@ -21,14 +21,9 @@ module Calabash
         :post_timeout => 0,
         :timeout_message => 'Timed out waiting...',
         :screenshot_on_error => true
-      }
+      }.freeze
 
-      def wait_for(options_or_timeout=
-          {:timeout => 30,
-           :retry_frequency => 0.3,
-           :post_timeout => 0,
-           :timeout_message => 'Timed out waiting...',
-           :screenshot_on_error => true}, &block)
+      def wait_for(options_or_timeout=DEFAULT_OPTS, &block)
         #note Hash is preferred, number acceptable for backwards compat
         default_timeout = 30
         timeout = options_or_timeout || default_timeout
@@ -107,6 +102,9 @@ module Calabash
       end
       #options for wait_for apply
       def wait_for_elements_do_not_exist(elements_arr, options={})
+        if elements_arr.is_a?(String)
+          elements_arr = [elements_arr]
+        end
         options[:timeout_message] = options[:timeout_message] || "Timeout waiting for no elements matching: #{elements_arr.join(",")}"
         wait_for(options) do
           elements_arr.none? { |q| element_exists(q) }
@@ -246,7 +244,7 @@ module Calabash
       def when_element_exists(uiquery, opts = {})
         action = { :action => lambda { touch uiquery } }
         opts = DEFAULT_OPTS.merge(action).merge(opts)
-        wait_for_elements_exists([uiquery], opts)
+        wait_for_elements_exist([uiquery], opts)
         opts[:action].call
       end
 

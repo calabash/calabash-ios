@@ -27,11 +27,23 @@ def calabash_sim_reset
 end
 
 def calabash_sim_accessibility
-  dirs = Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "*.*", "Library", "Preferences"))
-  dirs.each do |sim_pref_dir|
+  Calabash::Cucumber::SimulatorHelper.stop
+  old = ['5.*','6.*','7.0*'].map do |x|
+    Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "7.0*", "Library", "Preferences"))
+  end.flatten
+
+  rest = Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "*.*", "Library", "Preferences"))
+  rest = rest - old
+  (old+rest).each do |sim_pref_dir|
     fp = File.expand_path("#{@script_dir}/data/")
-    FileUtils.cp("#{fp}/com.apple.Accessibility.plist", sim_pref_dir)
+    if rest.include?(sim_pref_dir)
+      tgt = 'com.apple.Accessibility-5.1.plist'
+    else
+      tgt = 'com.apple.Accessibility.plist'
+    end
+    FileUtils.cp("#{fp}/#{tgt}", File.join(sim_pref_dir, 'com.apple.Accessibility.plist'))
   end
+
 end
 
 
@@ -125,7 +137,7 @@ end
 
 def calabash_sim_device(args)
   quit_sim
-  options = ["iPad","iPad_Retina", "iPhone", "iPhone_Retina", "iPhone_Retina_4inch"]
+  options = ["iPad", "iPad_Retina", "iPhone", "iPhone_Retina", "iPhone_Retina_4inch"]
   if args.length != 1 or not options.find { |x| x == args[0] }
     print_usage
     puts "Unrecognized args: #{args}"
