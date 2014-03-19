@@ -323,7 +323,8 @@ module Calabash
                 end
               end
             rescue TimeoutErr => e
-              puts 'Timed out...'
+              puts 'Timed out... Retrying'
+              stop
             end
           end
         rescue RuntimeError => e

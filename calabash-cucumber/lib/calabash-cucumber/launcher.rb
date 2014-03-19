@@ -253,11 +253,22 @@ class Calabash::Cucumber::Launcher
   end
 
   def default_launch_method
+    sdk = sdk_version
+    major = nil
+    if sdk && !sdk.strip.empty?
+      major = sdk.split('.')[0]
+      begin
+        major = major.to_i
+      rescue
+        warn("SDK_VERSION invalid #{sdk_version} - ignoring...")
+      end
+    end
+    return :instruments if major && major >= 7 # Only instruments supported for iOS7+
+    return :sim_launcher if major # and then we have <= 6
+
     if RunLoop::Core.above_or_eql_version?('5.1', RunLoop::Core.xcode_version)
       return use_sim_launcher_env? ? :sim_launcher : :instruments
     end
-
-    return :instruments if sdk_version.start_with?('7') # Only instruments supported for iOS7+
 
     sim_detector = SimLauncher::SdkDetector.new()
     available = sim_detector.available_sdk_versions.reject { |v| v.start_with?('7') }
@@ -385,9 +396,11 @@ class Calabash::Cucumber::Launcher
         if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
           puts 'retrying run loop...'
         end
+        Calabash::Cucumber::SimulatorHelper.stop
       end
     end
     Calabash::Cucumber::SimulatorHelper.stop
+    puts "Unable to start. Make sure you've set APP_BUNDLE_PATH to a build supported by this simulator version"
     raise StartError.new(last_err)
   end
 
