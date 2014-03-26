@@ -387,6 +387,9 @@ class Calabash::Cucumber::Launcher
   end
 
   def new_run_loop(args)
+    if RunLoop::Core.above_or_eql_version?('5.1', RunLoop::Core.xcode_version)
+      Calabash::Cucumber::SimulatorHelper.stop
+    end
     last_err = nil
     5.times do
       begin
