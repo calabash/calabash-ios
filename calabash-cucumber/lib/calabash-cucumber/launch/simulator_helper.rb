@@ -108,8 +108,10 @@ module Calabash
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
           else
-            puts "Found potential build dir: #{build_dirs.first}"
-            puts "Checking..."
+            if FULL_CONSOLE_OUTPUT
+              puts "Found potential build dir: #{build_dirs.first}"
+              puts "Checking..."
+            end
             return build_dirs.first
           end
         end
