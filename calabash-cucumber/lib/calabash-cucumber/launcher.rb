@@ -5,6 +5,8 @@ require 'calabash-cucumber/actions/instruments_actions'
 require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
+require 'calabash-cucumber/version'
+
 
 class Calabash::Cucumber::Launcher
 
@@ -16,6 +18,7 @@ class Calabash::Cucumber::Launcher
   attr_accessor :launch_args
 
   @@launcher = nil
+  @@server_version = nil
 
   class StartError < RuntimeError
     attr_accessor :error
@@ -336,6 +339,7 @@ class Calabash::Cucumber::Launcher
     end
     self.launch_args = args
     ensure_connectivity
+    check_server_gem_compatibility
   end
 
   def detect_device_from_args(args)
@@ -556,6 +560,92 @@ class Calabash::Cucumber::Launcher
     msg.join("\n")
   end
 
+  # extracts server version from the app binary at +app_bundle_path+ by
+  # inspecting the binary's strings table.
+  #
+  # SPECIAL: sets the +@@server_version+ class variable to cache the server
+  # version because the server version will never change during runtime.
+  #
+  # @return [String] the server version
+  # @param [String] app_bundle_path file path (usually) to the application bundle
+  # @raise [RuntimeError] if there is no executable at +app_bundle_path+
+  # @raise [RuntimeError] if the server version cannot be extracted from any
+  #   binary at +app_bundle_path+
+  def server_version_from_bundle(app_bundle_path)
+    return @@server_version unless @@server_version.nil?
+    exe_paths = []
+    Dir.foreach(app_bundle_path) do |item|
+      next if item == '.' or item == '..' or File.directory?(item)
+      full_path = File.join(app_bundle_path, item)
+      if File.executable?(full_path)
+        exe_paths << full_path
+      end
+    end
+
+    raise "could not find executable in '#{app_bundle_path}'" if exe_paths.empty?
+
+    server_version = nil
+    exe_paths.each do |path|
+      server_version_string = `strings #{path} | grep -E 'CALABASH VERSION'`.chomp!
+      if server_version_string
+        server_version = server_version_string.split(' ').last
+        break
+      end
+    end
+
+    unless server_version
+      raise 'could not find server version by inspecting the binary strings table'
+    end
+    @@server_version = server_version
+  end
+
+  # queries the server for its version.
+  #
+  # SPECIAL: sets the +@@server_version+ class variable to cache the server
+  # version because the server version will never change during runtime.
+  #
+  # @return [String] the server version
+  # @raise [RuntimeError] if the server cannot be reached
+  def server_version_from_server
+    return @@server_version unless @@server_version.nil?
+    ensure_connectivity if self.device == nil
+    @@server_version = self.device.server_version
+  end
+
+  # checks the server and gem version compatibility and generates a warning if
+  # the server and gem are not compatible.
+  #
+  # WIP:  this is a proof-of-concept implementation and requires _strict_
+  # equality.  in the future we should allow minimum framework compatibility.
+  #
+  # @return [nil] nothing to return
+  def check_server_gem_compatibility
+    app_bundle_path = self.launch_args[:app]
+    if File.directory?(app_bundle_path)
+      server_version = server_version_from_bundle(app_bundle_path)
+    else
+      server_version = server_version_from_server
+    end
+
+    gem_version = Calabash::Cucumber::VERSION
+
+    if server_version != gem_version
+      msgs = []
+      msgs << 'server version is not compatible with gem version'
+      msgs << 'please update your server and gem'
+      msgs << "server version: '#{server_version}'"
+      msgs << "   gem version: '#{gem_version}'"
+
+      msg = "#{msgs.join("\n")}"
+
+      begin
+        warn "\033[34m\nWARN: #{msg}\033[0m"
+      rescue
+        warn "\nWARN: #{msg}"
+      end
+    end
+    nil
+  end
 
 end
 
