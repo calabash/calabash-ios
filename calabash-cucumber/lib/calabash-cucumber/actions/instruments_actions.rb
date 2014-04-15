@@ -13,6 +13,10 @@ class Calabash::Cucumber::InstrumentsActions
     query_action(options, :uia_tap_offset)
   end
 
+  def tap(options)
+    uia_tap_server(options[:query], options)
+  end
+
   def double_tap(options)
     query_action(options, :uia_double_tap_offset)
   end

@@ -13,6 +13,10 @@ class Calabash::Cucumber::PlaybackActions
     playback('touch', options)
   end
 
+  def tap(options)
+    touch(options)
+  end
+
   def double_tap(options)
     playback('double_tap', options)
   end

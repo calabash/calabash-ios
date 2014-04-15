@@ -64,6 +64,10 @@ module Calabash
         simple_touch(label, *args)
       end
 
+      def tap_mark(label, *args)
+        simple_touch(label, *args)
+      end
+
       def html(q)
         query(q).map { |e| e['html'] }
       end

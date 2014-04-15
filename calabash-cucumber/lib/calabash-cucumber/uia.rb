@@ -16,6 +16,15 @@ module Calabash
         res['results'].first
       end
 
+      def uia_tap_server(query, options={})
+        res = http({:method => :post, :path => 'uia-tap'}, {:query => query}.merge(options))
+        res = JSON.parse(res)
+        if res['outcome'] != 'SUCCESS'
+          raise "uia-tap action failed because: #{res['reason']}\n#{res['details']}"
+        end
+        res['results'].first
+      end
+
       def uia_query(*queryparts)
         #TODO escape '\n etc in query
         uia_handle_command(:query, queryparts)
