@@ -166,8 +166,6 @@ module Calabash
           if type.eql?(:pending)
             pending(msg)
           else
-            # todo deprecated function does not output on a new line when called within cucumber
-            # todo should the _deprecated function be colored?
             begin
               warn "\033[34m\nWARN: #{msg}\033[0m"
             rescue
