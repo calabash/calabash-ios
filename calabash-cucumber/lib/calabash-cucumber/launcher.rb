@@ -627,14 +627,17 @@ class Calabash::Cucumber::Launcher
       server_version = server_version_from_server
     end
 
-    gem_version = Calabash::Cucumber::VERSION
+    server_version = Calabash::Cucumber::Version.new(server_version)
+    gem_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::VERSION)
+    min_server_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
 
-    if server_version != gem_version
+    if server_version < min_server_version
       msgs = []
       msgs << 'server version is not compatible with gem version'
       msgs << 'please update your server and gem'
-      msgs << "server version: '#{server_version}'"
-      msgs << "   gem version: '#{gem_version}'"
+      msgs << "       gem version: '#{gem_version}'"
+      msgs << "min server version: '#{min_server_version}'"
+      msgs << "    server version: '#{server_version}'"
 
       msg = "#{msgs.join("\n")}"
 
