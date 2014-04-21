@@ -19,6 +19,10 @@ module Calabash
 
       DEFAULT_SIM_RETRY = 2
 
+      # Load environment variable for showing full console output.
+      # If not env var set then we use false, i.e. output to console is limited.
+      FULL_CONSOLE_OUTPUT = ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1' ? true : false
+
       def self.relaunch(path, sdk = nil, version = 'iphone', args = nil)
 
         app_bundle_path = app_bundle_or_raise(path)
@@ -30,7 +34,6 @@ module Calabash
         simulator = SimLauncher::Simulator.new
         simulator.quit_simulator
       end
-
 
       def self.derived_data_dir_for_project
         dir = project_dir
@@ -75,6 +78,9 @@ module Calabash
             end
           end
 
+          # todo analyze `self.derived_data_dir_for_project` to see if it contains dead code
+          # todo assuming this is not dead code, the documentation around derived data for project needs to be updated
+
           if (build_dirs.count == 0)
             msg = ["Unable to find your built app."]
             msg << "This means that Calabash can't automatically launch iOS simulator."
@@ -85,7 +91,7 @@ module Calabash
             msg << "i.e., the directory containing your .xcodeproj file."
             msg << "In Xcode, build your calabash target for simulator."
             msg << "Check that your app can be found in\n #{File.expand_path("~/Library/Developer/Xcode/DerivedData")}"
-            msg << "\n\nOption 2). In features/support/launch.rb set APP_BUNDLE_PATH to"
+            msg << "\n\nOption 2). In features/support/01_launch.rb set APP_BUNDLE_PATH to"
             msg << "the path where Xcode has built your Calabash target."
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
@@ -97,13 +103,15 @@ module Calabash
 
             msg << "\nThis means that Calabash can't automatically launch iOS simulator."
             msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
-            msg << "\nIn features/support/launch.rb set APP_BUNDLE_PATH to"
+            msg << "\nIn features/support/01_launch.rb set APP_BUNDLE_PATH to"
             msg << "the path where Xcode has built your Calabash target."
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
           else
-            puts "Found potential build dir: #{build_dirs.first}"
-            puts "Checking..."
+            if FULL_CONSOLE_OUTPUT
+              puts "Found potential build dir: #{build_dirs.first}"
+              puts "Checking..."
+            end
             return build_dirs.first
           end
         end
@@ -113,30 +121,50 @@ module Calabash
         File.expand_path(ENV['PROJECT_DIR'] || Dir.pwd)
       end
 
-      def self.app_bundle_or_raise(path)
+      def self.detect_app_bundle(path=nil,device_build_dir='iPhoneSimulator')
+        begin
+          app_bundle_or_raise(path,device_build_dir)
+        rescue =>e
+          nil
+        end
+      end
+
+      def self.app_bundle_or_raise(path=nil, device_build_dir='iPhoneSimulator')
         bundle_path = nil
         path = File.expand_path(path) if path
 
         if path and not File.directory?(path)
-          puts "Unable to find .app bundle at #{path}. It should be an .app directory."
-          dd_dir = derived_data_dir_for_project
-          app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))
-          msg = "Try setting APP_BUNDLE_PATH in features/support/launch.rb to one of:\n\n"
-          msg << app_bundles.join("\n")
-          raise msg
+          raise "Unable to find .app bundle at #{path}. It should be an .app directory."
         elsif path
           bundle_path = path
+        elsif xamarin_project?
+          bundle_path = bundle_path_from_xamarin_project(device_build_dir)
+          unless bundle_path
+            msg = ["Detected Xamarin project, but did not detect built app linked with Calabash"]
+            msg << "You should build your project from Xamarin Studio"
+            msg << "Make sure you build for Simulator and that you're using the Calabash components"
+            raise msg.join("\n")
+          end
+          if FULL_CONSOLE_OUTPUT
+            puts("-"*37)
+            puts "Auto detected APP_BUNDLE_PATH:\n\n"
+
+            puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
+            puts "Please verify!"
+            puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
+            puts("-"*37)
+          end
         else
           dd_dir = derived_data_dir_for_project
           sim_dirs = Dir.glob(File.join(dd_dir, "Build", "Products", "*-iphonesimulator", "*.app"))
           if sim_dirs.empty?
             msg = ["Unable to auto detect APP_BUNDLE_PATH."]
-            msg << "Have you built your app for simulator?."
+            msg << "Have you built your app for simulator?"
             msg << "Searched dir: #{dd_dir}/Build/Products"
             msg << "Please build your app from Xcode"
             msg << "You should build the -cal target."
             msg << ""
-            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/launch.rb"
+            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb"
             msg << "This should point to the location of your built app linked with calabash.\n"
             raise msg.join("\n")
           end
@@ -147,23 +175,81 @@ module Calabash
             msg << "Please build your app from Xcode"
             msg << "You should build your calabash target."
             msg << ""
-            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/launch.rb"
+            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb"
             msg << "This should point to the location of your built app linked with calabash.\n"
             raise msg.join("\n")
           end
-          puts("-"*37)
-          puts "Auto detected APP_BUNDLE_PATH:\n\n"
+          if FULL_CONSOLE_OUTPUT
+            puts("-"*37)
+            puts "Auto detected APP_BUNDLE_PATH:\n\n"
 
-          puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
-          puts "Please verify!"
-          puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/launch.rb\n"
-          puts("-"*37)
+            puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
+            puts "Please verify!"
+            puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
+            puts("-"*37)
+          end
           bundle_path = sim_dirs[0]
         end
         bundle_path
       end
 
-      def self.find_preferred_dir(sim_dirs)
+      def self.xamarin_project?
+        xamarin_ios_csproj_path != nil
+      end
+
+      def self.xamarin_ios_csproj_path
+        solution_path = Dir['*.sln'].first
+        if solution_path
+          project_dir = Dir.pwd
+        else
+          solution_path = Dir[File.join('..','*.sln')].first
+          project_dir = File.expand_path('..') if solution_path
+        end
+        return nil unless project_dir
+
+        ios_project_dir = Dir[File.join(project_dir,'*.iOS')].first
+        return ios_project_dir if ios_project_dir && File.directory?(ios_project_dir)
+        # ios_project_dir does not exist
+        # Detect case where there is no such sub directory
+        # (i.e. iOS only Xamarin project)
+        bin_dir = File.join(project_dir, 'bin')
+        if xamarin_ios_bin_dir?(bin_dir)
+            return project_dir ## Looks like iOS bin dir is here
+        end
+
+        sub_dirs = Dir[File.join(project_dir,'*')].select {|dir| File.directory?(dir)}
+
+        sub_dirs.find do |sub_dir|
+          contains_csproj = Dir[File.join(sub_dir,'*.csproj')].first
+          contains_csproj && xamarin_ios_bin_dir?(File.join(sub_dir,'bin'))
+        end
+
+      end
+
+      def self.xamarin_ios_bin_dir?(bin_dir)
+        File.directory?(bin_dir) &&
+            (File.directory?(File.join(bin_dir,'iPhoneSimulator')) ||
+                File.directory?(File.join(bin_dir,'iPhone')))
+      end
+
+      def self.bundle_path_from_xamarin_project(device_build_dir='iPhoneSimulator')
+        ios_project_path = xamarin_ios_csproj_path
+        conf_glob = File.join(ios_project_path,'bin',device_build_dir,'*')
+        built_confs = Dir[conf_glob]
+
+        calabash_build = built_confs.find {|path| File.basename(path) == 'Calabash'}
+        debug_build = built_confs.find {|path| File.basename(path) == 'Debug'}
+
+        bundle_path = [calabash_build, debug_build, *built_confs].find do |path|
+          next unless path && File.directory?(path)
+          app_dir = Dir[File.join(path,'*.app')].first
+          app_dir && linked_with_calabash?(app_dir)
+        end
+
+        Dir[File.join(bundle_path,'*.app')].first if bundle_path
+      end
+
+      def self.linked_with_calabash?(d)
         skipped_formats = [".png", ".jpg", ".jpeg", ".plist", ".nib", ".lproj"]
         dir = File.expand_path(d)
 
@@ -181,33 +267,45 @@ module Calabash
         false
       end
 
+      def self.find_preferred_dir(sim_dirs)
+        sim_dirs.find do |d|
+          linked_with_calabash?(d)
+        end
+
+        # Defaulted to false
+        false
+      end
+
       def self.ensure_connectivity(app_bundle_path, sdk, version, args = nil)
         begin
           max_retry_count = (ENV['MAX_CONNECT_RETRY'] || DEFAULT_SIM_RETRY).to_i
           timeout = (ENV['CONNECT_TIMEOUT'] || DEFAULT_SIM_WAIT).to_i
           retry_count = 0
           connected = false
-          puts "Waiting at most #{timeout} seconds for simulator (CONNECT_TIMEOUT)"
-          puts "Retrying at most #{max_retry_count} times (MAX_CONNECT_RETRY)"
+
+          if FULL_CONSOLE_OUTPUT
+            puts "Waiting at most #{timeout} seconds for simulator (CONNECT_TIMEOUT)"
+            puts "Retrying at most #{max_retry_count} times (MAX_CONNECT_RETRY)"
+          end
+
           until connected do
             raise "MAX_RETRIES" if retry_count == max_retry_count
             retry_count += 1
-            puts "(#{retry_count}.) Start Simulator #{sdk}, #{version}, for #{app_bundle_path}"
+            if FULL_CONSOLE_OUTPUT
+              puts "(#{retry_count}.) Start Simulator #{sdk}, #{version}, for #{app_bundle_path}"
+            end
             begin
               Timeout::timeout(timeout, TimeoutErr) do
                 simulator = launch(app_bundle_path, sdk, version, args)
                 until connected
                   begin
                     connected = (ping_app == '405')
-                    if ENV['POST_START_BREAK']
-                      puts "Environment var POST_START_BREAK is deprecated and should no longer be necessary."
-                      post_connect_sleep = (ENV['POST_START_BREAK'] || "2").to_f
-                      sleep(post_connect_sleep) unless post_connect_sleep <= 0
-                    end
                     if connected
                       server_version = get_version
                       if server_version
-                        p server_version
+                        if FULL_CONSOLE_OUTPUT
+                          p server_version
+                        end
                         unless version_check(server_version)
                           msgs = ["You're running an older version of Calabash server with a newer client",
                                   "Client:#{Calabash::Cucumber::VERSION}",
@@ -230,10 +328,11 @@ module Calabash
                 end
               end
             rescue TimeoutErr => e
-              puts "Timed out..."
+              puts 'Timed out... Retrying'
+              stop
             end
           end
-        rescue e
+        rescue RuntimeError => e
           p e
           msg = "Unable to make connection to Calabash Server at #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}\n"
           msg << "Make sure you've' linked correctly with calabash.framework and set Other Linker Flags.\n"
@@ -245,14 +344,15 @@ module Calabash
 
       def self.launch(app_bundle_path, sdk, version, args = nil)
         simulator = SimLauncher::Simulator.new
-        simulator.quit_simulator
-        simulator.launch_ios_app(app_bundle_path, sdk, version) #, args wait for update to sim launcher
+        simulator.launch_ios_app(app_bundle_path, sdk, version)
         simulator
       end
 
       def self.ping_app
         url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
-        puts "Ping #{url}..."
+        if FULL_CONSOLE_OUTPUT
+           puts "Ping #{url}..."   
+        end
         http = Net::HTTP.new(url.host, url.port)
         res = http.start do |sess|
           sess.request Net::HTTP::Get.new url.path
@@ -266,23 +366,31 @@ module Calabash
         status
       end
 
-      VERSION_ENDPOINT = ENV['CALABASH_WITH_FRANK'] ? "/calabash_version" : "/version"
-
-      def self.version_info
+      def self.get_version
         endpoint = ENV['DEVICE_ENDPOINT']|| "http://localhost:37265"
-        url = URI.parse(endpoint.chomp("/") + VERSION_ENDPOINT)
+        endpoint += "/" unless endpoint.end_with? "/"
+        url = URI.parse("#{endpoint}version")
 
-        puts "Fetch version #{url}..."
+        if FULL_CONSOLE_OUTPUT
+          puts "Fetch version #{url}..."
+        end
         begin
           body = Net::HTTP.get_response(url).body
-          JSON.parse(body)
+          res = JSON.parse(body)
+          if res['iOS_version']
+            @ios_version = res['iOS_version']
+          end
+          res
         rescue
           nil
         end
       end
 
       def self.ios_version
-        @_ios_version ||= (version_info || {})['iOS_version']
+        unless @ios_version
+          get_version
+        end
+        @ios_version
       end
 
       def self.ios_major_version

@@ -1,14 +1,16 @@
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/keyboard_helpers'
+require 'calabash-cucumber/keychain_helpers'
 require 'calabash-cucumber/wait_helpers'
-require 'calabash-cucumber/location'
+require 'calabash-cucumber/launcher'
 require 'net/http'
 require 'test/unit/assertions'
 require 'json'
 require 'set'
 require 'calabash-cucumber/version'
-
+require 'calabash-cucumber/date_picker'
+require 'calabash-cucumber/ipad_1x_2x'
 
 if not Object.const_defined?(:CALABASH_COUNT)
   #compatability with IRB
@@ -24,9 +26,9 @@ module Calabash
       include Calabash::Cucumber::TestsHelpers
       include Calabash::Cucumber::WaitHelpers
       include Calabash::Cucumber::KeyboardHelpers
-      include Calabash::Cucumber::Location
-
-
+      include Calabash::Cucumber::KeychainHelpers
+      include Calabash::Cucumber::DatePicker
+      include Calabash::Cucumber::IPad
 
       def page(clz,*args)
         clz.new(self,*args)
@@ -37,7 +39,7 @@ module Calabash
       end
 
       def home_direction
-        @current_rotation = @current_rotation || :down
+        status_bar_orientation.to_sym
       end
 
       def assert_home_direction(expected)
@@ -45,11 +47,6 @@ module Calabash
           screenshot_and_raise "Expected home button to have direction #{expected} but had #{home_direction}"
         end
       end
-
-      def escape_quotes(str)
-        str.gsub("'", "\\\\'")
-      end
-
 
       def label(uiquery)
         query(uiquery, :accessibilityLabel)
@@ -71,13 +68,74 @@ module Calabash
         query(q).map { |e| e['html'] }
       end
 
+      # sets the text value of the views matched by +uiquery+ to +txt+
+      #
+      # @deprecated since 0.9.145
+      #
+      # we have stopped testing this method.  you have been warned.
+      #
+      # * to enter text using the native keyboard use 'keyboard_enter_text'
+      # * to delete text use 'keyboard_enter_text('Delete')"
+      # * to clear a text field or text view:
+      #   - RECOMMENDED: use queries and touches to replicate what the user would do
+      #     - for text fields, implement a clear text button and touch it
+      #     - for text views, use touches to reveal text editing popup
+      #       see https://github.com/calabash/calabash-ios/issues/151
+      #   - use 'clear_text'
+      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
+      #
+      # raises an error if the +uiquery+ finds no matching queries or finds
+      # a view that does not respond to the objc selector 'setText'
       def set_text(uiquery, txt)
-        $stderr.write("Warning: set_text is deprecated.\n")
-        $stderr.write("Please use keyboard_enter_text\n")
-        $stderr.flush
+        msgs = ["'set_text' is deprecated and its behavior is now unpredictable",
+                "* to enter text using the native keyboard use 'keyboard_enter_text'",
+                "* to delete text use 'keyboard_enter_text('Delete')",
+                '* to clear a text field or text view:',
+                '  - RECOMMENDED: use queries and touches to replicate what the user would do',
+                '    * for text fields, implement a clear text button and touch it',
+                '    * for text views, use touches to reveal text editing popup',
+                '    see https://github.com/calabash/calabash-ios/issues/151',
+                "  - use 'clear_text'",
+                'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API']
+        msg = msgs.join("\n")
+        _deprecated('0.9.145', msg, :warn)
+
         text_fields_modified = map(uiquery, :setText, txt)
-        screenshot_and_raise "could not find text field #{uiquery}" if text_fields_modified.empty?
+
+        msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
+        assert_map_results(text_fields_modified, msg)
         text_fields_modified
+      end
+
+      # sets the text value of the views matched by +uiquery+ to <tt>''</tt>
+      # (the empty string)
+      #
+      # using this sparingly and with caution
+      #
+      #
+      # it is recommended that you instead do some combination of the following
+      #
+      # * use queries and touches to replicate with the user would
+      #   - for text fields, implement a clear text button and touch it
+      #   - for text views, use touches to reveal text editing popup
+      #   see https://github.com/calabash/calabash-ios/issues/151
+      #
+      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
+      #
+      # raises an error if the +uiquery+ finds no matching queries or finds
+      # a _single_ view that does not respond to the objc selector 'setText'
+      #
+      # IMPORTANT
+      # calling:
+      #
+      #     > clear_text("view")
+      #
+      # will clear the text on _all_ visible views that respond to 'setText'
+      def clear_text(uiquery)
+        views_modified = map(uiquery, :setText, '')
+        msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
+        assert_map_results(views_modified, msg)
+        views_modified
       end
 
 
@@ -103,52 +161,6 @@ module Calabash
         res['results'].first
       end
 
-
-
-      #not officially supported yet
-      #def change_slider_value_to(q, value)
-      #  target = value.to_f
-      #  if target < 0
-      #    pending "value '#{value}' must be >= 0"
-      #  end
-      #  min_val = query(q, :minimumValue).first
-      #  # will not work for min_val != 0
-      #  if min_val != 0
-      #    screenshot_and_raise "sliders with non-zero minimum values are not supported - slider '#{q}' has minimum value of '#{min_val}'"
-      #  end
-      #  max_val = query(q, :maximumValue).first
-      #  if target > max_val
-      #    screenshot_and_raise "cannot change slider '#{q}' to '#{value}' because the maximum allowed value is '#{max_val}'"
-      #  end
-      #
-      #  val = query(q, :value).first
-      #  # the x offset is from the middle of the slider.
-      #  # ex.  slider from 0 to 5
-      #  #      to touch 3, x must be 0
-      #  #      to touch 0, x must be -2.5
-      #  #      to touch 5, x must be 2.5
-      #  width = query(q, :frame).first["width"] - 10
-      #
-      #  cur_x = -width/2.0 + val*width
-      #  tgt_x = -width/2.0 + target*width
-      #
-      #  interpolate("slide", :start =>q, :end => q,
-      #              :offset_end => {:x => tgt_x, :y => 1},
-      #              :offset_start => {:x => cur_x, :y => -1})
-      #  sleep(0.1)
-      #
-      #  val = query(q, :value).first
-      #  cur_x = -width/2.0 + val*width
-      #  tgt_x = -width/2.0 + target*width
-      #
-      #  interpolate("slide", :start =>q, :end => q,
-      #              :offset_end => {:x => tgt_x, :y => 1},
-      #              :offset_start => {:x => cur_x, :y => -1})
-      #
-      #
-      #end
-
-
       #def screencast_begin
       #   http({:method=>:post, :path=>'screencast'}, {:action => :start})
       #end
@@ -160,8 +172,6 @@ module Calabash
       #  end
       #  file_name
       #end
-
-
     end
   end
 end

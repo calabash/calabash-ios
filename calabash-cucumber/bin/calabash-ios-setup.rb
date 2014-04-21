@@ -3,14 +3,15 @@ require 'rexml/rexml'
 require "rexml/document"
 
 
-
 def detect_accessibility_support
   dirs = Dir.glob(File.join(File.expand_path("~/Library"),"Application Support","iPhone Simulator","*.*","Library","Preferences"))
   dirs.each do |sim_pref_dir|
     fp = File.expand_path("#{sim_pref_dir}/com.apple.Accessibility.plist")
+    out = `defaults read "#{fp}" AXInspectorEnabled`
+    ax_inspector = out.split("\n")[0]=="0"
     out = `defaults read "#{fp}" ApplicationAccessibilityEnabled`
-
-    if not(File.exists?(fp)) || out.split("\n")[0] == "0"
+    app_acc = out.split("\n")[0]=="0"
+    if not(File.exists?(fp)) || ax_inspector == "0" || app_acc == "0"
         msg("Warn") do
           puts "Accessibility is not enabled for simulator: #{sim_pref_dir}"
           puts "Enabled accessibility as described here:"
@@ -24,70 +25,31 @@ def detect_accessibility_support
 end
 
 def calabash_setup(args)
-  #TODO ensure frank setup called
-  msg("Info") do
-    puts "Copy libCalabash.a to Frank directory"
-  end
-
-  lib_cal = File.expand_path(File.join(@lib_cal_dir,"libCalabash.a"),)
-  tgt_dir = File.join(File.expand_path("."),"Frank")
-  FileUtils.cp(lib_cal, tgt_dir)
-
-  xc_config_path = File.join(tgt_dir, "frankify.xcconfig")
-  xc_config = File.read(xc_config_path)
-
-  msg("Info") do
-    puts "Checking Frank/frankify.xcconfig for libCalabash"
-  end
-
-  added_xcconfig = []
-  xc_config.each_line do |line|
-    line = line.strip
-    if line.start_with?('FRANK_LDFLAGS')
-      unless line.index("-lCalabash")
-        line = "#{line} -lCalabash"
-      end
-    end
-    added_xcconfig << line
-  end
-
-  File.open(xc_config_path, "w") do |f|
-    f.write(added_xcconfig.join("\n")+"\n")
-  end
-
-
-
-
-
-  return
   puts "Checking if Xcode is running..."
   res = `ps x -o pid,command | grep -v grep | grep Contents/MacOS/Xcode`
-  if res==""
-    puts "Xcode not running."
-    project_name, project_path, xpath = find_project_files(args)
-    setup_project(project_name, project_path, xpath)
+  unless res==""
+    puts "Detected running Xcode. You may need to restart Xcode after setup."
+  end
 
-    detect_accessibility_support
+  project_name, project_path, xpath = find_project_files(args)
+  setup_project(project_name, project_path, xpath)
 
-    msg("Setup done") do
+  calabash_sim_accessibility
+  detect_accessibility_support
 
-      puts "Please validate by running the -cal target"
-      puts "from Xcode."
-      puts "When starting the iOS Simulator using the"
-      puts "new -cal target, you should see:\n\n"
-      puts '  "Started LPHTTP server on port 37265"'
-      puts "\nin the application log in Xcode."
-      puts "\n\n"
-      puts "After validating, you can generate a features folder:"
-      puts "Go to your project (the dir containing the .xcodeproj file)."
-      puts "Then run calabash-ios gen"
-      puts "(if you don't already have a features folder)."
-    end
+  msg("Setup done") do
 
-  else
-    puts "Xcode is running. We'll be changing the project file so we'd better stop it."
-    puts "Please stop XCode and run setup again"
-    exit(0)
+    puts "Please validate by running the -cal target"
+    puts "from Xcode."
+    puts "When starting the iOS Simulator using the"
+    puts "new -cal target, you should see:\n\n"
+    puts '  "Started LPHTTP server on port 37265"'
+    puts "\nin the application log in Xcode."
+    puts "\n\n"
+    puts "After validating, you can generate a features folder:"
+    puts "Go to your project (the dir containing the .xcodeproj file)."
+    puts "Then run calabash-ios gen"
+    puts "(if you don't already have a features folder)."
   end
 end
 
@@ -131,56 +93,18 @@ def download_calabash(project_path)
   ##Download calabash.framework
   if not File.directory?(File.join(project_path, file))
     msg("Info") do
-      zip_file = "calabash.framework-#{ENV['FRAMEWORK_VERSION']||Calabash::Cucumber::FRAMEWORK_VERSION}.zip"
-      puts "Did not find calabash.framework. I'll download it...'"
-      puts "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
-      require 'uri'
+      zip_file = File.join(@framework_dir,"calabash.framework.zip")
 
-      uri = URI.parse "http://cloud.github.com/downloads/calabash/calabash-ios/#{zip_file}"
-      success = false
-      if has_proxy?
-        proxy_url = proxy
-        connection = Net::HTTP::Proxy(proxy_url[0], proxy_url[1])
-      else
-        connection = Net::HTTP
-      end
-      begin
-      connection.start(uri.host, uri.port) do |http|
-        request = Net::HTTP::Get.new uri.request_uri
-
-        http.request request do |response|
-          if response.code == '200'
-            open zip_file, 'wb' do |io|
-              response.read_body do |chunk|
-                print "."
-                io.write chunk
-              end
-            end
-            success = true
-          else
-             puts "Got bad response code #{response.code}."
-             puts "Aborting..."
-          end
-        end
-      end
-      rescue SocketError => e
-        msg("Error") do
-          puts "Exception: #{e}"
-          puts "Unable to download Calabash. Please check connection."
-        end
-        exit 1
-      end
-      if success
-        puts "\nDownload done: #{file}. Unzipping..."
-        if not system("unzip -C -K -o -q -d #{project_path} #{zip_file} -x __MACOSX/* calabash.framework/.DS_Store")
+      if File.exist?(zip_file)
+        if not system("unzip -C -K -o -q -d '#{project_path}' '#{zip_file}' -x __MACOSX/* calabash.framework/.DS_Store")
           msg("Error") do
             puts "Unable to unzip file: #{zip_file}"
             puts "You must install manually."
           end
           exit 1
         end
-        FileUtils.rm(zip_file)
       else
+        puts "Inconsistent gem state: Cannot find framework: #{zip_file}"
         exit 0
       end
     end
@@ -211,27 +135,11 @@ def setup_project(project_name, project_path, path)
     exit 1
   end
 
-  pwd = FileUtils.pwd
-  FileUtils.cd project_path
-  ##Backup
-  if File.exists? "#{proj_file}.bak"
-    msg("Error") do
-      puts "Backup file already exists. #{proj_file}.bak"
-      puts "For safety, I won't overwrite this file."
-      puts "You must manually move this file, if you want to"
-      puts "Run calabash-ios setup again."
-    end
-    exit 1
-  end
-
-  file = download_calabash(project_path)
+  download_calabash(project_path)
 
   msg("Info") do
     puts "Setting up project file for calabash-ios."
   end
-
-
-  FileUtils.cd pwd
 
   ##Backup
   msg("Info") do
@@ -264,8 +172,8 @@ def validate_setup(args)
   else
     dd_dir = Calabash::Cucumber::SimulatorHelper.derived_data_dir_for_project
       if not dd_dir
-        puts "Unable to find iOS project."
-        puts "You should run this command from an iOS project directory."
+        puts "Unable to find iOS XCode project."
+        puts "You should run this command from an XCode project directory."
         exit 1
       end
       app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))
@@ -334,8 +242,8 @@ def validate_ipa(ipa)
     end
 
     app_dir = Dir.foreach("#{dir}/Payload").find {|d| /\.app$/.match(d)}
-    app = app_dir.split(".")[0]
-    res = `otool "#{File.expand_path(dir)}/Payload/#{app_dir}/#{app}" -o 2> /dev/null | grep CalabashServer`
+
+    res = `otool "#{File.expand_path(dir)}/Payload/#{app_dir}/"* -o 2> /dev/null | grep CalabashServer`
     msg("Info") do
       if /CalabashServer/.match(res)
         puts "Ipa: #{ipa} *contains* calabash.framework"
@@ -366,6 +274,59 @@ def validate_app(app)
     else
       puts "App: #{app} *does not contain* calabash.framework"
     end
+  end
+
+end
+
+
+def update(args)
+  if args.length > 0
+    target = args[0]
+    unless UPDATE_TARGETS.include?(target)
+      msg('Error') do
+        puts "Invalid target #{target}. Must be one of: #{UPDATE_TARGETS.join(' ')}"
+      end
+      exit 1
+    end
+
+
+
+    target_file = 'features/support/launch.rb'
+    msg('Question') do
+      puts "I'm about to update the #{target_file} file."
+      puts "Please hit return to confirm that's what you want."
+    end
+    exit 2 unless STDIN.gets.chomp == ''
+
+
+    unless File.exist?(target_file)
+      msg('Error') do
+        puts "Unable to find file #{target_file}"
+        puts "Please change directory so that #{target_file} exists."
+      end
+      exit 1
+    end
+    new_launch_script = File.join(@script_dir, 'launch.rb')
+
+    FileUtils.cp(new_launch_script, 'features/support/01_launch.rb', :verbose => true)
+    FileUtils.rm(target_file, :force => true, :verbose => true)
+
+    hooks_file = 'features/support/hooks.rb'
+    if File.exist?(hooks_file)
+      FileUtils.mv(hooks_file, 'features/support/02_pre_stop_hooks.rb', :verbose => true)
+    end
+
+    msg('Info') do
+      puts "File copied.\n"
+      puts 'Launch on device using environment variable DEVICE_TARGET=device.'
+      puts 'Launch on simulator by default or using environment variable DEVICE_TARGET=simulator.'
+    end
+  else
+    msg('Error') do
+      puts "update must take one of the following targets: #{UPDATE_TARGETS.join(' ')}"
+    end
+    exit 1
+
   end
 
 end

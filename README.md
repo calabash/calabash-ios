@@ -1,5 +1,4 @@
-Welcome to Calabash for iOS
-===========================
+# Welcome to Calabash for iOS
 
 Calabash is an automated testing technology for Android and iOS native and hybrid applications.
 This repository contains support for iOS, for Android, see [Calabash Landing Page](http://calaba.sh/).
@@ -14,75 +13,67 @@ This document explains how to install Calabash iOS. For introductory informatio
 
 [Introducing Calabash](http://blog.lesspainful.com/2012/03/07/Calabash/).
 
-[Change log](https://github.com/calabash/calabash-ios/tree/0.9.x/changelog)
+[Change log](https://github.com/calabash/calabash-ios/tree/master/changelog)
 
-
-This guide explains how to setup and use Calabash for iOS
-=========================================================
+# This guide explains how to setup and use Calabash for iOS
 
 Running Calabash requires Mac OSX.  After completing this guide you will be able to run tests locally
 against the iOS Simulator. You can also interactively explore and
 interact with your application using the Calabash console.
 
-If you have any questions on Calabash iOS, please use the google group
+If you have any questions about Calabash iOS, please use the google group
 
 [http://groups.google.com/group/calabash-ios](http://groups.google.com/group/calabash-ios)
 
-For Xamarin users, we recommend the free Xamarin [Calabash component](https://components.xamarin.com/view/calabash/) which replaces
-the `calabash-ios setup` step below.
+For Xamarin users, we recommend the free Xamarin [Calabash component](https://components.xamarin.com/view/calabash/) which replaces the `calabash-ios setup` step below.
 
 Also the Calabash.app is an OS X app containing precompiled versions of Ruby, Calabash and the Xamarin Test Cloud gem.
 
 [https://s3.amazonaws.com/calabashapp/Calabash.zip](https://s3.amazonaws.com/calabashapp/Calabash.zip)
 
 
-The rest of this guide was writting using XCode 5, but should also work for
-XCode versions >= 4.3.
+The rest of this guide was writting using XCode 5, but should also work for XCode versions >= 4.3.
 
-*NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from
-the preferences pane under "Downloads" in Xcode. Then I had to do
+*NOTE about Xcode 4.3* after upgrading to Xcode 4.3, I needed to install the command line tools from the preferences pane under "Downloads" in Xcode. Then I had to do
 
+```
     sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
+```
 
-
-Installation
-------------
+## Installation
 
 ### Prerequisites
 
 You need to have Ruby installed. This is installed by default on MacOSX.
+
 Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7" (or higher). We do recommend using Ruby 2.0+.
 
 ### Fast track
 
-Note: Fast track is EXPERIMENTAL, but in my experience it works for most iOS projects.
-But there *are* some project setups where it does not.
+Note: Fast track is EXPERIMENTAL, but in our experience it works for most iOS projects.  But there *are* some project setups where it does not.
 
 If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
 
 For automatic setup:
 
 1. In a terminal, go to your iOS project
-  - `cd path-to-my-ios-project` (i.e. directory containing .xcodeproj file)
+    - `cd path-to-my-ios-project` (i.e. directory containing .xcodeproj file)
 
 2. Install calabash-cucumber gem (this make take some time because of dependencies)
-  - `gem install calabash-cucumber`
-  - (Note you may need to run `sudo gem install calabash-cucumber` if you get
-     ERROR:  While executing gem ... (Gem::FilePermissionError)).
+    - `gem install calabash-cucumber`
+    - Note you may need to run `sudo gem install calabash-cucumber` if you see ERROR:  While executing gem ... (Gem::FilePermissionError)).
 
 3. Setup your project for Calabash-iOS.
-  - `calabash-ios setup`
-  (Answer the questions and read the output :)
+    - `calabash-ios setup` Answer the questions and read the output :)
 
 4. Generate a skeleton features folder for your tests
-  - `calabash-ios gen`
-  (this also copies the scripts irb_iosX.sh for "interactive development" into your current dir)
+    - `calabash-ios gen`
 
 5. In Xcode, build your project using the <project-name>-cal scheme
-  - ![-cal scheme](documentation/images/scheme.png "-cal scheme")
+    - ![-cal scheme](documentation/images/scheme.png "-cal scheme")
 
 6. Run the generated test!
-  - `cucumber`
+    - `cucumber`
 
 If all goes well, you are now ready to write your first test.
 Start by editing the file `features/my_first.feature`.
@@ -93,7 +84,7 @@ Proceed by reading details about installation below, or moving on to the
 
 ### Note on Cocoapods
 
-Soon we will fully support Cocoapods.
+We plan on supporting Cocoapods.
 
 Until then, please se this nice article [http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods)
 by [@angelolloqui][https://twitter.com/angelolloqui].
@@ -182,11 +173,11 @@ Branches
 Some important news about what is happening with Calabash iOS and upcoming features. This is a preliminary notice to keep everyone informed. Soon, there will be a longer blog post at http://blog.lesspainful.com/ explaining more about rationale etc.
 
 ### The 0.9.x line
-[Link to 0.9.x branch](https://github.com/calabash/calabash-ios/tree/0.9.x).
+[Link to master branch](https://github.com/calabash/calabash-ios/tree/master).
 
 We've been making many small releases marked as 0.9.xyz for some time. This has been mostly bug-fixes and adding high-level functions, although some releases have added new features too. My current focus has been providing an implementation of 'query' on Calabash Android, and as this is finishing off, I'll turn attention back to Calabash iOS.
 
-Calabash iOS will now move towards what we will designate a 1.0.0 release. What we mean by '1.0.0', is that we consider Calabash a stable and reliable product with a decent feature set sufficient for testing most iOS applications. The label '1.0.0' will mean a much stronger adherence to backwards compatibility, quality and stability. Particularly, from version 1.0.0, Calabash will be adhering to the notion of Semantic Versioning: http://semver.org/, and we will use also continuous integration and automated testing on Calabash (iOS and Android) itself.
+Calabash iOS is moving towards what we will designate a 1.0.0 release. What we mean by '1.0.0', is that we consider Calabash a stable and reliable product with a decent feature set sufficient for testing most iOS applications. The label '1.0.0' will mean a much stronger adherence to backwards compatibility, quality and stability. Particularly, from version 1.0.0, Calabash will be adhering to the notion of Semantic Versioning: http://semver.org/, and we will use also continuous integration and automated testing on Calabash (iOS and Android) itself.
 
 But 1.0.0 won't be the next line of releases. There will be a 0.10.x line first which will incorporate significant changes.
 
@@ -198,7 +189,7 @@ The single most significant change in the 0.10.x line will be that Calabash will
 
 - Frank comes with a very cool tool called Symbiote which gives a visual representation of the current screen elements as well as a playground for exploring queries. Calabash iOS (and later Android) users will get access to Symbiote.
 
-- The Frank build system has improved vastly during the last 10 months and has surpassed that of Calabash iOS.
+- The Frank build system has improved vastly in the past year and has surpassed that of Calabash iOS.
 
 - Calabash also brings benefits to Frank users: the Calabash selector engine features selection into web views, selection by NSPredicate, selection by indexPath, better reflective method-call support. The Calabash touch engine allows synthesizing arbitrary gestures, even those not predefined by UIAutomation. Also, a bunch of other things like 'external' UIAutomation support will exist in the 0.10.x line.
 
@@ -222,7 +213,7 @@ If you are already using Calabash iOS in a project and you want to update to the
 #### Troubleshooting Installation
 
 On Mountain Lion with Ruby 1.8.x, you may see an error like this:
-
+```
     ~$ sudo gem install calabash-cucumber
     Password:
     Building native extensions.  This could take a while...
@@ -231,12 +222,9 @@ On Mountain Lion with Ruby 1.8.x, you may see an error like this:
 
     /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby extconf.rb
     mkmf.rb can't find header files for ruby at /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/ruby/ruby.h
+```
 
-One possible cause can be not having the correct Command Line Tools (compiler
-tool chain) for your OS X release. For example, for OS X 10.8
-"Mountain Lion" you need the "Mountain Lion" version of these. You can
-install them from Xcode Preferences pane (in the Download tab).
-
+One possible cause can be not having the correct Command Line Tools (compiler tool chain) for your OS X release. For example, for OS X 10.8 "Mountain Lion" you need the "Mountain Lion" version of these. You can install them from Xcode Preferences pane (in the Download tab).
 
 Important notice
 ================
@@ -249,9 +237,11 @@ for the version of your app running calabash tests.
 
 An experimental check can be done by the calabash-ios tool
 
+```
     calabash-ios check PATH_TO_IPA_OR_APP
+```
 
-But this is not guaranteed to work, and it is your responsibility to ensure.
+This is not guaranteed to work; it is your responsibility to ensure that the framework is properly installed.
 
 
 Installation details
@@ -264,7 +254,8 @@ How does automated setup work?
 
 Verify that you have installed calabash-cucumber correctly by running `calabash-ios` from the command line:
 
-    krukow:~/tmp/sample$ calabash-ios
+```
+    $ calabash-ios
     Usage: calabash-ios <command-name> [parameters]
     <command-name> can be one of
         help
@@ -274,15 +265,16 @@ Verify that you have installed calabash-cucumber correctly by running `calabash-
         setup (EXPERIMENTAL) [opt path]?
          setup your XCode project for calabash-ios
       ...
+```
 
 When you run `calabash-ios setup` and answer any questions it might ask the following happens:
 
 Note that calabash-ios will backup your project file:
 
-    krukow:~/tmp/sample$ calabash-ios setup
+    $ calabash-ios setup
     Checking if Xcode is running...
     ----------Info----------
-    Making backup of project file: /Users/krukow/tmp/sample/sample.xcodeproj/project.pbxproj
+    Making backup of project file: ~/sample/sample.xcodeproj/project.pbxproj
     ...
 
 The project file is copied to `project.pbxproj.bak`. In case something goes wrong you can move this file back to `project.pbxproj` (in your .xcodeproj) folder.
@@ -302,7 +294,6 @@ Setup will modify your xcode project file to use Calabash iOs. You should now ha
 - set the special `-force_load` and `-lstdc++` linker flags (for that target)
 
 
-
 Next steps
 ==========
 
@@ -318,3 +309,6 @@ which can be found in the file epl-v10.html at the root of this distribution.
 By using this software in any fashion, you are agreeing to be bound by
 the terms of this license.
 You must not remove this notice, or any other, from this software.
+
+
+

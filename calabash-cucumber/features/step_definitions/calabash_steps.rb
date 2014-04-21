@@ -33,24 +33,13 @@ Then /^I (?:press|touch) the "([^\"]*)" button$/ do |name|
   sleep(STEP_PAUSE)
 end
 
-Then /^I (?:press|touch) tabBarButton number (\d+)$/ do |index|
-  index = index.to_i
-  screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
-  touch("tabBarButton index:#{index-1}")
-  sleep(STEP_PAUSE)
-end
-
-Then /^I (?:press|touch) the "([^\"]*)" tabBarButton$/ do |name|
-  touch("tabBarButton marked:'#{name}'")
-  sleep(STEP_PAUSE)
-end
-
 Then /^I (?:press|touch) (?:input|text) field number (\d+)$/ do |index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
   touch("textField index:#{index-1}")
-  sleep(STEP_PAUSE)
+  sleep(STEP_PAUSE)  
 end
+
 
 Then /^I (?:press|touch) the "([^\"]*)" (?:input|text) field$/ do |name|
   placeholder_query = "textField placeholder:'#{name}'"
@@ -74,8 +63,14 @@ Then /^I (?:press|touch) list item number (\d+)$/ do |index|
 end
 
 Then /^I (?:press|touch) list item "([^\"]*)"$/ do |cell_name|
-   touch("tableViewCell marked:'#{cell_name}'")
-   sleep(STEP_PAUSE)
+  if
+  query("tableViewCell marked:'#{cell_name}'").empty?
+  then
+    touch("tableViewCell text:'#{cell_name}'")
+  else
+    touch("tableViewCell marked:'#{cell_name}'")
+  end
+  sleep(STEP_PAUSE)
 end
 
 Then /^I toggle the switch$/ do
@@ -102,12 +97,16 @@ end
 ## -- Entering text -- ##
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" field$/ do |text_to_type, field_name|
-  set_text("textField marked:'#{field_name}'", text_to_type)
+  touch("textField marked:'#{field_name}'")
+  wait_for_keyboard()
+  keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
 
 Then /^I enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
-  set_text("textField placeholder:'#{field_name}'", text_to_type)
+  touch("textField marked:'#{field_name}'")
+  wait_for_keyboard()
+  keyboard_enter_text text_to_type
   sleep(STEP_PAUSE)
 end
 
@@ -117,8 +116,8 @@ Then /^I fill in "([^\"]*)" with "([^\"]*)"$/ do |text_field, text_to_type|
 end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text|input) field$/ do |text_to_type, field_name|
-  touch("textField placeholder:'#{field_name}'")
-  await_keyboard
+  macro %Q|I touch the "#{field_name}" text field|
+  wait_for_keyboard()
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
@@ -132,36 +131,40 @@ end
 Then /^I enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text, index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
-  set_text("textField index:#{index-1}",text)
+  touch("textField index:#{index-1}")
+  wait_for_keyboard()
+  keyboard_enter_text text
+  sleep(STEP_PAUSE)
 end
 
 Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field number (\d+)$/ do |text_to_type, index|
-  index = index.to_i
-  screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
-  touch("textField index:#{index-1}")
-  await_keyboard
+  idx = index.to_i
+  macro %Q|I touch text field number #{idx}|
+  wait_for_keyboard()
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
 end
 
 When /^I clear "([^\"]*)"$/ do |name|
-  macro %Q|I enter "" into the "#{name}" text field|
+  msg = "When I clear <name>' will be deprecated because it is ambiguous - what should be cleared?"
+  _deprecated('0.9.151', msg, :warn)
+  clear_text("textField marked:'#{name}'")
 end
 
 Then /^I clear (?:input|text) field number (\d+)$/ do |index|
   index = index.to_i
   screenshot_and_raise "Index should be positive (was: #{index})" if (index<=0)
-  set_text("textField index:#{index-1}","")
+  clear_text("textField index:#{index-1}")
 end
 
 # -- See -- #
 Then /^I wait to see "([^\"]*)"$/ do |expected_mark|
-  wait_for_elements_exist( [ marked(expected_mark) ], :timeout => WAIT_TIMEOUT)
+  wait_for(WAIT_TIMEOUT) { view_with_mark_exists( expected_mark ) }
 end
 
 Then /^I wait until I don't see "([^\"]*)"$/ do |expected_mark|
   sleep 1## wait for previous screen to disappear
-  wait_for_elements_do_not_exist( [ marked(expected_mark) ], :timeout => WAIT_TIMEOUT)
+  wait_for(WAIT_TIMEOUT) { not element_exists( "view marked:'#{expected_mark}'" )}
 end
 
 Then /^I wait to not see "([^\"]*)"$/ do |expected_mark|
@@ -173,33 +176,30 @@ Then /^I wait for "([^\"]*)" to appear$/ do |name|
 end
 
 Then /^I wait for the "([^\"]*)" button to appear$/ do |name|
-  wait_for_elements_exist([ "button marked:'#{name}'" ], :timeout => WAIT_TIMEOUT)
+  wait_for(WAIT_TIMEOUT) { element_exists( "button marked:'#{name}'" ) }
 end
-
-Then /^I wait for the "([^\"]*)" tabBarButton to appear$/ do |name|
-  wait_for_elements_exist([ "tabBarButton marked:'#{name}'" ], :timeout => WAIT_TIMEOUT)
-end
-
 
 Then /^I wait to see a navigation bar titled "([^\"]*)"$/ do |expected_mark|
+  msg = "waited for '#{WAIT_TIMEOUT}' seconds but did not see the navbar with title '#{expected_mark}'"
   wait_for(:timeout => WAIT_TIMEOUT,
-           :timeout_message => "Timed out waiting for a navigationItemView with label #{expected_mark}") do
-
-     label('navigationItemView').include?(expected_mark)
+           :timeout_message => msg ) do
+    all_items = query("navigationItemView marked:'#{expected_mark}'")
+    button_items = query("navigationItemButtonView")
+    non_button_items = all_items.delete_if { |item| button_items.include?(item) }
+    !non_button_items.empty?
   end
 end
 
-Then /^I wait for the "([^\"]*)" (?:input|text) field$/ do |placeholder|
-  wait_for_elements_exist([ "textField placeholder:'#{placeholder}'" ], :timeout => WAIT_TIMEOUT)
+Then /^I wait for the "([^\"]*)" (?:input|text) field$/ do |placeholder_or_view_mark|
+  wait_for(WAIT_TIMEOUT) {
+    element_exists( "textField placeholder:'#{placeholder_or_view_mark}'") ||
+          element_exists( "textField marked:'#{placeholder_or_view_mark}'")
+  }
 end
 
 Then /^I wait for (\d+) (?:input|text) field(?:s)?$/ do |count|
   count = count.to_i
-  wait_for(:timeout => WAIT_TIMEOUT,
-           :timeout_message => "Timed out waiting for at least #{count} textFields") do
-
-    query(:textField).count >= count
-  end
+  wait_for(WAIT_TIMEOUT) { query(:textField).count >= count  }
 end
 
 
@@ -332,7 +332,7 @@ end
 
 Then /^I send app to background for (\d+) seconds$/ do |secs|
   secs = secs.to_f
-  background(secs)
+  send_app_to_background(secs)
   sleep(secs+10)
 end
 
@@ -358,13 +358,6 @@ Then /^I should see a "([^\"]*)" button$/ do |expected_mark|
 end
 Then /^I should not see a "([^\"]*)" button$/ do |expected_mark|
   check_element_does_not_exist("button marked:'#{expected_mark}'")
-end
-
-Then /^I should see a "([^\"]*)" tabBarButton$/ do |expected_mark|
-  check_element_exists("tabBarButton marked:'#{expected_mark}'")
-end
-Then /^I should not see a "([^\"]*)" tabBarButton$/ do |expected_mark|
-  check_element_does_not_exist("tabBarButton marked:'#{expected_mark}'")
 end
 
 Then /^I don't see the text "([^\"]*)"$/ do |text|
@@ -411,10 +404,10 @@ Then /^I see (\d+) (?:input|text) field(?:s)?$/ do |count|
 end
 
 Then /^I should see a "([^\"]*)" (?:input|text) field$/ do |expected_mark|
-  res = element_exists("textField placeholder:'#{expected_mark}'") or
+  res = element_exists("textField placeholder:'#{expected_mark}'") ||
           element_exists("textField marked:'#{expected_mark}'")
   unless res
-    screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{txt}"
+    screenshot_and_raise "Expected textfield with placeholder or accessibilityLabel: #{expected_mark}"
   end
 end
 
@@ -422,7 +415,7 @@ Then /^I should not see a "([^\"]*)" (?:input|text) field$/ do |expected_mark|
   res = query("textField placeholder:'#{expected_mark}'")
   res.concat query("textField marked:'#{expected_mark}'")
   unless res.empty?
-    screenshot_and_raise "Expected no textfield with placeholder nor accessibilityLabel: #{txt}, found #{res}"
+    screenshot_and_raise "Expected no textfield with placeholder nor accessibilityLabel: #{expected_mark}, found #{res}"
   end
 end
 
@@ -433,4 +426,43 @@ end
 
 Then /^I should see (?:the)? user location$/ do
   check_element_exists("view:'MKUserLocationView'")
+end
+
+### Date Picker ###
+
+# time_str can be in any format that Time can parse
+Then(/^I change the date picker time to "([^"]*)"$/) do |time_str|
+  target_time = Time.parse(time_str)
+  current_date = date_time_from_picker()
+  current_date = DateTime.new(current_date.year,
+                              current_date.mon,
+                              current_date.day,
+                              target_time.hour,
+                              target_time.min,
+                              0,
+                              target_time.gmt_offset)
+  picker_set_date_time current_date
+  sleep(STEP_PAUSE)
+end
+
+# date_str can be in any format that Date can parse
+Then(/^I change the date picker date to "([^"]*)"$/) do |date_str|
+  target_date = Date.parse(date_str)
+  current_time = date_time_from_picker()
+  date_time = DateTime.new(target_date.year,
+                           target_date.mon,
+                           target_date.day,
+                           current_time.hour,
+                           current_time.min,
+                           0,
+                           Time.now.sec,
+                           current_time.offset)
+  picker_set_date_time date_time
+  sleep(STEP_PAUSE)
+end
+
+# date_str can be in any format that Date can parse
+Then(/^I change the date picker date to "([^"]*)" at "([^"]*)"$/) do |date_str, time_str|
+  macro %Q|I change the date picker time to "#{time_str}"|
+  macro %Q|I change the date picker date to "#{date_str}"|
 end

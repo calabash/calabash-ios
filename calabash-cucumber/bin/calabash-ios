@@ -15,7 +15,7 @@ require File.join(File.dirname(__FILE__),"calabash-ios-build")
 @features_dir = File.join(FileUtils.pwd, "features")
 @source_dir = File.join(File.dirname(__FILE__), '..', 'features-skeleton')
 @script_dir = File.join(File.dirname(__FILE__), '..', 'scripts')
-@lib_cal_dir = File.join(File.dirname(__FILE__), '..', 'libcalabash')
+@framework_dir = File.join(File.dirname(__FILE__), '..', 'staticlib')
 
 if (ARGV.length == 0)
   print_usage
@@ -33,6 +33,9 @@ elsif cmd == 'console'
   exit 0
 elsif cmd == 'build'
   build
+  exit 0
+elsif cmd == 'update'
+  update(ARGV)
   exit 0
 elsif cmd == 'run'
   run
