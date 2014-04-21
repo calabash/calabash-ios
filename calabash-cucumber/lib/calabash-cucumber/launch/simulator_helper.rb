@@ -271,9 +271,6 @@ module Calabash
         sim_dirs.find do |d|
           linked_with_calabash?(d)
         end
-
-        # Defaulted to false
-        false
       end
 
       def self.ensure_connectivity(app_bundle_path, sdk, version, args = nil)
