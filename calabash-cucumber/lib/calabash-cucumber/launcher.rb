@@ -462,9 +462,9 @@ class Calabash::Cucumber::Launcher
       # These 3 keys will enable accessibility on the simulator
       # without popping the inspector windows
       # (which could overlay a view for the test and making test fails)
-      puts `defaults write "#{fp}" AccessibilityEnabled YES`
-      puts `defaults write "#{fp}" AutomationEnabled YES`
-      puts `defaults write "#{fp}" ApplicationAccessibilityEnabled YES`
+      `defaults write "#{fp}" AccessibilityEnabled YES`
+      `defaults write "#{fp}" AutomationEnabled YES`
+      `defaults write "#{fp}" ApplicationAccessibilityEnabled YES`
     end
   end
 
