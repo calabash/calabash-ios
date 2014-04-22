@@ -316,6 +316,9 @@ class Calabash::Cucumber::Launcher
 
 
     reset_app_jail if args[:reset]
+    if args[:device_target]=='simulator'
+      enable_accessibility_on_simulator
+    end
 
 
     if args[:privacy_settings]
@@ -449,6 +452,22 @@ class Calabash::Cucumber::Launcher
     end
   end
 
+  # If simulator is used, this method ensures the accessibility is turned
+  # on by setting Accessibility-related keys on the simulator's preferences.
+  def enable_accessibility_on_simulator
+    dirs = Dir.glob(File.join(File.expand_path("~/Library"),"Application Support","iPhone Simulator","*.*","Library","Preferences"))
+    dirs.each do |sim_pref_dir|
+      fp = File.expand_path("#{sim_pref_dir}/com.apple.Accessibility.plist")
+
+      # These 3 keys will enable accessibility on the simulator
+      # without popping the inspector windows
+      # (which could overlay a view for the test and making test fails)
+      `defaults write "#{fp}" AccessibilityEnabled YES`
+      `defaults write "#{fp}" AutomationEnabled YES`
+      `defaults write "#{fp}" ApplicationAccessibilityEnabled YES`
+    end
+  end
+
   def ping_app
     url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
 
@@ -575,8 +594,8 @@ class Calabash::Cucumber::Launcher
     return @@server_version unless @@server_version.nil?
     exe_paths = []
     Dir.foreach(app_bundle_path) do |item|
-      next if item == '.' or item == '..' or File.directory?(item)
       full_path = File.join(app_bundle_path, item)
+      next if item == '.' or item == '..' or File.directory?(full_path)
       if File.executable?(full_path)
         exe_paths << full_path
       end
