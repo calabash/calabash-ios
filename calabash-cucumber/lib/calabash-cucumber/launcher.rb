@@ -462,9 +462,9 @@ class Calabash::Cucumber::Launcher
       # These 3 keys will enable accessibility on the simulator
       # without popping the inspector windows
       # (which could overlay a view for the test and making test fails)
-      puts `defaults write "#{fp}" AccessibilityEnabled YES`
-      puts `defaults write "#{fp}" AutomationEnabled YES`
-      puts `defaults write "#{fp}" ApplicationAccessibilityEnabled YES`
+      `defaults write "#{fp}" AccessibilityEnabled YES`
+      `defaults write "#{fp}" AutomationEnabled YES`
+      `defaults write "#{fp}" ApplicationAccessibilityEnabled YES`
     end
   end
 
@@ -594,8 +594,8 @@ class Calabash::Cucumber::Launcher
     return @@server_version unless @@server_version.nil?
     exe_paths = []
     Dir.foreach(app_bundle_path) do |item|
-      next if item == '.' or item == '..' or File.directory?(item)
       full_path = File.join(app_bundle_path, item)
+      next if item == '.' or item == '..' or File.directory?(full_path)
       if File.executable?(full_path)
         exe_paths << full_path
       end
