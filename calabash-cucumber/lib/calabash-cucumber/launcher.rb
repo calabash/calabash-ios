@@ -594,8 +594,8 @@ class Calabash::Cucumber::Launcher
     return @@server_version unless @@server_version.nil?
     exe_paths = []
     Dir.foreach(app_bundle_path) do |item|
-      next if item == '.' or item == '..' or File.directory?(item)
       full_path = File.join(app_bundle_path, item)
+      next if item == '.' or item == '..' or File.directory?(full_path)
       if File.executable?(full_path)
         exe_paths << full_path
       end
