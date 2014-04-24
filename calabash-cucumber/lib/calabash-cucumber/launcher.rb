@@ -12,13 +12,15 @@ class Calabash::Cucumber::Launcher
 
   KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
 
+  @@launcher = nil
+
+  SERVER_VERSION_NOT_AVAILABLE = '0.0.0'
+  @@server_version = nil
+
   attr_accessor :run_loop
   attr_accessor :device
   attr_accessor :actions
   attr_accessor :launch_args
-
-  @@launcher = nil
-  @@server_version = nil
 
   class StartError < RuntimeError
     attr_accessor :error
@@ -575,14 +577,26 @@ class Calabash::Cucumber::Launcher
     return @@server_version unless @@server_version.nil?
     exe_paths = []
     Dir.foreach(app_bundle_path) do |item|
-      next if item == '.' or item == '..' or File.directory?(item)
+      next if item == '.' or item == '..'
+
       full_path = File.join(app_bundle_path, item)
-      if File.executable?(full_path)
+      if File.executable?(full_path) and not File.directory?(full_path)
         exe_paths << full_path
       end
     end
 
-    raise "could not find executable in '#{app_bundle_path}'" if exe_paths.empty?
+    if exe_paths.empty?
+      msg = "could not find executable in '#{app_bundle_path}'"
+
+      begin
+        warn "\033[34m\nWARN: #{msg}\033[0m"
+      rescue
+        warn "\nWARN: #{msg}"
+      end
+
+      @@server_version = SERVER_VERSION_NOT_AVAILABLE
+      return @@server_version
+    end
 
     server_version = nil
     exe_paths.each do |path|
@@ -594,8 +608,16 @@ class Calabash::Cucumber::Launcher
     end
 
     unless server_version
-      raise 'could not find server version by inspecting the binary strings table'
+      msg = 'could not find server version by inspecting the binary strings table'
+      begin
+        warn "\033[34m\nWARN: #{msg}\033[0m"
+      rescue
+        warn "\nWARN: #{msg}"
+      end
+      @@server_version = SERVER_VERSION_NOT_AVAILABLE
+      return @@server_version
     end
+
     @@server_version = server_version
   end
 
@@ -625,6 +647,16 @@ class Calabash::Cucumber::Launcher
       server_version = server_version_from_bundle(app_bundle_path)
     else
       server_version = server_version_from_server
+    end
+
+    if server_version == SERVER_VERSION_NOT_AVAILABLE
+      msg = 'server version could not be found - skipping compatibility check'
+      begin
+        warn "\033[34m\nWARN: #{msg}\033[0m"
+      rescue
+        warn "\nWARN: #{msg}"
+      end
+      return nil
     end
 
     server_version = Calabash::Cucumber::Version.new(server_version)
