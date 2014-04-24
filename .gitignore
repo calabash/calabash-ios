@@ -12,3 +12,6 @@ Markdown.pl
 examples_development
 *.swp
 *.gem
+
+# rvm and .rbenv versions
+.ruby-version
