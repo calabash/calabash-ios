@@ -221,7 +221,11 @@ class Calabash::Cucumber::Launcher
         :device => device_env,
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
-        :sdk_version => sdk_version
+        :sdk_version => sdk_version,
+        # do not advertise this to users!
+        # for example, don't include documentation about this
+        # this is used to instrument internal testing
+        :launch_retries => 5
     }
 
     #:device_target will be set
@@ -403,7 +407,10 @@ class Calabash::Cucumber::Launcher
       Calabash::Cucumber::SimulatorHelper.stop
     end
     last_err = nil
-    5.times do
+
+    num_retries = args[:launch_retries] || 5
+
+    num_retries.times do
       begin
         return RunLoop.run(args)
       rescue RunLoop::TimeoutError => e
