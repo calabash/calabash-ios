@@ -6,9 +6,12 @@ require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/version'
+require 'calabash-cucumber/utils/logging'
 
 
 class Calabash::Cucumber::Launcher
+
+  include Calabash::Cucumber::Logging
 
   KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
 

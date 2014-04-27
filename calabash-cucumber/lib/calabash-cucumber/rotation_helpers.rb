@@ -1,6 +1,10 @@
+require 'calabash-cucumber/utils/logging'
+
 module Calabash
   module Cucumber
     module RotationHelpers  #=> Connection, StatusBarHelpers
+
+      include Calabash::Cucumber::Logging
 
       def rotation_candidates
         %w(rotate_left_home_down rotate_left_home_left rotate_left_home_right rotate_left_home_up

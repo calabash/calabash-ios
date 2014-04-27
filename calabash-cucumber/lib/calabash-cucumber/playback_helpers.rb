@@ -1,7 +1,10 @@
+require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
     module PlaybackHelpers
+
+      include Calabash::Cucumber::Logging
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
 

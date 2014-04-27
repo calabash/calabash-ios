@@ -2,7 +2,6 @@ require 'httpclient'
 require 'json'
 require 'geocoder'
 require 'calabash-cucumber/uia'
-require 'calabash-cucumber/utils/logging'
 require 'calabash-cucumber/environment_helpers'
 require 'calabash-cucumber/connection'
 require 'calabash-cucumber/connection_helpers'
@@ -13,10 +12,13 @@ require 'calabash-cucumber/failure_helpers'
 require 'calabash-cucumber/status_bar_helpers'
 require 'calabash-cucumber/rotation_helpers'
 require 'calabash-cucumber/map'
+require 'calabash-cucumber/utils/logging'
+
 
 module Calabash
   module Cucumber
     module Core
+
       include Calabash::Cucumber::Logging
       include Calabash::Cucumber::EnvironmentHelpers
       include Calabash::Cucumber::ConnectionHelpers
@@ -27,7 +29,6 @@ module Calabash
       include Calabash::Cucumber::StatusBarHelpers
       include Calabash::Cucumber::RotationHelpers
       include Calabash::Cucumber::PlaybackHelpers
-
 
       def macro(txt)
         if self.respond_to? :step

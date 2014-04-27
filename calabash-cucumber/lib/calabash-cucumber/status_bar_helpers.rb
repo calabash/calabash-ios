@@ -1,6 +1,10 @@
+require 'calabash-cucumber/utils/logging'
+
 module Calabash
   module Cucumber
     module StatusBarHelpers #=> Map
+
+      include Calabash::Cucumber::Logging
 
       def device_orientation(force_down=false)
         res = map(nil, :orientation, :device).first
