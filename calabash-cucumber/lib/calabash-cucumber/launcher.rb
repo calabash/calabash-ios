@@ -121,7 +121,7 @@ class Calabash::Cucumber::Launcher
     directories_for_sdk_prefix(sdk).each do |dir|
       bundle = `find "#{dir}/Applications" -type d -depth 2 -name "#{app}" | head -n 1`
       next if bundle.empty? # Assuming we're already clean
-      if ENV['DEBUG']=='1'
+      if debug_logging?
         puts "Reset app state for #{bundle}"
       end
       sandbox = File.dirname(bundle)
@@ -139,7 +139,7 @@ class Calabash::Cucumber::Launcher
 
   # Call as update_privacy_settings('com.my.app', {:photos => {:allow => true}})
   def update_privacy_settings(bundle_id, opts={})
-    if ENV['DEBUG']=='1'
+    if debug_logging?
       puts "Update privacy settings #{bundle_id}, #{opts}"
     end
     unless File.exist?(`which sqlite3`.strip)
@@ -152,12 +152,12 @@ class Calabash::Cucumber::Launcher
       sdk = setting_options[:sdk] || SimLauncher::SdkDetector.new().latest_sdk_version
 
       dirs = directories_for_sdk_prefix(sdk)
-      if ENV['DEBUG']=='1'
+      if debug_logging?
         puts "About to update privacy setting #{setting_name} for #{bundle_id}, allow: #{allow} in sdk #{sdk}, #{dirs}"
       end
 
       dirs.each do |dir|
-        if ENV['DEBUG']=='1'
+        if debug_logging?
           puts "Setting access for #{bundle_id} for permission #{setting_name} to allow: #{allow}"
         end
         path_to_tcc_db = tcc_database_for_sdk_dir(dir)
@@ -172,7 +172,7 @@ class Calabash::Cucumber::Launcher
           sql = %Q['UPDATE access SET allowed=#{allowed_as_i} where client="#{bundle_id}" AND service="#{setting_name}";']
         end
 
-        if ENV['DEBUG']=='1'
+        if debug_logging?
           puts "Executing sql #{sql} on #{path_to_tcc_db}"
         end
 

@@ -16,6 +16,13 @@ module Calabash
         ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
       end
 
+      # controls whether or not calabash logs debug information
+      #
+      # @return [Boolean] +true+ if the <tt>DEBUG</tt> is set to '1'
+      def debug_logging?
+        ENV['DEBUG'] == '1'
+      end
+
     end
   end
 end

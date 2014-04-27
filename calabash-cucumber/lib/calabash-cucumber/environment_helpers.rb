@@ -128,12 +128,6 @@ module Calabash
       end
 
 
-      # returns +true+ if the <tt>DEBUG</tt> is set to +1+
-      def debug_logging?
-        ENV['DEBUG'] == '1'
-      end
-
-
       # prints a deprecated message that includes the line number
       #   +version+ string indicating when the feature was deprecated
       #   +msg+ deprecation message (possibly suggesting alternatives)

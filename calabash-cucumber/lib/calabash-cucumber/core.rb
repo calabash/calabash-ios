@@ -2,6 +2,7 @@ require 'httpclient'
 require 'json'
 require 'geocoder'
 require 'calabash-cucumber/uia'
+require 'calabash-cucumber/utils/logging'
 require 'calabash-cucumber/environment_helpers'
 require 'calabash-cucumber/connection'
 require 'calabash-cucumber/connection_helpers'
@@ -16,6 +17,7 @@ require 'calabash-cucumber/map'
 module Calabash
   module Cucumber
     module Core
+      include Calabash::Cucumber::Logging
       include Calabash::Cucumber::EnvironmentHelpers
       include Calabash::Cucumber::ConnectionHelpers
       include Calabash::Cucumber::QueryHelpers

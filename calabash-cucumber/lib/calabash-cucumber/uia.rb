@@ -2,10 +2,13 @@ require 'edn'
 require 'json'
 # required for ruby 1.8
 require 'enumerator'
+require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
     module UIA
+
+      include Calabash::Cucumber::Logging
 
       def uia(command,options={})
         res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
@@ -192,7 +195,7 @@ module Calabash
           end
         end
         command = "#{js_cmd}.#{js_args.join('.')}"
-        if ENV['DEBUG'] == '1'
+        if debug_logging?
           puts 'Sending UIA command'
           puts command
         end
@@ -203,7 +206,7 @@ module Calabash
 
       def uia_handle_command(cmd, *query_args)
         command = uia_serialize_command(cmd, *query_args)
-        if ENV['DEBUG'] == '1'
+        if debug_logging?
           puts 'Sending UIA command'
           puts command
         end
@@ -261,7 +264,7 @@ module Calabash
       end
 
       def uia_result(s)
-        if ENV['DEBUG'] == '1'
+        if debug_logging?
           puts 'Result'
           p s
         end
