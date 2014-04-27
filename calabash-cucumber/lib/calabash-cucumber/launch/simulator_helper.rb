@@ -3,11 +3,14 @@ require 'json'
 require 'run_loop'
 require 'net/http'
 require 'cfpropertylist'
+require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
 
     module SimulatorHelper
+
+      include Calabash::Cucumber::Logging
 
       class TimeoutErr < RuntimeError
       end
@@ -18,10 +21,6 @@ module Calabash
       DEFAULT_SIM_WAIT = 30
 
       DEFAULT_SIM_RETRY = 2
-
-      # Load environment variable for showing full console output.
-      # If not env var set then we use false, i.e. output to console is limited.
-      FULL_CONSOLE_OUTPUT = ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1' ? true : false
 
       def self.relaunch(path, sdk = nil, version = 'iphone', args = nil)
 
@@ -108,7 +107,7 @@ module Calabash
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
           else
-            if FULL_CONSOLE_OUTPUT
+            if full_console_logging?
               puts "Found potential build dir: #{build_dirs.first}"
               puts "Checking..."
             end
@@ -145,7 +144,7 @@ module Calabash
             msg << "Make sure you build for Simulator and that you're using the Calabash components"
             raise msg.join("\n")
           end
-          if FULL_CONSOLE_OUTPUT
+          if full_console_logging?
             puts("-"*37)
             puts "Auto detected APP_BUNDLE_PATH:\n\n"
 
@@ -179,7 +178,7 @@ module Calabash
             msg << "This should point to the location of your built app linked with calabash.\n"
             raise msg.join("\n")
           end
-          if FULL_CONSOLE_OUTPUT
+          if full_console_logging?
             puts("-"*37)
             puts "Auto detected APP_BUNDLE_PATH:\n\n"
 
@@ -280,7 +279,7 @@ module Calabash
           retry_count = 0
           connected = false
 
-          if FULL_CONSOLE_OUTPUT
+          if full_console_logging?
             puts "Waiting at most #{timeout} seconds for simulator (CONNECT_TIMEOUT)"
             puts "Retrying at most #{max_retry_count} times (MAX_CONNECT_RETRY)"
           end
@@ -288,7 +287,7 @@ module Calabash
           until connected do
             raise "MAX_RETRIES" if retry_count == max_retry_count
             retry_count += 1
-            if FULL_CONSOLE_OUTPUT
+            if full_console_logging?
               puts "(#{retry_count}.) Start Simulator #{sdk}, #{version}, for #{app_bundle_path}"
             end
             begin
@@ -300,7 +299,7 @@ module Calabash
                     if connected
                       server_version = get_version
                       if server_version
-                        if FULL_CONSOLE_OUTPUT
+                        if full_console_logging?
                           p server_version
                         end
                         unless version_check(server_version)
@@ -347,7 +346,7 @@ module Calabash
 
       def self.ping_app
         url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
-        if FULL_CONSOLE_OUTPUT
+        if full_console_logging?
            puts "Ping #{url}..."   
         end
         http = Net::HTTP.new(url.host, url.port)
@@ -368,7 +367,7 @@ module Calabash
         endpoint += "/" unless endpoint.end_with? "/"
         url = URI.parse("#{endpoint}version")
 
-        if FULL_CONSOLE_OUTPUT
+        if full_console_logging?
           puts "Fetch version #{url}..."
         end
         begin

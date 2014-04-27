@@ -127,11 +127,6 @@ module Calabash
         ENV['CALABASH_NO_DEPRECATION'] == '1'
       end
 
-      # returns +true+ if the <tt>CALABASH_FULL_CONSOLE_OUTPUT</tt> is set to
-      # +1+
-      def full_console_logging?
-        ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-      end
 
       # returns +true+ if the <tt>DEBUG</tt> is set to +1+
       def debug_logging?

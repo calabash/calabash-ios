@@ -402,7 +402,7 @@ class Calabash::Cucumber::Launcher
         return RunLoop.run(args)
       rescue RunLoop::TimeoutError => e
         last_err = e
-        if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+        if full_console_logging?
           puts 'retrying run loop...'
         end
         Calabash::Cucumber::SimulatorHelper.stop
@@ -419,8 +419,8 @@ class Calabash::Cucumber::Launcher
       timeout = (ENV['CONNECT_TIMEOUT'] || timeout).to_i
       retry_count = 0
       connected = false
-      if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-        puts "Waiting for App to be ready"
+      if full_console_logging?
+        puts 'Waiting for App to be ready'
       end
       until connected do
         raise "MAX_RETRIES" if retry_count == max_retry_count
