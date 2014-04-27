@@ -1,8 +1,11 @@
-require 'bundler'
 require 'fileutils'
 
+require 'bundler'
 Bundler::GemHelper.install_tasks
 
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new
+task :test => :spec
 
 task :build_server do
 

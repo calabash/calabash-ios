@@ -30,4 +30,7 @@ Gem::Specification.new do |s|
   s.add_dependency('awesome_print')
   s.add_dependency('xamarin-test-cloud', '~> 0.9.27')
 
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rspec'
+
 end
