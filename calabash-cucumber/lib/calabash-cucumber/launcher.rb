@@ -1,4 +1,5 @@
 require 'calabash-cucumber/launch/simulator_helper'
+require 'calabash-cucumber/utils/simulator_accessibility'
 require 'sim_launcher'
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/actions/instruments_actions'
@@ -6,9 +7,13 @@ require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/version'
+require 'calabash-cucumber/utils/logging'
 
 
 class Calabash::Cucumber::Launcher
+
+  include Calabash::Cucumber::Logging
+  include Calabash::Cucumber::SimulatorAccessibility
 
   KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
 
@@ -121,7 +126,7 @@ class Calabash::Cucumber::Launcher
     directories_for_sdk_prefix(sdk).each do |dir|
       bundle = `find "#{dir}/Applications" -type d -depth 2 -name "#{app}" | head -n 1`
       next if bundle.empty? # Assuming we're already clean
-      if ENV['DEBUG']=='1'
+      if debug_logging?
         puts "Reset app state for #{bundle}"
       end
       sandbox = File.dirname(bundle)
@@ -139,7 +144,7 @@ class Calabash::Cucumber::Launcher
 
   # Call as update_privacy_settings('com.my.app', {:photos => {:allow => true}})
   def update_privacy_settings(bundle_id, opts={})
-    if ENV['DEBUG']=='1'
+    if debug_logging?
       puts "Update privacy settings #{bundle_id}, #{opts}"
     end
     unless File.exist?(`which sqlite3`.strip)
@@ -152,12 +157,12 @@ class Calabash::Cucumber::Launcher
       sdk = setting_options[:sdk] || SimLauncher::SdkDetector.new().latest_sdk_version
 
       dirs = directories_for_sdk_prefix(sdk)
-      if ENV['DEBUG']=='1'
+      if debug_logging?
         puts "About to update privacy setting #{setting_name} for #{bundle_id}, allow: #{allow} in sdk #{sdk}, #{dirs}"
       end
 
       dirs.each do |dir|
-        if ENV['DEBUG']=='1'
+        if debug_logging?
           puts "Setting access for #{bundle_id} for permission #{setting_name} to allow: #{allow}"
         end
         path_to_tcc_db = tcc_database_for_sdk_dir(dir)
@@ -172,7 +177,7 @@ class Calabash::Cucumber::Launcher
           sql = %Q['UPDATE access SET allowed=#{allowed_as_i} where client="#{bundle_id}" AND service="#{setting_name}";']
         end
 
-        if ENV['DEBUG']=='1'
+        if debug_logging?
           puts "Executing sql #{sql} on #{path_to_tcc_db}"
         end
 
@@ -216,7 +221,11 @@ class Calabash::Cucumber::Launcher
         :device => device_env,
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
-        :sdk_version => sdk_version
+        :sdk_version => sdk_version,
+        # do not advertise this to users!
+        # for example, don't include documentation about this
+        # this is used to instrument internal testing
+        :launch_retries => 5
     }
 
     #:device_target will be set
@@ -265,7 +274,7 @@ class Calabash::Cucumber::Launcher
       begin
         major = major.to_i
       rescue
-        warn("SDK_VERSION invalid #{sdk_version} - ignoring...")
+        calabash_warn("SDK_VERSION invalid #{sdk_version} - ignoring...")
       end
     end
     return :instruments if major && major >= 7 # Only instruments supported for iOS7+
@@ -328,6 +337,7 @@ class Calabash::Cucumber::Launcher
         puts 'Warning: :privacy_settings not supported on device'
       end
     end
+    enable_accessibility_on_simulators
 
     if run_with_instruments?(args)
       self.run_loop = new_run_loop(args)
@@ -397,12 +407,15 @@ class Calabash::Cucumber::Launcher
       Calabash::Cucumber::SimulatorHelper.stop
     end
     last_err = nil
-    5.times do
+
+    num_retries = args[:launch_retries] || 5
+
+    num_retries.times do
       begin
         return RunLoop.run(args)
       rescue RunLoop::TimeoutError => e
         last_err = e
-        if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+        if full_console_logging?
           puts 'retrying run loop...'
         end
         Calabash::Cucumber::SimulatorHelper.stop
@@ -419,8 +432,8 @@ class Calabash::Cucumber::Launcher
       timeout = (ENV['CONNECT_TIMEOUT'] || timeout).to_i
       retry_count = 0
       connected = false
-      if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-        puts "Waiting for App to be ready"
+      if full_console_logging?
+        puts 'Waiting for App to be ready'
       end
       until connected do
         raise "MAX_RETRIES" if retry_count == max_retry_count
@@ -586,13 +599,7 @@ class Calabash::Cucumber::Launcher
     end
 
     if exe_paths.empty?
-      msg = "could not find executable in '#{app_bundle_path}'"
-
-      begin
-        warn "\033[34m\nWARN: #{msg}\033[0m"
-      rescue
-        warn "\nWARN: #{msg}"
-      end
+      calabash_warn "could not find executable in '#{app_bundle_path}'"
 
       @@server_version = SERVER_VERSION_NOT_AVAILABLE
       return @@server_version
@@ -608,12 +615,8 @@ class Calabash::Cucumber::Launcher
     end
 
     unless server_version
-      msg = 'could not find server version by inspecting the binary strings table'
-      begin
-        warn "\033[34m\nWARN: #{msg}\033[0m"
-      rescue
-        warn "\nWARN: #{msg}"
-      end
+      calabash_warn('could not find server version by inspecting the binary strings table')
+
       @@server_version = SERVER_VERSION_NOT_AVAILABLE
       return @@server_version
     end
@@ -650,12 +653,7 @@ class Calabash::Cucumber::Launcher
     end
 
     if server_version == SERVER_VERSION_NOT_AVAILABLE
-      msg = 'server version could not be found - skipping compatibility check'
-      begin
-        warn "\033[34m\nWARN: #{msg}\033[0m"
-      rescue
-        warn "\nWARN: #{msg}"
-      end
+      calabash_warn('server version could not be found - skipping compatibility check')
       return nil
     end
 
@@ -671,13 +669,7 @@ class Calabash::Cucumber::Launcher
       msgs << "min server version: '#{min_server_version}'"
       msgs << "    server version: '#{server_version}'"
 
-      msg = "#{msgs.join("\n")}"
-
-      begin
-        warn "\033[34m\nWARN: #{msg}\033[0m"
-      rescue
-        warn "\nWARN: #{msg}"
-      end
+      calabash_warn("#{msgs.join("\n")}")
     end
     nil
   end

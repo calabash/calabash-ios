@@ -1,5 +1,8 @@
 require 'sim_launcher'
 require 'calabash-cucumber/launch/simulator_helper'
+require 'calabash-cucumber/utils/simulator_accessibility'
+
+include Calabash::Cucumber::SimulatorAccessibility
 
 def quit_sim
   `echo 'application "iPhone Simulator" quit' | osascript`
@@ -22,30 +25,11 @@ def calabash_sim_reset
     launcher.launch_ios_app(app_path, sdk, ENV['DEVICE'] || 'iphone')
     puts `osascript #{reset_script}`
   end
-
-
 end
 
 def calabash_sim_accessibility
-  Calabash::Cucumber::SimulatorHelper.stop
-  old = ['5.*','6.*','7.0*'].map do |x|
-    Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "7.0*", "Library", "Preferences"))
-  end.flatten
-
-  rest = Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "*.*", "Library", "Preferences"))
-  rest = rest - old
-  (old+rest).each do |sim_pref_dir|
-    fp = File.expand_path("#{@script_dir}/data/")
-    if rest.include?(sim_pref_dir)
-      tgt = 'com.apple.Accessibility-5.1.plist'
-    else
-      tgt = 'com.apple.Accessibility.plist'
-    end
-    FileUtils.cp("#{fp}/#{tgt}", File.join(sim_pref_dir, 'com.apple.Accessibility.plist'))
-  end
-
+  enable_accessibility_on_simulators
 end
-
 
 def calabash_sim_location(args)
 

@@ -1,6 +1,6 @@
 module Calabash
   module Cucumber
-    VERSION = '0.9.169.pre3'
+    VERSION = '0.9.169.pre4'
     MIN_SERVER_VERSION = '0.9.169.pre1'
 
     class Version

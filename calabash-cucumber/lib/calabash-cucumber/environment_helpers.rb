@@ -1,10 +1,14 @@
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/launcher'
+require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
+
+    # methods that describe the runtime environment
     module EnvironmentHelpers
 
+      include Calabash::Cucumber::Logging
 
       # returns +true+ if UIAutomation functions are available
       #
@@ -119,60 +123,6 @@ module Calabash
       # raises an error if the server cannot be reached
       def iphone_app_emulated_on_ipad?
         _default_device_or_create().iphone_app_emulated_on_ipad?
-      end
-
-      # returns +true+ if the <tt>CALABASH_NO_DEPRECATION</tt> variable is set
-      # to +1+
-      def no_deprecation_warnings?
-        ENV['CALABASH_NO_DEPRECATION'] == '1'
-      end
-
-      # returns +true+ if the <tt>CALABASH_FULL_CONSOLE_OUTPUT</tt> is set to
-      # +1+
-      def full_console_logging?
-        ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-      end
-
-      # returns +true+ if the <tt>DEBUG</tt> is set to +1+
-      def debug_logging?
-        ENV['DEBUG'] == '1'
-      end
-
-
-      # prints a deprecated message that includes the line number
-      #   +version+ string indicating when the feature was deprecated
-      #   +msg+ deprecation message (possibly suggesting alternatives)
-      #   +type+ <tt>{ :warn | :pending }</tt> - <tt>:pending</tt> will raise a
-      #          cucumber pending exception
-      #
-      # if ENV['CALABASH_NO_DEPRECATION'] == '1' then this method is a nop
-      def _deprecated(version, msg, type)
-        allowed = [:pending, :warn]
-        unless allowed.include?(type)
-          screenshot_and_raise "type '#{type}' must be on of '#{allowed}'"
-        end
-
-        unless no_deprecation_warnings?
-
-
-          if RUBY_VERSION < '2.0'
-            stack = Kernel.caller()[1..6].join("\n")
-          else
-            stack = Kernel.caller(0, 6)[1..-1].join("\n")
-          end
-
-          msg = "deprecated '#{version}' - '#{msg}'\n#{stack}"
-
-          if type.eql?(:pending)
-            pending(msg)
-          else
-            begin
-              warn "\033[34m\nWARN: #{msg}\033[0m"
-            rescue
-              warn "\nWARN: #{msg}"
-            end
-          end
-        end
       end
 
       private

@@ -1,12 +1,16 @@
+require 'calabash-cucumber/utils/logging'
+
 module Calabash
   module Cucumber
     module StatusBarHelpers #=> Map
+
+      include Calabash::Cucumber::Logging
 
       def device_orientation(force_down=false)
         res = map(nil, :orientation, :device).first
 
         if ['face up', 'face down'].include?(res)
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+          if full_console_logging?
             if force_down
               puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
             end

@@ -1,10 +1,13 @@
 require 'json'
+require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
     # Class device encapsulates information about the device or devices we are
     # interacting with during a test.
     class Device
+
+      include Calabash::Cucumber::Logging
 
       GESTALT_IPHONE = 'iPhone'
       GESTALT_IPAD = 'iPad'

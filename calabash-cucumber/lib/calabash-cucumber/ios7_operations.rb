@@ -4,15 +4,17 @@ require 'calabash-cucumber/actions/instruments_actions'
 require 'calabash-cucumber/actions/playback_actions'
 require 'calabash-cucumber/environment_helpers'
 
+# todo deprecate the Calabash::Cucumber::IOS7Operations
 
-
+# WARNING:  this entire module is deprecated
+# references functions that do not exist
+# should be removed
 module Calabash
   module Cucumber
     module IOS7Operations
       include Calabash::Cucumber::UIA
       include Calabash::Cucumber::EnvironmentHelpers
 
-      # todo deprecate the Calabash::Cucumber::IOS7Operations
 
       # <b>DEPRECATED</b>
       #

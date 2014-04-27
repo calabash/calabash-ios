@@ -1,6 +1,10 @@
+require 'calabash-cucumber/utils/logging'
+
 module Calabash
   module Cucumber
     module RotationHelpers  #=> Connection, StatusBarHelpers
+
+      include Calabash::Cucumber::Logging
 
       def rotation_candidates
         %w(rotate_left_home_down rotate_left_home_left rotate_left_home_right rotate_left_home_up
@@ -18,15 +22,15 @@ module Calabash
       def rotate_home_button_to(dir)
         dir_sym = dir.to_sym
         if dir_sym.eql?(:top)
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            warn "converting '#{dir}' to ':up' - please adjust your code"
+          if full_console_logging?
+            calabash_warn "converting '#{dir}' to ':up' - please adjust your code"
           end
           dir_sym = :up
         end
 
         if dir_sym.eql?(:bottom)
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            warn "converting '#{dir}' to ':down' - please adjust your code"
+          if full_console_logging?
+            calabash_warn "converting '#{dir}' to ':down' - please adjust your code"
           end
           dir_sym = :down
         end
@@ -46,7 +50,7 @@ module Calabash
         return res if res.eql? dir_sym
 
         rotation_candidates.each { |candidate|
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+          if full_console_logging?
             puts "try to rotate to '#{dir_sym}' using '#{candidate}'"
           end
           playback(candidate)
@@ -63,10 +67,10 @@ module Calabash
           return if res.eql? dir_sym
         }
 
-        if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-          warn "Could not rotate home button to '#{dir}'."
-          warn 'Is rotation enabled for this controller?'
-          warn "Will return 'down'"
+        if full_console_logging?
+          calabash_warn "Could not rotate home button to '#{dir}'."
+          calabash_warn 'Is rotation enabled for this controller?'
+          calabash_warn "Will return 'down'"
         end
         :down
       end
@@ -99,7 +103,7 @@ module Calabash
         end
 
         if rotate_cmd.nil?
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+          if full_console_logging?
             puts "Could not rotate device in direction '#{dir}' with orientation '#{current_orientation} - will do nothing"
           end
         else

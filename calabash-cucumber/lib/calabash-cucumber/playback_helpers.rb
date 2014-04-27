@@ -1,7 +1,10 @@
+require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
     module PlaybackHelpers
+
+      include Calabash::Cucumber::Logging
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
 
@@ -19,11 +22,6 @@ module Calabash
         directories.each { |dir|
           path = "#{dir}/#{recording}"
           if File.exists?(path)
-            # useful for debugging recordings, but too verbose for release
-            # suggest (yet) another variable CALABASH_DEBUG_PLAYBACK ?
-            #if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-            #  puts "found compatible playback: '#{path}'"
-            #end
             return File.read(path)
           end
         }
@@ -70,7 +68,7 @@ EOF
         data = find_compatible_recording(recording_name, os, rec_dir, device, candidates)
 
         if data.nil? and device=='ipad'
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+          if full_console_logging?
             puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
           end
           data = find_compatible_recording(recording_name, os, rec_dir, 'iphone', candidates)
@@ -187,7 +185,7 @@ EOF
 
         rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
         unless File.directory?(rec_dir)
-          if ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+          if full_console_logging?
             puts "creating playback directory at '#{rec_dir}'"
           end
           system("mkdir -p #{rec_dir}")

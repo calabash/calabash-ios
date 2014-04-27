@@ -1,10 +1,12 @@
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
 require 'fileutils'
+require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
     module WaitHelpers
+      include Calabash::Cucumber::Logging
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
 

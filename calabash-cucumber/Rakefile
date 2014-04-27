@@ -1,9 +1,22 @@
-require 'bundler'
 require 'fileutils'
 
+require 'bundler'
 Bundler::GemHelper.install_tasks
 
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new
+task :test => :spec
 
+# REQUIRES that the calabash-ios-server source code is located
+#
+#   ../../calabash-ios-server.
+#
+# if your server source code is in a different location, you can use:
+#
+# $ CALABASH_SERVER_PATH=/your/path rake build_server'
+#
+# to specify an alternative server location
+desc 'build the calabash.framework and install it in ./staticlib/.'
 task :build_server do
 
   FRAMEWORK='calabash.framework'
