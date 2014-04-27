@@ -1,4 +1,5 @@
 require 'calabash-cucumber/launch/simulator_helper'
+require 'calabash-cucumber/utils/simulator_accessibility'
 require 'sim_launcher'
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/actions/instruments_actions'
@@ -12,6 +13,7 @@ require 'calabash-cucumber/utils/logging'
 class Calabash::Cucumber::Launcher
 
   include Calabash::Cucumber::Logging
+  include Calabash::Cucumber::SimulatorAccessibility
 
   KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
 
@@ -331,6 +333,7 @@ class Calabash::Cucumber::Launcher
         puts 'Warning: :privacy_settings not supported on device'
       end
     end
+    enable_accessibility_on_simulators
 
     if run_with_instruments?(args)
       self.run_loop = new_run_loop(args)
