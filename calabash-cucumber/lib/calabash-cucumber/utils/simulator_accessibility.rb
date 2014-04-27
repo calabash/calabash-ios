@@ -28,6 +28,12 @@ module Calabash
         system "/usr/bin/osascript -e 'tell application \"#{dev_dir}/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app\" to quit'"
       end
 
+      # launches the iOS Simulator indicated by +xcode-select+ or +DEVELOPER_DIR+
+      def launch_simulator
+        dev_dir = xcode_developer_dir
+        system "open -a \"#{dev_dir}/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app\""
+      end
+
       # resets the simulator content and settings.  it is analogous to touching
       # the menu item.
       #

@@ -12,6 +12,19 @@ describe 'simulator accessibility tool' do
     expect(File.exist?(path)).to be == true
   end
 
+  it 'should be able open and close the simulator' do
+    quit_simulator
+    sleep(2)
+    ps = `ps auxw | grep "iPhone Simulator.app/Contents/MacOS/iPhone Simulator" | grep -v grep`
+    expect(ps.split("\n").count).to be == 0
+
+    launch_simulator
+    sleep(4)
+
+    ps = `ps auxw | grep "iPhone Simulator.app/Contents/MacOS/iPhone Simulator" | grep -v grep`
+    expect(ps.split("\n").count).to be == 1
+  end
+
   describe 'enabling accessibility' do
 
     before(:each) do
