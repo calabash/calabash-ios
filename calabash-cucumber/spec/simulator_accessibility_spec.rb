@@ -99,6 +99,16 @@ describe 'simulator accessibility tool' do
 
 
       it 'should not be able to launch LPSimpleExample-app b/c accessibility is not enabled' do
+        msgs =
+              [
+                    'Will throw a "ScriptAgent quit unexpectedly" UI dialog!',
+                    '',
+                    'This dialog is generated because the app failed to a launch',
+                    'correctly on the simulator.  I checked run_loop and this is not',
+                    'caused by anything there.',
+                    '',
+                    'AFAICT there is nothing to be done about this.']
+        calabash_warn(msgs.join("\n"))
         expect { @launcher.new_run_loop(@launch_args) }.to raise_error(Calabash::Cucumber::Launcher::StartError)
       end
 
