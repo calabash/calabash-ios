@@ -12,6 +12,19 @@ describe 'simulator accessibility tool' do
     expect(File.exist?(path)).to be == true
   end
 
+  it 'should be able open and close the simulator' do
+    quit_simulator
+    sleep(2)
+    ps = `ps auxw | grep "iPhone Simulator.app/Contents/MacOS/iPhone Simulator" | grep -v grep`
+    expect(ps.split("\n").count).to be == 0
+
+    launch_simulator
+    sleep(4)
+
+    ps = `ps auxw | grep "iPhone Simulator.app/Contents/MacOS/iPhone Simulator" | grep -v grep`
+    expect(ps.split("\n").count).to be == 1
+  end
+
   describe 'enabling accessibility' do
 
     before(:each) do
@@ -86,6 +99,16 @@ describe 'simulator accessibility tool' do
 
 
       it 'should not be able to launch LPSimpleExample-app b/c accessibility is not enabled' do
+        msgs =
+              [
+                    'Will throw a "ScriptAgent quit unexpectedly" UI dialog!',
+                    '',
+                    'This dialog is generated because the app failed to a launch',
+                    'correctly on the simulator.  I checked run_loop and this is not',
+                    'caused by anything there.',
+                    '',
+                    'AFAICT there is nothing to be done about this.']
+        calabash_warn(msgs.join("\n"))
         expect { @launcher.new_run_loop(@launch_args) }.to raise_error(Calabash::Cucumber::Launcher::StartError)
       end
 
