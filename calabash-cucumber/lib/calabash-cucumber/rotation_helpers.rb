@@ -23,14 +23,14 @@ module Calabash
         dir_sym = dir.to_sym
         if dir_sym.eql?(:top)
           if full_console_logging?
-            warn "converting '#{dir}' to ':up' - please adjust your code"
+            calabash_warn "converting '#{dir}' to ':up' - please adjust your code"
           end
           dir_sym = :up
         end
 
         if dir_sym.eql?(:bottom)
           if full_console_logging?
-            warn "converting '#{dir}' to ':down' - please adjust your code"
+            calabash_warn "converting '#{dir}' to ':down' - please adjust your code"
           end
           dir_sym = :down
         end
@@ -68,9 +68,9 @@ module Calabash
         }
 
         if full_console_logging?
-          warn "Could not rotate home button to '#{dir}'."
-          warn 'Is rotation enabled for this controller?'
-          warn "Will return 'down'"
+          calabash_warn "Could not rotate home button to '#{dir}'."
+          calabash_warn 'Is rotation enabled for this controller?'
+          calabash_warn "Will return 'down'"
         end
         :down
       end

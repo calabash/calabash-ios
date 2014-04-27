@@ -268,7 +268,7 @@ class Calabash::Cucumber::Launcher
       begin
         major = major.to_i
       rescue
-        warn("SDK_VERSION invalid #{sdk_version} - ignoring...")
+        calabash_warn("SDK_VERSION invalid #{sdk_version} - ignoring...")
       end
     end
     return :instruments if major && major >= 7 # Only instruments supported for iOS7+
@@ -589,13 +589,7 @@ class Calabash::Cucumber::Launcher
     end
 
     if exe_paths.empty?
-      msg = "could not find executable in '#{app_bundle_path}'"
-
-      begin
-        warn "\033[34m\nWARN: #{msg}\033[0m"
-      rescue
-        warn "\nWARN: #{msg}"
-      end
+      calabash_warn "could not find executable in '#{app_bundle_path}'"
 
       @@server_version = SERVER_VERSION_NOT_AVAILABLE
       return @@server_version
@@ -611,12 +605,8 @@ class Calabash::Cucumber::Launcher
     end
 
     unless server_version
-      msg = 'could not find server version by inspecting the binary strings table'
-      begin
-        warn "\033[34m\nWARN: #{msg}\033[0m"
-      rescue
-        warn "\nWARN: #{msg}"
-      end
+      calabash_warn('could not find server version by inspecting the binary strings table')
+
       @@server_version = SERVER_VERSION_NOT_AVAILABLE
       return @@server_version
     end
@@ -653,12 +643,7 @@ class Calabash::Cucumber::Launcher
     end
 
     if server_version == SERVER_VERSION_NOT_AVAILABLE
-      msg = 'server version could not be found - skipping compatibility check'
-      begin
-        warn "\033[34m\nWARN: #{msg}\033[0m"
-      rescue
-        warn "\nWARN: #{msg}"
-      end
+      calabash_warn('server version could not be found - skipping compatibility check')
       return nil
     end
 
@@ -674,13 +659,7 @@ class Calabash::Cucumber::Launcher
       msgs << "min server version: '#{min_server_version}'"
       msgs << "    server version: '#{server_version}'"
 
-      msg = "#{msgs.join("\n")}"
-
-      begin
-        warn "\033[34m\nWARN: #{msg}\033[0m"
-      rescue
-        warn "\nWARN: #{msg}"
-      end
+      calabash_warn("#{msgs.join("\n")}")
     end
     nil
   end
