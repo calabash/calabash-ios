@@ -97,6 +97,11 @@ describe 'simulator accessibility tool' do
         @launcher = Calabash::Cucumber::Launcher.new
       end
 
+      it 'should not fail if the com.apple.Accessibility.plist does not exist' do
+        dir = File.join(simulator_app_support_dir, "#{@latest_sdk}")
+        expect(enable_accessibility_in_sdk_dir(dir, {:verbose => true})).to be == false
+      end
+
 
       it 'should not be able to launch LPSimpleExample-app b/c accessibility is not enabled' do
         msgs =
