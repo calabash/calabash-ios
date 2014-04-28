@@ -12,22 +12,7 @@ def quit_sim
 end
 
 def calabash_sim_reset
-  reset_script = File.expand_path("#{@script_dir}/reset_simulator.scpt")
-  app_path = File.expand_path("#{@script_dir}/EmptyAppHack.app")
-  launcher = SimLauncher::Simulator.new
-
-  sdks = ENV['SDK_VERSIONS']
-  if sdks
-    sdks = sdks.split(",")
-  else
-    sdks = SimLauncher::SdkDetector.new(launcher).available_sdk_versions
-  end
-
-
-  sdks.each do |sdk|
-    launcher.launch_ios_app(app_path, sdk, ENV['DEVICE'] || 'iphone')
-    puts `osascript #{reset_script}`
-  end
+  reset_simulator_content_and_settings
 end
 
 def calabash_sim_accessibility
