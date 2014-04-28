@@ -120,9 +120,14 @@ describe 'simulator accessibility tool' do
       it 'should be able to enable accessibility for the latest sdk' do
         repopulate_sim_app_support_for_sdk(@latest_sdk)
 
+        # needs launch the simulator again because it seems to want to write
+        # more files on the second launch.
+        launch_simulator
+        sleep(4)
+
         plist = File.join(simulator_app_support_dir, "#{@latest_sdk}", 'Library/Preferences/com.apple.Accessibility.plist')
         hash = accessibility_properties_hash()
-        expect(plist_read(hash[:access_enabled], plist)).to be == nil
+        expect(plist_read(hash[:access_enabled], plist)).to be == 'true'
         expect(plist_read(hash[:app_access_enabled], plist)).to be == 'true'
         expect(plist_read(hash[:automation_enabled], plist)).to be == nil
         expect(plist_read(hash[:inspector_showing], plist)).to be == 'false'
