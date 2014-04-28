@@ -64,10 +64,15 @@ module Calabash
       #     ~/Library/Application Support/iPhone Simulator/Library/7.1
       #
       # this method also hides the AXInspector.
-      def enable_accessibility_on_simulators
-        simulator_support_sdk_dirs.each do |dir|
-          enable_accessibility_in_sdk_dir(dir)
+      # @param [Hash] opts controls the behavior of the method
+      # @option opts [Boolean] :verbose controls logging output
+      # @return [Boolean] true iff enabling accessibility worked on all sdk
+      #  directories
+      def enable_accessibility_on_simulators(opts={})
+        results =  simulator_support_sdk_dirs.map do |dir|
+          enable_accessibility_in_sdk_dir(dir, opts)
         end
+        results.all? { |elm| elm }
       end
 
       @private
