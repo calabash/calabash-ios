@@ -337,7 +337,10 @@ class Calabash::Cucumber::Launcher
         puts 'Warning: :privacy_settings not supported on device'
       end
     end
-    enable_accessibility_on_simulators
+
+    if args[:device_target].downcase.include?('simulator')
+      enable_accessibility_on_simulators
+    end
 
     if run_with_instruments?(args)
       self.run_loop = new_run_loop(args)

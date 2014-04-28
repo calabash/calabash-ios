@@ -64,10 +64,15 @@ module Calabash
       #     ~/Library/Application Support/iPhone Simulator/Library/7.1
       #
       # this method also hides the AXInspector.
-      def enable_accessibility_on_simulators
-        simulator_support_sdk_dirs.each do |dir|
-          enable_accessibility_in_sdk_dir(dir)
+      # @param [Hash] opts controls the behavior of the method
+      # @option opts [Boolean] :verbose controls logging output
+      # @return [Boolean] true iff enabling accessibility worked on all sdk
+      #  directories
+      def enable_accessibility_on_simulators(opts={})
+        results =  simulator_support_sdk_dirs.map do |dir|
+          enable_accessibility_in_sdk_dir(dir, opts)
         end
+        results.all? { |elm| elm }
       end
 
       @private
@@ -81,22 +86,89 @@ module Calabash
       #   enable_accessibility_in_sdk_dir(path)
       #
       # this method also hides the AXInspector.
+      #
+      # if the Library/Preferences/com.apple.Accessibility.plist does not exist,
+      # this method returns false.
+      #
       # @see enable_accessibility_on_simulators for the public API.
       #
       # @param [String] sim_app_support_sdk_dir the directory where the
       #   Library/Preferences/com.apple.Accessibility.plist can be found.
-      def enable_accessibility_in_sdk_dir(sim_app_support_sdk_dir)
-        quit_simulator
+      #
+      # @param [Hash] opts controls the behavior of the method
+      # @option opts [Boolean] :verbose controls logging output
+      # @return [Boolean] iff the plist exists and the plist was successfully
+      #   updated.
+      def enable_accessibility_in_sdk_dir(sim_app_support_sdk_dir, opts={})
+        default_opts = {:verbose => false}
+        merged = default_opts.merge(opts)
+
         plist_path = File.expand_path("#{sim_app_support_sdk_dir}/Library/Preferences/com.apple.Accessibility.plist")
 
-        hash = accessibility_properties_hash()
-        plist_set(hash[:access_enabled], 'bool', 'true', plist_path)
-        plist_set(hash[:app_access_enabled], 'bool', 'true', plist_path)
-        plist_set(hash[:automation_enabled], 'bool', 'true', plist_path)
+        verbose = merged[:verbose]
 
-        plist_set(hash[:inspector_showing], 'bool', 'false', plist_path)
-        plist_set(hash[:inspector_full_size], 'bool', 'false', plist_path)
-        plist_set(hash[:inspector_frame], 'string', '{{270, -13}, {276, 166}}', plist_path)
+        sdk = File.basename(sim_app_support_sdk_dir)
+        msgs = ["cannot enable accessibility for #{sdk} SDK"]
+        unless File.exists?(plist_path)
+          if verbose
+            msgs << "expected plist to exist at #{plist_path}"
+            calabash_warn(msgs.join("\n"))
+          end
+          return false
+        end
+
+        quit_simulator
+
+        hash = accessibility_properties_hash()
+
+        unless plist_set(hash[:access_enabled], 'bool', 'true', plist_path)
+          if verbose
+            msgs << "could not set '#{hash[:access_enabled]}' to YES"
+            calabash_warn(msgs.join("\n"))
+          end
+          return false
+        end
+
+        unless plist_set(hash[:app_access_enabled], 'bool', 'true', plist_path)
+          if verbose
+            msgs << "could not set '#{hash[:app_access_enabled]}' to YES"
+            calabash_warn(msgs.join("\n"))
+          end
+          return false
+        end
+
+        unless plist_set(hash[:automation_enabled], 'bool', 'true', plist_path)
+          if verbose
+            msgs << "could not set '#{hash[:automation_enabled]}' to YES"
+            calabash_warn(msgs.join("\n"))
+          end
+          return false
+        end
+
+        unless plist_set(hash[:inspector_showing], 'bool', 'false', plist_path)
+          if verbose
+            msgs << "could not set '#{hash[:inspector_showing]}' to NO"
+            calabash_warn(msgs.join("\n"))
+          end
+          return false
+        end
+
+        unless plist_set(hash[:inspector_full_size], 'bool', 'false', plist_path)
+          if verbose
+            msgs << "could not set '#{hash[:inspector_full_size]}' to NO"
+            calabash_warn(msgs.join("\n"))
+          end
+          return false
+        end
+
+        res = plist_set(hash[:inspector_frame], 'string', '{{270, -13}, {276, 166}}', plist_path)
+        unless res
+          if verbose
+            msgs << "could not set '#{hash[:inspector_frame]}'"
+            calabash_warn(msgs.join("\n"))
+          end
+        end
+        res
       end
 
 
