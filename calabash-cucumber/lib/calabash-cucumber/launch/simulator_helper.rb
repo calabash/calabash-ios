@@ -55,7 +55,7 @@ module Calabash
             hash = CFPropertyList.native_types(plist.value)
             ws_dir = File.dirname(hash['WorkspacePath']).downcase
             p_dir = dir.downcase
-            if (p_dir.include? ws_dir)
+            if p_dir.include? ws_dir
               xcode_workspace_name = ws_dir.split('/').last
             end
             ws_dir == p_dir
@@ -82,7 +82,7 @@ module Calabash
             File.basename(xc_proj).start_with?(xcode_proj_name)
           end
 
-          if (build_dirs.count == 0 && !xcode_workspace_name.empty?)
+          if build_dirs.count == 0 && !xcode_workspace_name.empty?
             # check for directory named "workspace-{deriveddirectoryrandomcharacters}"
             build_dirs = Dir.glob("#{DERIVED_DATA}/*").find_all do |xc_proj|
               File.basename(xc_proj).downcase.start_with?(xcode_workspace_name)
@@ -92,7 +92,7 @@ module Calabash
           # todo analyze `self.derived_data_dir_for_project` to see if it contains dead code
           # todo assuming this is not dead code, the documentation around derived data for project needs to be updated
 
-          if (build_dirs.count == 0)
+          if build_dirs.count == 0
             msg = ['Unable to find your built app.']
             msg << "This means that Calabash can't automatically launch iOS simulator."
             msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
@@ -101,13 +101,13 @@ module Calabash
             msg << 'Option 1) Make sure you are running this command from your project directory, '
             msg << 'i.e., the directory containing your .xcodeproj file.'
             msg << 'In Xcode, build your calabash target for simulator.'
-            msg << "Check that your app can be found in\n #{File.expand_path('~/Library/Developer/Xcode/DerivedData')}"
+            msg << "Check that your app can be found in\n #{DERIVED_DATA}"
             msg << "\n\nOption 2). In features/support/01_launch.rb set APP_BUNDLE_PATH to"
             msg << 'the path where Xcode has built your Calabash target.'
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
 
-          elsif (build_dirs.count > 1)
+          elsif build_dirs.count > 1
             msg = ['Unable to auto detect APP_BUNDLE_PATH.']
             msg << "You have several projects with the same name: #{xcode_proj_name} in #{DERIVED_DATA}:\n"
             msg << build_dirs.join("\n")
@@ -135,13 +135,12 @@ module Calabash
       def detect_app_bundle(path=nil,device_build_dir='iPhoneSimulator')
         begin
           app_bundle_or_raise(path,device_build_dir)
-        rescue =>e
+        rescue
           nil
         end
       end
 
       def app_bundle_or_raise(path=nil, device_build_dir='iPhoneSimulator')
-        bundle_path = nil
         path = File.expand_path(path) if path
 
         if path and not File.directory?(path)
@@ -349,13 +348,14 @@ module Calabash
 
         http = Net::HTTP.new(url.host, url.port)
         res = http.start do |sess|
-          sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || "version")
+          # noinspection RubyResolve
+          sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || 'version')
         end
 
         status = res.code
         begin
           http.finish if http and http.started?
-        rescue Exception => e
+        rescue
           # nop
         end
 
