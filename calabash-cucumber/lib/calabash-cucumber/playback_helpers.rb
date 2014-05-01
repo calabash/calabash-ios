@@ -1,4 +1,5 @@
 require 'calabash-cucumber/utils/logging'
+require 'calabash-cucumber/device'
 
 module Calabash
   module Cucumber
@@ -7,6 +8,18 @@ module Calabash
       include Calabash::Cucumber::Logging
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
+
+      def device_major_version
+        url = URI.parse(ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265/')
+        http = Net::HTTP.new(url.host, url.port)
+        res = http.start do |sess|
+          sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || 'version')
+        end
+
+        version_body = JSON.parse(res.body)
+        device = Calabash::Cucumber::Device.new(url, version_body)
+        device.ios_major_version
+      end
 
       def recording_name_for(recording_name, os, device)
         #noinspection RubyControlFlowConversionInspection
@@ -39,11 +52,10 @@ module Calabash
 
       def load_playback_data(recording_name, options={})
         device = options['DEVICE'] || ENV['DEVICE'] || 'iphone'
-
         if @calabash_launcher && @calabash_launcher.active?
           major = @calabash_launcher.ios_major_version
         else
-          major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+          major = device_major_version
         end
 
         unless major
@@ -156,7 +168,7 @@ EOF
         if @calabash_launcher && @calabash_launcher.active?
           major = @calabash_launcher.ios_major_version
         else
-          major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+          major = device_major_version
         end
 
         unless major
