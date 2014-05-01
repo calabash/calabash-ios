@@ -350,10 +350,9 @@ class Calabash::Cucumber::Launcher
       self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
       # run with sim launcher
-      sdk = sdk_version || SimLauncher::SdkDetector.new().available_sdk_versions.reverse.find { |x| !x.start_with?('7') }
-      path = self.simulator_launcher.app_bundle_or_raise(app_path)
       self.actions= Calabash::Cucumber::PlaybackActions.new
-      self.simulator_launcher.relaunch(path, sdk, args[:device].to_s, args)
+      # why not just pass args - AFAICT args[:app] == app_path?
+      self.simulator_launcher.relaunch(app_path, sdk_version(), args)
     end
     self.launch_args = args
     ensure_connectivity

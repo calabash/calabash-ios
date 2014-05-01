@@ -34,11 +34,28 @@ module Calabash
         @sdk_detector = SimLauncher::SdkDetector.new()
       end
 
-      def relaunch(path, sdk = nil, version = 'iphone', args = nil)
-        # cached, but not used
+      def relaunch(app_path, sdk, args)
+        app_bundle_path = app_bundle_or_raise(app_path)
+
+        if sdk.nil?
+          # iOS 7 requires launching with instruments, so we _must_ launch with
+          # the first SDK that is _not_ iOS 7
+          _sdk = self.sdk_detector.available_sdk_versions.reverse.find { |x| !x.start_with?('7') }
+        else
+          # use SDK_VERSION to specify a different version
+          # as of Xcode 5.0.2, the min supported simulator version is iOS 6
+          _sdk = sdk
+        end
+
+        if args[:device]
+          device = args[:device].to_s
+        else
+          device = 'iphone'
+        end
+
         self.launch_args = args
-        app_bundle_path = app_bundle_or_raise(path)
-        ensure_connectivity(app_bundle_path, sdk, version, args)
+
+        ensure_connectivity(app_bundle_path, _sdk, device, args)
       end
 
       def stop
@@ -367,7 +384,7 @@ module Calabash
         end
 
         if full_console_logging?
-          puts "ping status = '#{status}"
+          puts "ping status = '#{status}'"
         end
         status
       end
