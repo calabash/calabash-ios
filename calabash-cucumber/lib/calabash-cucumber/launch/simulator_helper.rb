@@ -10,9 +10,38 @@ module Calabash
     module SimulatorHelper
 
 
+      def self._deprecated(version, msg, type)
+        allowed = [:pending, :warn]
+        unless allowed.include?(type)
+          raise "type '#{type}' must be on of '#{allowed}'"
+        end
+
+        unless no_deprecation_warnings?
+
+          if RUBY_VERSION < '2.0'
+            stack = Kernel.caller()[1..6].join("\n")
+          else
+            stack = Kernel.caller(0, 6)[1..-1].join("\n")
+          end
+
+          msg = "deprecated '#{version}' - '#{msg}'\n#{stack}"
+
+          if type.eql?(:pending)
+            pending(msg)
+          else
+            begin
+              warn "\033[34m\nWARN: #{msg}\033[0m"
+            rescue
+              warn "\nWARN: #{msg}"
+            end
+          end
+        end
+      end
+
       def self.full_console_logging?
         ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
       end
+
 
       class TimeoutErr < RuntimeError
       end
@@ -304,16 +333,6 @@ module Calabash
                         if full_console_logging?
                           p server_version
                         end
-                        unless version_check(server_version)
-                          msgs = ["You're running an older version of Calabash server with a newer client",
-                                  "Client:#{Calabash::Cucumber::VERSION}",
-                                  "Server:#{server_version}",
-                                  "Minimum server version #{Calabash::Cucumber::FRAMEWORK_VERSION}",
-                                  'Update recommended:',
-                                  'https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version'
-                          ]
-                          raise msgs.join("\n")
-                        end
                       else
                         connected = false
                       end
@@ -398,9 +417,10 @@ module Calabash
         end
       end
 
+      # noinspection RubyUnusedLocalVariable
       def self.version_check(version)
-        server_version = version['version']
-        Calabash::Cucumber::FRAMEWORK_VERSION == server_version
+        _deprecated('0.9.169', 'check is now done in Launcher', :warn)
+        raise(NotImplementedError, 'this method has been deprecated and will be removed')
       end
     end
 
