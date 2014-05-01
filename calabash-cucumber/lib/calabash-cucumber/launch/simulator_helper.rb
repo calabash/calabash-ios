@@ -1,14 +1,26 @@
 require 'sim_launcher'
 require 'json'
-require 'run_loop'
 require 'net/http'
 require 'cfpropertylist'
+
 
 module Calabash
   module Cucumber
 
     module SimulatorHelper
 
+      # controls printing of deprecation warnings
+      #
+      # to inhibit deprecation message set this to '1'
+      #
+      # inhibiting deprecation messages is not recommend
+      CALABASH_NO_DEPRECATION = ENV['CALABASH_NO_DEPRECATION'] || '0'
+
+      # returns +true+ if the <tt>CALABASH_NO_DEPRECATION</tt> variable is set
+      # to +1+
+      def self.no_deprecation_warnings?
+        ENV['CALABASH_NO_DEPRECATION'] == '1'
+      end
 
       def self._deprecated(version, msg, type)
         allowed = [:pending, :warn]
@@ -384,37 +396,18 @@ module Calabash
       end
 
       def self.get_version
-        endpoint = ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265'
-        endpoint += '/' unless endpoint.end_with? '/'
-        url = URI.parse("#{endpoint}version")
-
-        if full_console_logging?
-          puts "Fetch version #{url}..."
-        end
-        begin
-          body = Net::HTTP.get_response(url).body
-          res = JSON.parse(body)
-          if res['iOS_version']
-            @ios_version = res['iOS_version']
-          end
-          res
-        rescue
-          nil
-        end
+        _deprecated('0.9.169', 'use an instance Device class instead', :warn)
+        raise(NotImplementedError, 'this method has been deprecated')
       end
 
       def self.ios_version
-        unless @ios_version
-          get_version
-        end
-        @ios_version
+        _deprecated('0.9.169', 'use an instance Device class instead', :warn)
+        raise(NotImplementedError, 'this method has been deprecated')
       end
 
       def self.ios_major_version
-        v = ios_version
-        if v
-          v.split('.')[0]
-        end
+        _deprecated('0.9.169', 'use an instance Device class instead', :warn)
+        raise(NotImplementedError, 'this method has been deprecated')
       end
 
       # noinspection RubyUnusedLocalVariable
