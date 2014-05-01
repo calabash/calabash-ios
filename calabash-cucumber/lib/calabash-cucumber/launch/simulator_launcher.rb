@@ -4,11 +4,10 @@ require 'net/http'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
 
-
 module Calabash
   module Cucumber
 
-    class SimulatorHelper
+    class SimulatorLauncher
       include Calabash::Cucumber::Logging
 
       class TimeoutErr < RuntimeError
