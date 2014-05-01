@@ -288,7 +288,7 @@ module Calabash
           next if skipped_formats.include? File.extname(file)
 
           # If its not, try to run otool against that file, check whether we are linked against calabash framework.
-          out = `otool #{dir}/#{file} -o 2> /dev/null | grep CalabashServer`
+          out = `otool "#{dir}/#{file}" -o 2> /dev/null | grep CalabashServer`
           return true if /CalabashServer/.match(out)
         end
 
