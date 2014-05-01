@@ -335,22 +335,13 @@ module Calabash
             end
             begin
               Timeout::timeout(timeout, TimeoutErr) do
-                simulator = launch(app_bundle_path, sdk, version, args)
+                launch(app_bundle_path, sdk, version, args)
                 until connected
                   begin
-                    connected = (ping_app == '405')
-                    if connected
-                      server_version = get_version
-                      if server_version
-                        if full_console_logging?
-                          p server_version
-                        end
-                      else
-                        connected = false
-                      end
-                    end
+                    connected = (ping_app == '200')
+                    break if connected
                   rescue Exception => e
-
+                    # nop
                   ensure
                     sleep 1 unless connected
                   end
