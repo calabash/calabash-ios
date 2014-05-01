@@ -9,18 +9,6 @@ module Calabash
 
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
 
-      def device_major_version
-        url = URI.parse(ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265/')
-        http = Net::HTTP.new(url.host, url.port)
-        res = http.start do |sess|
-          sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || 'version')
-        end
-
-        version_body = JSON.parse(res.body)
-        device = Calabash::Cucumber::Device.new(url, version_body)
-        device.ios_major_version
-      end
-
       def recording_name_for(recording_name, os, device)
         #noinspection RubyControlFlowConversionInspection
         if !recording_name.end_with? '.base64'
@@ -52,11 +40,8 @@ module Calabash
 
       def load_playback_data(recording_name, options={})
         device = options['DEVICE'] || ENV['DEVICE'] || 'iphone'
-        if @calabash_launcher && @calabash_launcher.active?
-          major = @calabash_launcher.ios_major_version
-        else
-          major = device_major_version
-        end
+
+        major = Calabash::Cucumber::Launcher.launcher.ios_major_version
 
         unless major
           raise <<EOF
@@ -165,11 +150,7 @@ EOF
 
         device = ENV['DEVICE'] || 'iphone'
 
-        if @calabash_launcher && @calabash_launcher.active?
-          major = @calabash_launcher.ios_major_version
-        else
-          major = device_major_version
-        end
+        major = Calabash::Cucumber::Launcher.launcher.ios_major_version
 
         unless major
           raise <<EOF

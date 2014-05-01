@@ -110,6 +110,9 @@ class Calabash::Cucumber::Launcher
   end
 
   def ios_major_version
+    # pinging the app will set self.device
+    ping_app if self.device.nil?
+    # guard against Runtime errors
     return nil if device.nil? or device.ios_version.nil?
     device.ios_major_version
   end
