@@ -1,30 +1,18 @@
 require 'sim_launcher'
 require 'calabash-cucumber/launch/simulator_helper'
 require 'calabash-cucumber/utils/simulator_accessibility'
+require 'calabash-cucumber/utils/logging'
 
+include Calabash::Cucumber::Logging
 include Calabash::Cucumber::SimulatorAccessibility
 
 def quit_sim
-  `echo 'application "iPhone Simulator" quit' | osascript`
+  _deprecated('0.9.169', 'use Calabash::Cucumber::SimulatorAccessibility.quit_simulator', :warn)
+  quit_simulator
 end
 
 def calabash_sim_reset
-  reset_script = File.expand_path("#{@script_dir}/reset_simulator.scpt")
-  app_path = File.expand_path("#{@script_dir}/EmptyAppHack.app")
-  launcher = SimLauncher::Simulator.new
-
-  sdks = ENV['SDK_VERSIONS']
-  if sdks
-    sdks = sdks.split(",")
-  else
-    sdks = SimLauncher::SdkDetector.new(launcher).available_sdk_versions
-  end
-
-
-  sdks.each do |sdk|
-    launcher.launch_ios_app(app_path, sdk, ENV['DEVICE'] || 'iphone')
-    puts `osascript #{reset_script}`
-  end
+  reset_simulator_content_and_settings
 end
 
 def calabash_sim_accessibility
@@ -120,7 +108,7 @@ end
 
 
 def calabash_sim_device(args)
-  quit_sim
+  quit_simulator
   options = ["iPad", "iPad_Retina", "iPhone", "iPhone_Retina", "iPhone_Retina_4inch"]
   if args.length != 1 or not options.find { |x| x == args[0] }
     print_usage
