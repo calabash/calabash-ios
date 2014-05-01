@@ -3,14 +3,16 @@ require 'json'
 require 'run_loop'
 require 'net/http'
 require 'cfpropertylist'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
 
     module SimulatorHelper
 
-      include Calabash::Cucumber::Logging
+
+      def self.full_console_logging?
+        ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
+      end
 
       class TimeoutErr < RuntimeError
       end
