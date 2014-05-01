@@ -17,7 +17,7 @@ module Calabash
       class TimeoutErr < RuntimeError
       end
 
-      DERIVED_DATA = File.expand_path("~/Library/Developer/Xcode/DerivedData")
+      DERIVED_DATA = File.expand_path('~/Library/Developer/Xcode/DerivedData')
       DEFAULT_DERIVED_DATA_INFO = File.expand_path("#{DERIVED_DATA}/*/info.plist")
 
       DEFAULT_SIM_WAIT = 30
@@ -64,7 +64,7 @@ module Calabash
             raise "Unable to found several *.xcodeproj in #{dir}: #{res}"
           end
 
-          xcode_proj_name = res.first.split(".xcodeproj")[0]
+          xcode_proj_name = res.first.split('.xcodeproj')[0]
 
           xcode_proj_name = File.basename(xcode_proj_name)
 
@@ -83,35 +83,35 @@ module Calabash
           # todo assuming this is not dead code, the documentation around derived data for project needs to be updated
 
           if (build_dirs.count == 0)
-            msg = ["Unable to find your built app."]
+            msg = ['Unable to find your built app.']
             msg << "This means that Calabash can't automatically launch iOS simulator."
             msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
-            msg << ""
+            msg << ''
             msg << "To fix there are a couple of options:\n"
-            msg << "Option 1) Make sure you are running this command from your project directory, "
-            msg << "i.e., the directory containing your .xcodeproj file."
-            msg << "In Xcode, build your calabash target for simulator."
-            msg << "Check that your app can be found in\n #{File.expand_path("~/Library/Developer/Xcode/DerivedData")}"
+            msg << 'Option 1) Make sure you are running this command from your project directory, '
+            msg << 'i.e., the directory containing your .xcodeproj file.'
+            msg << 'In Xcode, build your calabash target for simulator.'
+            msg << "Check that your app can be found in\n #{File.expand_path('~/Library/Developer/Xcode/DerivedData')}"
             msg << "\n\nOption 2). In features/support/01_launch.rb set APP_BUNDLE_PATH to"
-            msg << "the path where Xcode has built your Calabash target."
+            msg << 'the path where Xcode has built your Calabash target.'
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
 
           elsif (build_dirs.count > 1)
-            msg = ["Unable to auto detect APP_BUNDLE_PATH."]
+            msg = ['Unable to auto detect APP_BUNDLE_PATH.']
             msg << "You have several projects with the same name: #{xcode_proj_name} in #{DERIVED_DATA}:\n"
             msg << build_dirs.join("\n")
 
             msg << "\nThis means that Calabash can't automatically launch iOS simulator."
             msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
             msg << "\nIn features/support/01_launch.rb set APP_BUNDLE_PATH to"
-            msg << "the path where Xcode has built your Calabash target."
+            msg << 'the path where Xcode has built your Calabash target.'
             msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
             raise msg.join("\n")
           else
             if full_console_logging?
               puts "Found potential build dir: #{build_dirs.first}"
-              puts "Checking..."
+              puts 'Checking...'
             end
             return build_dirs.first
           end
@@ -141,53 +141,53 @@ module Calabash
         elsif xamarin_project?
           bundle_path = bundle_path_from_xamarin_project(device_build_dir)
           unless bundle_path
-            msg = ["Detected Xamarin project, but did not detect built app linked with Calabash"]
-            msg << "You should build your project from Xamarin Studio"
+            msg = ['Detected Xamarin project, but did not detect built app linked with Calabash']
+            msg << 'You should build your project from Xamarin Studio'
             msg << "Make sure you build for Simulator and that you're using the Calabash components"
             raise msg.join("\n")
           end
           if full_console_logging?
-            puts("-"*37)
+            puts('-'*37)
             puts "Auto detected APP_BUNDLE_PATH:\n\n"
 
             puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
-            puts "Please verify!"
+            puts 'Please verify!'
             puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
-            puts("-"*37)
+            puts('-'*37)
           end
         else
           dd_dir = derived_data_dir_for_project
-          sim_dirs = Dir.glob(File.join(dd_dir, "Build", "Products", "*-iphonesimulator", "*.app"))
+          sim_dirs = Dir.glob(File.join(dd_dir, 'Build', 'Products', '*-iphonesimulator', '*.app'))
           if sim_dirs.empty?
-            msg = ["Unable to auto detect APP_BUNDLE_PATH."]
-            msg << "Have you built your app for simulator?"
+            msg = ['Unable to auto detect APP_BUNDLE_PATH.']
+            msg << 'Have you built your app for simulator?'
             msg << "Searched dir: #{dd_dir}/Build/Products"
-            msg << "Please build your app from Xcode"
-            msg << "You should build the -cal target."
-            msg << ""
-            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb"
+            msg << 'Please build your app from Xcode'
+            msg << 'You should build the -cal target.'
+            msg << ''
+            msg << 'Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb'
             msg << "This should point to the location of your built app linked with calabash.\n"
             raise msg.join("\n")
           end
           preferred_dir = find_preferred_dir(sim_dirs)
           if preferred_dir.nil?
-            msg = ["Error... Unable to find APP_BUNDLE_PATH."]
-            msg << "Cannot find a built app that is linked with calabash.framework"
-            msg << "Please build your app from Xcode"
-            msg << "You should build your calabash target."
-            msg << ""
-            msg << "Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb"
+            msg = ['Error... Unable to find APP_BUNDLE_PATH.']
+            msg << 'Cannot find a built app that is linked with calabash.framework'
+            msg << 'Please build your app from Xcode'
+            msg << 'You should build your calabash target.'
+            msg << ''
+            msg << 'Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb'
             msg << "This should point to the location of your built app linked with calabash.\n"
             raise msg.join("\n")
           end
           if full_console_logging?
-            puts("-"*37)
+            puts('-'*37)
             puts "Auto detected APP_BUNDLE_PATH:\n\n"
 
             puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
-            puts "Please verify!"
+            puts 'Please verify!'
             puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
-            puts("-"*37)
+            puts('-'*37)
           end
           bundle_path = sim_dirs[0]
         end
@@ -251,7 +251,7 @@ module Calabash
       end
 
       def self.linked_with_calabash?(d)
-        skipped_formats = [".png", ".jpg", ".jpeg", ".plist", ".nib", ".lproj"]
+        skipped_formats = ['.png', '.jpg', '.jpeg', '.plist', '.nib', '.lproj']
         dir = File.expand_path(d)
 
         # For every file on that .app directory
@@ -287,7 +287,7 @@ module Calabash
           end
 
           until connected do
-            raise "MAX_RETRIES" if retry_count == max_retry_count
+            raise 'MAX_RETRIES' if retry_count == max_retry_count
             retry_count += 1
             if full_console_logging?
               puts "(#{retry_count}.) Start Simulator #{sdk}, #{version}, for #{app_bundle_path}"
@@ -309,8 +309,8 @@ module Calabash
                                   "Client:#{Calabash::Cucumber::VERSION}",
                                   "Server:#{server_version}",
                                   "Minimum server version #{Calabash::Cucumber::FRAMEWORK_VERSION}",
-                                  "Update recommended:",
-                                  "https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version"
+                                  'Update recommended:',
+                                  'https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version'
                           ]
                           raise msgs.join("\n")
                         end
@@ -332,9 +332,9 @@ module Calabash
           end
         rescue RuntimeError => e
           p e
-          msg = "Unable to make connection to Calabash Server at #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}\n"
+          msg = "Unable to make connection to Calabash Server at #{ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265/'}\n"
           msg << "Make sure you've' linked correctly with calabash.framework and set Other Linker Flags.\n"
-          msg << "Make sure you don't have a firewall blocking traffic to #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}.\n"
+          msg << "Make sure you don't have a firewall blocking traffic to #{ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265/'}.\n"
           raise msg
         end
       end
@@ -347,7 +347,7 @@ module Calabash
       end
 
       def self.ping_app
-        url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
+        url = URI.parse(ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265/')
         if full_console_logging?
            puts "Ping #{url}..."   
         end
@@ -365,8 +365,8 @@ module Calabash
       end
 
       def self.get_version
-        endpoint = ENV['DEVICE_ENDPOINT']|| "http://localhost:37265"
-        endpoint += "/" unless endpoint.end_with? "/"
+        endpoint = ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265'
+        endpoint += '/' unless endpoint.end_with? '/'
         url = URI.parse("#{endpoint}version")
 
         if full_console_logging?
@@ -394,12 +394,12 @@ module Calabash
       def self.ios_major_version
         v = ios_version
         if v
-          v.split(".")[0]
+          v.split('.')[0]
         end
       end
 
       def self.version_check(version)
-        server_version = version["version"]
+        server_version = version['version']
         Calabash::Cucumber::FRAMEWORK_VERSION == server_version
       end
     end
