@@ -15,8 +15,13 @@ IRB.conf[:SAVE_HISTORY] = 50
 IRB.conf[:HISTORY_FILE] = ".irb-history"
 
 require 'calabash-cucumber/operations'
+
+# legacy support - module was deprecated 0.9.169
+# and replaced with simulator_launcher
 require 'calabash-cucumber/launch/simulator_helper'
-SIM=Calabash::Cucumber::SimulatorHelper
+
+require 'calabash-cucumber/launch/simulator_launcher'
+SIM=Calabash::Cucumber::SimulatorLauncher.new()
 
 extend Calabash::Cucumber::Operations
 
