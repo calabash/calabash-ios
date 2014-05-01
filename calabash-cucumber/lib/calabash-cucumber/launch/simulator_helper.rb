@@ -2,6 +2,7 @@ require 'sim_launcher'
 require 'json'
 require 'net/http'
 require 'cfpropertylist'
+require 'calabash-cucumber/utils/logging'
 
 
 module Calabash
@@ -9,49 +10,8 @@ module Calabash
 
     class SimulatorHelper
 
-      # controls printing of deprecation warnings
-      #
-      # to inhibit deprecation message set this to '1'
-      #
-      # inhibiting deprecation messages is not recommend
-      CALABASH_NO_DEPRECATION = ENV['CALABASH_NO_DEPRECATION'] || '0'
+      include Calabash::Cucumber::Logging
 
-      # returns +true+ if the <tt>CALABASH_NO_DEPRECATION</tt> variable is set
-      # to +1+
-      def no_deprecation_warnings?
-        ENV['CALABASH_NO_DEPRECATION'] == '1'
-      end
-
-      def _deprecated(version, msg, type)
-        allowed = [:pending, :warn]
-        unless allowed.include?(type)
-          raise "type '#{type}' must be on of '#{allowed}'"
-        end
-
-        unless no_deprecation_warnings?
-
-          if RUBY_VERSION < '2.0'
-            stack = Kernel.caller()[1..6].join("\n")
-          else
-            stack = Kernel.caller(0, 6)[1..-1].join("\n")
-          end
-
-          msg = "deprecated '#{version}' - '#{msg}'\n#{stack}"
-
-          if type.eql?(:pending)
-            pending(msg)
-          else
-            begin
-              warn "\033[34m\nWARN: #{msg}\033[0m"
-            rescue
-              warn "\nWARN: #{msg}"
-            end
-          end
-        end
-      end
-
-      def full_console_logging?
-        ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
       end
 
 
