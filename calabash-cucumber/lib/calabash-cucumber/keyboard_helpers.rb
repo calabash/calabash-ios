@@ -743,8 +743,8 @@ module Calabash
       # the first responder will be the +UITextField+ or +UITextView+ instance
       # that is associated with the visible keyboard.
       #
-      # returns +empty string+ if there no +textField+ or +testView+ is found to be
-      # the first responder.  This helps remedy issues with non-standard UI kits
+      # returns +empty string+ if there no +textField+ or +textView+ is found to be
+      # the first responder.
       #
       # raises an exception if there is no visible keyboard
       def _text_from_first_responder
@@ -754,7 +754,7 @@ module Calabash
           res = query("#{ui_class} isFirstResponder:1", :text)
           return res.first unless res.empty?
         end
-
+        #noinspection RubyUnnecessaryReturnStatement
         return ""
       end
 
