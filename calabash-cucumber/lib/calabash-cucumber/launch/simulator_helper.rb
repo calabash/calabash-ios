@@ -9,11 +9,7 @@ module Calabash
   module Cucumber
 
     class SimulatorHelper
-
       include Calabash::Cucumber::Logging
-
-      end
-
 
       class TimeoutErr < RuntimeError
       end
@@ -22,19 +18,32 @@ module Calabash
       DEFAULT_DERIVED_DATA_INFO = File.expand_path("#{DERIVED_DATA}/*/info.plist")
 
       DEFAULT_SIM_WAIT = 30
-
       DEFAULT_SIM_RETRY = 2
 
+      # Calabash::Cucumber::Device
+      attr_accessor :device
+      # SimLauncher::Simulator
+      attr_accessor :simulator
+      # SimLauncher::SdkDetector
+      attr_accessor :sdk_detector
 
-      def relaunch(path, sdk = nil, version = 'iphone', args = nil)
-        app_bundle_path = app_bundle_or_raise(path)
-        ensure_connectivity(app_bundle_path, sdk, version, args)
+      # launch args passed in from Launcher
+      attr_accessor :launch_args
 
+      def initialize
+        @simulator = SimLauncher::Simulator.new
+        @sdk_detector = SimLauncher::SdkDetector.new()
       end
 
-        simulator = SimLauncher::Simulator.new
-        simulator.quit_simulator
+      def relaunch(path, sdk = nil, version = 'iphone', args = nil)
+        # cached, but not used
+        self.launch_args = args
+        app_bundle_path = app_bundle_or_raise(path)
+        ensure_connectivity(app_bundle_path, sdk, version, args)
+      end
+
       def stop
+        self.simulator.quit_simulator
       end
 
       def derived_data_dir_for_project
@@ -277,7 +286,9 @@ module Calabash
 
       def ensure_connectivity(app_bundle_path, sdk, version, args = nil)
         begin
+          # todo should get the retry could from the args
           max_retry_count = (ENV['MAX_CONNECT_RETRY'] || DEFAULT_SIM_RETRY).to_i
+          # todo should get the timeout from the args
           timeout = (ENV['CONNECT_TIMEOUT'] || DEFAULT_SIM_WAIT).to_i
           retry_count = 0
           connected = false
@@ -322,12 +333,14 @@ module Calabash
       end
 
 
-        simulator = SimLauncher::Simulator.new
-        simulator.launch_ios_app(app_bundle_path, sdk, version)
       def launch(app_bundle_path, sdk, version, args = nil)
+        # cached but not used
+        self.launch_args = args
+        self.simulator.launch_ios_app(app_bundle_path, sdk, version)
         simulator
       end
 
+      # duplicate of Launcher ping method
       def ping_app
         url = URI.parse(ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265/')
         if full_console_logging?
@@ -342,10 +355,18 @@ module Calabash
         status = res.code
         begin
           http.finish if http and http.started?
-        rescue
-
+        rescue Exception => e
+          # nop
         end
-        puts "ping status = '#{status}"
+
+        if status == '200'
+          version_body = JSON.parse(res.body)
+          self.device = Calabash::Cucumber::Device.new(url, version_body)
+        end
+
+        if full_console_logging?
+          puts "ping status = '#{status}"
+        end
         status
       end
 
