@@ -382,16 +382,19 @@ module Calabash
         if full_console_logging?
            puts "Ping #{url}..."   
         end
+
         http = Net::HTTP.new(url.host, url.port)
         res = http.start do |sess|
-          sess.request Net::HTTP::Get.new url.path
+          sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || "version")
         end
+
         status = res.code
         begin
           http.finish if http and http.started?
         rescue
 
         end
+        puts "ping status = '#{status}"
         status
       end
 
