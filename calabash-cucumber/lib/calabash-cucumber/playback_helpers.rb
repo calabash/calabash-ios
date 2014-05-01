@@ -38,18 +38,16 @@ module Calabash
       end
 
       def load_playback_data(recording_name, options={})
-        os = options['OS'] || ENV['OS']
         device = options['DEVICE'] || ENV['DEVICE'] || 'iphone'
 
-        unless os
-          if @calabash_launcher && @calabash_launcher.active?
-            major = @calabash_launcher.ios_major_version
-          else
-            major = Calabash::Cucumber::SimulatorHelper.ios_major_version
-          end
+        if @calabash_launcher && @calabash_launcher.active?
+          major = @calabash_launcher.ios_major_version
+        else
+          major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+        end
 
-          unless major
-            raise <<EOF
+        unless major
+          raise <<EOF
           Unable to determine iOS major version
           Most likely you have updated your calabash-cucumber client
           but not your server. Please follow closely:
@@ -58,9 +56,8 @@ https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-vers
 
           If you are running version 0.9.120+ then please report this message as a bug.
 EOF
-          end
-          os = "ios#{major}"
         end
+        os = "ios#{major}"
 
         rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
 
@@ -155,17 +152,15 @@ EOF
         end
 
         device = ENV['DEVICE'] || 'iphone'
-        os = ENV['OS']
 
-        unless os
-          if @calabash_launcher && @calabash_launcher.active?
-            major = @calabash_launcher.ios_major_version
-          else
-            major = Calabash::Cucumber::SimulatorHelper.ios_major_version
-          end
+        if @calabash_launcher && @calabash_launcher.active?
+          major = @calabash_launcher.ios_major_version
+        else
+          major = Calabash::Cucumber::SimulatorHelper.ios_major_version
+        end
 
-          unless major
-            raise <<EOF
+        unless major
+          raise <<EOF
           Unable to determine iOS major version
           Most likely you have updated your calabash-cucumber client
           but not your server. Please follow closely:
@@ -174,9 +169,9 @@ https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-vers
 
           If you are running version 0.9.120+ then please report this message as a bug.
 EOF
-          end
-          os = "ios#{major}"
+
         end
+        os = "ios#{major}"
 
         file_name = "#{file_name}_#{os}_#{device}.base64"
         system('/usr/bin/plutil -convert binary1 -o _recording_binary.plist _recording.plist')
