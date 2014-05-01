@@ -64,67 +64,65 @@ module Calabash
           end
         }
 
-        if not info_plist.nil?
-          return File.dirname(info_plist)
-        else
-          res = Dir.glob("#{dir}/*.xcodeproj")
-          if res.empty?
-            raise "Unable to find *.xcodeproj in #{dir}"
-          elsif res.count > 1
-            raise "Unable to found several *.xcodeproj in #{dir}: #{res}"
-          end
+        return File.dirname(info_plist) unless info_plist.nil?
 
-          xcode_proj_name = res.first.split('.xcodeproj')[0]
+        res = Dir.glob("#{dir}/*.xcodeproj")
+        if res.empty?
+          raise "Unable to find *.xcodeproj in #{dir}"
+        elsif res.count > 1
+          raise "Unable to found several *.xcodeproj in #{dir}: #{res}"
+        end
 
-          xcode_proj_name = File.basename(xcode_proj_name)
+        xcode_proj_name = res.first.split('.xcodeproj')[0]
 
+        xcode_proj_name = File.basename(xcode_proj_name)
+
+        build_dirs = Dir.glob("#{DERIVED_DATA}/*").find_all do |xc_proj|
+          File.basename(xc_proj).start_with?(xcode_proj_name)
+        end
+
+        if build_dirs.count == 0 && !xcode_workspace_name.empty?
+          # check for directory named "workspace-{deriveddirectoryrandomcharacters}"
           build_dirs = Dir.glob("#{DERIVED_DATA}/*").find_all do |xc_proj|
-            File.basename(xc_proj).start_with?(xcode_proj_name)
+            File.basename(xc_proj).downcase.start_with?(xcode_workspace_name)
           end
+        end
 
-          if build_dirs.count == 0 && !xcode_workspace_name.empty?
-            # check for directory named "workspace-{deriveddirectoryrandomcharacters}"
-            build_dirs = Dir.glob("#{DERIVED_DATA}/*").find_all do |xc_proj|
-              File.basename(xc_proj).downcase.start_with?(xcode_workspace_name)
-            end
+        # todo analyze `self.derived_data_dir_for_project` to see if it contains dead code
+        # todo assuming this is not dead code, the documentation around derived data for project needs to be updated
+
+        if build_dirs.count == 0
+          msg = ['Unable to find your built app.']
+          msg << "This means that Calabash can't automatically launch iOS simulator."
+          msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
+          msg << ''
+          msg << "To fix there are a couple of options:\n"
+          msg << 'Option 1) Make sure you are running this command from your project directory, '
+          msg << 'i.e., the directory containing your .xcodeproj file.'
+          msg << 'In Xcode, build your calabash target for simulator.'
+          msg << "Check that your app can be found in\n #{DERIVED_DATA}"
+          msg << "\n\nOption 2). In features/support/01_launch.rb set APP_BUNDLE_PATH to"
+          msg << 'the path where Xcode has built your Calabash target.'
+          msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
+          raise msg.join("\n")
+
+        elsif build_dirs.count > 1
+          msg = ['Unable to auto detect APP_BUNDLE_PATH.']
+          msg << "You have several projects with the same name: #{xcode_proj_name} in #{DERIVED_DATA}:\n"
+          msg << build_dirs.join("\n")
+
+          msg << "\nThis means that Calabash can't automatically launch iOS simulator."
+          msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
+          msg << "\nIn features/support/01_launch.rb set APP_BUNDLE_PATH to"
+          msg << 'the path where Xcode has built your Calabash target.'
+          msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
+          raise msg.join("\n")
+        else
+          if full_console_logging?
+            puts "Found potential build dir: #{build_dirs.first}"
+            puts 'Checking...'
           end
-
-          # todo analyze `self.derived_data_dir_for_project` to see if it contains dead code
-          # todo assuming this is not dead code, the documentation around derived data for project needs to be updated
-
-          if build_dirs.count == 0
-            msg = ['Unable to find your built app.']
-            msg << "This means that Calabash can't automatically launch iOS simulator."
-            msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
-            msg << ''
-            msg << "To fix there are a couple of options:\n"
-            msg << 'Option 1) Make sure you are running this command from your project directory, '
-            msg << 'i.e., the directory containing your .xcodeproj file.'
-            msg << 'In Xcode, build your calabash target for simulator.'
-            msg << "Check that your app can be found in\n #{DERIVED_DATA}"
-            msg << "\n\nOption 2). In features/support/01_launch.rb set APP_BUNDLE_PATH to"
-            msg << 'the path where Xcode has built your Calabash target.'
-            msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
-            raise msg.join("\n")
-
-          elsif build_dirs.count > 1
-            msg = ['Unable to auto detect APP_BUNDLE_PATH.']
-            msg << "You have several projects with the same name: #{xcode_proj_name} in #{DERIVED_DATA}:\n"
-            msg << build_dirs.join("\n")
-
-            msg << "\nThis means that Calabash can't automatically launch iOS simulator."
-            msg << "Searched in Xcode 4.x default: #{DEFAULT_DERIVED_DATA_INFO}"
-            msg << "\nIn features/support/01_launch.rb set APP_BUNDLE_PATH to"
-            msg << 'the path where Xcode has built your Calabash target.'
-            msg << "Alternatively you can use the environment variable APP_BUNDLE_PATH.\n"
-            raise msg.join("\n")
-          else
-            if full_console_logging?
-              puts "Found potential build dir: #{build_dirs.first}"
-              puts 'Checking...'
-            end
-            return build_dirs.first
-          end
+          build_dirs.first
         end
       end
 
