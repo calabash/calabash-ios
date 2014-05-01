@@ -7,7 +7,7 @@ require 'cfpropertylist'
 module Calabash
   module Cucumber
 
-    module SimulatorHelper
+    class SimulatorHelper
 
       # controls printing of deprecation warnings
       #
@@ -18,11 +18,11 @@ module Calabash
 
       # returns +true+ if the <tt>CALABASH_NO_DEPRECATION</tt> variable is set
       # to +1+
-      def self.no_deprecation_warnings?
+      def no_deprecation_warnings?
         ENV['CALABASH_NO_DEPRECATION'] == '1'
       end
 
-      def self._deprecated(version, msg, type)
+      def _deprecated(version, msg, type)
         allowed = [:pending, :warn]
         unless allowed.include?(type)
           raise "type '#{type}' must be on of '#{allowed}'"
@@ -50,7 +50,7 @@ module Calabash
         end
       end
 
-      def self.full_console_logging?
+      def full_console_logging?
         ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
       end
 
@@ -65,19 +65,19 @@ module Calabash
 
       DEFAULT_SIM_RETRY = 2
 
-      def self.relaunch(path, sdk = nil, version = 'iphone', args = nil)
 
+      def relaunch(path, sdk = nil, version = 'iphone', args = nil)
         app_bundle_path = app_bundle_or_raise(path)
         ensure_connectivity(app_bundle_path, sdk, version, args)
 
       end
 
-      def self.stop
         simulator = SimLauncher::Simulator.new
         simulator.quit_simulator
+      def stop
       end
 
-      def self.derived_data_dir_for_project
+      def derived_data_dir_for_project
         dir = project_dir
         xcode_workspace_name = ''
         info_plist = Dir.glob(DEFAULT_DERIVED_DATA_INFO).find { |plist_file|
@@ -159,11 +159,11 @@ module Calabash
         end
       end
 
-      def self.project_dir
+      def project_dir
         File.expand_path(ENV['PROJECT_DIR'] || Dir.pwd)
       end
 
-      def self.detect_app_bundle(path=nil,device_build_dir='iPhoneSimulator')
+      def detect_app_bundle(path=nil,device_build_dir='iPhoneSimulator')
         begin
           app_bundle_or_raise(path,device_build_dir)
         rescue =>e
@@ -171,7 +171,7 @@ module Calabash
         end
       end
 
-      def self.app_bundle_or_raise(path=nil, device_build_dir='iPhoneSimulator')
+      def app_bundle_or_raise(path=nil, device_build_dir='iPhoneSimulator')
         bundle_path = nil
         path = File.expand_path(path) if path
 
@@ -235,11 +235,11 @@ module Calabash
         bundle_path
       end
 
-      def self.xamarin_project?
+      def xamarin_project?
         xamarin_ios_csproj_path != nil
       end
 
-      def self.xamarin_ios_csproj_path
+      def xamarin_ios_csproj_path
         solution_path = Dir['*.sln'].first
         if solution_path
           project_dir = Dir.pwd
@@ -268,13 +268,13 @@ module Calabash
 
       end
 
-      def self.xamarin_ios_bin_dir?(bin_dir)
+      def xamarin_ios_bin_dir?(bin_dir)
         File.directory?(bin_dir) &&
             (File.directory?(File.join(bin_dir,'iPhoneSimulator')) ||
                 File.directory?(File.join(bin_dir,'iPhone')))
       end
 
-      def self.bundle_path_from_xamarin_project(device_build_dir='iPhoneSimulator')
+      def bundle_path_from_xamarin_project(device_build_dir='iPhoneSimulator')
         ios_project_path = xamarin_ios_csproj_path
         conf_glob = File.join(ios_project_path,'bin',device_build_dir,'*')
         built_confs = Dir[conf_glob]
@@ -291,7 +291,7 @@ module Calabash
         Dir[File.join(bundle_path,'*.app')].first if bundle_path
       end
 
-      def self.linked_with_calabash?(d)
+      def linked_with_calabash?(d)
         skipped_formats = ['.png', '.jpg', '.jpeg', '.plist', '.nib', '.lproj']
         dir = File.expand_path(d)
 
@@ -309,13 +309,13 @@ module Calabash
         false
       end
 
-      def self.find_preferred_dir(sim_dirs)
+      def find_preferred_dir(sim_dirs)
         sim_dirs.find do |d|
           linked_with_calabash?(d)
         end
       end
 
-      def self.ensure_connectivity(app_bundle_path, sdk, version, args = nil)
+      def ensure_connectivity(app_bundle_path, sdk, version, args = nil)
         begin
           max_retry_count = (ENV['MAX_CONNECT_RETRY'] || DEFAULT_SIM_RETRY).to_i
           timeout = (ENV['CONNECT_TIMEOUT'] || DEFAULT_SIM_WAIT).to_i
@@ -362,13 +362,13 @@ module Calabash
       end
 
 
-      def self.launch(app_bundle_path, sdk, version, args = nil)
         simulator = SimLauncher::Simulator.new
         simulator.launch_ios_app(app_bundle_path, sdk, version)
+      def launch(app_bundle_path, sdk, version, args = nil)
         simulator
       end
 
-      def self.ping_app
+      def ping_app
         url = URI.parse(ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265/')
         if full_console_logging?
            puts "Ping #{url}..."   
@@ -389,23 +389,23 @@ module Calabash
         status
       end
 
-      def self.get_version
+      def get_version
         _deprecated('0.9.169', 'use an instance Device class instead', :warn)
         raise(NotImplementedError, 'this method has been deprecated')
       end
 
-      def self.ios_version
+      def ios_version
         _deprecated('0.9.169', 'use an instance Device class instead', :warn)
         raise(NotImplementedError, 'this method has been deprecated')
       end
 
-      def self.ios_major_version
+      def ios_major_version
         _deprecated('0.9.169', 'use an instance Device class instead', :warn)
         raise(NotImplementedError, 'this method has been deprecated')
       end
 
       # noinspection RubyUnusedLocalVariable
-      def self.version_check(version)
+      def version_check(version)
         _deprecated('0.9.169', 'check is now done in Launcher', :warn)
         raise(NotImplementedError, 'this method has been deprecated and will be removed')
       end
