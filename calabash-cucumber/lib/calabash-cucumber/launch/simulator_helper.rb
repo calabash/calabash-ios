@@ -157,7 +157,7 @@ module Calabash
             puts('-'*37)
             puts "Auto detected APP_BUNDLE_PATH:\n\n"
 
-            puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
+            puts "APP_BUNDLE_PATH= '#{bundle_path}'\n\n"
             puts 'Please verify!'
             puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
             puts('-'*37)
