@@ -341,7 +341,7 @@ class Calabash::Cucumber::Launcher
       end
     end
 
-    if args[:device_target].downcase.include?('simulator')
+    if simulator_target?(args)
       enable_accessibility_on_simulators
     end
 
@@ -410,9 +410,15 @@ class Calabash::Cucumber::Launcher
   end
 
   def new_run_loop(args)
-    if RunLoop::Core.above_or_eql_version?('5.1', RunLoop::Core.xcode_version)
+
+    # for stability, quit the simulator if Xcode version is > 5.1 and the
+    # target device is the simulator
+    target_is_sim = simulator_target?(args)
+    xcode_gte_51 = RunLoop::Core.above_or_eql_version?('5.1', RunLoop::Core.xcode_version)
+    if target_is_sim and xcode_gte_51
       self.simulator_launcher.stop
     end
+
     last_err = nil
 
     num_retries = args[:launch_retries] || 5
@@ -534,8 +540,12 @@ class Calabash::Cucumber::Launcher
     (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
   end
 
-  def simulator_target?
-    ENV['DEVICE_TARGET'] == 'simulator'
+  def simulator_target?(launch_args={})
+    if launch_args.empty?
+      ENV['DEVICE_TARGET'].downcase.include?('simulator')
+    else
+      launch_args[:device_target].downcase.include?('simulator')
+    end
   end
 
   def sdk_version
