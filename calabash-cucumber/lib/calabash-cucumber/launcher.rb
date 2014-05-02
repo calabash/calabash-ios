@@ -381,12 +381,14 @@ class Calabash::Cucumber::Launcher
 
   end
 
+  # todo this method should be migrated to the Simulator Launcher
   def detect_app_bundle_from_args(args)
     if args[:device_target]=='simulator'
       device_xamarin_build_dir = 'iPhoneSimulator'
     else
       device_xamarin_build_dir = 'iPhone'
     end
+    # is this really only applicable to the Xamarin IDE?
     self.simulator_launcher.detect_app_bundle(nil, device_xamarin_build_dir)
   end
 
