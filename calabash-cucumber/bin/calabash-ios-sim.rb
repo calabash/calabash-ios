@@ -1,5 +1,4 @@
 require 'sim_launcher'
-require 'calabash-cucumber/launch/simulator_helper'
 require 'calabash-cucumber/utils/simulator_accessibility'
 
 include Calabash::Cucumber::SimulatorAccessibility
