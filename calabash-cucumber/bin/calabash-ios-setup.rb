@@ -154,9 +154,7 @@ def setup_project(project_name, project_path, path)
 
 end
 
-
-
-require 'calabash-cucumber/launch/simulator_helper'
+require 'calabash-cucumber/launch/simulator_launcher'
 def validate_setup(args)
   if args.length > 0
     if args[0].end_with?(".ipa")
@@ -170,7 +168,7 @@ def validate_setup(args)
       exit 1
     end
   else
-    dd_dir = Calabash::Cucumber::SimulatorHelper.derived_data_dir_for_project
+    dd_dir = Calabash::Cucumber::SimulatorLauncher.new().derived_data_dir_for_project
       if not dd_dir
         puts "Unable to find iOS XCode project."
         puts "You should run this command from an XCode project directory."

@@ -5,7 +5,7 @@ require 'calabash-cucumber/uia'
 require 'calabash-cucumber/environment_helpers'
 require 'calabash-cucumber/connection'
 require 'calabash-cucumber/connection_helpers'
-require 'calabash-cucumber/launch/simulator_helper'
+require 'calabash-cucumber/launch/simulator_launcher'
 require 'calabash-cucumber/query_helpers'
 require 'calabash-cucumber/playback_helpers'
 require 'calabash-cucumber/failure_helpers'
@@ -14,6 +14,10 @@ require 'calabash-cucumber/rotation_helpers'
 require 'calabash-cucumber/map'
 require 'calabash-cucumber/utils/logging'
 
+
+# legacy support - module was deprecated 0.9.169
+# replaced with simulator-launcher
+require 'calabash-cucumber/launch/simulator_helper'
 
 module Calabash
   module Cucumber

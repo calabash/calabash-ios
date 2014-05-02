@@ -1,4 +1,4 @@
-require 'calabash-cucumber/launch/simulator_helper'
+require 'calabash-cucumber/launch/simulator_launcher'
 require 'calabash-cucumber/utils/simulator_accessibility'
 require 'sim_launcher'
 require 'calabash-cucumber/device'
@@ -26,6 +26,7 @@ class Calabash::Cucumber::Launcher
   attr_accessor :device
   attr_accessor :actions
   attr_accessor :launch_args
+  attr_accessor :simulator_launcher
 
   class StartError < RuntimeError
     attr_accessor :error
@@ -43,6 +44,11 @@ class Calabash::Cucumber::Launcher
   end
 
 
+  def initialize
+    @simulator_launcher = Calabash::Cucumber::SimulatorLauncher.new
+    @@launcher = self
+  end
+
   def actions
     attach if @actions.nil?
     @actions
@@ -52,7 +58,6 @@ class Calabash::Cucumber::Launcher
     l = launcher
     return l if l && l.active?
     l.attach
-
   end
 
   def attach(max_retry=1, timeout=10)
@@ -104,11 +109,10 @@ class Calabash::Cucumber::Launcher
     @@launcher
   end
 
-  def initialize
-    @@launcher = self
-  end
-
   def ios_major_version
+    # pinging the app will set self.device
+    ping_app if self.device.nil?
+    # guard against Runtime errors
     return nil if device.nil? or device.ios_version.nil?
     device.ios_major_version
   end
@@ -120,7 +124,7 @@ class Calabash::Cucumber::Launcher
 
   def reset_app_jail(sdk=nil, path=nil)
     sdk ||= sdk_version || SimLauncher::SdkDetector.new().latest_sdk_version
-    path ||= Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+    path ||= self.simulator_launcher.app_bundle_or_raise(app_path)
 
     app = File.basename(path)
     directories_for_sdk_prefix(sdk).each do |dir|
@@ -284,8 +288,7 @@ class Calabash::Cucumber::Launcher
       return use_sim_launcher_env? ? :sim_launcher : :instruments
     end
 
-    sim_detector = SimLauncher::SdkDetector.new()
-    available = sim_detector.available_sdk_versions.reject { |v| v.start_with?('7') }
+    available = self.simulator_launcher.sdk_detector.available_sdk_versions.reject { |v| v.start_with?('7') }
     if available.include?(sdk_version)
       :sim_launcher
     else
@@ -318,7 +321,7 @@ class Calabash::Cucumber::Launcher
       else
         device_xamarin_build_dir = 'iPhone'
       end
-      args[:app] = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path, device_xamarin_build_dir)
+      args[:app] = self.simulator_launcher.app_bundle_or_raise(app_path, device_xamarin_build_dir)
     end
 
     args[:bundle_id] ||= detect_bundle_id_from_app_bundle(args)
@@ -337,17 +340,19 @@ class Calabash::Cucumber::Launcher
         puts 'Warning: :privacy_settings not supported on device'
       end
     end
-    enable_accessibility_on_simulators
+
+    if args[:device_target].downcase.include?('simulator')
+      enable_accessibility_on_simulators
+    end
 
     if run_with_instruments?(args)
       self.run_loop = new_run_loop(args)
       self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
       # run with sim launcher
-      sdk = sdk_version || SimLauncher::SdkDetector.new().available_sdk_versions.reverse.find { |x| !x.start_with?('7') }
-      path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
       self.actions= Calabash::Cucumber::PlaybackActions.new
-      Calabash::Cucumber::SimulatorHelper.relaunch(path, sdk, args[:device].to_s, args)
+      # why not just pass args - AFAICT args[:app] == app_path?
+      self.simulator_launcher.relaunch(app_path, sdk_version(), args)
     end
     self.launch_args = args
     ensure_connectivity
@@ -376,13 +381,15 @@ class Calabash::Cucumber::Launcher
 
   end
 
+  # todo this method should be migrated to the Simulator Launcher
   def detect_app_bundle_from_args(args)
     if args[:device_target]=='simulator'
       device_xamarin_build_dir = 'iPhoneSimulator'
     else
       device_xamarin_build_dir = 'iPhone'
     end
-    Calabash::Cucumber::SimulatorHelper.detect_app_bundle(nil, device_xamarin_build_dir)
+    # is this really only applicable to the Xamarin IDE?
+    self.simulator_launcher.detect_app_bundle(nil, device_xamarin_build_dir)
   end
 
   def detect_bundle_id_from_app_bundle(args)
@@ -404,7 +411,7 @@ class Calabash::Cucumber::Launcher
 
   def new_run_loop(args)
     if RunLoop::Core.above_or_eql_version?('5.1', RunLoop::Core.xcode_version)
-      Calabash::Cucumber::SimulatorHelper.stop
+      self.simulator_launcher.stop
     end
     last_err = nil
 
@@ -418,10 +425,10 @@ class Calabash::Cucumber::Launcher
         if full_console_logging?
           puts 'retrying run loop...'
         end
-        Calabash::Cucumber::SimulatorHelper.stop
+        self.simulator_launcher.stop
       end
     end
-    Calabash::Cucumber::SimulatorHelper.stop
+    self.simulator_launcher.stop
     puts "Unable to start. Make sure you've set APP_BUNDLE_PATH to a build supported by this simulator version"
     raise StartError.new(last_err)
   end
@@ -507,7 +514,7 @@ class Calabash::Cucumber::Launcher
 
   def detect_bundle_id
     begin
-      bundle_path = Calabash::Cucumber::SimulatorHelper.app_bundle_or_raise(app_path)
+      bundle_path = self.simulator_launcher.app_bundle_or_raise(app_path)
       plist_path = File.join(bundle_path, 'Info.plist')
       info_plist_as_hash(plist_path)['CFBundleIdentifier']
     rescue => e
@@ -670,6 +677,10 @@ class Calabash::Cucumber::Launcher
       msgs << "    server version: '#{server_version}'"
 
       calabash_warn("#{msgs.join("\n")}")
+    else
+      if full_console_logging?
+        calabash_info("gem #{gem_version} is compat with '#{server_version}'")
+      end
     end
     nil
   end
