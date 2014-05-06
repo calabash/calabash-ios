@@ -73,8 +73,6 @@ describe 'simulator accessibility tool' do
 
       before(:each) do
         reset_simulator_content_and_settings
-        actual = simulator_support_sdk_dirs
-        expect(actual.count).to be == 0
 
         @latest_sdk = @sdk_detector.latest_sdk_version
         @device_target = "iPhone Retina (4-inch) - Simulator - iOS #{@latest_sdk}"
@@ -118,11 +116,6 @@ describe 'simulator accessibility tool' do
 
       it 'should be able to enable accessibility for the latest sdk' do
         repopulate_sim_app_support_for_sdk(@latest_sdk)
-
-        # needs launch the simulator again because it seems to want to write
-        # more files on the second launch.
-        launch_simulator
-        sleep(4)
 
         plist = File.join(simulator_app_support_dir, "#{@latest_sdk}", 'Library/Preferences/com.apple.Accessibility.plist')
         hash = accessibility_properties_hash()

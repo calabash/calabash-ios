@@ -1,4 +1,3 @@
-require 'sim_launcher'
 require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/utils/logging'
 

@@ -42,13 +42,38 @@ module Calabash
       # * ~/Library/Application Support/iPhone Simulator/Library
       # * ~/Library/Application Support/iPhone Simulator/Library/<sdk>[-64]
       #
-      # at the next launch of the iOS Simulator these directories will be
-      # recreated.
+      # and relaunching the iOS Simulator which will recreate the Library
+      # directory and the latest SDK directory.
       def reset_simulator_content_and_settings
+        quit_simulator
         sim_lib_path = File.join(simulator_app_support_dir(), 'Library')
         FileUtils.rm_rf(sim_lib_path)
         simulator_support_sdk_dirs.each do |dir|
           FileUtils.rm_rf(dir)
+        end
+
+        launch_simulator
+
+        # this is tricky because we need to wait for the simulator to recreate
+        # the directories.  specifically, we need the Accessibility plist to be
+        # exist so subsequent calabash launches will be able to enable
+        # accessibility.
+        #
+        # the directories take ~3.0 - ~5.0 to create.
+        counter = 0
+        loop do
+          break if counter == 80
+          dirs = simulator_support_sdk_dirs
+          if dirs.count == 0
+            sleep(0.2)
+          else
+            break if dirs.all? { |dir|
+              plist = File.expand_path("#{dir}/Library/Preferences/com.apple.Accessibility.plist")
+              File.exists?(plist)
+            }
+            sleep(0.2)
+          end
+          counter = counter + 1
         end
       end
 

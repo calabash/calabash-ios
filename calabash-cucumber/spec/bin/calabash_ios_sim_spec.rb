@@ -18,15 +18,7 @@ describe 'calabash ios sim cli' do
 
   it 'should be able to reset the content and settings of the simulator' do
     calabash_sim_reset
-    expect(simulator_support_sdk_dirs.count).to be == 0
-    launch_simulator
-
-    opts = {:timeout => 5, :timeout_msg => 'wait for 5s simulator to recreated directories'}
-    lib_dir = File.expand_path(File.join(simulator_app_support_dir, 'Library'))
-    wait_for(opts) do
-      simulator_support_sdk_dirs.count == 1 and File.exists?(lib_dir)
-    end
-
+    expect(simulator_support_sdk_dirs.count).to be == 1
   end
 
 end
