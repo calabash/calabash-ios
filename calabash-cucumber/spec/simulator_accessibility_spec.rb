@@ -128,7 +128,7 @@ describe 'simulator accessibility tool' do
         hash = accessibility_properties_hash()
         expect(plist_read(hash[:access_enabled], plist)).to be == 'true'
         expect(plist_read(hash[:app_access_enabled], plist)).to be == 'true'
-        expect(plist_read(hash[:automation_enabled], plist)).to be == nil
+        expect(plist_read(hash[:automation_enabled], plist)).to be == 'true'
         expect(plist_read(hash[:inspector_showing], plist)).to be == 'false'
         expect(plist_key_exists?(hash[:inspector_full_size], plist)).to be == false
         expect(plist_key_exists?(hash[:inspector_frame], plist)).to be == false
