@@ -31,10 +31,17 @@ module Calabash
             stack = Kernel.caller(0, 6)[1..-1].join("\n")
           end
 
-          msgs = ['Calabash::Cucumber::SimulatorHelper module has been replaced',
-                  'please update your code to use this pattern:',
-                  '  launcher = Calabash::Cucumber::Launcher.new',
-                  '  launcher.simulator_launcher.stop']
+          msgs = ['The Calabash::Cucumber::SimulatorHelper module has been replaced.',
+                  'Please replace:',
+                  '',
+                  '    Calabash::Cucumber::SimulatorHelper.stop',
+                  '',
+                  'with this:',
+                  '',
+                  '    launcher = Calabash::Cucumber::Launcher.new',
+                  '    launcher.simulator_launcher.stop',
+                  '',
+                  'The stack trace below will show you the line number you need to change.']
 
           msg = "deprecated '0.9.169' - #{msgs.join("\n")}\n#{stack}"
 
