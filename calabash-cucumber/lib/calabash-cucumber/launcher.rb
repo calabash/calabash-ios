@@ -123,7 +123,7 @@ class Calabash::Cucumber::Launcher
   end
 
   def reset_app_jail(sdk=nil, path=nil)
-    sdk ||= sdk_version || SimLauncher::SdkDetector.new().latest_sdk_version
+    sdk ||= sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
     path ||= self.simulator_launcher.app_bundle_or_raise(app_path)
 
     app = File.basename(path)
@@ -158,7 +158,7 @@ class Calabash::Cucumber::Launcher
 
       setting_name = KNOWN_PRIVACY_SETTINGS[setting_name] || setting_name
       allow = setting_options[:allow] == false ? false : true
-      sdk = setting_options[:sdk] || SimLauncher::SdkDetector.new().latest_sdk_version
+      sdk = setting_options[:sdk] || self.simulator_launcher.sdk_detector.latest_sdk_version
 
       dirs = directories_for_sdk_prefix(sdk)
       if debug_logging?
