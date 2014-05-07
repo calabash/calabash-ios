@@ -541,11 +541,9 @@ class Calabash::Cucumber::Launcher
   end
 
   def simulator_target?(launch_args={})
-    if launch_args.empty?
-      ENV['DEVICE_TARGET'].downcase.include?('simulator')
-    else
-      launch_args[:device_target].downcase.include?('simulator')
-    end
+    value = ENV['DEVICE_TARGET'] || launch_args[:device_target]
+    return false if value.nil?
+    value.downcase.include?('simulator')
   end
 
   def sdk_version

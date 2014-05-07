@@ -10,11 +10,15 @@ describe 'Calabash Launcher' do
   describe 'simulator_target? should respond correctly to DEVICE_TARGET' do
 
     before(:each) do
-      ENV['DEVICE_TARGET'] = ''
+      ENV['DEVICE_TARGET'] = nil
     end
 
     def set_device_target(val)
       ENV['DEVICE_TARGET'] = val
+    end
+
+    it 'should return true if DEVICE_TARGET is nil' do
+      expect(@launcher.simulator_target?).to be == false
     end
 
     it 'should return true if DEVICE_TARGET is simulator' do
@@ -57,6 +61,14 @@ describe 'Calabash Launcher' do
       expect(@launcher.simulator_target?(hash)).to be == false
 
       hash = {:device_target => '66h3hfgc466836ehcg72738eh8f322842855d2fd'}
+      expect(@launcher.simulator_target?(hash)).to be == false
+
+      hash = {:device_target => 'foobar'}
+      expect(@launcher.simulator_target?(hash)).to be == false
+    end
+
+    it 'should return false when passed a hash with no :device_target key' do
+      hash = {:foobar => 'foobar'}
       expect(@launcher.simulator_target?(hash)).to be == false
     end
 
