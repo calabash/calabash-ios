@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency('json')
   s.add_dependency('edn')
   s.add_dependency('CFPropertyList')
-  s.add_dependency('sim_launcher', '~> 0.4.9')
+  s.add_dependency('sim_launcher', '~> 0.4.10')
   s.add_dependency('slowhandcuke')
   s.add_dependency('geocoder', '~>1.1.8')
   s.add_dependency('httpclient', '~> 2.3.3')
