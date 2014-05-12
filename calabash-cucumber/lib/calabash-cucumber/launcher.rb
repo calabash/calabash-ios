@@ -232,23 +232,25 @@ class Calabash::Cucumber::Launcher
         :launch_retries => 5
     }
 
-    #:device_target will be set
-
-    if run_with_instruments?(args) && !simulator_target?
-      device_tgt = ENV['DEVICE_TARGET']
-      if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
-        device_tgt = RunLoop::Core.detect_connected_device
-      end
-
-      if device_tgt
-        args[:device_target] = args[:udid] = device_tgt
+    device_tgt = ENV['DEVICE_TARGET']
+    if run_with_instruments?(args)
+      if simulator_target?
+        args[:device_target] = device_tgt
+        args[:udid] = nil
       else
-        args[:device_target] = 'simulator'
+        if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
+          device_tgt = RunLoop::Core.detect_connected_device
+        end
+
+        if device_tgt
+          args[:device_target] = args[:udid] = device_tgt
+        end
       end
-    else
-      args[:device_target] = 'simulator'
     end
 
+    if args[:device_target].nil?
+      args[:device_target] = 'simulator'
+    end
     args
   end
 
