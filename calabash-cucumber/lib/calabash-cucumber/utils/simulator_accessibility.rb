@@ -48,7 +48,7 @@ module Calabash
         quit_simulator
         sim_lib_path = File.join(simulator_app_support_dir(), 'Library')
         FileUtils.rm_rf(sim_lib_path)
-        simulator_support_sdk_dirs.each do |dir|
+        existing_simulator_support_sdk_dirs.each do |dir|
           FileUtils.rm_rf(dir)
         end
 
@@ -63,7 +63,7 @@ module Calabash
         counter = 0
         loop do
           break if counter == 80
-          dirs = simulator_support_sdk_dirs
+          dirs = existing_simulator_support_sdk_dirs
           if dirs.count == 0
             sleep(0.2)
           else
@@ -238,7 +238,7 @@ module Calabash
       #     ~/Library/Application Support/iPhone Simulator/Library/7.1
       #
       # @return[Array<String>] a list of absolute paths to simulator directories
-      def simulator_support_sdk_dirs
+      def existing_simulator_support_sdk_dirs
         sim_app_support_path = simulator_app_support_dir()
         Dir.glob("#{sim_app_support_path}/*").select { |path|
           path =~ /(\d)\.(\d)\.?(\d)?(-64)?/

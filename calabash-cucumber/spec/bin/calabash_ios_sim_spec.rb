@@ -18,7 +18,7 @@ describe 'calabash ios sim cli' do
 
   it 'should be able to reset the content and settings of the simulator' do
     calabash_sim_reset
-    expect(simulator_support_sdk_dirs.count).to be == 1
+    expect(existing_simulator_support_sdk_dirs.count).to be == 1
   end
 
 end

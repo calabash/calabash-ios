@@ -73,6 +73,9 @@ describe 'simulator accessibility tool' do
 
       before(:each) do
         reset_simulator_content_and_settings
+          existing_simulator_support_sdk_dirs.each do |dir|
+            FileUtils.rm_rf(dir)
+          end
 
         @latest_sdk = @sdk_detector.latest_sdk_version
         @device_target = "iPhone Retina (4-inch) - Simulator - iOS #{@latest_sdk}"
