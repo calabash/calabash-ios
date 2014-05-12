@@ -311,14 +311,14 @@ class Calabash::Cucumber::Launcher
         args[:app] = File.expand_path(args[:app])
       else
         # args[:app] is not a directory so must be a bundle id
-        if args[:device_target] == 'simulator' ## bundle id set, but simulator target
+        if simulator_target?(args) ## bundle id set, but simulator target
           args[:app] = app_path || detect_app_bundle_from_args(args)
         end
       end
     end
 
     unless args[:app]
-      if args[:device_target]=='simulator'
+      if simulator_target?(args)
         device_xamarin_build_dir = 'iPhoneSimulator'
       else
         device_xamarin_build_dir = 'iPhone'
@@ -335,7 +335,7 @@ class Calabash::Cucumber::Launcher
 
 
     if args[:privacy_settings]
-      if args[:device_target]=='simulator'
+      if simulator_target?(args)
         update_privacy_settings(args[:bundle_id], args[:privacy_settings])
       else
         #Not supported on device
@@ -385,7 +385,7 @@ class Calabash::Cucumber::Launcher
 
   # todo this method should be migrated to the Simulator Launcher
   def detect_app_bundle_from_args(args)
-    if args[:device_target]=='simulator'
+    if simulator_target?(args)
       device_xamarin_build_dir = 'iPhoneSimulator'
     else
       device_xamarin_build_dir = 'iPhone'
