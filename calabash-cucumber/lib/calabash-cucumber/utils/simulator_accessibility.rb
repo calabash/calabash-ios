@@ -1,6 +1,7 @@
 require 'calabash-cucumber/utils/xctools'
 require 'calabash-cucumber/utils/plist_buddy'
 require 'sim_launcher'
+require 'cfpropertylist'
 
 module Calabash
   module Cucumber
@@ -88,13 +89,21 @@ module Calabash
       #     ~/Library/Application Support/iPhone Simulator/Library/7.0.3-64
       #     ~/Library/Application Support/iPhone Simulator/Library/7.1
       #
+      # a simulator is 'possible' if the SDK is available in the Xcode version.
+      #
+      # this method merges (uniquely) the possible and existing SDKs.
+      #
       # this method also hides the AXInspector.
+      #
       # @param [Hash] opts controls the behavior of the method
       # @option opts [Boolean] :verbose controls logging output
       # @return [Boolean] true iff enabling accessibility worked on all sdk
       #  directories
       def enable_accessibility_on_simulators(opts={})
-        results =  simulator_support_sdk_dirs.map do |dir|
+        possible = possible_simulator_support_sdk_dirs
+        existing = existing_simulator_support_sdk_dirs
+        dirs = (possible + existing).uniq
+        results = dirs.map do |dir|
           enable_accessibility_in_sdk_dir(dir, opts)
         end
         results.all? { |elm| elm }
@@ -107,13 +116,14 @@ module Calabash
       #
       # WARNING:  this will quit the simulator
       #
-      #   path = '~/Library/Application Support/iPhone Simulator/Library/6.1'
+      #   path = '/6.1'
       #   enable_accessibility_in_sdk_dir(path)
       #
       # this method also hides the AXInspector.
       #
-      # if the Library/Preferences/com.apple.Accessibility.plist does not exist,
-      # this method returns false.
+      # if the Library/Preferences/com.apple.Accessibility.plist does not exist
+      # this method will create a Library/Preferences/com.apple.Accessibility.plist
+      # that (oddly) the Simulator will _not_ overwrite.
       #
       # @see enable_accessibility_on_simulators for the public API.
       #
@@ -128,72 +138,47 @@ module Calabash
         default_opts = {:verbose => false}
         merged = default_opts.merge(opts)
 
-        plist_path = File.expand_path("#{sim_app_support_sdk_dir}/Library/Preferences/com.apple.Accessibility.plist")
+        quit_simulator
 
         verbose = merged[:verbose]
-
         sdk = File.basename(sim_app_support_sdk_dir)
         msgs = ["cannot enable accessibility for #{sdk} SDK"]
-        unless File.exists?(plist_path)
-          if verbose
-            msgs << "expected plist to exist at #{plist_path}"
-            calabash_warn(msgs.join("\n"))
-          end
-          return false
-        end
 
-        quit_simulator
+        plist_path = File.expand_path("#{sim_app_support_sdk_dir}/Library/Preferences/com.apple.Accessibility.plist")
 
         hash = accessibility_properties_hash()
 
-        unless plist_set(hash[:access_enabled], 'bool', 'true', plist_path)
-          if verbose
-            msgs << "could not set '#{hash[:access_enabled]}' to YES"
-            calabash_warn(msgs.join("\n"))
+        if File.exist?(plist_path)
+          res = hash.map do |hash_key, settings|
+            success = plist_set(settings[:key], settings[:type], settings[:value], plist_path)
+            unless success
+              if verbose
+                if settings[:type] == 'bool'
+                  value = settings[:value] ? 'YES' : 'NO'
+                else
+                  value = settings[:value]
+                end
+                msgs << "could not set #{hash_key} => '#{settings[:key]}' to #{value}"
+                calabash_warn(msgs.join("\n"))
+              end
+            end
+            success
           end
-          return false
+          res.all? { |elm| elm }
+        else
+          FileUtils.mkdir_p("#{sim_app_support_sdk_dir}/Library/Preferences")
+          plist = CFPropertyList::List.new
+          data = {}
+          # CFPropertyList gem is super wonky
+          # it matches Boolean to a string type with 'true/false' values
+          # - stick with PlistBuddy
+          # hash.each do |_, settings|
+          #   data[settings[:key]] = settings[:value]
+          # end
+          plist.value = CFPropertyList.guess(data)
+          plist.save(plist_path, CFPropertyList::List::FORMAT_BINARY)
+          enable_accessibility_in_sdk_dir(sim_app_support_sdk_dir)
         end
-
-        unless plist_set(hash[:app_access_enabled], 'bool', 'true', plist_path)
-          if verbose
-            msgs << "could not set '#{hash[:app_access_enabled]}' to YES"
-            calabash_warn(msgs.join("\n"))
-          end
-          return false
-        end
-
-        unless plist_set(hash[:automation_enabled], 'bool', 'true', plist_path)
-          if verbose
-            msgs << "could not set '#{hash[:automation_enabled]}' to YES"
-            calabash_warn(msgs.join("\n"))
-          end
-          return false
-        end
-
-        unless plist_set(hash[:inspector_showing], 'bool', 'false', plist_path)
-          if verbose
-            msgs << "could not set '#{hash[:inspector_showing]}' to NO"
-            calabash_warn(msgs.join("\n"))
-          end
-          return false
-        end
-
-        unless plist_set(hash[:inspector_full_size], 'bool', 'false', plist_path)
-          if verbose
-            msgs << "could not set '#{hash[:inspector_full_size]}' to NO"
-            calabash_warn(msgs.join("\n"))
-          end
-          return false
-        end
-
-        res = plist_set(hash[:inspector_frame], 'string', '{{270, -13}, {276, 166}}', plist_path)
-        unless res
-          if verbose
-            msgs << "could not set '#{hash[:inspector_frame]}'"
-            calabash_warn(msgs.join("\n"))
-          end
-        end
-        res
       end
 
 
@@ -204,20 +189,34 @@ module Calabash
       def accessibility_properties_hash
         {
               # this is required
-              :access_enabled => 'AccessibilityEnabled',
+              :access_enabled => {:key => 'AccessibilityEnabled',
+                                  :value => 'true',
+                                  :type => 'bool'},
               # i _think_ this is legacy
-              :app_access_enabled => 'ApplicationAccessibilityEnabled',
+              :app_access_enabled => {:key => 'ApplicationAccessibilityEnabled',
+                                      :value => 'true',
+                                      :type => 'bool'},
 
               # i don't know what this does
-              :automation_enabled => 'AutomationEnabled',
+              :automation_enabled => {:key => 'AutomationEnabled',
+                                      :value => 'true',
+                                      :type => 'bool'},
 
               # determines if the Accessibility Inspector is showing
-              :inspector_showing => 'AXInspectorEnabled',
+              :inspector_showing => {:key => 'AXInspectorEnabled',
+                                     :value => 'false',
+                                     :type => 'bool'},
+
               # controls if the Accessibility Inspector is expanded or not expanded
-              :inspector_full_size => 'AXInspector.enabled',
+              :inspector_full_size => {:key => 'AXInspector.enabled',
+                                       :value => 'false',
+                                       :type => 'bool'},
+
               # controls the frame of the Accessibility Inspector
               # this is a 'string' => {{0, 0}, {276, 166}}
-              :inspector_frame => 'AXInspector.frame'
+              :inspector_frame => {:key => 'AXInspector.frame',
+                                   :value => '{{270, -13}, {276, 166}}',
+                                   :type => 'string'}
         }
       end
 
@@ -288,7 +287,7 @@ module Calabash
         # in Xcode 5.1* SDK 7.0 ==> 7.0.3 so we should not include '7.0'
         # if the user's support directory already contains a 7.0 and 7.0-64 dir
         # we will detect it by reading from disk.
-        available - ['7.0']
+        (available - ['7.0']).uniq.sort
       end
 
       # return absolute paths to possible simulator support sdk dirs
