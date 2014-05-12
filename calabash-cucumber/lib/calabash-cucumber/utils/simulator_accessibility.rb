@@ -252,6 +252,56 @@ module Calabash
         }
       end
 
+      # returns a list of possible SDKs per Xcode version
+      #
+      # it is not enough to ask for the available sdks because of the new 64-bit
+      # variants that started to appear Xcode 5 and the potential for patch level
+      # versions.
+      #
+      # unfortunately, this method will need be maintained per Xcode version.
+      #
+      # @return [Array<String>] ex. ['6.1', '7.1', '7.0.3', '7.0.3-64']
+      def possible_simulator_sdks
+        sdk_detector = SimLauncher::SdkDetector.new
+        available = sdk_detector.available_sdk_versions
+        instruments_version = instruments(:version)
+
+        # in Xcode 5.1* SDK 7.0 ==> 7.0.3
+        if (instruments_version == '5.1' or instruments_version == '5.1.1') and available.include?('7.0')
+          available << '7.0.3'
+          available << '7.0.3-64'
+        end
+
+        if instruments_version == '5.1.1' and available.include?('7.1')
+          available << '7.1'
+          available << '7.1-64'
+        end
+
+        gem_compat_xcode_versions = ['5.1', '5.1.1']
+        unless gem_compat_xcode_versions.include?(instruments_version)
+          msg = ["expected Xcode instruments version to be '5.1' or '5.1.1'",
+                 "but found version '#{instruments_version}'",
+                 "Gem needs a manual update for Xcode #{instruments_version}!"].join("\n")
+          calabash_warn(msg)
+        end
+
+        # in Xcode 5.1* SDK 7.0 ==> 7.0.3 so we should not include '7.0'
+        # if the user's support directory already contains a 7.0 and 7.0-64 dir
+        # we will detect it by reading from disk.
+        available - ['7.0']
+      end
+
+      # return absolute paths to possible simulator support sdk dirs
+      #
+      # these directories may or may not exist
+      # @return [Array<String>] an array of absolute paths
+      def possible_simulator_support_sdk_dirs
+        base_dir = simulator_app_support_dir
+        possible_simulator_sdks.map { |sdk|
+          "#{base_dir}/#{sdk}"
+        }
+      end
+
     end
   end
 end

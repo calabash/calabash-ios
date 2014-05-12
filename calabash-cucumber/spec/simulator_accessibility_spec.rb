@@ -31,6 +31,39 @@ describe 'simulator accessibility tool' do
     expect(actual).to be == expected
   end
 
+  # brittle because some users will not have installed 6.1 or 7.0, but hey, why
+  # are them gem dev'ing or gem testing?
+  it 'should be able to return possible SDKs' do
+    actual = possible_simulator_sdks
+    instruments_version = instruments(:version)
+    case instruments_version
+      when '5.1'
+        expected = ['6.1', '7.1', '7.0.3', '7.0.3-64']
+        expect(actual).to be == expected
+      when '5.1.1'
+        expected = ['6.1', '7.1', '7.0.3', '7.0.3-64', '7.1', '7.1-64']
+        expect(actual).to be == expected
+      else
+        pending("Xcode version '#{instruments_version}' is not supported by this test - gem needs update!")
+    end
+  end
+
+  # brittle because some users will not have installed 6.1 or 7.0, but hey, why
+  # are them gem dev'ing or gem testing?
+  it 'should be able to return Simulator Support SDK dirs' do
+    actual = possible_simulator_support_sdk_dirs
+    instruments_version = instruments(:version)
+    case instruments_version
+      when '5.1'
+        expect(actual.count).to be == 4
+      when '5.1.1'
+        expect(actual.count).to be == 6
+      else
+        pending("Xcode version '#{instruments_version}' is not supported by this test - gem needs update!")
+    end
+    puts actual
+  end
+
   describe 'enabling accessibility' do
 
     before(:each) do
