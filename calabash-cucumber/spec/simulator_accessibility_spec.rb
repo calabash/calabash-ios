@@ -12,7 +12,7 @@ describe 'simulator accessibility tool' do
     expect(File.exist?(path)).to be == true
   end
 
-  it 'should be able open and close the simulator' do
+  it 'should be able to open and close the simulator' do
     cmd = "ps auxw | grep \"iPhone Simulator.app/Contents/MacOS/iPhone Simulator\" | grep -v grep"
 
     quit_simulator
@@ -22,6 +22,13 @@ describe 'simulator accessibility tool' do
     launch_simulator
     sleep(4)
     expect(`#{cmd}`.split("\n").count).to be == 1
+  end
+
+  it 'should be able to return a path a com.apple.Accessibility.plist for an SDK' do
+    sdk = "#{simulator_app_support_dir}/7.1"
+    expected = "#{sdk}/Library/Preferences/com.apple.Accessibility.plist"
+    actual = plist_path_with_sdk_dir(sdk)
+    expect(actual).to be == expected
   end
 
   describe 'enabling accessibility' do

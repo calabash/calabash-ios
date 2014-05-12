@@ -221,10 +221,17 @@ module Calabash
         }
       end
 
-      # the absolute path the the iPhone Simulator Application Support directory
+      # the absolute path to the iPhone Simulator Application Support directory
       # @return [String] absolute path
       def simulator_app_support_dir
         File.expand_path('~/Library/Application Support/iPhone Simulator')
+      end
+
+      # the absolute path to the SDK's com.apple.Accessibility.plist file
+      # @param [String] sdk_dir base path the SDK directory
+      # @return [String] an absolute path
+      def plist_path_with_sdk_dir(sdk_dir)
+        File.expand_path("#{sdk_dir}/Library/Preferences/com.apple.Accessibility.plist")
       end
 
       # returns a list of absolute paths the existing simulator directories.
