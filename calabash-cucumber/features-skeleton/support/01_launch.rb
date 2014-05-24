@@ -4,13 +4,11 @@
 #                                      #
 #   When running calabash-ios tests at #
 #   www.xamarin.com/test-cloud         #
-#   this file will be overwritten by   #
-#   a file which automates             #
-#   app launch on devices.             #
-#                                      #
-#   Don't rely on this file being      #
-#   present when running at            #
-#   Xamarin Test Cloud                 #
+#   the  methods invoked by            #
+#   CalabashLauncher are overriden.    #
+#   It will automatically ensure       #
+#   running on device, installing apps #
+#   etc.                               #
 #                                      #
 ########################################
 
