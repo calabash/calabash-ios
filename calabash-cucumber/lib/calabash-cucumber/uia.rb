@@ -19,7 +19,7 @@ module Calabash
         res['results'].first
       end
 
-      def uia_tap_server(query, options={})
+      def uia_wait_tap(query, options={})
         res = http({:method => :post, :path => 'uia-tap'}, {:query => query}.merge(options))
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'

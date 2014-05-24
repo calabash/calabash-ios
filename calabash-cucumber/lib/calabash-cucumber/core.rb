@@ -85,13 +85,13 @@ module Calabash
         query_action_with_options(:touch, uiquery, options)
       end
 
-      def tap_q(uiquery, options={})
+      def wait_tap(uiquery, options={})
         _uiquery, options = extract_query_and_options(uiquery, options)
-        launcher.actions.tap(options)
+        launcher.actions.wait_tap(options)
       end
 
       def t(uiquery, options={})
-        tap_q(uiquery, options)
+        wait_tap(uiquery, options)
       end
 
 

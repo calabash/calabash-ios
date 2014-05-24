@@ -63,8 +63,14 @@ module Calabash
         touch("view marked:'#{label}'", *args)
       end
 
-      def tap(label, *args)
-        simple_touch(label, *args)
+      def tap(hash_or_string, *args)
+        if hash_or_string.is_a?(String)
+          tap_mark(hash_or_string, *args)
+        elsif hash_or_string.respond_to?(:[])
+          wait_tap(hash_or_string[:query], hash_or_string)
+        else
+          raise(ArgumentError, "first parameter to tap must be a string or a hash. Was: #{hash_or_string.class}, #{hash_or_string}")
+        end
       end
 
       def tap_mark(label, *args)

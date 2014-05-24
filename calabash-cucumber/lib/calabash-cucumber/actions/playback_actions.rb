@@ -13,7 +13,7 @@ class Calabash::Cucumber::PlaybackActions
     playback('touch', options)
   end
 
-  def tap(options)
+  def wait_tap(options)
     touch(options)
   end
 
