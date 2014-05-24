@@ -10,6 +10,8 @@ module Calabash
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
 
+      CLIENT_TIMEOUT_ADDITION = 5
+
       class WaitError < RuntimeError
       end
 
@@ -114,8 +116,11 @@ module Calabash
       end
 
       def wait_for_condition(options = {})
-        options[:timeout] = options[:timeout] || 30
-        options[:query] = options[:query] || "view"
+        timeout = options[:timeout]
+        unless timeout && timeout > 0
+          timeout = 30
+        end
+        options[:query] = options[:query] || '*'
         if options.has_key?(:condition)
           opt_condition = options[:condition]
           if opt_condition.is_a?(Symbol)
@@ -127,22 +132,23 @@ module Calabash
         end
         options[:condition] = options[:condition] || CALABASH_CONDITIONS[:none_animating]
         options[:post_timeout] = options[:post_timeout] || 0
-        options[:frequency] = options[:frequency] || 0.3
-        retry_frequency = options[:retry_frequency] = options[:retry_frequency] || 0.3
-        options[:count] = options[:count] || 2
-        timeout_message = options[:timeout_message] = options[:timeout_message] || "Timeout waiting for condition (#{options[:condition]})"
-        screenshot_on_error = options[:screenshot_on_error] = options[:screenshot_on_error] || true
+
+        retry_frequency = options[:frequency] = options[:frequency] || 0.2
+        timeout_message = options[:timeout_message] = options[:timeout_message] || "Timeout waiting (#{options[:timeout]}) for condition (#{options[:condition]})"
+        screenshot_on_error = true
+        if options.key?(:screenshot_on_error)
+          screenshot_on_error = options[:screenshot_on_error]
+        end
 
         begin
-          Timeout::timeout(options[:timeout],WaitError) do
-            loop do
+          Timeout::timeout(timeout+CLIENT_TIMEOUT_ADDITION, WaitError) do
               res = http({:method => :post, :path => 'condition'},
                          options)
               res = JSON.parse(res)
-              break if res['outcome'] == 'SUCCESS'
-              sleep(options[:retry_frequency]) if options[:retry_frequency] > 0
-            end
-            sleep(options[:post_timeout]) if options[:post_timeout] > 0
+              unless res['outcome'] == 'SUCCESS'
+                raise WaitError.new(res['reason'])
+              end
+              sleep(options[:post_timeout]) if options[:post_timeout] > 0
           end
         rescue WaitError => e
           msg = timeout_message || e
@@ -158,7 +164,7 @@ module Calabash
             raise wait_error(msg)
           end
         rescue Exception => e
-          handle_error_with_options(e,nil, options[:screenshot_on_error])
+          handle_error_with_options(e,nil, screenshot_on_error)
         end
       end
 

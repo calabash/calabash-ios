@@ -46,6 +46,10 @@ module Calabash
         map(uiquery, :query, *args)
       end
 
+      def q(uiquery, *args)
+        query(uiquery, *args)
+      end
+
       # causes all views matched by the +query+ to briefly change colors making
       # them visually identifiable.
       #
@@ -80,6 +84,16 @@ module Calabash
       def touch(uiquery, options={})
         query_action_with_options(:touch, uiquery, options)
       end
+
+      def tap_q(uiquery, options={})
+        _uiquery, options = extract_query_and_options(uiquery, options)
+        launcher.actions.tap(options)
+      end
+
+      def t(uiquery, options={})
+        tap_q(uiquery, options)
+      end
+
 
       def double_tap(uiquery, options={})
         query_action_with_options(:double_tap, uiquery, options)
