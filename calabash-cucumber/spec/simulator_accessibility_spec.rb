@@ -84,7 +84,7 @@ describe 'simulator accessibility tool' do
                   :no_launch => false,
                   :sdk_version => @latest_sdk,
                   :app => lp_simple_example,
-                  :timeout => 10,
+                  :timeout => 30,
                   :device_target => @device_target,
                   :launch_retries => 1
             }
