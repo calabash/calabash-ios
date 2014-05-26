@@ -6,7 +6,7 @@ module Calabash
 
     def self.const_missing(const_name)
       if const_name == :FRAMEWORK_VERSION
-        _deprecated('0.9.169', 'no replacement', :warn)
+        _deprecated('0.9.169', 'FRAMEWORK_VERSION has been deprecated - there is no replacement', :warn)
         return nil
       end
       raise(NameError, "uninitialized constant Calabash::Cucumber::#{const_name}")
