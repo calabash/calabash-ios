@@ -451,7 +451,9 @@ class Calabash::Cucumber::Launcher
         puts 'Waiting for App to be ready'
       end
       until connected do
-        raise "MAX_RETRIES" if retry_count == max_retry_count
+        if retry_count == max_retry_count
+          raise "Timed out connecting to Calabash server after #{max_retry_count} retries. Make sure it is linked and App isn't crashing"
+        end
         retry_count += 1
         begin
           Timeout::timeout(timeout, CalabashLauncherTimeoutErr) do
@@ -468,7 +470,10 @@ class Calabash::Cucumber::Launcher
             end
           end
         rescue CalabashLauncherTimeoutErr => e
-          puts "Timed out...Retry.."
+          if full_console_logging?
+            puts "Timed out after #{timeout} secs, trying to connect to Calabash server..."
+            puts "Will retry #{max_retry_count - retry_count}"
+          end
         end
       end
     rescue RuntimeError => e
