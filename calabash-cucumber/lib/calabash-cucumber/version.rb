@@ -1,8 +1,8 @@
 require 'calabash-cucumber/utils/logging'
 module Calabash
   module Cucumber
-    VERSION = '0.9.169'
-    MIN_SERVER_VERSION = '0.9.169'
+    VERSION = '0.10.0.pre1'
+    MIN_SERVER_VERSION = '0.10.0.pre1'
 
     def self.const_missing(const_name)
       if const_name == :FRAMEWORK_VERSION
