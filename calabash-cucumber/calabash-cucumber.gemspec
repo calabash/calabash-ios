@@ -19,8 +19,8 @@ Gem::Specification.new do |s|
   s.add_dependency('cucumber', '~> 1.3.0')
   s.add_dependency('calabash-common', '~> 0.0.1')
   s.add_dependency('json')
-  s.add_dependency('edn')
-  s.add_dependency('CFPropertyList')
+  s.add_dependency('edn', '1.0.3')
+  s.add_dependency('CFPropertyList','~> 2.2.8')
   s.add_dependency('sim_launcher', '~> 0.4.11')
   s.add_dependency('slowhandcuke')
   s.add_dependency('geocoder', '~>1.1.8')
@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   s.add_dependency('bundler', '~> 1.1')
   s.add_dependency('run_loop', '~> 0.2.1')
   s.add_dependency('awesome_print')
-  s.add_dependency('xamarin-test-cloud', '~> 0.9.27')
+  s.add_dependency('xamarin-test-cloud', '~> 0.9.33')
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
