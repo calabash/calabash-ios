@@ -29,9 +29,9 @@ Gem::Specification.new do |s|
   s.add_dependency('run_loop', '~> 0.2.1')
   s.add_dependency('awesome_print')
   s.add_dependency('xamarin-test-cloud', '~> 0.9.33')
-  s.add_dependency('yard', '~> 0.8.7.4')
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
+  s.add_development_dependency('yard', '~> 0.8.7.4')
 
 end
