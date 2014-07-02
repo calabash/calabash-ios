@@ -27,10 +27,11 @@ If you have any questions about Calabash iOS, please use the google group
 
 For Xamarin users, we recommend the free Xamarin [Calabash component](https://components.xamarin.com/view/calabash/) which replaces the `calabash-ios setup` step below.
 
-Also the Calabash.app is an OS X app containing precompiled versions of Ruby, Calabash and the Xamarin Test Cloud gem.
+For setup with CocoaPods, please follow the excellent guide from Angel G. Olloqui
 
-[https://s3.amazonaws.com/calabashapp/Calabash.zip](https://s3.amazonaws.com/calabashapp/Calabash.zip)
+[http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods)
 
+and see example project: [https://github.com/calabash/calabash-ios-example](https://github.com/calabash/calabash-ios-example).
 
 The rest of this guide was writting using XCode 5, but should also work for XCode versions >= 4.3.
 
