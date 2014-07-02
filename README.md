@@ -280,7 +280,7 @@ Note that calabash-ios will backup your project file:
 
 The project file is copied to `project.pbxproj.bak`. In case something goes wrong you can move this file back to `project.pbxproj` (in your .xcodeproj) folder.
 
-Setup will modify your xcode project file to use Calabash iOs. You should now have a new Scheme named [target]-cal in Xcode:
+Setup will modify your xcode project file to use `calabash-ios`. You should now have a new Scheme named [target]-cal in Xcode:
 
 ![-cal scheme](documentation/images/scheme.png "-cal scheme")
 
