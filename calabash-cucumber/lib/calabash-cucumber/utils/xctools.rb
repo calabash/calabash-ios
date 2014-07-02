@@ -24,7 +24,7 @@ module Calabash
       # returns the path to the current developer usr/bin directory
       # @return [String] path to the current xcode binaries
       def xcode_bin_dir
-        "#{xcode_developer_dir}/usr/bin"
+        File.expand_path("#{xcode_developer_dir}/usr/bin")
       end
 
       # method for interacting with instruments

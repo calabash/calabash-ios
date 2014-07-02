@@ -59,7 +59,7 @@ describe 'simulator accessibility tool' do
 
   it 'should be able to find existing simulator support sdk dirs' do
     mocked_support_dir = File.expand_path(File.join(__FILE__, '..', 'resources/enable-accessibility/'))
-    self.should_receive(:simulator_app_support_dir).and_return(mocked_support_dir)
+    expect(self).to receive(:simulator_app_support_dir).and_return(mocked_support_dir)
     actual = existing_simulator_support_sdk_dirs
     expect(actual.count).to be == 5
   end
