@@ -5,7 +5,7 @@ require 'calabash-cucumber/keychain_helpers'
 require 'calabash-cucumber/wait_helpers'
 require 'calabash-cucumber/launcher'
 require 'net/http'
-require 'test/unit'
+require 'test/unit/assertions'
 require 'json'
 require 'set'
 require 'calabash-cucumber/version'
@@ -23,7 +23,7 @@ module Calabash
   module Cucumber
     module Operations
 
-      include Minitest::Assertions
+      include Test::Unit::Assertions
       include Calabash::Cucumber::Logging
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
