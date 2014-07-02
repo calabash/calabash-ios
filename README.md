@@ -47,7 +47,7 @@ The rest of this guide was writting using XCode 5, but should also work for XCod
 
 You need to have Ruby installed. This is installed by default on MacOSX.
 
-Verify by running `ruby -v` in a terminal - it should print "ruby 1.8.7" (or higher). We do recommend using Ruby 2.0+.
+Verify by running `ruby -v` in a terminal. It should be at least '1.9' but we do recommend using Ruby 2.0+.
 
 ### Fast track
 
@@ -210,22 +210,6 @@ If you are already using Calabash iOS in a project and you want to update to the
 
 [Updating your Calabash iOS version](https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version)
 
-
-#### Troubleshooting Installation
-
-On Mountain Lion with Ruby 1.8.x, you may see an error like this:
-```
-    ~$ sudo gem install calabash-cucumber
-    Password:
-    Building native extensions.  This could take a while...
-    ERROR:  Error installing calabash-android:
-    ERROR: Failed to build gem native extension.
-
-    /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby extconf.rb
-    mkmf.rb can't find header files for ruby at /System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/ruby/ruby.h
-```
-
-One possible cause can be not having the correct Command Line Tools (compiler tool chain) for your OS X release. For example, for OS X 10.8 "Mountain Lion" you need the "Mountain Lion" version of these. You can install them from Xcode Preferences pane (in the Download tab).
 
 Important notice
 ================
