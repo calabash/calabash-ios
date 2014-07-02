@@ -32,5 +32,6 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
+  s.add_development_dependency('yard', '~> 0.8.7.4')
 
 end

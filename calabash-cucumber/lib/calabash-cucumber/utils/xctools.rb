@@ -8,10 +8,12 @@ module Calabash
 
       # returns the path to the current developer directory
       #
-      # $ man xcode-select
-      # DEVELOPER_DIR
-      # Overrides the active developer directory. When DEVELOPER_DIR is set, its value
-      # will be used instead of the system-wide active developer directory.
+      # From the man pages:
+      #
+      #  $ man xcode-select
+      #  DEVELOPER_DIR
+      #  Overrides the active developer directory. When DEVELOPER_DIR is set, its value
+      #  will be used instead of the system-wide active developer directory.
       #
       # @return [String] path to current developer directory
       def xcode_developer_dir
