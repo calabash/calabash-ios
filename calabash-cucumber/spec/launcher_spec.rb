@@ -76,7 +76,72 @@ describe 'Calabash Launcher' do
       hash = {:foobar => 'foobar'}
       expect(@launcher.simulator_target?(hash)).to be == false
     end
+  end
 
+  describe 'resetting application content and settings' do
+
+    SANDBOX_DIRS = ['Library', 'Documents', 'tmp']
+
+    def populate_app_sandbox(path=args_for_reset_app_sandbox[:path])
+      udid_dir = File.expand_path(File.join(path, '..'))
+      SANDBOX_DIRS.each do |dir|
+        dir_path = File.expand_path(File.join(udid_dir, dir))
+        FileUtils.mkdir_p(dir_path)
+      end
+      udid_dir
+    end
+
+    def args_for_reset_app_sandbox(sdk='7.1')
+      sub_dir = 'resources/launcher'
+      dir_udid = '1FCBF253-E5EC-4FD5-839D-0AC526F28D10'
+      app_name = 'LPSimpleExample-cal.app'
+      joined = File.join(__FILE__, '..', sub_dir, sdk, 'Applications', dir_udid, app_name)
+      {
+            :path => File.expand_path(joined),
+            :sdk => sdk
+      }
+    end
+
+    it 'reset_app_jail should be deprecated' do
+      args = args_for_reset_app_sandbox
+      out = capture_stderr do
+        @launcher.reset_app_jail(nil, args[:path])
+      end
+      version = '0.10.0'
+      dep_msg = 'use reset_app_sandbox instead'
+      tokens = out.string.split("\n")
+      expect("#{tokens[0]}\n#{tokens[1]}").to be == "\e[34m\nWARN: deprecated '#{version}' - '#{dep_msg}'"
+    end
+
+    describe 'reset_app_sandbox should reset the application sandbox' do
+      it 'should generate a warning if called against a device' do
+        ENV['DEVICE_TARGET'] = UDID
+        args = args_for_reset_app_sandbox
+        out = capture_stderr do
+          @launcher.reset_app_sandbox(args)
+        end
+        expect(out.string).to be == "\e[34m\nWARN: calling 'reset_app_sandbox' when targeting a device is not allowed\e[0m\n"
+      end
+
+      it 'should remove the correct items from the sandbox' do
+        args = args_for_reset_app_sandbox '7.1'
+        udid_path = populate_app_sandbox(args[:path])
+        directories = Dir.glob("#{udid_path}/*").select {|f| File.directory? f }
+        expected = ['LPSimpleExample-cal.app'].concat(SANDBOX_DIRS)
+        expect(directories.map { |dir| File.basename(dir) }).to match_array(expected)
+
+        # ugly ugly ugly - need to mock the directories_for_sdk_prefix method
+        mocked_support_dir = File.expand_path(File.join(__FILE__, '..', 'resources/launcher'))
+        sdk = args[:sdk]
+        mock_result = Dir["#{mocked_support_dir}/#{sdk}*"]
+        expect(@launcher).to receive(:directories_for_sdk_prefix).with(sdk).and_return(mock_result)
+
+        @launcher.reset_app_sandbox(args)
+        directories = Dir.glob("#{udid_path}/*").select {|f| File.directory? f }
+        expect(directories.map { |dir| File.basename(dir) }).to contain_exactly('LPSimpleExample-cal.app')
+      end
+    end
+  end
   end
 
   describe 'default launch args should respect DEVICE_TARGET' do
