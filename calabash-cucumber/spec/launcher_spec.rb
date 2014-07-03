@@ -157,10 +157,5 @@ describe 'Calabash Launcher' do
 
       end
     end
-
-    describe 'running without instruments' do
-
-
-    end
   end
 end
