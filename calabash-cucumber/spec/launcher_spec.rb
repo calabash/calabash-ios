@@ -6,6 +6,7 @@ describe 'Calabash Launcher' do
 
   UDID = '66h3hfgc466836ehcg72738eh8f322842855d2fd'
   IPHONE_4IN_R_64 = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
+
   before(:each) do
     @launcher = Calabash::Cucumber::Launcher.new
   end
@@ -80,7 +81,7 @@ describe 'Calabash Launcher' do
 
   describe 'default launch args should respect DEVICE_TARGET' do
 
-    it "it should return 'simulator' if DEVICE_TARGET nil" do
+    it "should return 'simulator' if DEVICE_TARGET nil" do
       args = @launcher.default_launch_args
       expect(args[:device_target]).to be == 'simulator'
     end
