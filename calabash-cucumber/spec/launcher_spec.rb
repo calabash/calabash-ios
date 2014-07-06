@@ -102,17 +102,6 @@ describe 'Calabash Launcher' do
       }
     end
 
-    it 'reset_app_jail should be deprecated' do
-      args = args_for_reset_app_sandbox
-      out = capture_stderr do
-        @launcher.reset_app_jail(nil, args[:path])
-      end
-      version = '0.10.0'
-      dep_msg = 'use reset_app_sandbox instead'
-      tokens = out.string.split("\n")
-      expect("#{tokens[0]}\n#{tokens[1]}").to be == "\e[34m\nWARN: deprecated '#{version}' - '#{dep_msg}'"
-    end
-
     describe 'reset_app_sandbox should reset the application sandbox' do
       it 'should generate a warning if called against a device' do
         ENV['DEVICE_TARGET'] = UDID

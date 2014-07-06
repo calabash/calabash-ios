@@ -157,7 +157,8 @@ class Calabash::Cucumber::Launcher
   # @deprecated Use {#reset_app_sandbox} instead.
   # Reset the app sandbox for a device.
   def reset_app_jail(sdk=nil, path=nil)
-    _deprecated('0.10.0', 'use reset_app_sandbox instead', :warn)
+    # will be deprecated in a future version
+    #_deprecated('0.10.0', 'use reset_app_sandbox instead', :warn)
     reset_app_sandbox({:sdk => sdk, :path => path})
   end
 
