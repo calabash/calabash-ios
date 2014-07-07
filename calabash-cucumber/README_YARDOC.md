@@ -28,6 +28,13 @@ $ be yard server
 
 View docs here: http://0.0.0.0:8808
 
+When writing docs, it is usual to run:
+
+```
+# Reparses the library code on each request
+$ be yard server --reload
+```
+
 ### Documenting with Yard
 
 * http://yardoc.org/
@@ -130,8 +137,34 @@ You can also chain return values.
 def find(query) finder_code_here end
 ```
 
-### generics are allowed
+#### generics are allowed
 
 ```
 # @param [Array<String, Integer, Float>] list a list of strings integers and floats
+```
+
+#### ignoring private APIs
+
+The [.yardopts](./.yardopts) file includes the `--no-private` option.
+
+To mark an object as private, use the one of the following tags:
+
+* `@private` <== preferred
+* `@!visibility private`
+
+```
+# @private
+# if +msg+ is a String, a new WaitError is returned. Otherwise +msg+
+# ...
+def wait_error(msg)
+  (msg.is_a?(String) ? WaitError.new(msg) : msg)
+end
+```
+
+```
+# @!visibility private
+# raises an error by raising a exception and conditionally takes a
+# screenshot based on the value of +screenshot_on_error+.
+# ...
+def handle_error_with_options(ex, timeout_message, screenshot_on_error)
 ```

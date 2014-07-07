@@ -9,7 +9,7 @@ task :test => :spec
 
 require 'yard'
 YARD::Rake::YardocTask.new do |t|
-  t.files   = ['lib/**/*.rb', 'bin/**/*.rb']
+  # see .yardopts for options
 end
 
 # REQUIRES that the calabash-ios-server source code is located
