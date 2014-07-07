@@ -44,11 +44,18 @@ This page has details about the Yard markup tags and is extremely useful:
 The following files have good examples of yard format:
 
 ```
-lib/calabash-cucumber/utils/plist_buddy.rblib/calabash-cucumber/utils/simulator_accessibility.rblib/calabash-cucumber/utils/xctools.rb
-```
-and `keyboard_helpers.rb` is a good example of comprehensive documentation (it is in rdoc - pull requests welcome).
-### Examples
-```
+lib/calabash-cucumber/utils/plist_buddy.rb
+lib/calabash-cucumber/utils/simulator_accessibility.rb
+lib/calabash-cucumber/utils/xctools.rb
+
+```
+
+and `keyboard_helpers.rb` is a good example of comprehensive documentation (it is in rdoc - pull requests welcome).
+
+
+### Examples
+
+```
 # method for interacting with instruments
 #
 #              instruments #=> /Applications/Xcode.app/Contents/Developer/usr/bin/instruments
@@ -59,7 +66,7 @@ lib/calabash-cucumber/utils/plist_buddy.rblib/calabash-cucumber/utils/simulator
 #   :sims, and :version as valid parameters
 # @return [String] based on the value of +cmd+ version, a list known
 #   simulators, or the path to the instruments binary
-# @raise [ArgumentError] if invalid +cmd+ is passed```
+# @raise [ArgumentError] if invalid +cmd+ is passed
 ```
 
 #### code blocks
