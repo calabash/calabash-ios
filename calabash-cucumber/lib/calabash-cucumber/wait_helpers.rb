@@ -237,6 +237,7 @@ module Calabash
         end
       end
 
+      # @!visibility private
       def wait_for_condition(options = {})
         timeout = options[:timeout]
         unless timeout && timeout > 0
@@ -388,6 +389,7 @@ module Calabash
         action.call
       end
 
+      # @!visibility private
       def screenshot_and_retry(msg, &block)
         path  = screenshot
         res = yield
@@ -401,6 +403,15 @@ module Calabash
         end
       end
 
+      # @!visibility private
+      # raises an error by raising a exception and conditionally takes a
+      # screenshot based on the value of +screenshot_on_error+.
+      # @param [Exception,nil] ex an exception to raise
+      # @param [String,nil] timeout_message the message of the raise
+      # @param [Boolean] screenshot_on_error iff true takes a screenshot before
+      #  raising an error
+      # @return [nil]
+      # @raise RuntimeError based on +ex+ and +timeout_message+
       def handle_error_with_options(ex, timeout_message, screenshot_on_error)
         msg = (timeout_message || ex)
         if ex
@@ -413,6 +424,12 @@ module Calabash
         end
       end
 
+      # @private
+      # if +msg+ is a String, a new WaitError is returned. Otherwise +msg+
+      # itself is returned.
+      # @param [String,Object] msg a message to raise
+      # @return [WaitError] if +msg+ is a String, returns a new WaitError
+      # @return [Object] if +msg+ is anything else, returns +msg+
       def wait_error(msg)
         (msg.is_a?(String) ? WaitError.new(msg) : msg)
       end
