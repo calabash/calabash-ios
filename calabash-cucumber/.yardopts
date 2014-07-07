@@ -1,1 +1,1 @@
---markup=markdown
+--markup=markdown --no-private lib/**/*.rb bin/**/*.rb - LICENSE
