@@ -13,12 +13,6 @@ require 'calabash-cucumber/date_picker'
 require 'calabash-cucumber/ipad_1x_2x'
 require 'calabash-cucumber/utils/logging'
 
-if not Object.const_defined?(:CALABASH_COUNT)
-  #compatability with IRB
-  CALABASH_COUNT = {:step_index => 0, :step_line => "irb"}
-end
-
-
 module Calabash
   module Cucumber
     module Operations
