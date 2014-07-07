@@ -33,16 +33,16 @@ module Calabash
 
       # The default options used in the "wait*" methods
       DEFAULT_OPTS = {
-        # default upper limit on how long to wait
-        :timeout => 30,
-        # default polling frequency for waiting
-        :retry_frequency => 0.3,
-        # default extra wait after the condition becomes true
-        :post_timeout => 0,
-        # default message if timeout occurs
-        :timeout_message => 'Timed out waiting...',
-        # Calabash will generate a screenshot by default if waiting times out
-        :screenshot_on_error => true
+            # default upper limit on how long to wait
+            :timeout => 30,
+            # default polling frequency for waiting
+            :retry_frequency => 0.3,
+            # default extra wait after the condition becomes true
+            :post_timeout => 0,
+            # default message if timeout occurs
+            :timeout_message => 'Timed out waiting...',
+            # Calabash will generate a screenshot by default if waiting times out
+            :screenshot_on_error => true
       }.freeze
 
       # Waits for a condition to be true. The condition is specified by a given block that is called repeatedly.
@@ -104,11 +104,11 @@ module Calabash
         rescue WaitError => e
           msg = timeout_message || e
           if screenshot_on_error
-           sleep(retry_frequency)
-           return screenshot_and_retry(msg, &block)
+            sleep(retry_frequency)
+            return screenshot_and_retry(msg, &block)
           else
-           raise wait_error(msg)
-         end
+            raise wait_error(msg)
+          end
         rescue Exception => e
           handle_error_with_options(e, nil, screenshot_on_error)
         end
@@ -159,7 +159,6 @@ module Calabash
           end
         end
       end
-
 
       # Waits for a Calabash query to return a non-empty result (typically a UI element to be visible).
       # Uses `wait_for`.
@@ -265,13 +264,13 @@ module Calabash
 
         begin
           Timeout::timeout(timeout+CLIENT_TIMEOUT_ADDITION, WaitError) do
-              res = http({:method => :post, :path => 'condition'},
-                         options)
-              res = JSON.parse(res)
-              unless res['outcome'] == 'SUCCESS'
-                raise WaitError.new(res['reason'])
-              end
-              sleep(options[:post_timeout]) if options[:post_timeout] > 0
+            res = http({:method => :post, :path => 'condition'},
+                       options)
+            res = JSON.parse(res)
+            unless res['outcome'] == 'SUCCESS'
+              raise WaitError.new(res['reason'])
+            end
+            sleep(options[:post_timeout]) if options[:post_timeout] > 0
           end
         rescue WaitError => e
           msg = timeout_message || e
@@ -347,7 +346,7 @@ module Calabash
       def until_element_exists(uiquery, opts = {})
         extra_opts = { :until_exists => uiquery, :action => lambda {} }
         opts = DEFAULT_OPTS.merge(extra_opts).merge(opts)
-        wait_poll(opts) do 
+        wait_poll(opts) do
           opts[:action].call
         end
       end
@@ -367,7 +366,7 @@ module Calabash
         condition = lambda {element_does_not_exist(uiquery)}
         extra_opts = { :until => condition, :action => lambda {} }
         opts = DEFAULT_OPTS.merge(extra_opts).merge(opts)
-        wait_poll(opts) do 
+        wait_poll(opts) do
           opts[:action].call
         end
       end
