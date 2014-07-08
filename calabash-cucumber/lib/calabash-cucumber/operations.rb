@@ -57,6 +57,7 @@ module Calabash
         touch("view marked:'#{label}'", *args)
       end
 
+      #@private
       def tap(hash_or_string, *args)
         if hash_or_string.is_a?(String)
           tap_mark(hash_or_string, *args)

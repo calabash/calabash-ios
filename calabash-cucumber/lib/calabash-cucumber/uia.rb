@@ -25,7 +25,7 @@ module Calabash
         if res['outcome'] != 'SUCCESS'
           raise "uia-tap action failed because: #{res['reason']}\n#{res['details']}"
         end
-        res['results'].first
+        res['results']
       end
 
       def uia_query(*queryparts)

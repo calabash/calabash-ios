@@ -35,7 +35,7 @@ class Calabash::Cucumber::InstrumentsActions
 
   def touch_hold(options)
     query_action(options) do |offset|
-      duration = options[:duration] || 4
+      duration = options[:duration] || 3
       uia_touch_hold_offset(duration, offset)
     end
   end
