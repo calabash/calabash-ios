@@ -2,7 +2,7 @@ require 'calabash-cucumber/playback_helpers'
 require 'calabash-cucumber/connection_helpers'
 require 'calabash-cucumber/query_helpers'
 
-
+# @!visibility private
 class Calabash::Cucumber::PlaybackActions
   include Calabash::Cucumber::PlaybackHelpers
   include Calabash::Cucumber::ConnectionHelpers

@@ -3,6 +3,7 @@ require 'calabash-cucumber/connection_helpers'
 require 'calabash-cucumber/query_helpers'
 require 'calabash-cucumber/map'
 
+# @!visibility private
 class Calabash::Cucumber::InstrumentsActions
   include Calabash::Cucumber::UIA
   include Calabash::Cucumber::ConnectionHelpers
