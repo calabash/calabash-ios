@@ -812,7 +812,19 @@ module Calabash
         stop_test_server
       end
 
-      # @!visibility private
+      # Attach the current calabash launcher to a console.
+      # @example
+      #  You have encountered a failing cucumber Scenario.
+      #  You open the console and want to start investigating the cause of the failure.
+      #
+      #  Use
+      #
+      #  > console_attach
+      #
+      #  to connect to the current launcher
+      #
+      # @return [Calabash::Cucumber::Launcher,nil] the currently active
+      #  calabash launcher
       def console_attach
         # setting the @calabash_launcher here for backward compatibility
         @calabash_launcher = launcher.attach
