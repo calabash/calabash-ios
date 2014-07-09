@@ -146,7 +146,6 @@ module Calabash
 
       # Queries all views in view hierarchy, even if not visible.
       # @deprecated use the 'all' or 'visible' modifier in query syntax
-      # {}
       def query_all(uiquery, *args)
         msg0 = "use the 'all' or 'visible' query language feature"
         msg1 = 'see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax'
@@ -387,7 +386,6 @@ module Calabash
       # @option options {Fixnum} :row row to scroll to
       # @option options {String} :scroll_position position to scroll to
       # @option options {Boolean} :animated (true) animate or not
-      #
       def scroll_to_cell(options={:query => 'tableView',
                                   :row => 0,
                                   :section => 0,
