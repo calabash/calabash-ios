@@ -306,9 +306,14 @@ module Calabash
 
       # Performs a "swipe" gesture.
       # By default, the gesture starts at the center of the screen.
-      # @todo `swipe` is an old style API which doesn't take a query as its first argument. We should migrate this.
-      # @note Due to a bug in Apple's UIAutomation, swipe is broken on certain views in the iOS Simulator. It works fully on devices.
-      #   {https://github.com/calabash/calabash-ios/issues/253}
+      #
+      # @todo `swipe` is an old style API which doesn't take a query as its
+      #  first argument. We should migrate this.
+      #
+      # @note Due to a bug in Apple's UIAutomation, swipe is broken on certain
+      #  views in the iOS Simulator. Swiping works on devices.
+      #  {https://github.com/calabash/calabash-ios/issues/253}
+      #
       # @example
       #   swipe :left
       # @example
