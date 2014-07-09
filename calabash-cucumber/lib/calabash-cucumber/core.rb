@@ -787,6 +787,8 @@ module Calabash
       end
 
       # Starts the app and Calabash test server in the console.
+      # @note It is not recommended to call this method outside of the
+      #  calabash console. Call `Calabash::Cucumber::Launcher#relaunch instead.
       # @see Calabash::Cucumber::Launcher#relaunch
       # @return {Calabash::Cucumber::Launcher} the launcher object in use
       def start_test_server_in_background(args={})
