@@ -405,6 +405,7 @@ module Calabash
       # Scroll a table view to a section and row. Table view can have multiple sections.
       #
       # @todo should expose a non-option first argument query and required parameters `section`, `row`
+      #
       # @see #scroll_to_row
       # @example
       #   scroll_to_cell query:"UITableView", row:4, section:0, animate: false
