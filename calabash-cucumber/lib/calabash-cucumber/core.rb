@@ -332,7 +332,8 @@ module Calabash
       end
 
 
-      # Performs the "pan" or "drag-n-drop" gesture on from the `from` parameter to the `to` parameter (both are queries).
+      # Performs the "pan" or "drag-n-drop" gesture on from the `from` parameter
+      # to the `to` parameter (both are queries).
       # @example
       #   q1="* marked:'Cell 3' parent tableViewCell descendant tableViewCellReorderControl"
       #   q2="* marked:'Cell 6' parent tableViewCell descendant tableViewCellReorderControl"
