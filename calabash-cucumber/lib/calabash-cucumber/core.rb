@@ -183,11 +183,16 @@ module Calabash
         touch(nil, offset: {x:x, y:y})
       end
 
-      # Performs the `tap` gesture on the (first) view that matches
-      # query `uiquery`. As opposed to `touch`, `wait_tap` is a high-level method that combines:
-      # (1) waiting for the view to appear,
-      # (2) waiting for animations to complete on the view (and it's parents) and (3) actually tapping the view.
-      # This removes the common boiler-plate trio: `wait_for_element_exists`, `wait_for_none_animating`, `touch`.
+      # Performs the `tap` gesture on the (first) view that matches query `uiquery`.
+      #
+      # As opposed to `touch`, `wait_tap` is a high-level method that combines:
+      #
+      # 1. waiting for the view to appear,
+      # 2. waiting for animations to complete on the view (and it's parents) and
+      # 3. actually tapping the view.
+      #
+      # This removes the common boiler-plate trio: `wait_for_element_exists`,
+      # `wait_for_none_animating`, `touch`.
       #
       # By default, taps the center of the view.
       # @see #touch
