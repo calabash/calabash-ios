@@ -210,10 +210,13 @@ module Calabash
         launcher.actions.wait_tap(options)
       end
 
-      # Performs the "double tap" gesture on the (first) view that matches
-      # query `uiquery`. Note that this assumes the view is visible and not animating.
+      # Performs the "double tap" gesture on the (first) view that matches query `uiquery`.
+      #
+      # @note This assumes the view is visible and not animating.
+      #
       # If the view is not visible it will fail with an error. If the view is animating
       # it will *silently* fail.
+      #
       # By default, taps the center of the view.
       # @example
       #   double_tap "view marked:'Third'", offset:{x:100}
@@ -227,10 +230,15 @@ module Calabash
       end
 
       # Performs the "two-finger tap" gesture on the (first) view that matches
-      # query `uiquery`. Note that this assumes the view is visible and not animating.
+      # query `uiquery`.
+      #
+      # @note This assumes the view is visible and not animating.
+      #
       # If the view is not visible it will fail with an error. If the view is animating
       # it will *silently* fail.
+      #
       # By default, taps the center of the view.
+      #
       # @example
       #   two_finger_tap "view marked:'Third'", offset:{x:100}
       # @param {String} uiquery query describing view to touch.
@@ -243,11 +251,17 @@ module Calabash
       end
 
       # Performs the "flick" gesture on the (first) view that matches
-      # query `uiquery`. Note that this assumes the view is visible and not animating.
+      # query `uiquery`.
+      #
+      # @note This assumes the view is visible and not animating.
+      #
       # If the view is not visible it will fail with an error. If the view is animating
       # it will *silently* fail.
+      #
       # By default, the gesture starts at the center of the view and "flicks" according to `delta`.
+      #
       # A flick is similar to a swipe.
+      #
       # @example
       #   flick("MKMapView", {x:100,y:50})
       # @param {String} uiquery query describing view to touch.
@@ -269,10 +283,15 @@ module Calabash
       end
 
       # Performs the "long press" or "touch and hold" gesture on the (first) view that matches
-      # query `uiquery`. Note that this assumes the view is visible and not animating.
+      # query `uiquery`.
+      #
+      # @note This assumes the view is visible and not animating.
+      #
       # If the view is not visible it will fail with an error. If the view is animating
       # it will *silently* fail.
+      #
       # By default, the gesture starts at the center of the view.
+      #
       # @example
       #   touch_hold "webView css:'input'", duration:10, offset:{x: -40}
       # @param {String} uiquery query describing view to touch.
