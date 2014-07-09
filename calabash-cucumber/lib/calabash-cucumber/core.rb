@@ -611,8 +611,9 @@ module Calabash
         views_touched
       end
 
-      # @param {Fixnum} secs number of seconds to be in the background (should not be more than 60 secs)
       # Sends app to background. Simulates pressing the home button.
+      # @param {Fixnum} secs number of seconds to be in the background
+      #  `should not be more than 60 secs`
       def send_app_to_background(secs)
         launcher.actions.send_app_to_background(secs)
       end
