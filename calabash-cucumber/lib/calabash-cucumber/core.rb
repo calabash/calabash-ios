@@ -414,12 +414,12 @@ module Calabash
         views_touched
       end
 
-      # scrolls to +mark+ in a UITableView
+      # scrolls to mark in a UITableView
       #
-      # calls the +:scrollToRowWithMark+ server route
+      # calls the :scrollToRowWithMark server route
       #
-      #    scroll_to_row_with_mark(mark, {:scroll_position => :top}) #=> scroll to the top of the item with the given +mark+
-      # scroll_to_row_with_mark(mark, {:scroll_position => :bottom}) #=> scroll to the bottom of the item with the given +mark+
+      #    scroll_to_row_with_mark(mark, {:scroll_position => :top}) #=> scroll to the top of the item with the given mark
+      # scroll_to_row_with_mark(mark, {:scroll_position => :bottom}) #=> scroll to the bottom of the item with the given mark
       #
       # allowed options
       #     :query => a query string
@@ -435,10 +435,10 @@ module Calabash
       #         allowed => {true | false}
       #
       # raises an exception if the scroll cannot be performed.
-      # * the +mark+ is nil
-      # * the +:query+ finds no table view
-      # * table view does not contain a cell with the given +mark+
-      # * +:scroll_position+ is invalid
+      # * the mark is nil
+      # * the :query finds no table view
+      # * table view does not contain a cell with the given mark
+      # * :scroll_position is invalid
       def scroll_to_row_with_mark(mark, options={:query => 'tableView',
                                                    :scroll_position => :middle,
                                                    :animate => true})
@@ -464,11 +464,11 @@ module Calabash
         views_touched
       end
 
-      # scrolls to +item+ in +section+ in a UICollectionView
+      # scrolls to item in section in a UICollectionView
       #
-      # calls the +:collectionViewScroll+ server route
+      # calls the :collectionViewScroll server route
       #
-      # +item+ and +section+ are zero-indexed
+      # item and section are zero-indexed
       #
       #    scroll_to_collection_view_item(0, 2, {:scroll_position => :top}) #=> scroll to item 0 in section 2 to top
       # scroll_to_collection_view_item(5, 0, {:scroll_position => :bottom}) #=> scroll to item 5 in section 0 to bottom
@@ -491,9 +491,9 @@ module Calabash
       #         allowed => any string
       #
       # raises an exception if the scroll cannot be performed.
-      # * the +:query+ finds no collection view
-      # * collection view does not contain a cell at +item+/+section+
-      # * +:scroll_position+ is invalid
+      # * the :query finds no collection view
+      # * collection view does not contain a cell at item/section
+      # * :scroll_position is invalid
       def scroll_to_collection_view_item(item, section, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -522,12 +522,12 @@ module Calabash
         views_touched
       end
 
-      # scrolls to +mark+ in a UICollectionView
+      # scrolls to mark in a UICollectionView
       #
-      # calls the +:collectionViewScrollToItemWithMark+ server route
+      # calls the :collectionViewScrollToItemWithMark server route
       #
-      #    scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :top}) #=> scroll to the top of the item with the given +mark+
-      # scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :bottom}) #=> scroll to the bottom of the item with the given +mark+
+      #    scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :top}) #=> scroll to the top of the item with the given mark
+      # scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :bottom}) #=> scroll to the bottom of the item with the given mark
       #
       # allowed options
       #     :query => a query string
@@ -547,10 +547,10 @@ module Calabash
       #         allowed => any string
       #
       # raises an exception if the scroll cannot be performed.
-      # * the +mark+ is nil
-      # * the +:query+ finds no collection view
-      # * collection view does not contain a cell with the given +mark+
-      # * +:scroll_position+ is invalid
+      # * the mark is nil
+      # * the :query finds no collection view
+      # * collection view does not contain a cell with the given mark
+      # * :scroll_position is invalid
       def scroll_to_collection_view_item_with_mark(mark, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
