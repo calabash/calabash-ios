@@ -110,7 +110,7 @@ module Calabash
         map(uiquery, :query, *args)
       end
 
-      # Shorthand alias for `query`
+      # Shorthand alias for `query`.
       # @see #query
       # @!visibility private
       def q(uiquery, *args)
@@ -131,20 +131,20 @@ module Calabash
         map(uiquery, :flash, *args).compact
       end
 
-      # returns the version of the running calabash server.
+      # Returns the version of the running calabash server.
       # @return [String] version of the running calabash server.
       def server_version
         JSON.parse(http(:path => 'version'))
       end
 
-      # returns the version of the loaded Calabash library.
+      # Returns the version of the loaded Calabash library.
       # @see Calabash::Cucumber::VERSION
       # @return [String] the version of the loaded Calabash library.
       def client_version
         Calabash::Cucumber::VERSION
       end
 
-      # queries all views in view hieararchy, even if not visible.
+      # Queries all views in view hierarchy, even if not visible.
       # @deprecated use the 'all' or 'visible' modifier in query syntax
       # {}
       def query_all(uiquery, *args)
@@ -344,7 +344,7 @@ module Calabash
         playback('cell_swipe', options)
       end
 
-      # scroll a scroll view in a direction. By default scrolls half the frame size.
+      # Scroll a scroll view in a direction. By default scrolls half the frame size.
       # @example
       #   scroll("UITableView", :down)
       # @note this is implemented by calling the Obj-C `setContentOffset:animated:` method and can do things users cant.
@@ -357,7 +357,7 @@ module Calabash
         views_touched
       end
 
-      # scroll a table view to a row. Table view should have only one section.
+      # Scroll a table view to a row. Table view should have only one section.
       # @see #scroll_to_cell
       # @example
       #   scroll_to_row "UITableView", 2
@@ -372,7 +372,8 @@ module Calabash
         views_touched
       end
 
-      # scroll a table view to a section and row. Table view can have multiple sections.
+      # Scroll a table view to a section and row. Table view can have multiple sections.
+      #
       # @todo should expose a non-option first argument query and required parameters `section`, `row`
       # @see #scroll_to_row
       # @example
@@ -579,13 +580,13 @@ module Calabash
         views_touched
       end
 
-      # sends app to background (simulate pressing the home button)
       # @param {Fixnum} secs number of seconds to be in the background (should not be more than 60 secs)
+      # Sends app to background. Simulates pressing the home button.
       def send_app_to_background(secs)
         launcher.actions.send_app_to_background(secs)
       end
 
-      # Simulates gps location of the device/simulator
+      # Simulates gps location of the device/simulator.
       # @note Seems UIAutomation is broken here on physical devices on iOS 7.1
       # @example
       #   set_location place:'Tower of London'
@@ -717,7 +718,7 @@ module Calabash
         res['result']
       end
 
-      # Kills the app
+      # Kills the app.
       def calabash_exit
         # Exiting the app shuts down the HTTP connection and generates ECONNREFUSED,
         # or HTTPClient::KeepAliveDisconnected
@@ -729,13 +730,13 @@ module Calabash
         end
       end
 
-      # Get the Calabash server log level
+      # Get the Calabash server log level.
       # @return {String} the current log level
       def server_log_level
         _debug_level_response(http(:method => :get, :path => 'debug'))
       end
 
-      # Set the Calabash server log level
+      # Set the Calabash server log level.
       # @param {String} level the log level to set (debug, info, warn, error)
       def set_server_log_level(level)
         _debug_level_response(http({:method => :post, :path => 'debug'}, {:level => level}))
@@ -750,7 +751,7 @@ module Calabash
         res['results'].first
       end
 
-      # Starts the app and Calabash test server
+      # Starts the app and Calabash test server in the console.
       # @see Calabash::Cucumber::Launcher#relaunch
       # @return {Calabash::Cucumber::Launcher} the launcher object in use
       def start_test_server_in_background(args={})
