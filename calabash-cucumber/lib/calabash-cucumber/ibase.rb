@@ -54,7 +54,6 @@ class Calabash::IBase
   # @see #trait
   # @param {Hash} wait_opts options hash to pass to `wait_for_element_exists`
   #   (see {Calabash::Cucumber::WaitHelpers#wait_for} and {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS}).
-  # @param {Array} args optional additional arguments to pass to the page object constructor
   # @return {IBase} self
   def await(wait_opts={})
     wait_for_elements_exist([trait], wait_opts)

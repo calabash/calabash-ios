@@ -36,7 +36,7 @@ module Calabash
       end
 
       # raises a Runtime error (and generates a screenshot) unless at least one element matches query `query`.
-      # @param {String} uiquery the query to execute
+      # @param {String} query the query to execute
       # @return {nil} Returns nil if there is a match.
       # @raise [RuntimeError] if no element matches `query`.
       def check_element_exists(query)
@@ -46,7 +46,7 @@ module Calabash
       end
 
       # raises a Runtime error (and generates a screenshot) if at least one element matches query `query`.
-      # @param {String} uiquery the query to execute
+      # @param {String} query the query to execute
       # @return {nil} Returns nil if there is no match.
       # @raise [RuntimeError] if an element matches `query`.
       def check_element_does_not_exist(query)
