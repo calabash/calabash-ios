@@ -27,10 +27,8 @@ module Calabash
       include Calabash::Cucumber::DatePicker
       include Calabash::Cucumber::IPad
 
-      def page(clz,*args)
-        clz.new(self,*args)
-      end
 
+<<<<<<< Updated upstream
       def await_page(clz,*args)
         clz.new(self,*args).await
       end
@@ -180,6 +178,8 @@ module Calabash
       #  end
       #  file_name
       #end
+=======
+>>>>>>> Stashed changes
     end
   end
 end
