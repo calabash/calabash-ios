@@ -721,8 +721,11 @@ module Calabash
       end
 
       # Calls a method on the app's AppDelegate object.
-      # This is an escape hatch for calling an arbitraty hook inside (the test build) of your app.
-      # Typically used to "go around" the UI for speed purposes.
+      #
+      # This is an escape hatch for calling an arbitrary hook inside
+      # (the test build) of your app.  Commonly used to "go around" the UI for
+      # speed purposes or reset the app to a good known state.
+      #
       # You must create a method on you app delegate of the form:
       #
       #     - (NSString *) calabashBackdoor:(NSString *)aIgnorable;
