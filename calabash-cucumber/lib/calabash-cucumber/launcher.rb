@@ -10,6 +10,8 @@ require 'calabash-cucumber/version'
 require 'calabash-cucumber/utils/logging'
 
 
+# Class used to launch apps for testing in iOS Simulator or on iOS Devices
+# Uses instruments to launch, but has legacy support for using `sim_launcher`.
 class Calabash::Cucumber::Launcher
 
   include Calabash::Cucumber::Logging
@@ -43,23 +45,26 @@ class Calabash::Cucumber::Launcher
   class CalabashLauncherTimeoutErr < Timeout::Error
   end
 
-
+  # @!visibility private
   def initialize
     @simulator_launcher = Calabash::Cucumber::SimulatorLauncher.new
     @@launcher = self
   end
 
+  # @!visibility private
   def actions
     attach if @actions.nil?
     @actions
   end
 
+  # @see Calabash::Cucumber::Core#console_attach
   def self.attach
     l = launcher
     return l if l && l.active?
     l.attach
   end
 
+  # @see Calabash::Cucumber::Core#console_attach
   def attach(max_retry=1, timeout=10)
     if calabash_no_launch?
       self.actions= Calabash::Cucumber::PlaybackActions.new
@@ -95,20 +100,30 @@ class Calabash::Cucumber::Launcher
     self
   end
 
+  # Are we running using instruments?
+  #
+  # @return {Boolean} true iff we're using instruments to launch
   def self.instruments?
     l = launcher_if_used
     return false unless l
     l.instruments?
   end
 
+  # Get a reference to the current launcher (instantiates a new one if needed). Usually we use a singleton launcher throughout a test run.
+  # @return {Calabash::Cucumber::Launcher} the current launcher
   def self.launcher
     @@launcher ||= Calabash::Cucumber::Launcher.new
   end
 
+  # Get a reference to the current launcher (does not instantiate a new one if unset).
+  # Usually we use a singleton launcher throughout a test run.
+  # @return {Calabash::Cucumber::Launcher} the current launcher or nil
   def self.launcher_if_used
     @@launcher
   end
 
+  # "Major" component of the current iOS version of the device
+  # @return {String} the "major" component, e.g., "7" for "7.1.1"
   def ios_major_version
     # pinging the app will set self.device
     ping_app if self.device.nil?
@@ -117,11 +132,17 @@ class Calabash::Cucumber::Launcher
     device.ios_major_version
   end
 
+  # the current iOS version of the device
+  # @return {String} the current iOS version of the device
   def ios_version
     return nil if device.nil?
     device.ios_version
   end
 
+  # Reset the app sandbox for a device
+  # @todo currently only works on iOS Simulator and in Xamarin Test Cloud
+  # @param {String} sdk the sdk version to reset (for simulator)
+  # @param {String} path the app bundle path to reset (for simulator)
   def reset_app_jail(sdk=nil, path=nil)
     sdk ||= sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
     path ||= self.simulator_launcher.app_bundle_or_raise(app_path)
@@ -142,11 +163,13 @@ class Calabash::Cucumber::Launcher
 
   end
 
+  # @!visibility private
   def directories_for_sdk_prefix(sdk)
     Dir["#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}*"]
   end
 
   # Call as update_privacy_settings('com.my.app', {:photos => {:allow => true}})
+  # @!visibility private
   def update_privacy_settings(bundle_id, opts={})
     if debug_logging?
       puts "Update privacy settings #{bundle_id}, #{opts}"
@@ -194,10 +217,12 @@ class Calabash::Cucumber::Launcher
 
   end
 
+  # @!visibility private
   def tcc_database_for_sdk_dir(dir)
     File.join(dir,'Library', 'TCC', 'TCC.db')
   end
 
+  # @!visibility private
   def privacy_setting(sdk_dir, bundle_id, setting_name)
     setting_name = KNOWN_PRIVACY_SETTINGS[setting_name] || setting_name
     path_to_tcc_db = tcc_database_for_sdk_dir(sdk_dir)
@@ -207,6 +232,7 @@ class Calabash::Cucumber::Launcher
     (output == '0' || output == '1') ? output.to_i : nil
   end
 
+  # @!visibility private
   def default_launch_args
     # APP_BUNDLE_PATH
     # BUNDLE_ID
@@ -254,6 +280,7 @@ class Calabash::Cucumber::Launcher
     args
   end
 
+  # @!visibility private
   def detect_connected_device?
     if ENV['DETECT_CONNECTED_DEVICE'] == '1'
       return true
@@ -272,6 +299,7 @@ class Calabash::Cucumber::Launcher
     return false
   end
 
+  # @!visibility private
   def default_launch_method
     sdk = sdk_version
     major = nil
@@ -298,7 +326,35 @@ class Calabash::Cucumber::Launcher
     end
   end
 
+  # Launches your app on the connected device or simulator. Stops the app if it is already running.
+  # `relaunch` does a lot of error detection and handling to reliably start the app and test. Instruments (particularly the cli)
+  # has stability issues which we workaround by restarting the simulator process and checking that UIAutomation is correctly
+  # attaching.
+  #
+  # Takes optional args to specify details of the launch (e.g. device or simulator, sdk version, target device, launch method...).
+  # @note an important part of relaunch behavior is controlled by environment variables, specified below
+  #
+  # The two most important environment variables are `DEVICE_TARGET` and `APP_BUNDLE_PATH`.
+  #
+  # - `DEVICE_TARGET` controls which device you're running on. To see the options run: `instruments -s devices`.
+  #   In addition you can specify `DEVICE_TARGET=device` to run on a (unique) usb-connected device.
+  # - `APP_BUNDLE_PATH` controls which `.app` bundle to launch in simulator (don't use for on-device testing, instead use `BUNDLE_ID`).
+  # - `BUNDLE_ID` used with `DEVICE_TARGET=device` to specify which app to launch on device
+  # - `DEBUG` - set to "1" to obtain debug info (typically used to debug launching, UIAutomation and other issues)
+  # - `DEBUG_HTTP` - set to "1" to show raw HTTP traffic
+  #
+  #
+  # @example Launching on iPad simulator with DEBUG settings
+  #   DEBUG_HTTP=1 DEVICE_TARGET="iPad - Simulator - iOS 7.1" DEBUG=1 APP_BUNDLE_PATH=FieldServiceiOS.app bundle exec calabash-ios console
+  # @param {Hash} args optional args to specify details of the launch (e.g. device or simulator, sdk version,
+  #   target device, launch method...).
+  # @option args {String} :app (detect the location of the bundle from project settings) app bundle path
+  # @option args {String} :bundle_id if launching on device, specify this or env `BUNDLE_ID` to be the bundle identifier
+  #   of the application to launch
+  # @option args {Hash} :privacy_settings preset privacy settings for the, e.g., {:photos => {:allow => true}}.
+  #    See {KNOWN_PRIVACY_SETTINGS}
   def relaunch(args={})
+    #TODO stopping is currently broken, but this works anyway because instruments stop the process before relaunching
     RunLoop.stop(run_loop) if run_loop
 
     args = default_launch_args.merge(args)
@@ -361,6 +417,7 @@ class Calabash::Cucumber::Launcher
     check_server_gem_compatibility
   end
 
+  # @!visibility private
   def detect_device_from_args(args)
     if args[:app] && File.directory?(args[:app])
       # Derive bundle id from bundle_dir
@@ -383,7 +440,7 @@ class Calabash::Cucumber::Launcher
 
   end
 
-  # todo this method should be migrated to the Simulator Launcher
+  # @!visibility private
   def detect_app_bundle_from_args(args)
     if simulator_target?(args)
       device_xamarin_build_dir = 'iPhoneSimulator'
@@ -394,6 +451,7 @@ class Calabash::Cucumber::Launcher
     self.simulator_launcher.detect_app_bundle(nil, device_xamarin_build_dir)
   end
 
+  # @!visibility private
   def detect_bundle_id_from_app_bundle(args)
     if args[:app] && File.directory?(args[:app])
       # Derive bundle id from bundle_dir
@@ -406,11 +464,13 @@ class Calabash::Cucumber::Launcher
     end
   end
 
+  # @!visibility private
   def info_plist_from_bundle_path(bundle_path)
     plist_path = File.join(bundle_path, 'Info.plist')
     info_plist_as_hash(plist_path) if File.exist?(plist_path)
   end
 
+  # @!visibility private
   def new_run_loop(args)
 
     # for stability, quit the simulator if Xcode version is > 5.1 and the
@@ -441,6 +501,7 @@ class Calabash::Cucumber::Launcher
     raise StartError.new(last_err)
   end
 
+  # @!visibility private
   def ensure_connectivity(max_retry=10, timeout=30)
     begin
       max_retry_count = (ENV['MAX_CONNECT_RETRY'] || max_retry).to_i
@@ -484,6 +545,7 @@ class Calabash::Cucumber::Launcher
     end
   end
 
+  # @!visibility private
   def ping_app
     url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
 
@@ -506,10 +568,12 @@ class Calabash::Cucumber::Launcher
     status
   end
 
+  # @!visibility private
   def stop
     RunLoop.stop(run_loop) if run_loop && run_loop[:pid]
   end
 
+  # @!visibility private
   def calabash_notify(world)
     if world.respond_to?(:on_launch)
       world.on_launch
@@ -517,6 +581,7 @@ class Calabash::Cucumber::Launcher
   end
 
 
+  # @!visibility private
   def info_plist_as_hash(plist_path)
     unless File.exist?(plist_path)
       raise "Unable to find Info.plist: #{plist_path}"
@@ -525,6 +590,7 @@ class Calabash::Cucumber::Launcher
     CFPropertyList.native_types(parsedplist.value)
   end
 
+  # @!visibility private
   def detect_bundle_id
     begin
       bundle_path = self.simulator_launcher.app_bundle_or_raise(app_path)
@@ -535,60 +601,74 @@ class Calabash::Cucumber::Launcher
     end
   end
 
+  # @!visibility private
   def calabash_no_stop?
     calabash_no_launch? or ENV['NO_STOP']=="1"
   end
 
+  # @!visibility private
   def calabash_no_launch?
     ENV['NO_LAUNCH']=='1'
   end
 
+  # @!visibility private
   def device_target?
     (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
   end
 
+  # @!visibility private
   def simulator_target?(launch_args={})
     value = ENV['DEVICE_TARGET'] || launch_args[:device_target]
     return false if value.nil?
     value.downcase.include?('simulator')
   end
 
+  # @!visibility private
   def sdk_version
     ENV['SDK_VERSION']
   end
 
+  # @!visibility private
   def use_instruments_env?
     ENV['LAUNCH_VIA'] == 'instruments'
   end
 
+  # @!visibility private
   def use_sim_launcher_env?
     ENV['LAUNCH_VIA'] == 'sim_launcher'
   end
 
+  # @!visibility private
   def reset_between_scenarios?
     ENV['RESET_BETWEEN_SCENARIOS']=="1"
   end
 
+  # @!visibility private
   def device_env
     ENV['DEVICE']
   end
 
+  # @!visibility private
   def app_path
     ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH) || ENV['APP']
   end
 
+  # @!visibility private
   def run_with_instruments?(args)
     args && args[:launch_method] == :instruments
   end
 
+  # @!visibility private
   def active?
     not run_loop.nil?
   end
 
+  # @!visibility private
   def instruments?
     !!(active? && run_loop[:pid])
   end
 
+  # @!visibility private
   def inspect
     msg = ["#{self.class}: Launch Method #{launch_args && launch_args[:launch_method]}"]
     if run_with_instruments?(self.launch_args) && self.run_loop
@@ -665,6 +745,7 @@ class Calabash::Cucumber::Launcher
   # WIP:  this is a proof-of-concept implementation and requires _strict_
   # equality.  in the future we should allow minimum framework compatibility.
   #
+  # @!visibility private
   # @return [nil] nothing to return
   def check_server_gem_compatibility
     app_bundle_path = self.launch_args[:app]
