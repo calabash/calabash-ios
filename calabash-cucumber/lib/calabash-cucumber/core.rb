@@ -445,34 +445,31 @@ module Calabash
         views_touched
       end
 
-      # scrolls to mark in a UITableView
+      # Scrolls to a mark in a UITableView.
       #
-      # calls the :scrollToRowWithMark server route
+      # @example
+      #  # scroll to the top of the item with the given mark
+      #  scroll_to_row_with_mark(mark, {:scroll_position => :top})
+      # @example
+      #  # scroll to the bottom of the item with the given mark
+      #  scroll_to_row_with_mark(mark, {:scroll_position => :bottom})
       #
-      #    scroll_to_row_with_mark(mark, {:scroll_position => :top}) #=> scroll to the top of the item with the given mark
-      # scroll_to_row_with_mark(mark, {:scroll_position => :bottom}) #=> scroll to the bottom of the item with the given mark
+      # @param [String] mark an accessibility {label | identifier} or text in
+      #  or on the row
+      # @param [Hash] options controls the query and and scroll behavior
+      # @option options [String] :query the query that should be used to find
+      #  table the row is in
+      # @option options [Symbol] :scroll_position the table position to scroll
+      #  the row to - allowed values `{:middle | :top | :bottom}`
       #
-      # allowed options
-      #     :query => a query string
-      #         default => 'tableView'
-      #         example => "tableView marked:'hit songs'"
-      #
-      #     :scroll_position => the position to scroll to
-      #         default => :middle
-      #         allowed => {:top | :middle | :bottom}
-      #
-      #     :animate => animate the scrolling
-      #         default => true
-      #         allowed => {true | false}
-      #
-      # raises an exception if the scroll cannot be performed.
-      # * the mark is nil
-      # * the :query finds no table view
-      # * table view does not contain a cell with the given mark
-      # * :scroll_position is invalid
+      # @option options [Boolean] :animate iff true the scrolling is animated
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] if the mark is nil
+      # @raise [RuntimeError] if the table query finds no table view
+      # @raise [RuntimeError] if the scroll position is invalid
       def scroll_to_row_with_mark(mark, options={:query => 'tableView',
-                                                   :scroll_position => :middle,
-                                                   :animate => true})
+                                                 :scroll_position => :middle,
+                                                 :animate => true})
         if mark.nil?
           screenshot_and_raise 'mark argument cannot be nil'
         end
@@ -495,36 +492,38 @@ module Calabash
         views_touched
       end
 
-      # scrolls to item in section in a UICollectionView
+      # Scrolls to an item in a section of a UICollectionView.
       #
-      # calls the :collectionViewScroll server route
+      # @note item and section are zero-indexed
       #
-      # item and section are zero-indexed
+      # @example
+      #  # scroll to item 0 in section 2 to top
+      #  scroll_to_collection_view_item(0, 2, {:scroll_position => :top})
       #
-      #    scroll_to_collection_view_item(0, 2, {:scroll_position => :top}) #=> scroll to item 0 in section 2 to top
-      # scroll_to_collection_view_item(5, 0, {:scroll_position => :bottom}) #=> scroll to item 5 in section 0 to bottom
+      # @example
+      #  # scroll to item 5 in section 0 to bottom
+      #  scroll_to_collection_view_item(5, 0, {:scroll_position => :bottom})
       #
-      # allowed options
-      #     :query => a query string
-      #         default => 'collectionView'
-      #         example => "collectionView marked:'hit songs'"
+      # @example
+      #  # the following are the allowed :scroll_position values
+      #  {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
       #
-      #     :scroll_position => the position to scroll to
-      #         default => :top
-      #         allowed => {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
-      #
-      #     :animate => animate the scrolling
-      #         default => true
-      #         allowed => {true | false}
-      #
-      #     :failed_message => the message to display on failure
-      #         default => nil - will display a default failure message
-      #         allowed => any string
-      #
-      # raises an exception if the scroll cannot be performed.
-      # * the :query finds no collection view
-      # * collection view does not contain a cell at item/section
-      # * :scroll_position is invalid
+      # @param [Integer] item the index of the item to scroll to
+      # @param [Integer] section the section of the item to scroll to
+      # @param [Hash] opts options for controlling the collection view query
+      #  and scroll behavior
+      # @option opts [String] :query the query that is used to identify which
+      #  collection view to scroll - defaults to `collectionView`
+      # @option opts [Symbol] :scroll_position the position in the collection
+      #  view to scroll the item to - defaults to `:top`
+      # @option opts [Boolean] :animate iff true animate the scroll
+      # @option opts [String] :failed_message a custom error message to display
+      #  if the scrolling fails; if not specified, a generic failure will be
+      #  displayed - defaults to `nil`
+      # @raise [RuntimeException] if the scroll cannot be performed
+      # @raise [RuntimeException] :query finds no collection view
+      # @raise [RuntimeException] the collection view does not contain a cell at item/section
+      # @raise [RuntimeException] :scroll_position is invalid
       def scroll_to_collection_view_item(item, section, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -553,35 +552,37 @@ module Calabash
         views_touched
       end
 
-      # scrolls to mark in a UICollectionView
+      # Scrolls to mark in a UICollectionView.
       #
-      # calls the :collectionViewScrollToItemWithMark server route
+      # @example
+      #  # scroll to the top of the item with the given mark
+      #  scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :top})
+      # @example
+      #  # scroll to the bottom of the item with the given mark
+      #  scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :bottom})
       #
-      #    scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :top}) #=> scroll to the top of the item with the given mark
-      # scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :bottom}) #=> scroll to the bottom of the item with the given mark
+      # @example
+      #  # the following are the allowed :scroll_position values
+      #  {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
       #
-      # allowed options
-      #     :query => a query string
-      #         default => 'collectionView'
-      #         example => "collectionView marked:'hit songs'"
-      #
-      #     :scroll_position => the position to scroll to
-      #         default => :top
-      #         allowed => {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
-      #
-      #     :animate => animate the scrolling
-      #         default => true
-      #         allowed => {true | false}
-      #
-      #     :failed_message => the message to display on failure
-      #         default => nil - will display a default failure message
-      #         allowed => any string
-      #
-      # raises an exception if the scroll cannot be performed.
-      # * the mark is nil
-      # * the :query finds no collection view
-      # * collection view does not contain a cell with the given mark
-      # * :scroll_position is invalid
+      # @param [String] mark an accessibility {label | identifier} or text in
+      #  or on the item
+      # @param [Hash] opts options for controlling the collection view query
+      #  and scroll behavior
+      # @option opts [String] :query the query that is used to identify which
+      #  collection view to scroll - defaults to `collectionView`
+      # @option opts [Symbol] :scroll_position the position in the collection
+      #  view to scroll the item to - defaults to `:top`
+      # @option opts [Boolean] :animate iff true animate the scroll
+      # @option opts [String] :failed_message a custom error message to display
+      #  if the scrolling fails; if not specified, a generic failure will be
+      #  displayed - defaults to `nil`
+      # @raise [RuntimeException] if the scroll cannot be performed
+      # @raise [RuntimeException] if the mark is nil
+      # @raise [RuntimeException] :query finds no collection view
+      # @raise [RuntimeException] the collection view does not contain a cell
+      #  with the mark
+      # @raise [RuntimeException] :scroll_position is invalid
       def scroll_to_collection_view_item_with_mark(mark, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
