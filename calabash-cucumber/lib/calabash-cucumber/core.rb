@@ -798,6 +798,211 @@ module Calabash
         @calabash_launcher
       end
 
+      # Helper method to easily create page object instances from a cucumber execution context.
+      # The advantage of using `page` to instantiate a page object class is that it
+      # will automatically store a reference to the current Cucumber world
+      # which is needed in the page object methods to call Cucumber-specific methods
+      # like puts or embed.
+      # @example Instantiating a `LoginPage` from a step definition
+      #   Given(/^I am about to login to a self-hosted site$/) do
+      #       @current_page = page(LoginPage).await(timeout: 30)
+      #       @current_page.self_hosted_site
+      #   end
+      #
+      # @see Calabash::IBase
+      # @param {Class} clz the page object class to instantiate (passing the cucumber world and `args`)
+      # @param {Array} args optional additional arguments to pass to the page object constructor
+      # @return {Object} a fresh instance of `Class clz` which has been passed a reference to the cucumber World object.
+      def page(clz,*args)
+        clz.new(self,*args)
+      end
+
+      # Instantiates a page using `page` and calls the page's `await` method.
+      # @see #page
+      # @see Calabash::IBase#await
+      # @example Instantiating and waiting a `LoginPage` from a step definition
+      #   Given(/^I am about to login to a self-hosted site$/) do
+      #       @current_page = await_page(LoginPage)
+      #       @current_page.self_hosted_site
+      #   end
+      #
+      # @see Calabash::IBase
+      # @param {Class} clz the page object class to instantiate (passing the cucumber world and `args`)
+      # @param {Array} args optional additional arguments to pass to the page object constructor
+      # @return {Object} a fresh instance of `Class clz` which has been passed a reference to the cucumber World object.
+      #   Calls await on the page object.
+      def await_page(clz,*args)
+        clz.new(self,*args).await
+      end
+
+      # @!visibility private
+      def home_direction
+        status_bar_orientation.to_sym
+      end
+
+      # Returns all accessibilityLabels of objects matching `uiquery`.
+      # @param {String} uiquery query to match
+      # @return {Array<String>} Returns all accessibilityLabels of objects matching `uiquery`.
+      def label(uiquery)
+        query(uiquery, :accessibilityLabel)
+      end
+
+      # Returns all accessibilityIdentifiers of objects matching `uiquery`.
+      # @param {String} uiquery query to match
+      # @return {Array<String>} Returns all accessibilityIdentifiers of objects matching `uiquery`.
+      def identifier(uiquery)
+        query(uiquery, :accessibilityIdentifier)
+      end
+
+      # @!visibility private
+      # @deprecated use `tap_mark`
+      def simple_touch(label, *args)
+        tap_mark(label, *args)
+      end
+
+      # taps a view with mark `hash_or_string`
+      # @deprecated In later Calabash versions we will change the semantics of `tap` to take a general query
+      #   (instead of a 'mark' now). We're deprecating this now to prepare people for a breaking change.
+      # @param {String} hash_or_string mark to pass to call `tap_mark(hash_or_string)`.
+      # @return {Array<Hash>} array containing the serialized version of the tapped view.
+      def tap(hash_or_string, *args)
+        _deprecated('0.10.0', 'Use tap_mark instead. In later Calabash versions we will change the semantics of `tap` to take a general query.')
+        if hash_or_string.is_a?(String)
+          tap_mark(hash_or_string, *args)
+        elsif hash_or_string.respond_to?(:[])
+          wait_tap(hash_or_string[:query], hash_or_string)
+        else
+          raise(ArgumentError, "first parameter to tap must be a string or a hash. Was: #{hash_or_string.class}, #{hash_or_string}")
+        end
+      end
+
+      # taps a view with mark `label`. Equivalent to `touch("* marked:'#{label}'")`
+      # @param {String} label the mark of the view to tap
+      # @param {Array} args optional additional arguments to pass to `touch`.
+      # @return {Array<Hash>} array containing the serialized version of the tapped view.
+      def tap_mark(label, *args)
+        touch("view marked:'#{label}'", *args)
+      end
+
+      # returns the 'html' property of all objects matching the query `q`
+      # @param {String} q the query to execute (should be a webView query)
+      # @return {Array<String>} array containing html of all elements matching the query
+      def html(q)
+        query(q).map { |e| e['html'] }
+      end
+
+      # sets the text value of the views matched by +uiquery+ to +txt+
+      #
+      # @deprecated since 0.9.145
+      #
+      # we have stopped testing this method.  you have been warned.
+      #
+      # * to enter text using the native keyboard use 'keyboard_enter_text'
+      # * to delete text use 'keyboard_enter_text('Delete')"
+      # * to clear a text field or text view:
+      #   - RECOMMENDED: use queries and touches to replicate what the user would do
+      #     - for text fields, implement a clear text button and touch it
+      #     - for text views, use touches to reveal text editing popup
+      #       see https://github.com/calabash/calabash-ios/issues/151
+      #   - use 'clear_text'
+      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
+      #
+      # raises an error if the +uiquery+ finds no matching queries or finds
+      # a view that does not respond to the objc selector 'setText'
+      def set_text(uiquery, txt)
+        msgs = ["'set_text' is deprecated and its behavior is now unpredictable",
+                "* to enter text using the native keyboard use 'keyboard_enter_text'",
+                "* to delete text use 'keyboard_enter_text('Delete')",
+                '* to clear a text field or text view:',
+                '  - RECOMMENDED: use queries and touches to replicate what the user would do',
+                '    * for text fields, implement a clear text button and touch it',
+                '    * for text views, use touches to reveal text editing popup',
+                '    see https://github.com/calabash/calabash-ios/issues/151',
+                "  - use 'clear_text'",
+                'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API']
+        msg = msgs.join("\n")
+        _deprecated('0.9.145', msg, :warn)
+
+        text_fields_modified = map(uiquery, :setText, txt)
+
+        msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
+        assert_map_results(text_fields_modified, msg)
+        text_fields_modified
+      end
+
+      # sets the text value of the views matched by +uiquery+ to <tt>''</tt>
+      # (the empty string)
+      #
+      # using this sparingly and with caution
+      #
+      #
+      # it is recommended that you instead do some combination of the following
+      #
+      # * use queries and touches to replicate with the user would
+      #   - for text fields, implement a clear text button and touch it
+      #   - for text views, use touches to reveal text editing popup
+      #   see https://github.com/calabash/calabash-ios/issues/151
+      #
+      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
+      #
+      # raises an error if the +uiquery+ finds no matching queries or finds
+      # a _single_ view that does not respond to the objc selector 'setText'
+      #
+      # IMPORTANT
+      # calling:
+      #
+      #     > clear_text("view")
+      #
+      # will clear the text on _all_ visible views that respond to 'setText'
+      def clear_text(uiquery)
+        views_modified = map(uiquery, :setText, '')
+        msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
+        assert_map_results(views_modified, msg)
+        views_modified
+      end
+
+
+      # Sets user preference (NSUserDefaults) value of key `key` to `val`.
+      # @example
+      #   set_user_pref 'foo', {lastname: "Krukow"}
+      #   # returns
+      #   [
+      #       {
+      #       "lastname" => "Krukow"
+      #       },
+      #      {
+      #       "firstname" => "Karl"
+      #      }
+      #   ]
+      #
+      # @param {String} key the set to set
+      # @param {Object} val the (JSON_ serializable) value to set
+      # @return {Object} the current user preferences
+      def set_user_pref(key, val)
+        res = http({:method => :post, :path => 'userprefs'},
+                   {:key=> key, :value => val})
+        res = JSON.parse(res)
+        if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "set_user_pref #{key} = #{val} failed because: #{res['reason']}\n#{res['details']}"
+        end
+
+        res['results']
+      end
+
+      # Gets the user preference (NSUserDefaults) value for a key.
+      # @param {String} key the read
+      # @return {Object} the current user preferences value for `key`
+      def user_pref(key)
+        res = http({:method => :get, :raw => true, :path => 'userprefs'},
+                   {:key=> key})
+        res = JSON.parse(res)
+        if res['outcome'] != 'SUCCESS'
+          screenshot_and_raise "get user_pref #{key} failed because: #{res['reason']}\n#{res['details']}"
+        end
+
+        res['results'].first
+      end
+
       # @!visibility private
       # @todo broken currently
       def stop_test_server
@@ -851,6 +1056,13 @@ module Calabash
       def extract_query_and_options(uiquery, options)
         options = prepare_query_options(uiquery, options)
         return options[:query], options
+      end
+
+      # @!visibility private
+      def assert_home_direction(expected)
+        unless expected.to_sym == home_direction
+          screenshot_and_raise "Expected home button to have direction #{expected} but had #{home_direction}"
+        end
       end
 
       # @!visibility private
