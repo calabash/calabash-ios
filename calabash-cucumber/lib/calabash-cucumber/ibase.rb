@@ -1,29 +1,61 @@
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/operations'
 
+# The `IBase` class is a base class that can be used to easily implement page object classes on iOS (hence the I).
+# Delegates to the cucumber World object for missing methods (e.g. embed or puts).
+# Mixes in {Calabash::Cucumber::Operations}.
+# For Calabash Android there is a corresponding `ABase`.
+# For more detailed documentation on using the Page Object Pattern (POP) with Calabash, please see:
+# {http://developer.xamarin.com/guides/testcloud/calabash/xplat-best-practices/}.
+# Note we recommend using POP even if you're not targeting multiple platforms as it tends to lead to more maintainable
+# test suites.
 class Calabash::IBase
   include Calabash::Cucumber::Operations
 
   attr_accessor :world, :transition_duration
 
+  # create a new page object, storing a reference to
+  #  the Cucumber `world`, optionally set a `transition_duration`
   def initialize(world, transition_duration=0.5)
     self.world = world
     self.transition_duration = transition_duration
   end
 
+  # specifies a query that recognizes this page.
+  # @abstract You should override the `trait` method in sub-classes of `IBase`. Alternatively you can override implement
+  #  the `title` method to which causes a default implementation of trait with query
+  #  "navigationItemView marked:'title'"
+  # @return [String] a query string that identifies this page
   def trait
     raise "You should define a trait method or a title method" unless respond_to?(:title)
     "navigationItemView marked:'#{self.title}'"
   end
 
+  # returns true if the current view shows this page's `trait`
+  # @see #trait
+  # @return [Boolean] true iff `element_exists(trait)`
   def current_page?
     element_exists(trait)
   end
 
+  # A variant of {Calabash::Cucumber::Core#page} that works inside page objects.
+  # @see Calabash::Cucumber::Core#page
+  # @see Calabash::IBase
+  # @param {Class} clz the page object class to instantiate (passing the cucumber world and `args`)
+  # @param {Array} args optional additional arguments to pass to the page object constructor
+  # @return {Object} a fresh instance of `Class clz` which has been passed a reference to the cucumber World object.
   def page(clz, *args)
     clz.new(world, *args)
   end
 
+  # Waits for this page to load. This is done by calling `wait_for_element_exists(trait, wait_opts)` and
+  # optionally waits for animations to complete.
+  # @see Calabash::Cucumber::WaitHelpers#wait_for_element_exists
+  # @see #trait
+  # @param {Hash} wait_opts options hash to pass to `wait_for_element_exists`
+  #   (see {Calabash::Cucumber::WaitHelpers#wait_for} and {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS}).
+  # @param {Array} args optional additional arguments to pass to the page object constructor
+  # @return {IBase} self
   def await(wait_opts={})
     wait_for_elements_exist([trait], wait_opts)
     unless wait_opts.has_key?(:await_animation) && !wait_opts[:await_animation]
@@ -84,6 +116,7 @@ class Calabash::IBase
     page_obj
   end
 
+  # @!visibility private
   def await_screenshot(wait_opts={}, screenshot_opts={})
     await(wait_opts)
     screenshot_embed(screenshot_opts)
