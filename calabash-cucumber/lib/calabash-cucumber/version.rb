@@ -85,36 +85,64 @@ module Calabash
         @major, @minor, @patch = version.split('.').map(&:to_i)
       end
 
+      # Returns an string representation of this version.
+      # @return [String] a string in the form `<major>.<minor>.<patch>[.pre<N>]`
       def to_s
         str = [@major, @minor, @patch].join('.')
         str = "#{str}.#{@pre}" if @pre
         str
       end
 
+      # Compare this version to another for equality.
+      # @param [Version] other the version to compare against
+      # @return [Boolean] true iff this Version is the same as `other`
       def == (other)
         compare(self, other) == 0
       end
 
+      # Compare this version to another for inequality.
+      # @param [Version] other the version to compare against
+      # @return [Boolean] true iff this Version is not the same as `other`
       def != (other)
         compare(self, other) != 0
       end
 
+      # Is this version less-than another version?
+      # @param [Version] other the version to compare against
+      # @return [Boolean] true iff this Version is less-than `other`
       def < (other)
         compare(self, other) < 0
       end
 
+      # Is this version greater-than another version?
+      # @param [Version] other the version to compare against
+      # @return [Boolean] true iff this Version is greater-than `other`
       def > (other)
         compare(self, other) > 0
       end
 
+      # Is this version less-than or equal to another version?
+      # @param [Version] other the version to compare against
+      # @return [Boolean] true iff this Version is less-than or equal `other`
       def <= (other)
         compare(self, other) <= 0
       end
 
+      # Is this version greater-than or equal to another version?
+      # @param [Version] other the version to compare against
+      # @return [Boolean] true iff this Version is greater-than or equal `other`
       def >= (other)
         compare(self, other) >= 0
       end
 
+      # Compare version `a` to version `b`.
+      #
+      # @example
+      #   compare Version.new(0.10.0), Version.new(0.9.0)  =>  1
+      #   compare Version.new(0.9.0),  Version.new(0.10.0) => -1
+      #   compare Version.new(0.9.0),  Version.new(0.9.0)  =>  0
+      #
+      # @return [Integer] an integer `(-1, 1)`
       def compare(a, b)
 
         if a.major != b.major
