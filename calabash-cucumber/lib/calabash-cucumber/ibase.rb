@@ -12,12 +12,24 @@ require 'calabash-cucumber/operations'
 class Calabash::IBase
   include Calabash::Cucumber::Operations
 
+  # A reference to the Cucumber World variable.
   # @!attribute [rw] world
-  #  @return [Object] the Cucumber World instance
+  # @return [Object] the Cucumber World instance
   attr_accessor :world
 
+  # The number of seconds to allow for page complete animations _after_ this
+  # page trait becomes visible.
+  #
+  # @note By default, this value is _not_ used.  To use this additional
+  #  wait time, you need to include `:await_animation => true` in the options
+  #  hash that is passed the `await` and `transition` methods.
+  #
+  # @see #trait
+  # @see #await
+  # @see #transition
+  #
   # @!attribute [rw] transition_duration
-  #  @return [Number] the number of seconds to allow for page transitions
+  # @return [Number] the number of seconds to allow for page transitions
   attr_accessor :transition_duration
 
   # Create a new page object.
