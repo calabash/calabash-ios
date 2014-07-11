@@ -15,10 +15,19 @@ module Calabash
 
       include Calabash::Cucumber::Logging
 
+      # @!visibility private
       GESTALT_IPHONE = 'iPhone'
+
+      # @!visibility private
       GESTALT_IPAD = 'iPad'
+
+      # @!visibility private
       GESTALT_IPHONE5 = '4-inch'
+
+      # @!visibility private
       GESTALT_SIM_SYS = 'x86_64'
+
+      # @!visibility private
       GESTALT_IPOD = 'iPod'
 
       attr_reader :endpoint
