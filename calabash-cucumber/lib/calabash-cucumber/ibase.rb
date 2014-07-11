@@ -30,11 +30,35 @@ class Calabash::IBase
     self.transition_duration = transition_duration
   end
 
-  # specifies a query that recognizes this page.
-  # @abstract You should override the `trait` method in sub-classes of `IBase`. Alternatively you can override implement
-  #  the `title` method to which causes a default implementation of trait with query
-  #  "navigationItemView marked:'title'"
+  # Specifies a query that recognizes this page.
+  #
+  # @abstract
+  # @see #await
+  #
+  # In your subclass, you have two options to implement this abstract method.
+  #
+  # 1. Override the `trait` method.
+  # 2. Implement a `title` method.
+  #
+  # If you implement a `title` method, this method will return:
+  # `"navigationItemView marked:'#{self.title}'"`
+  #
+  # @note It is recommended that you override this method method in your in
+  #  your subclasses (option 1 below).  Relying on the UINavigationBar title is
+  #  risky because Apple's UINavigationBar API changes often.
+  #
+  # @example
+  #  "view marked:'home'"
+  #
+  # @example
+  #  "tableView marked:'playlist'"
+  #
+  # @example
+  #  "button marked:'login'"
+  #
   # @return [String] a query string that identifies this page
+  # @raise [NotImplementedError] if the subclass does not respond to `title` or
+  #  the subclass does not override the `trait` method
   def trait
     raise "You should define a trait method or a title method" unless respond_to?(:title)
     "navigationItemView marked:'#{self.title}'"
