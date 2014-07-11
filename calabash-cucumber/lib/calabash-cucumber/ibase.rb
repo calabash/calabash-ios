@@ -29,7 +29,7 @@ class Calabash::IBase
 
   def await(wait_opts={})
     wait_for_elements_exist([trait], wait_opts)
-    unless wait_opts.has_key?(:await_animation) && !wait_opts[:await_animation]
+    if wait_opts[:await_animation]
       sleep(transition_duration)
     end
     self
