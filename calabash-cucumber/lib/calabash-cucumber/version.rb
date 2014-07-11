@@ -21,6 +21,16 @@ module Calabash
       raise(NameError, "uninitialized constant Calabash::Cucumber::#{const_name}")
     end
 
+    # A model of a release version that can be used to compare two version.
+    #
+    # Calabash tries very hard to comply with Semantic Versioning rules.
+    #
+    # However, our test workflow requires that we use `.pre` to denote
+    # pre-release versions instead of the recommended `-alpha`, `-beta`, or, `-pre`.
+    #
+    # Calabash version numbers will be in the form `<major>.<minor>.<patch>[.pre<N>]`.
+    #
+    # @see http://semver.org/
     class Version
 
       attr_accessor :major
