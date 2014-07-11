@@ -2,29 +2,36 @@
 module Calabash
   module Cucumber
 
-    # internal logging methods for calabash-ios gem
+    # Internal logging methods for the calabash-ios gem.
     module Logging
 
-      # controls the the kind of information calabash logs
+      # @!visibility private
+      # Has full console logging been enabled?
       #
-      # this is considered one level above debug logging - maybe we should call
+      # The return value is controlled by the `CALABASH_FULL_CONSOLE_OUTPUT`
+      # environment variable.
+      #
+      # This is considered one level above debug logging - maybe we should call
       # the info log level.
       #
-      # @return [Boolean] +true+ if the <tt>CALABASH_FULL_CONSOLE_OUTPUT</tt> is set to
-      #   '1'
+      # @return [Boolean] Returns `true` if full logging has been enabled.
       def full_console_logging?
         ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
       end
 
-      # controls whether or not calabash logs debug information
+      # @!visibility private
+      # Has debug logging been enabled?
       #
-      # @return [Boolean] +true+ if the <tt>DEBUG</tt> is set to '1'
+      # The return value is controlled by the `DEBUG` environment variable.
+      #
+      # @return [Boolean] Returns `true` if debug logging has been enabled.
       def debug_logging?
         ENV['DEBUG'] == '1'
       end
 
-      # prints a blue/cyan warning message
+      # Prints a blue warning message.
       # @param [String] msg the message to print
+      # @return [void]
       def calabash_warn(msg)
         begin
           warn "\033[34m\nWARN: #{msg}\033[0m"
@@ -33,8 +40,9 @@ module Calabash
         end
       end
 
-      # prints a green info message
+      # Prints a green info message.
       # @param [String] msg the message to print
+      # @return [void]
       def calabash_info(msg)
         begin
           puts "\033[32m\nINFO: #{msg}\033[0m"
@@ -43,27 +51,33 @@ module Calabash
         end
       end
 
-      # controls printing of deprecation warnings
+      # @!visibility private
+      # Controls printing of deprecation warnings.
       #
-      # to inhibit deprecation message set this to '1'
+      # To inhibit deprecation message set this to '1'
       #
-      # inhibiting deprecation messages is not recommend
+      # Inhibiting deprecation messages is not recommend.
       CALABASH_NO_DEPRECATION = ENV['CALABASH_NO_DEPRECATION'] || '0'
 
-      # returns +true+ if the <tt>CALABASH_NO_DEPRECATION</tt> variable is set
-      # to +1+
+      # @!visibility private
+      # Have deprecation warnings been turned off?
+      #
+      # The return value is controlled but the `CALABASH_NO_DEPRECATION`
+      # environment variable.
       def no_deprecation_warnings?
         ENV['CALABASH_NO_DEPRECATION'] == '1'
       end
 
-      # prints a deprecated message that includes the line number
+      # @!visibility private
+      # Prints a deprecated message that includes the line number.
       #
-      # if ENV['CALABASH_NO_DEPRECATION'] == '1' then this method is a nop
+      # If deprecation warns have been turned off this method does nothing.
       #
       # @param [String] version indicates when the feature was deprecated
       # @param [String] msg deprecation message (possibly suggesting alternatives)
       # @param [Symbol] type { :warn | :pending } - :pending will raise a
       #   cucumber pending exception
+      # @return [void]
       def _deprecated(version, msg, type)
         allowed = [:pending, :warn]
         unless allowed.include?(type)
