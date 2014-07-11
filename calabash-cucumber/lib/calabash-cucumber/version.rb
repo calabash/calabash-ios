@@ -12,6 +12,7 @@ module Calabash
     # users, the Calabash component.
     MIN_SERVER_VERSION = '0.10.0.pre1'
 
+    # @!visibility private
     def self.const_missing(const_name)
       if const_name == :FRAMEWORK_VERSION
         _deprecated('0.9.169', 'FRAMEWORK_VERSION has been deprecated - there is no replacement', :warn)
