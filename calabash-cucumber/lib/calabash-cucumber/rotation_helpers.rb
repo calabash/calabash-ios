@@ -2,7 +2,10 @@ require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
-    module RotationHelpers  #=> Connection, StatusBarHelpers
+
+    # Provides methods for rotating a device in a direction or to a particular
+    # orientation.
+    module RotationHelpers
 
       include Calabash::Cucumber::Logging
 
