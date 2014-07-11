@@ -64,7 +64,7 @@ class Calabash::IBase
     "navigationItemView marked:'#{self.title}'"
   end
 
-  # returns true if the current view shows this page's `trait`
+  # Returns true if the current view shows this page's `trait`.
   # @see #trait
   # @return [Boolean] true iff `element_exists(trait)`
   def current_page?
