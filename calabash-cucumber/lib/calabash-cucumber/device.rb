@@ -117,6 +117,13 @@ module Calabash
       # @return [String] The udid of this device.
       attr_accessor :udid
 
+      # Creates a new instance of Device.
+      #
+      # @see Calabash::Cucumber::Core#server_version
+      #
+      # @param [String] endpoint the http address of this device
+      # @param [Hash] version_data the output of the `server_version` function
+      # @return [Device] a new Device instance
       def initialize (endpoint, version_data)
         simulator_device = version_data['simulator_device']
         @endpoint = endpoint
