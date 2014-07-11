@@ -81,12 +81,22 @@ class Calabash::IBase
     clz.new(world, *args)
   end
 
-  # Waits for this page to load. This is done by calling `wait_for_element_exists(trait, wait_opts)` and
-  # optionally waits for animations to complete.
+  # Waits for this page's `trait` to become visible.
+  #
+  # After this page appears, you can optionally wait for `
+  # self.transition_duration` more seconds.
+  #
   # @see Calabash::Cucumber::WaitHelpers#wait_for_element_exists
+  # @see Calabash::Cucumber::WaitHelpers#wait_for
   # @see #trait
+  # @see #transition_duration
+  #
   # @param {Hash} wait_opts options hash to pass to `wait_for_element_exists`
-  #   (see {Calabash::Cucumber::WaitHelpers#wait_for} and {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS}).
+  #   (see {Calabash::Cucumber::WaitHelpers#wait_for} and
+  #   {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS}).
+  # @option wait_opts [Boolean] :await_animation iff true, will wait for
+  #  `self.transition_duration` after this page's `trait` appears - defaults to
+  #  false.
   # @return {IBase} self
   def await(wait_opts={})
     wait_for_elements_exist([trait], wait_opts)
