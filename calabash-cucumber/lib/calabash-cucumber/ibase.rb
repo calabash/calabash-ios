@@ -12,10 +12,14 @@ require 'calabash-cucumber/operations'
 class Calabash::IBase
   include Calabash::Cucumber::Operations
 
-  attr_accessor :world, :transition_duration
+  # @!attribute [rw] world
+  #  @return [Object] the Cucumber World instance
+  attr_accessor :world
 
-  # create a new page object, storing a reference to
-  #  the Cucumber `world`, optionally set a `transition_duration`
+  # @!attribute [rw] transition_duration
+  #  @return [Number] the number of seconds to allow for page transitions
+  attr_accessor :transition_duration
+
   def initialize(world, transition_duration=0.5)
     self.world = world
     self.transition_duration = transition_duration
