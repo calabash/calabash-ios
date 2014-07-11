@@ -69,7 +69,7 @@ class Calabash::IBase
   #  "button marked:'login'"
   #
   # @return [String] a query string that identifies this page
-  # @raise [NotImplementedError] if the subclass does not respond to `title` or
+  # @raise [RuntimeError] if the subclass does not respond to `title` or
   #  the subclass does not override the `trait` method
   def trait
     raise "You should define a trait method or a title method" unless respond_to?(:title)
@@ -99,8 +99,8 @@ class Calabash::IBase
 
   # Waits for this page's `trait` to become visible.
   #
-  # After this page appears, you can optionally wait for `
-  # self.transition_duration` more seconds.
+  # After this page appears, you can optionally wait for
+  # `self.transition_duration` more seconds.
   #
   # @see Calabash::Cucumber::WaitHelpers#wait_for_element_exists
   # @see Calabash::Cucumber::WaitHelpers#wait_for
@@ -134,13 +134,21 @@ class Calabash::IBase
   # @note If `transition_options[:page]` is defined, then it is assumed its
   #   value will be a subclass of Calabash::IBase or will behave as such.
   #
+  # @example Use this pattern to wait for `transition_duration` after the
+  #  the target page's trait becomes visible.
+  #
+  #  opts = {:tap => "button marked:'login'",
+  #          :wait_options => {:await_animation => true},
+  #          :page => LoginPage}
+  #  transition(opts)
+  #
   # @param [Hash] transition_options options for controlling the transition
   #
   # @option transition_options [String] :tap
   #  A uiquery used to perform a tap gesture to begin transition.
   #
   # @option transition_options [Proc] :action
-  #  A proc to use begin transition (either :tap or :action must be supplied)
+  #  A proc to use begin transition.
   #
   # @option transition_options [IBase,Class,nil] :page
   #  A page object or page object `class` to transition to (target page).
@@ -148,7 +156,7 @@ class Calabash::IBase
   #  If no `page` is supplied, `self` is used.
   #
   # @option transition_options [Boolean] :await
-  #  Iff true the `page`'s await will be called after performing the transition
+  #  If true the `page`'s await will be called after performing the transition
   #  that triggers the transition.  This is useful for waiting for animations to
   #  complete.  Defaults to `true`.
   #
@@ -159,8 +167,8 @@ class Calabash::IBase
   #  then these options are passed to the `page.await` method.
   #
   # @return [IBase] the page that is transitioned to
-  # @raise [MissingArgument] if `transition_options` does not include a non-nil
-  #  :tap or action :key
+  # @raise [RuntimeError] if `transition_options` does not include a non-nil
+  #  :tap or :action key
   def transition(transition_options={})
     uiquery = transition_options[:tap]
     action = transition_options[:action]
@@ -200,7 +208,6 @@ class Calabash::IBase
     await(wait_opts)
     screenshot_embed(screenshot_opts)
   end
-
 
   protected
   def method_missing(name, *args, &block)
