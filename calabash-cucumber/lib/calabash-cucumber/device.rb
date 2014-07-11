@@ -3,8 +3,14 @@ require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
-    # Class device encapsulates information about the device or devices we are
-    # interacting with during a test.
+
+    # Device encapsulates information about the device or simulator that the
+    # app is running on.  It also includes the following information about the
+    # app that is running on the current device.
+    #
+    # * The version of the embedded Calabash server.
+    # * Whether or not the app is an iPhone-only app that is being emulated on
+    #   an iPad.
     class Device
 
       include Calabash::Cucumber::Logging
