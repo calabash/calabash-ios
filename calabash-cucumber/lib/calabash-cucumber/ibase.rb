@@ -106,24 +106,45 @@ class Calabash::IBase
     self
   end
 
-  ##
-  # Performs a transition from receiver page to another by performing a +:tap+ gesture
-  # or a user specified +:action+.
-  # Caller must supply a hash of options +transition_options+ to describe the transition.
-  # Transition options may have the following keys
+  # Performs a transition from receiver page to another by performing a `tap`
+  # gesture or a user specified `action`.
   #
-  # +:tap+: A uiquery used to perform a tap gesture to begin transition
-  # +:action+: A proc to use begin transition (either :tap or :action must be supplied)
-  # +:page+: A page object or page object class to transition to (target page). If a class is provided this
-  # is instantiated using the +page+ method of self. If no +:page+ is supplied, +self+ is used.
-  # +:await+: If specified and truthy will await the +:page+ after performing gesture (usually to wait
-  # for animation to finish)
-  # +:tap_options+: If +:tap+ is provided used to pass as options to touch
-  # +:wait_options+: When awaiting target page, pass these options to the +await+ method
+  # Callers must supply a hash of options `transition_options` to describe the
+  # transition.
   #
-  # Returns the transition target page
+  # @note If a `tap` _and_ and `action` are defined, the `action` will be
+  #  ignored.
   #
-  # Note it is assumed that the target page is a Calabash::IBase (or acts accordingly)
+  # @note If `transition_options[:page]` is defined, then it is assumed its
+  #   value will be a subclass of Calabash::IBase or will behave as such.
+  #
+  # @param [Hash] transition_options options for controlling the transition
+  #
+  # @option transition_options [String] :tap
+  #  A uiquery used to perform a tap gesture to begin transition.
+  #
+  # @option transition_options [Proc] :action
+  #  A proc to use begin transition (either :tap or :action must be supplied)
+  #
+  # @option transition_options [IBase,Class,nil] :page
+  #  A page object or page object `class` to transition to (target page).
+  #  If a `class` is provided it is instantiated using the `self.page` method.
+  #  If no `page` is supplied, `self` is used.
+  #
+  # @option transition_options [Boolean] :await
+  #  Iff true the `page`'s await will be called after performing the transition
+  #  that triggers the transition.  This is useful for waiting for animations to
+  #  complete.  Defaults to `true`.
+  #
+  # @option transition_options [Hash] :tap_options Iff a `tap` gesture is defined
+  #  then these options will be passed to `touch`.
+  #
+  # @option transition_options [Hash] :wait_options Iff the :await key is true,
+  #  then these options are passed to the `page.await` method.
+  #
+  # @return [IBase] the page that is transitioned to
+  # @raise [MissingArgument] if `transition_options` does not include a non-nil
+  #  :tap or action :key
   def transition(transition_options={})
     uiquery = transition_options[:tap]
     action = transition_options[:action]
