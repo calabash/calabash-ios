@@ -136,35 +136,53 @@ module Calabash
         @iphone_4in = version_data['4inch']
       end
 
+      # Is this device a simulator or physical device?
+      # @return [Boolean] true iff this device is a simulator
       def simulator?
         system.eql?(GESTALT_SIM_SYS)
       end
 
+      # Is this device a device or simulator?
+      # @return [Boolean] true iff this device is a physical device
       def device?
         not simulator?
       end
 
+      # Is this device an iPhone?
+      # @return [Boolean] true iff this device is an iphone
       def iphone?
         device_family.eql? GESTALT_IPHONE
       end
 
+      # Is this device an iPod?
+      # @return [Boolean] true iff this device is an ipod
       def ipod?
         device_family.eql? GESTALT_IPOD
       end
 
+      # Is this device an iPad?
+      # @return [Boolean] true iff this device is an ipad
       def ipad?
         device_family.eql? GESTALT_IPAD
       end
 
+      # Is this device a 4in iPhone?
+      # @return [Boolean] true iff this device is a 4in iphone
       def iphone_4in?
         @iphone_4in
       end
 
+      # @deprecated 0.9.168 replaced with iphone_4in?
+      # @see #iphone_4in?
+      # Is this device an iPhone 5?
+      # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
+      # @return [Boolean] true iff this device is an iPhone 5
       def iphone_5?
         _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
         iphone_4in?
       end
 
+      # @!visibility private
       def version_hash (version_str)
         tokens = version_str.split(/[,.]/)
         {:major_version => tokens[0],
@@ -172,32 +190,60 @@ module Calabash
          :bug_version => tokens[2]}
       end
 
+      # The major iOS version of this device.
+      # @return [String] the major version of the OS
       def ios_major_version
         version_hash(ios_version)[:major_version]
       end
 
+      # Is this device running iOS 7?
+      # @return [Boolean] true iff the major version of the OS is 7
       def ios7?
         ios_major_version.eql?('7')
       end
 
+      # Is this device running iOS 6?
+      # @return [Boolean] true iff the major version of the OS is 6
       def ios6?
         ios_major_version.eql?('6')
       end
 
+      # Is this device running iOS 5?
+      # @return [Boolean] true iff the major version of the OS is 5
       def ios5?
         ios_major_version.eql?('5')
       end
 
+      # The screen size of the device.
+      #
+      # @note These values are not dynamically computed; they are constants.
+      #
+      # @note These values are for portrait or upside orientations
+      #
+      # @return [Hash] representation of the screen size as a hash with keys
+      #  `:width` and `:height`
       def screen_size
         return { :width => 768, :height => 1024 } if ipad?
         return { :width => 320, :height => 568 } if iphone_4in?
         { :width => 320, :height => 480 }
       end
 
+      # Is the app that is running an iPhone-only app emulated on an iPad?
+      #
+      # @note If the app is running in emulation mode, there will be a 1x or 2x
+      #   scale button visible on the iPad.
+      #
+      # @return [Boolean] true iff the app running on this devices is an
+      #   iPhone-only app emulated on an iPad
       def iphone_app_emulated_on_ipad?
         iphone_app_emulated_on_ipad
       end
 
+      # The version of the embedded Calabash server running in the app under
+      # test on this device.
+      # @deprecated 0.9.169 replaced with `server_version`
+      # @see #server_version
+      # @return [String] the version of the embedded Calabash server
       def framework_version
         _deprecated('0.9.169', "use 'server_version', instead", :warn)
         @server_version
