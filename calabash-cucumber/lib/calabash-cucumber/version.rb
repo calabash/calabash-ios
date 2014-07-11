@@ -174,9 +174,15 @@ module Calabash
   end
 end
 
+# These are unit tests.
+#
+# $ ruby lib/calabash-cucumber/version.rb
+#
+# todo move to rspec
 if __FILE__ == $0
   require 'test/unit'
 
+  # @!visibility private
   class LocalTest < Test::Unit::TestCase
     include Calabash::Cucumber
 
