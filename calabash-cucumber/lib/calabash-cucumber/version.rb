@@ -54,6 +54,25 @@ module Calabash
       #     pre-release version; otherwise this is nil
       attr_accessor :pre_version
 
+      # Creates a new Version instance with all the attributes set.
+      #
+      # @example
+      #  version = Version.new(0.10.1)
+      #  version.major       => 0
+      #  version.minor       => 10
+      #  version.patch       => 1
+      #  version.pre         => false
+      #  version.pre_release => nil
+      #
+      # @example
+      #  version = Version.new(1.6.3.pre5)
+      #  version.major       => 1
+      #  version.minor       => 6
+      #  version.patch       => 3
+      #  version.pre         => true
+      #  version.pre_release => 5
+      #
+      # @param [String] version the version string to parse.
       def initialize(version)
         tokens = version.split('.')
         count = tokens.count
