@@ -33,10 +33,25 @@ module Calabash
     # @see http://semver.org/
     class Version
 
+      # @!attribute [rw] major
+      #   @return [Integer] the major version
       attr_accessor :major
+
+      # @!attribute [rw] minor
+      #   @return [Integer] the minor version
       attr_accessor :minor
+
+      # @!attribute [rw] patch
+      #   @return [Integer] the patch version
       attr_accessor :patch
+
+      # @!attribute [rw] pre
+      #   @return [Boolean] true iff this is a pre-release version
       attr_accessor :pre
+
+      # @!attribute [rw] pre_version
+      #   @return [Integer] if this is a pre-release version, returns the
+      #     pre-release version; otherwise this is nil
       attr_accessor :pre_version
 
       def initialize(version)
