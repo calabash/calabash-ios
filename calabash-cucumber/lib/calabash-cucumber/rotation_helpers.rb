@@ -6,10 +6,15 @@ module Calabash
 
       include Calabash::Cucumber::Logging
 
-      def rotation_candidates
-        %w(rotate_left_home_down rotate_left_home_left rotate_left_home_right rotate_left_home_up
-           rotate_right_home_down rotate_right_home_left rotate_right_home_right rotate_right_home_up)
-      end
+      # @!visibility private
+      ROTATION_CANDIDATES = ['rotate_left_home_down',
+                             'rotate_left_home_left',
+                             'rotate_left_home_right',
+                             'rotate_left_home_up',
+                             'rotate_right_home_down',
+                             'rotate_right_home_left',
+                             'rotate_right_home_right',
+                             'rotate_right_home_up']
 
       # orientations refer to home button position
       #  down ==> bottom
@@ -49,12 +54,11 @@ module Calabash
 
         return res if res.eql? dir_sym
 
-        rotation_candidates.each { |candidate|
+        ROTATION_CANDIDATES.each { |candidate|
           if full_console_logging?
             puts "try to rotate to '#{dir_sym}' using '#{candidate}'"
           end
           playback(candidate)
-          # need a longer sleep for cloud testing
           sleep(0.4)
 
           res = status_bar_orientation
