@@ -20,6 +20,11 @@ class Calabash::IBase
   #  @return [Number] the number of seconds to allow for page transitions
   attr_accessor :transition_duration
 
+  # Create a new page object.
+  #
+  # @param [Object] world the cucumber World object
+  # @param [Number] transition_duration the number of seconds to for page
+  #  transitions
   def initialize(world, transition_duration=0.5)
     self.world = world
     self.transition_duration = transition_duration
