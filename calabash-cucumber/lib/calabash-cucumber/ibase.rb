@@ -72,6 +72,10 @@ class Calabash::IBase
   end
 
   # A variant of {Calabash::Cucumber::Core#page} that works inside page objects.
+  #
+  # @note It is assumed that `clz` will be a subclass of Calabash::IBase or will
+  # behave as such.
+  #
   # @see Calabash::Cucumber::Core#page
   # @see Calabash::IBase
   # @param {Class} clz the page object class to instantiate (passing the cucumber world and `args`)
