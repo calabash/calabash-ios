@@ -12,8 +12,11 @@ class Calabash::IBase
   end
 
   def trait
-    raise "You should define a trait method or a title method" unless respond_to?(:title)
-    "navigationItemView marked:'#{self.title}'"
+    if respond_to?(:title)
+      "navigationItemView marked:'#{self.title}'"
+    else
+      raise NotImplementedError, "Subclasses must implement a 'trait' or 'title' method"
+    end
   end
 
   def current_page?
