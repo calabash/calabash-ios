@@ -54,17 +54,20 @@ class Calabash::IBase
   #
   # Note it is assumed that the target page is a Calabash::IBase (or acts accordingly)
   def transition(transition_options={})
-    uiquery = transition_options[:tap]
-    action = transition_options[:action]
-    page_arg = transition_options[:page]
-    should_await = transition_options.has_key?(:await) ? transition_options[:await] : true
+    default_opts = {:await => true}
+    merged_transitions_opts = default_opts.merge(transition_options)
+
+    uiquery = merged_transitions_opts[:tap]
+    action = merged_transitions_opts[:action]
+    page_arg = merged_transitions_opts[:page]
+    should_await = merged_transitions_opts[:await]
 
     if action.nil? && uiquery.nil?
-      raise "Called transition without providing a gesture (:tap or :action) #{transition_options}"
+      raise MissingArgument "Called transition without providing a gesture (:tap or :action) #{transition_options}"
     end
 
     if uiquery
-      tap_options = transition_options[:tap_options] || {}
+      tap_options = merged_transitions_opts[:tap_options] || {}
       touch(uiquery, tap_options)
     else
       action.call()
@@ -74,9 +77,9 @@ class Calabash::IBase
     page_obj ||= self
 
     if should_await
-      wait_opts = transition_options[:wait_options] || {}
+      wait_opts = merged_transitions_opts[:wait_options] || {}
       if page_obj == self
-        unless wait_opts.has_key?(:await_animation) && !wait_opts[:await_animation]
+        if wait_opts[:await_animation]
           sleep(transition_duration)
         end
       else
