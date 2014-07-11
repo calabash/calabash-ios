@@ -108,6 +108,28 @@ module Calabash
         :down
       end
 
+      # Rotates the device in the direction indicated by `dir`.
+      #
+      # @example rotate left
+      #  rotate :left
+      #
+      # @example rotate right
+      #  rotate :right
+      #
+      # @example rotate down
+      #  rotate :down
+      #
+      # @example rotate up
+      #  rotate :up
+      #
+      # @note For legacy support the `dir` argument can be a String or Symbol.
+      #  Please update your code to pass a Symbol.
+      #
+      # @param [Symbol] dir The position of the home button after the rotation.
+      #  Can be one of `{:down | :left | :right | :up }`.
+      #
+      # @todo When running under UIAutomation, we should use that API to rotate
+      #  instead of relying on playbacks.
       def rotate(dir)
         dir = dir.to_sym
         current_orientation = status_bar_orientation().to_sym
