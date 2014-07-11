@@ -23,6 +23,9 @@ module Calabash
       attr_reader :iphone_app_emulated_on_ipad
       attr_reader :iphone_4in
 
+      # @deprecated 0.10.0 no replacement
+      # @!attribute [rw] udid
+      # @return [String] The udid of this device.
       attr_accessor :udid
 
       def initialize (endpoint, version_data)
@@ -104,6 +107,17 @@ module Calabash
         @server_version
       end
 
+      # @deprecated 0.10.0 no replacement
+      def udid
+        _deprecated('0.10.0', 'no replacement', :warn)
+        @udid
+      end
+
+      # @deprecated 0.10.0 no replacement
+      def udid=(value)
+        _deprecated('0.10.0', 'no replacement', :warn)
+        @udid = value
+      end
     end
   end
 end
