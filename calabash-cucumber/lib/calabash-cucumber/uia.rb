@@ -96,7 +96,7 @@ module Calabash
       # @example Advanced example that chains calls and uses arguments
       #   uia_call [:view, marked:'New Post'], {withName:"New Post"}, :toString, {charAt:0}
       #
-      # @param {Array} args_arr array describing the query, e.g., [:button, {marked:'foo'}]
+      # @param {Array} args_arr array describing the query, e.g., `[:button, {marked:'foo'}]`
       # @param {Array} opts optional arguments specifying a chained sequence of method calls (see example)
       def uia_call(args_arr, *opts)
         uia_call_method(:queryEl, args_arr, *opts)

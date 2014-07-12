@@ -150,9 +150,9 @@ module Calabash
       # @param [Hash] opts optional arguments to control the interaction with
       #  the 1X/2X buttons
       #
-      # @option opts [Symbol] :lang_code (defaults to :en) an Apple compatible
+      # @option opts [Symbol] :lang_code (:en) an Apple compatible
       #  language code
-      # @option opts [Symbol] :wait_after_touch (defaults to 0.4) how long to
+      # @option opts [Symbol] :wait_after_touch (0.4) how long to
       #  wait _after_ the scale button is touched
       #
       # @return [void]
@@ -216,9 +216,9 @@ module Calabash
       # @param [Hash] opts optional arguments to control the interaction with
       #  the 1X/2X buttons
       #
-      # @option opts [Symbol] :lang_code (defaults to :en) an Apple compatible
+      # @option opts [Symbol] :lang_code (:en) an Apple compatible
       #  language code
-      # @option opts [Symbol] :wait_after_touch (defaults to 0.4) how long to
+      # @option opts [Symbol] :wait_after_touch (0.4) how long to
       #  wait _after_ the scale button is touched
       #
       # @return [void]

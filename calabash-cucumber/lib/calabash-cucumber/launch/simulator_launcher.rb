@@ -374,21 +374,22 @@ module Calabash
         status
       end
 
-      # attempts to connect to launch the app and connect to the embedded
+      # Attempts to connect to launch the app and connect to the embedded
       # calabash server.
       #
-      # to change the number of times launching is attempted set MAX_CONNECT_RETRY
+      # @note To change the number of times launching is attempted set
+      # `MAX_CONNECT_RETRY`.
       #
-      # to change the relaunch timeout set CONNECT_TIMEOUT
+      # @note To change the relaunch timeout set `CONNECT_TIMEOUT`.
       #
       # @param [String] app_bundle_path path to the .app that should be launched
       # @param [String] sdk 6.0.3, 6.1.  if nil latest SDK will be used
-      # @param [String] device_family {iphone | ipad}
+      # @param [String] device_family `{iphone | ipad}`
       # @param [Hash] args eke! not used (see todo)
       #
       # @raise [TimeoutErr] if app cannot be launched in the simulator
-      # todo nearly a duplicate of Launcher ensure_connectivity
-      # todo args was originally intended to be the args passed to the application @ launch
+      # @todo nearly a duplicate of Launcher ensure_connectivity
+      # @todo args was originally intended to be the args passed to the application @ launch
       def ensure_connectivity(app_bundle_path, sdk, device_family, args = nil)
         begin
           # todo should get the retry could from the args
@@ -439,12 +440,13 @@ module Calabash
         end
       end
 
-      # launches the app
+      # Launches the app.
+      #
       # @param [String] app_bundle_path path to the .app that should be launched
       # @param [String] sdk 6.0.3, 6.1.  if nil latest SDK will be used
-      # @param [String] device_family {iphone | ipad}
-      # @param [Hash] args eke! not used (see todo)
-      # todo args was originally intended to be the args passed to the application @ launch
+      # @param [String] device_family `{iphone | ipad}`
+      # @param [Hash] args eke! not used
+      # @todo args was originally intended to be the args passed to the application @ launch
       def launch(app_bundle_path, sdk, device_family, args = nil)
         # cached but not used
         self.launch_args = args
