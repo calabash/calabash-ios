@@ -3,6 +3,7 @@ require 'calabash-cucumber/connection_helpers'
 require 'calabash-cucumber/query_helpers'
 require 'calabash-cucumber/map'
 
+# @!visibility private
 class Calabash::Cucumber::InstrumentsActions
   include Calabash::Cucumber::UIA
   include Calabash::Cucumber::ConnectionHelpers
@@ -35,7 +36,7 @@ class Calabash::Cucumber::InstrumentsActions
 
   def touch_hold(options)
     query_action(options) do |offset|
-      duration = options[:duration] || 4
+      duration = options[:duration] || 3
       uia_touch_hold_offset(duration, offset)
     end
   end
