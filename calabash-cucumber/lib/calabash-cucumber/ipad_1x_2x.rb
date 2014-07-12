@@ -6,31 +6,75 @@ require 'calabash-cucumber/uia'
 
 module Calabash
   module Cucumber
+    # Contains methods for interacting with the iPad.
     module IPad
 
+      # @!visibility private
+      # Provides methods to interact with the 1x and 2x buttons that appear
+      # when an iPhone-only app is emulated on an iPad.  Calabash cannot
+      # interact with these apps in 2x mode because the touch coordinates
+      # cannot be reliably translated from normal iPhone dimensions to the
+      # emulated dimensions.
+      #
+      # On iOS < 7, an app _remembered_ its last 1x/2x scale so when it
+      # reopened the previous scale would be the same as when it closed.  This
+      # meant you could manually set the scale once to 1x and never have to
+      # interact with the scale button again.
+      #
+      # On iOS > 7, the default behavior is that all emulated apps open at 2x
+      # regardless of their previous scale.
+      #
+      # @note In order to use this class, you must allow Calabash to launch
+      #  your app with instruments.
       class Emulation
+
         include Calabash::Cucumber::FailureHelpers
         include Calabash::Cucumber::HTTPHelpers
         include Calabash::Cucumber::QueryHelpers
         include Calabash::Cucumber::UIA
 
-        # NOTE to maintainers - when adding a localization, please notice that
+        # @!visibility private
+        #
+        # Maintainers:  when adding a localization, please notice that
         # the keys and values are semantically reversed.
         #
         # you should read the hash as:
         #
-        #     :emulated_1x #=> what button is showing when the app is emulated at 2X?
-        #     :emulated_2x #=> what button is showing when the app is emulated at 1X?
+        # ```
+        # :emulated_1x <= what button is showing when the app is emulated at 2X?
+        # :emulated_2x <= what button is showing when the app is emulated at 1X?
+        # ```
         IPAD_1X_2X_BUTTON_LABELS = {
               :en => {:emulated_1x => '2X',
                       :emulated_2x => '1X'}
         }
 
+        # @!visibility private
+        # @!attribute [r] scale
+        # The current 1X or 2X scale represented as a Symbol.
+        #
+        # @return [Symbol] Returns this emulation's scale.  Will be one of
+        # `{:emulated_1x | :emulated_2x}`.
         attr_reader :scale
+
+        # @!visibility private
+        # @!attribute [r] lang_code
+        # The Apple compatible language code for determining the accessibility
+        # label of the 1X and 2X buttons.
+        #
+        # @return [Symbol] Returns the language code of this emulation.
         attr_reader :lang_code
 
+        # @!visibility private
+        # A private instance variable for storing this emulation's 1X/2X button
+        # names.  The value will be set at runtime based on the language code
+        # that is passed the initializer.
         @button_names_hash = nil
 
+        # @!visibility private
+        # Creates a new Emulation.
+        # @param [Symbol] lang_code an Apple compatible language code
+        # @return [Emulation] Returns an emulation that is ready for action!
         def initialize (lang_code=:en)
           @button_names_hash = IPAD_1X_2X_BUTTON_LABELS[lang_code]
           if @button_names_hash.nil?
@@ -41,6 +85,7 @@ module Calabash
           @scale = _internal_ipad_emulation_scale
         end
 
+        # @!visibility private
         def tap_ipad_scale_button
           key = @scale
           name = @button_names_hash[key]
@@ -54,6 +99,7 @@ module Calabash
         end
 
         private
+        # @!visibility private
         def _internal_ipad_emulation_scale
           hash = @button_names_hash
           val = nil
@@ -81,36 +127,40 @@ module Calabash
 
       end
 
-      # ensures that iPhone apps emulated on an iPad are displayed at +scale+.
+      # Ensures that iPhone apps emulated on an iPad are displayed at scale.
       #
-      # starting in iOS 7, iPhone apps emulated on the iPad always launch at 2x.
+      # @note It is recommended that clients call this `ensure_ipad_emulation_1x`
+      #  instead of this method.
+      #
+      # @note If this is not an iPhone app emulated on an iPad, then calling
+      #  this method has no effect.
+      #
+      # @note In order to use this method, you must allow Calabash to launch
+      #  your app with instruments.
+      #
+      # Starting in iOS 7, iPhone apps emulated on the iPad always launch at 2x.
       # calabash cannot currently interact with such apps in 2x mode (trust us,
       # we've tried).
       #
-      # +scale+ must be one of { +:emulated_1x+ | +:emulated_2x+ }
+      # @see #ensure_ipad_emulation_1x
       #
-      # is it is recommended that clients call this convenience method:
+      # @param [Symbol] scale the desired scale - must be `:emulated_1x` or
+      #  `:emulated_2x`
       #
-      # +ensure_ipad_emulation_1x+ #=> ensures the app is displayed in 1x mode
+      # @param [Hash] opts optional arguments to control the interaction with
+      #  the 1X/2X buttons
       #
-      # takes these optional arguments
+      # @option opts [Symbol] :lang_code (defaults to :en) an Apple compatible
+      #  language code
+      # @option opts [Symbol] :wait_after_touch (defaults to 0.4) how long to
+      #  wait _after_ the scale button is touched
       #
-      #        :lang_code #=> a language code for matching the name of the 'scale' button
-      # :wait_after_touch #=> how long to wait after the 'scale' button is touched
+      # @return [void]
       #
-      # the default values are:
-      #
-      #        :lang_code => :en
-      # :wait_after_touch => 0.4
-      #
-      # +IMPORTANT+ if this is not an iphone app emulated on a ipad, then calling
-      # this function has no effect.
-      #
-      # raises an exception if:
-      # * the app was +not+ launched with Instruments i.e. there is no <tt>run_loop</tt>
-      # * an invalid +scale+ is passed
-      # * an unknown language code is passed
-      # * the 'scale' button cannot be touched
+      # @raise [RuntimeError] If the app was not launched with instruments.
+      # @raise [RuntimeError] If an invalid `scale` is passed.
+      # @raise [RuntimeError] If an unknown language code is passed.
+      # @raise [RuntimeError] If the scale button cannot be touched.
       def ensure_ipad_emulation_scale(scale, opts={})
         return unless iphone_app_emulated_on_ipad?
 
@@ -139,44 +189,49 @@ module Calabash
 
       end
 
-      # ensures that iPhone apps emulated on an iPad are displayed at +1X+.
+      # Ensures that iPhone apps emulated on an iPad are displayed at `1X`.
       #
-      # here is an example of how to use this function in your +Before+ launch
-      # hooks:
+      # @note If this is not an iPhone app emulated on an iPad, then calling
+      #  this method has no effect.
       #
-      #    Before do |scenario|
-      #      @calabash_launcher = Calabash::Cucumber::Launcher.new
-      #      unless @calabash_launcher.calabash_no_launch?
-      #        @calabash_launcher.relaunch
-      #        @calabash_launcher.calabash_notify(self)
-      #        # ensure emulated apps are at 1x
-      #        ensure_ipad_emulation_1x
-      #      end
-      #      # do other stuff to prepare the test environment
+      # @note In order to use this method, you must allow Calabash to launch
+      #  your app with instruments.
+      #
+      # Starting in iOS 7, iPhone apps emulated on the iPad always launch at 2x.
+      # calabash cannot currently interact with such apps in 2x mode (trust us,
+      # we've tried).
+      #
+      # @example Here is an example of how to use this function in your `Before` launch hooks.
+      #  Before do |scenario|
+      #    @calabash_launcher = Calabash::Cucumber::Launcher.new
+      #    unless @calabash_launcher.calabash_no_launch?
+      #      @calabash_launcher.relaunch
+      #      @calabash_launcher.calabash_notify(self)
+      #      # ensure emulated apps are at 1x
+      #      ensure_ipad_emulation_1x
       #    end
+      #    # do other stuff to prepare the test environment
+      #  end
       #
-      # takes these optional arguments
+      # @param [Hash] opts optional arguments to control the interaction with
+      #  the 1X/2X buttons
       #
-      #        :lang_code #=> a language code for matching the name of the 'scale' button
-      # :wait_after_touch #=> how long to wait after the 'scale' button is touched
+      # @option opts [Symbol] :lang_code (defaults to :en) an Apple compatible
+      #  language code
+      # @option opts [Symbol] :wait_after_touch (defaults to 0.4) how long to
+      #  wait _after_ the scale button is touched
       #
-      # the default values are:
+      # @return [void]
       #
-      #        :lang_code => :en
-      # :wait_after_touch => 0.4
-      #
-      # +IMPORTANT+ if this is not an iphone app emulated on a ipad, then calling
-      # this function has no effect.
-      #
-      # raises an exception if:
-      # * the app was +not+ launched with Instruments i.e. there is no <tt>run_loop</tt>
-      # * an unknown language code is passed
-      # * the 'scale' button cannot be touched
+      # @raise [RuntimeError] If the app was not launched with instruments.
+      # @raise [RuntimeError] If an unknown language code is passed.
+      # @raise [RuntimeError] If the scale button cannot be touched.
       def ensure_ipad_emulation_1x(opts={})
         ensure_ipad_emulation_scale(:emulated_1x, opts)
       end
 
       private
+      # @!visibility private
       # ensures iPhone apps running on an iPad are emulated at 2X
       #
       # you should never need to call this function - calabash cannot interact
