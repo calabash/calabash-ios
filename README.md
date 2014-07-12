@@ -1,3 +1,5 @@
+# Calabash iOS [![Build Status](https://travis-ci.org/calabash/calabash-ios.png)](https://travis-ci.org/calabash/calabash-ios) [![License](https://go-shields.herokuapp.com/license-Eclipse-blue.png)](http://opensource.org/licenses/MIT)
+
 # Welcome to Calabash for iOS
 
 Calabash is an automated testing technology for Android and iOS native and hybrid applications.
