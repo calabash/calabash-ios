@@ -2,9 +2,9 @@ require 'calabash-cucumber/failure_helpers'
 
 module Calabash
   module Cucumber
-    module TestsHelpers #=> http
-      include Calabash::Cucumber::FailureHelpers
+    module TestsHelpers
 
+      include Calabash::Cucumber::FailureHelpers
 
       # Returns the classes of all views matching `uiquery`
       # @param {String} uiquery the query to execute
@@ -28,9 +28,10 @@ module Calabash
         not element_does_not_exist(uiquery)
       end
 
-      # Returns true if at least one element matches query "* marked:'#{expected_mark}'"
+      # Returns true if at least one element matches query `"* marked:'#{expected_mark}'"`
       # @param {String} expected_mark the mark to search for
-      # @return {Boolean} `true` if at least one element matches query "* marked:'#{expected_mark}'". `false` otherwise.
+      # @return {Boolean} `true` if at least one element matches query
+      #  `"* marked:'#{expected_mark}'". `false` otherwise.
       def view_with_mark_exists(expected_mark)
         element_exists("view marked:'#{expected_mark}'")
       end

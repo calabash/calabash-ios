@@ -60,14 +60,16 @@ module Calabash
         end
       end
 
-      # does the instruments +version+ accept the -s (devices) flag?
+      # Does the instruments `version` accept the -s flag?
       #
-      #     instruments_supports_hyphen_s?('4.6.3') #=> false
-      #     instruments_supports_hyphen_s?('5.0.2') #=> true
-      #       instruments_supports_hyphen_s?('5.1') #=> true
+      # @example
+      #  instruments_supports_hyphen_s?('4.6.3') => false
+      #  instruments_supports_hyphen_s?('5.0.2') => true
+      #  instruments_supports_hyphen_s?('5.1')   => true
       #
-      # @param [String] version a major.minor.{patch} version string - defaults
-      #  to the currently active instruments binary
+      # @param [String] version (instruments(:version))
+      #   a major.minor[.patch] version string
+      #
       # @return [Boolean] true iff the version is >= 5.*
       def instruments_supports_hyphen_s?(version=instruments(:version))
         tokens = version.split('.')

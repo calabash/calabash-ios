@@ -113,10 +113,12 @@ cmd (String) (defaults to: nil) — controls the return value. currently accepts
 
 #### documenting option hashes
 
+Default values can be specified by including them after the option key in `()`.
+
 ```
 # @param [Hash] opts controls the content of the query string
-# @option opts [Integer,nil] :with_tag if non-nil the query string includes tag filter
-# @option opts [Integer,nil] :with_clips_to_bounds if non-nil the query string includes clipsToBounds filter
+# @option opts [Integer,nil] :with_tag (true) if non-nil the query string includes tag filter
+# @option opts [Integer,nil] :with_clips_to_bounds (false) if non-nil the query string includes clipsToBounds filter
 ```
 
 #### multiple return values

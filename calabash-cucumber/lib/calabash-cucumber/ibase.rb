@@ -110,9 +110,9 @@ class Calabash::IBase
   # @param {Hash} wait_opts options hash to pass to `wait_for_element_exists`
   #   (see {Calabash::Cucumber::WaitHelpers#wait_for} and
   #   {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS}).
-  # @option wait_opts [Boolean] :await_animation iff true, will wait for
-  #  `self.transition_duration` after this page's `trait` appears - defaults to
-  #  false.
+  # @option wait_opts [Boolean] :await_animation (false)
+  #   iff true, will wait for `self.transition_duration` after this page's
+  #   `trait` appears
   # @return {IBase} self
   def await(wait_opts={})
     wait_for_elements_exist([trait], wait_opts)

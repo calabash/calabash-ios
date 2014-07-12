@@ -351,7 +351,7 @@ class Calabash::Cucumber::Launcher
   # @option args {String} :app (detect the location of the bundle from project settings) app bundle path
   # @option args {String} :bundle_id if launching on device, specify this or env `BUNDLE_ID` to be the bundle identifier
   #   of the application to launch
-  # @option args {Hash} :privacy_settings preset privacy settings for the, e.g., {:photos => {:allow => true}}.
+  # @option args {Hash} :privacy_settings preset privacy settings for the, e.g., `{:photos => {:allow => true}}`.
   #    See {KNOWN_PRIVACY_SETTINGS}
   def relaunch(args={})
     #TODO stopping is currently broken, but this works anyway because instruments stop the process before relaunching

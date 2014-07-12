@@ -447,22 +447,24 @@ module Calabash
 
       # Scrolls to a mark in a UITableView.
       #
-      # @example
-      #  # scroll to the top of the item with the given mark
-      #  scroll_to_row_with_mark(mark, {:scroll_position => :top})
-      # @example
-      #  # scroll to the bottom of the item with the given mark
-      #  scroll_to_row_with_mark(mark, {:scroll_position => :bottom})
+      # @example Scroll to the top of the item with the given mark.
+      #  scroll_to_row_with_mark('settings', {:scroll_position => :top})
       #
-      # @param [String] mark an accessibility {label | identifier} or text in
+      # @example Scroll to the bottom of the item with the given mark.
+      #  scroll_to_row_with_mark('about', {:scroll_position => :bottom})
+      #
+      # @param [String] mark an accessibility `{label | identifier}` or text in
       #  or on the row
       # @param [Hash] options controls the query and and scroll behavior
-      # @option options [String] :query the query that should be used to find
-      #  table the row is in
-      # @option options [Symbol] :scroll_position the table position to scroll
-      #  the row to - allowed values `{:middle | :top | :bottom}`
       #
-      # @option options [Boolean] :animate iff true the scrolling is animated
+      # @option options [String] :query ('tableView')
+      #  the query that should be used to location the table
+      # @option options [Symbol] :scroll_position (:middle)
+      #  the table position to scroll the row to - allowed values
+      #  `{:middle | :top | :bottom}`
+      # @option options [Boolean] :animate (true)
+      #  should the scrolling be animated
+      #
       # @raise [RuntimeError] if the scroll cannot be performed
       # @raise [RuntimeError] if the mark is nil
       # @raise [RuntimeError] if the table query finds no table view
@@ -496,30 +498,33 @@ module Calabash
       #
       # @note item and section are zero-indexed
       #
-      # @example
-      #  # scroll to item 0 in section 2 to top
+      # @example Scroll to item 0 in section 2 to top.
       #  scroll_to_collection_view_item(0, 2, {:scroll_position => :top})
       #
-      # @example
-      #  # scroll to item 5 in section 0 to bottom
+      # @example Scroll to item 5 in section 0 to bottom.
       #  scroll_to_collection_view_item(5, 0, {:scroll_position => :bottom})
       #
-      # @example
-      #  # the following are the allowed :scroll_position values
+      # @example The following are the allowed :scroll_position values.
       #  {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
       #
       # @param [Integer] item the index of the item to scroll to
       # @param [Integer] section the section of the item to scroll to
       # @param [Hash] opts options for controlling the collection view query
       #  and scroll behavior
-      # @option opts [String] :query the query that is used to identify which
-      #  collection view to scroll - defaults to `collectionView`
-      # @option opts [Symbol] :scroll_position the position in the collection
-      #  view to scroll the item to - defaults to `:top`
-      # @option opts [Boolean] :animate iff true animate the scroll
-      # @option opts [String] :failed_message a custom error message to display
-      #  if the scrolling fails; if not specified, a generic failure will be
-      #  displayed - defaults to `nil`
+      #
+      # @option opts [String] :query ('collectionView')
+      #  the query that is used to identify which collection view to scroll
+      #
+      # @option opts [Symbol] :scroll_position (top)
+      #  the position in the collection view to scroll the item to
+      #
+      # @option opts [Boolean] :animate (true)
+      #  should the scrolling be animated
+      #
+      # @option opts [String] :failed_message (nil)
+      #  a custom error message to display if the scrolling fails - if not
+      #  specified, a generic failure will be displayed
+      #
       # @raise [RuntimeException] if the scroll cannot be performed
       # @raise [RuntimeException] :query finds no collection view
       # @raise [RuntimeException] the collection view does not contain a cell at item/section
@@ -554,29 +559,30 @@ module Calabash
 
       # Scrolls to mark in a UICollectionView.
       #
-      # @example
-      #  # scroll to the top of the item with the given mark
-      #  scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :top})
-      # @example
-      #  # scroll to the bottom of the item with the given mark
-      #  scroll_to_collection_view_item_with_mark(mark, {:scroll_position => :bottom})
+      # @example Scroll to the top of the item with the given mark.
+      #  scroll_to_collection_view_item_with_mark('cat', {:scroll_position => :top})
       #
-      # @example
-      #  # the following are the allowed :scroll_position values
+      # @example Scroll to the bottom of the item with the given mark.
+      #  scroll_to_collection_view_item_with_mark('dog', {:scroll_position => :bottom})
+      #
+      # @example The following are the allowed :scroll_position values.
       #  {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
       #
-      # @param [String] mark an accessibility {label | identifier} or text in
+      # @param [String] mark an accessibility `{label | identifier}` or text in
       #  or on the item
       # @param [Hash] opts options for controlling the collection view query
       #  and scroll behavior
-      # @option opts [String] :query the query that is used to identify which
-      #  collection view to scroll - defaults to `collectionView`
-      # @option opts [Symbol] :scroll_position the position in the collection
-      #  view to scroll the item to - defaults to `:top`
-      # @option opts [Boolean] :animate iff true animate the scroll
-      # @option opts [String] :failed_message a custom error message to display
-      #  if the scrolling fails; if not specified, a generic failure will be
-      #  displayed - defaults to `nil`
+      #
+      # @option opts [String] :query ('collectionView')
+      #   the query that is used to identify which collection view to scroll
+      # @option opts [Symbol] :scroll_position (:top)
+      #   the position in the collection view to scroll the item to
+      # @option opts [Boolean] :animate (true) should the scroll
+      #   be animated
+      # @option opts [String] :failed_message (nil)
+      #  a custom error message to display if the scrolling fails - if not
+      #  specified, a generic failure will be displayed
+      #
       # @raise [RuntimeException] if the scroll cannot be performed
       # @raise [RuntimeException] if the mark is nil
       # @raise [RuntimeException] :query finds no collection view
