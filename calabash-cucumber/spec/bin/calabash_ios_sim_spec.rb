@@ -3,8 +3,6 @@ require File.expand_path(File.join(__FILE__, '..', '..', '..', 'bin', 'calabash-
 require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/wait_helpers'
 
-include Calabash::Cucumber::WaitHelpers
-
 describe 'calabash ios sim cli' do
 
   it 'should deprecate the sim_quit method' do

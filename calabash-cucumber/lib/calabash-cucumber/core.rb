@@ -872,7 +872,8 @@ module Calabash
       # @param {String} hash_or_string mark to pass to call `tap_mark(hash_or_string)`.
       # @return {Array<Hash>} array containing the serialized version of the tapped view.
       def tap(hash_or_string, *args)
-        _deprecated('0.10.0', 'Use tap_mark instead. In later Calabash versions we will change the semantics of `tap` to take a general query.')
+        deprecation_msg = 'Use tap_mark instead. In later Calabash versions we will change the semantics of `tap` to take a general query.'
+        _deprecated('0.10.0', deprecation_msg, :warn)
         if hash_or_string.is_a?(String)
           tap_mark(hash_or_string, *args)
         elsif hash_or_string.respond_to?(:[])
