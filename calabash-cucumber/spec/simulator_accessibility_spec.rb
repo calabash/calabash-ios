@@ -201,6 +201,8 @@ describe 'simulator accessibility tool' do
             calabash_info("starting simulator '#{simulator}'")
             begin
               expect(@launcher.new_run_loop(@launch_args)).to be_a(Hash)
+            rescue Exception => e
+              calabash_info "could not launch '#{simulator}' - #{e}"
             ensure
               @launcher.stop
               sleep(2)
