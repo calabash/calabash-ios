@@ -16,7 +16,7 @@ describe 'xcode tools module' do
     end
 
     it 'should return the default developer directory' do
-      actual = `xcode-select --print-path`.chomp
+      actual = `/usr/bin/xcode-select --print-path`.chomp
       expect(xcode_developer_dir).to be == actual
     end
 

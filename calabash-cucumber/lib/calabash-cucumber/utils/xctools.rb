@@ -20,7 +20,7 @@ module Calabash
         # respect DEVELOPER_DIR
         return ENV['DEVELOPER_DIR'] if ENV['DEVELOPER_DIR']
         # fall back to xcode-select
-        `xcode-select --print-path`.chomp
+        `/usr/bin/xcode-select --print-path`.chomp
       end
 
       # returns the path to the current developer usr/bin directory
