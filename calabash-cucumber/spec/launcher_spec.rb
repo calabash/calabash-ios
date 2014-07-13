@@ -123,7 +123,7 @@ describe 'Calabash Launcher' do
                   expect(target).to be == detected
                   expect(args[:udid]).to be == detected
                 else
-                  pending('this behavior is needs verification')
+                  #pending('this behavior is needs verification')
                   expect(target).to be == 'simulator'
                 end
               end

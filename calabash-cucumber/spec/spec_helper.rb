@@ -29,3 +29,7 @@ module Kernel
     $stderr = STDERR
   end
 end
+
+def travis_ci?
+  ENV['TRAVIS']
+end
