@@ -23,17 +23,11 @@ Running Calabash requires Mac OSX.  After completing this guide you will be able
 against the iOS Simulator. You can also interactively explore and
 interact with your application using the Calabash console.
 
-If you have any questions about Calabash iOS, please use the google group
-
-[http://groups.google.com/group/calabash-ios](http://groups.google.com/group/calabash-ios)
+If you have any questions about Calabash iOS, please use the [google group](http://groups.google.com/group/calabash-ios).
 
 For Xamarin users, we recommend the free Xamarin [Calabash component](https://components.xamarin.com/view/calabash/) which replaces the `calabash-ios setup` step below.
 
-For setup with CocoaPods, please follow the excellent guide from Angel G. Olloqui
-
-[http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods)
-
-and see example project: [https://github.com/calabash/calabash-ios-example](https://github.com/calabash/calabash-ios-example).
+For setup with CocoaPods, please follow the excellent [guide from Angel G. Olloqui](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods) and see [example project](https://github.com/calabash/calabash-ios-example).
 
 The rest of this guide was writting using XCode 5, but should also work for XCode versions >= 4.3.
 
