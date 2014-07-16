@@ -3,13 +3,22 @@ require 'fileutils'
 require 'bundler'
 Bundler::GemHelper.install_tasks
 
-require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new
-task :test => :spec
+begin
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new
+  task :test => :spec
+rescue Exception => _
+  warn 'skipping rspec requirement because it is a development dependency'
+end
 
-require 'yard'
-YARD::Rake::YardocTask.new do |t|
-  # see .yardopts for options
+
+begin
+  require 'yard'
+  YARD::Rake::YardocTask.new do |t|
+    # see .yardopts for options
+  end
+rescue Exception => _
+  warn 'skipping yard requirement because it is a development dependency'
 end
 
 # REQUIRES that the calabash-ios-server source code is located
