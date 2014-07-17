@@ -5,17 +5,17 @@ module Calabash
 
     include Calabash::Cucumber::Logging
 
-    # module for reading and writing property list values
+    # @!visibility private
+    # A module for reading and writing property list values.
     module PlistBuddy
 
-      # reads +key+ from +file+ and returns the result
+      # Reads key from file and returns the result.
       # @param [String] key the key to inspect (may not be nil or empty)
       # @param [String] file the plist to read
       # @param [Hash] opts options for controlling execution
       # @option opts [Boolean] :verbose (false) controls log level
-      # @return [nil] if +key+ does not exist
-      # @return [String] if the +key+ exists then the value of +key+ (error)
-      # @raise [ArgumentError] if nil or empty +key+
+      # @return [String] the value of the key
+      # @raise [ArgumentError] if nil or empty key
       def plist_read(key, file, opts={})
         if key.nil? or key.length == 0
           raise(ArgumentError, "key '#{key}' must not be nil or empty")
@@ -29,18 +29,17 @@ module Calabash
         end
       end
 
-      # checks if the key exists in plist
+      # Checks if the key exists in plist.
       # @param [String] key the key to inspect (may not be nil or empty)
       # @param [String] file the plist to read
       # @param [Hash] opts options for controlling execution
       # @option opts [Boolean] :verbose (false) controls log level
-      # @return [Boolean] true iff the +key+ exists in plist +file+
+      # @return [Boolean] true iff the key exists in plist file
       def plist_key_exists?(key, file, opts={})
         plist_read(key, file, opts) != nil
-
       end
 
-      # replaces or creates the +value+ of +key+ in the +file+
+      # Replaces or creates the value of key in the file.
       #
       # @param [String] key the key to set (may not be nil or empty)
       # @param [String] type the plist type (used only when adding a value)
@@ -49,7 +48,7 @@ module Calabash
       # @param [Hash] opts options for controlling execution
       # @option opts [Boolean] :verbose (false) controls log level
       # @return [Boolean] true iff the operation was successful
-      # @raise [ArgumentError] if nil or empty +key+
+      # @raise [ArgumentError] if nil or empty key
       def plist_set(key, type, value, file, opts={})
         default_opts = {:verbose => false}
         merged = default_opts.merge(opts)
@@ -72,7 +71,7 @@ module Calabash
         res == ''
       end
 
-      @private
+      private
 
       # returns the path to the PlistBuddy executable
       # @return [String] path to PlistBuddy
@@ -80,14 +79,14 @@ module Calabash
         '/usr/libexec/PlistBuddy'
       end
 
-      # executes +cmd+ as a shell command and returns the result
+      # Executes cmd as a shell command and returns the result.
       #
       # @param [String] cmd shell command to execute
       # @param [Hash] opts options for controlling execution
       # @option opts [Boolean] :verbose (false) controls log level
       # @return [Boolean] if command was successful
-      # @return [String] if :print'ing result, the value of the key
-      # @return [String] if there is an error, the output from stderr
+      # @return [String] if :print'ing result, the value of the key - if there
+      #   is an error, the output from stderr
       def execute_plist_cmd(cmd, opts={})
         default_opts = {:verbose => false}
         merged = default_opts.merge(opts)
@@ -108,7 +107,7 @@ module Calabash
         res
       end
 
-      # composes a PlistBuddy command that can be executed as a shell command
+      # Composes a PlistBuddy command that can be executed as a shell command.
       #
       # @param [Symbol] type should be one of [:print, :set, :add]
       #
@@ -119,9 +118,9 @@ module Calabash
       #
       # @param [String] file the plist file to interact with (must exist)
       #
-      # @raise [RuntimeError] if +file+ does not exist
-      # @raise [ArgumentError] when invalid +type+ is passed
-      # @raise [ArgumentError] when +args_hash+ does not include required key/value pairs
+      # @raise [RuntimeError] if file does not exist
+      # @raise [ArgumentError] when invalid type is passed
+      # @raise [ArgumentError] when args_hash does not include required key/value pairs
       #
       # @return [String] a shell-ready PlistBuddy command
       def build_plist_cmd(type, args_hash, file)
