@@ -6,11 +6,45 @@ require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
+    # Collection of methods for interacting with the keyboard.
+    #
+    # There are two environmental variables you can use to control the speed of
+    # typing.  We've gone to great lengths to provide the fastest keyboard
+    # entry possible.
+    #
+    # If you are having trouble with skipped or are receiving JSON octet
+    # errors when typing, you might be able to resolve the problems by slowing
+    # down the rate of typing.
+    #
+    # Example:  Use keyboard_enter_char + :wait_after_char.
+    #
+    # ```
+    # str.each_char do |char|
+    #   # defaults to 0.05 seconds
+    #   keyboard_enter_char(char, `{wait_after_char:0.5}`)
+    # end
+    # ```
+    #
+    # Example:  Use keyboard_enter_char + POST_ENTER_KEYBOARD
+    #
+    # ```
+    # $ POST_ENTER_KEYBOARD=0.1 bundle exec cucumber
+    # str.each_char do |char|
+    #   # defaults to 0.05 seconds
+    #   keyboard_enter_char(char)
+    # end
+    # ```
+    #
+    # @note
+    #  We have an exhaustive set of keyboard related test.s  The API is reasonably
+    #  stable.  We are fighting against known bugs in Apple's UIAutomation. You
+    #  should only need to fall back to the examples below in unusual situations.
     module KeyboardHelpers
 
       include Calabash::Cucumber::TestsHelpers
       include Calabash::Cucumber::Logging
 
+      # @!visibility private
       KEYPLANE_NAMES = {
           :small_letters => 'small-letters',
           :capital_letters => 'capital-letters',
@@ -19,7 +53,8 @@ module Calabash
           :numbers_and_punctuation_alternate => 'numbers-and-punctuation-alternate'
       }
 
-
+      # @!visibility private
+      # noinspection RubyStringKeysInHashInspection
       UIA_SUPPORTED_CHARS = {
             'Delete' => '\b',
             'Return' => '\n'
@@ -32,17 +67,19 @@ module Calabash
             #'More' => nil,
       }
 
-
-      # returns a query string for detecting a keyboard
+      # @!visibility private
+      # Returns a query string for detecting a keyboard.
       def _qstr_for_keyboard
         "view:'UIKBKeyplaneView'"
       end
 
-      # returns true if a docked keyboard is visible.
+      # Returns true if a docked keyboard is visible.
       #
-      # a docked keyboard is pinned to the bottom of the view.
+      # A docked keyboard is pinned to the bottom of the view.
       #
-      # keyboards on the iPhone and iPod are docked.
+      # Keyboards on the iPhone and iPod are docked.
+      #
+      # @return [Boolean] if a keyboard is visible and docked.
       def docked_keyboard_visible?
         res = query(_qstr_for_keyboard).first
         return false if res.nil?
@@ -67,12 +104,12 @@ module Calabash
 
       end
 
-      # returns true if an undocked keyboard is visible.
+      # Returns true if an undocked keyboard is visible.
       #
-      # a undocked keyboard is floats in the middle of the view
+      # A undocked keyboard is floats in the middle of the view.
       #
-      # returns false if the device is not an iPad; all keyboards on the
-      # iPhone and iPod are docked
+      # @return [Boolean] Returns false if the device is not an iPad; all
+      # keyboards on the iPhone and iPod are docked.
       def undocked_keyboard_visible?
         return false if device_family_iphone?
 
@@ -82,28 +119,39 @@ module Calabash
         not docked_keyboard_visible?
       end
 
-      # returns true if a split keyboard is visible.
+      # Returns true if a split keyboard is visible.
       #
-      # a split keyboard is floats in the middle of the view and is split to
+      # A split keyboard is floats in the middle of the view and is split to
       # allow faster thumb typing
       #
-      # returns false if the device is not an iPad; all keyboards on the
-      # iPhone and iPod are docked
+      # @return [Boolean] Returns false if the device is not an iPad; all
+      # keyboards on the Phone and iPod are docked and not split.
       def split_keyboard_visible?
         return false if device_family_iphone?
         query("view:'UIKBKeyView'").count > 0 and
               element_does_not_exist(_qstr_for_keyboard)
       end
 
-      # returns true if there is a visible keyboard
+      # Returns true if there is a visible keyboard.
+      #
+      # @return [Boolean] Returns true if there is a visible keyboard.
       def keyboard_visible?
         docked_keyboard_visible? or undocked_keyboard_visible? or split_keyboard_visible?
       end
 
-      # waits for a keyboard to appear and once it does appear waits for 0.3
-      # seconds
+      # Waits for a keyboard to appear and once it does appear waits for
+      # `:post_timeout` seconds.
       #
-      # raises an error if no keyboard appears
+      # @see Calabash::Cucumber::WaitHelpers#wait_for for other options this
+      #  method can handle.
+      #
+      # @param [Hash] opts controls the `wait_for` behavior
+      # @option opts [String] :timeout_message ('keyboard did not appear')
+      #  Controls the message that appears in the exception.
+      # @option opts [Number] :post_timeout (0.3) Controls how long to wait
+      #  _after_ the keyboard has appeared.
+      #
+      # @raise [Calabash::Cucumber::WaitHelpers::WaitError] if no keyboard appears
       def wait_for_keyboard(opts={})
         default_opts = {:timeout_message => 'keyboard did not appear',
                         :post_timeout => 0.3}
@@ -113,37 +161,47 @@ module Calabash
         end
       end
 
-      # <b>DEPRECATED:</b> Use <tt>wait_for_keyboard</tt> instead.
+      # @deprecated 0.9.163 replaced with `wait_for_keyboard`
+      # @see #wait_for_keyboard
       def await_keyboard
         _deprecated('0.9.163', "use 'wait_for_keyboard' instead", :warn)
         wait_for_keyboard
       end
 
+      # @!visibility private
       # returns an array of possible ipad keyboard modes
       def _ipad_keyboard_modes
         [:docked, :undocked, :split]
       end
 
-      # returns the keyboard mode
+      # Returns the keyboard mode.
       #
+      # @example How to use in a wait_* function.
+      #  wait_for do
+      #   ipad_keyboard_mode({:raise_on_no_visible_keyboard => false}) == :split
+      #  end
+      #
+      # ```
       #                   keyboard is pinned to bottom of the view #=> :docked
       #             keyboard is floating in the middle of the view #=> :undocked
       #                             keyboard is floating and split #=> :split
-      #   no keyboard and :raise_on_no_visible_keyboard == false #=> :unknown
+      #     no keyboard and :raise_on_no_visible_keyboard == false #=> :unknown
+      # ```
       #
-      # raises an error if the device is not an iPad
+      # @raise [RuntimeError] if the device under test is not an iPad.
       #
-      # raises an error if the <tt>:raise_on_no_visible_keyboard</tt> is true
-      # (default) and no keyboard is visible
-      #
-      # set <tt>:raise_on_no_visible_keyboard</tt> to false to use in wait
-      # functions
+      # @raise [RuntimeError] if `:raise_on_no_visible_keyboard` is truthy and
+      #  no keyboard is visible.
+      # @param [Hash] opts controls the runtime behavior.
+      # @option opts [Boolean] :raise_on_no_visible_keyboard (true) set to false
+      #  if you don't want to raise an error.
+      # @return [Symbol] Returns one of `{:docked | :undocked | :split | :unknown}`
       def ipad_keyboard_mode(opts = {})
         raise 'the keyboard mode does not exist on the iphone or ipod' if device_family_iphone?
 
         default_opts = {:raise_on_no_visible_keyboard => true}
-        opts = default_opts.merge(opts)
-        if opts[:raise_on_no_visible_keyboard]
+        merged_opts = default_opts.merge(opts)
+        if merged_opts[:raise_on_no_visible_keyboard]
           screenshot_and_raise 'there is no visible keyboard' unless keyboard_visible?
           return :docked if docked_keyboard_visible?
           return :undocked if undocked_keyboard_visible?
@@ -156,15 +214,18 @@ module Calabash
         end
       end
 
-      # ensures that there is a keyboard to enter text
+      # @!visibility private
+      # Ensures that there is a keyboard to enter text.
       #
-      # IMPORTANT will always raise an error when the keyboard is split and
-      # there is no <tt>run_loop</tt> i.e. UIAutomation is not available
+      # @note
+      # *IMPORTANT* will always raise an error when the keyboard is split and
+      # there is no `run_loop`; i.e. UIAutomation is not available.
       #
-      # the default options are
-      #   :screenshot true raise with a screenshot
-      #   :skip false skip any checking (a nop) - used when iterating over
-      #   keyplanes for keys
+      # @param [Hash] opts controls screenshot-ing and error raising conditions
+      # @option opts [Boolean] :screenshot (true) raise with a screenshot if
+      #  a keyboard cannot be ensured
+      # @option opts [Boolean] :skip (false) skip any checking (a nop) - used
+      #  when iterating over keyplanes for keys
       def _ensure_can_enter_text(opts={})
         default_opts = {:screenshot => true,
                         :skip => false}
@@ -191,23 +252,37 @@ module Calabash
         end
       end
 
-      # use keyboard to enter chr
+      # Use keyboard to enter a character.
       #
-      # IMPORTANT: use the <tt>POST_ENTER_KEYBOARD</tt> environmental variable
-      # to slow down the typing; adds a wait after each character is touched.
-      # this can fix problems where the typing is too fast and characters are
-      # skipped.
+      # @note
+      #  IMPORTANT: Use the `POST_ENTER_KEYBOARD` environmental variable
+      #  to slow down the typing; adds a wait after each character is touched.
+      #  this can fix problems where the typing is too fast and characters are
+      #  skipped.
       #
-      # there are several special 'characters', some of which do not appear on all
-      # keyboards:
-      # * 'Delete'
-      # * 'Return'
+      # @note
+      #  There are several special 'characters', some of which do not appear on
+      #  all keyboards; e.g. `Delete`, `Return`.
       #
-      # raises error if there is no visible keyboard or the keyboard is not
-      # supported
+      # @note
+      #  Since 0.9.163, this method accepts a Hash as the second parameter.  The
+      #  previous second parameter was a Boolean that controlled whether or not
+      #  to screenshot on errors.
       #
-      # use the should_screenshot to control whether or not to raise an error
-      # if chr is not found
+      # @see #keyboard_enter_text
+      #
+      # @note
+      #  You should prefer to call `keyboard_enter_text`.
+      #
+      # @raise [RuntimeError] if there is no visible keyboard
+      # @raise [RuntimeError] if the keyboard (layout) is not supported
+      #
+      # @param [String] chr the character to type
+      # @param [Hash] opts options to control the behavior of the method
+      # @option opts [Boolean] :should_screenshot (true) whether or not to
+      #  screenshot on errors
+      # @option opts [Float] :wait_after_char ('POST_ENTER_KEYBOARD' or 0.05)
+      #  how long to wait after a character is typed.
       def keyboard_enter_char(chr, opts={})
         unless opts.is_a?(Hash)
          msg = "you should no longer pass a boolean as the second arg; pass {:should_screenshot => '#{opts}'}  hash instead"
@@ -248,6 +323,7 @@ module Calabash
               uia_type_string(code, '')
             end
           end
+          # noinspection RubyStringKeysInHashInspection
           res = {'results' => []}
         else
           res = http({:method => :post, :path => 'keyboard'},
@@ -274,9 +350,10 @@ module Calabash
         res['results']
       end
 
-      # uses the keyboard to enter text
+      # Uses the keyboard to enter text.
       #
-      # raises an error if the text cannot be entered
+      # @param [String] text the text to type.
+      # @raise [RuntimeError] if the text cannot be typed.
       def keyboard_enter_text(text)
         _ensure_can_enter_text
         if uia_available?
@@ -294,17 +371,21 @@ module Calabash
         end
       end
 
-      # touches the keyboard action key
+      # Touches the keyboard action key.
       #
-      # the action key depends on the keyboard.  some examples include:
+      # The action key depends on the keyboard.  Some examples include:
+      #
       # * Return
       # * Next
       # * Go
       # * Join
       # * Search
       #
-      # not all keyboards have an action key
-      # raises an error if the key cannot be entered
+      # @note
+      #  Not all keyboards have an action key.  For example, numeric keyboards
+      #  do not have an action key.
+      #
+      # @raise [RuntimeError] if the text cannot be typed.
       def tap_keyboard_action_key
         if uia_available?
           uia_type_string '\n', '', false
@@ -315,22 +396,27 @@ module Calabash
 
       # touches the keyboard action key
       #
-      # the action key depends on the keyboard.
+      # Touches the keyboard action key.
       #
-      # some examples include:
+      # The action key depends on the keyboard.  Some examples include:
+      #
       # * Return
       # * Next
       # * Go
       # * Join
       # * Search
       #
-      # not all keyboards have an action key
-      # raises an error if the key cannot be entered
+      # @note
+      #  Not all keyboards have an action key.  For example, numeric keyboards
+      #  do not have an action key.
+      #
+      # @raise [RuntimeError] if the text cannot be typed.
       def done
         tap_keyboard_action_key
       end
 
-      # returns the current keyplane
+      # @!visibility private
+      # Returns the current keyplane.
       def _current_keyplane
         kp_arr = _do_keyplane(
             lambda { query("view:'UIKBKeyplaneView'", 'keyplane', 'componentName') },
@@ -338,15 +424,20 @@ module Calabash
         kp_arr.first.downcase
       end
 
-      # searches the available keyplanes for chr and if it is found, types it
+      # @!visibility private
+      # Searches the available keyplanes for chr and if it is found, types it.
       #
-      # this is a recursive function
+      # This is a recursive function.
       #
-      # IMPORTANT: use the <tt>KEYPLANE_SEARCH_STEP_PAUSE</tt> variable to
-      # control how quickly the next keyplane is searched.  increase this value
-      # if you encounter problems with missed keystrokes.
+      # @note
+      #   Use the `KEYPLANE_SEARCH_STEP_PAUSE` variable to control how quickly
+      #   the next keyplane is searched.  Increase this value if you encounter
+      #   problems with missed keystrokes.
       #
-      # raises an error if the chr cannot be found
+      # @note
+      #   When running under instruments, this method is not called.
+      #
+      # @raise [RuntimeError] if the char cannot be found
       def _search_keyplanes_and_enter_char(chr, visited=Set.new)
         cur_kp = _current_keyplane
         begin
@@ -387,9 +478,10 @@ module Calabash
         end
       end
 
-      # process a keyplane
+      # @!visibility private
+      # Process a keyplane.
       #
-      # raises an error if there is not visible keyplane
+      # @raise [RuntimeError] if there is no visible keyplane
       def _do_keyplane(kbtree_proc, keyplane_proc)
         desc = query("view:'UIKBKeyplaneView'", 'keyplane')
         fail('No keyplane (UIKBKeyplaneView keyplane)') if desc.empty?
@@ -404,16 +496,19 @@ module Calabash
         end
       end
 
-      # returns a query string for finding the iPad 'Hide keyboard' button
+      # @!visibility private
+      # Returns a query string for finding the iPad 'Hide keyboard' button.
       def _query_uia_hide_keyboard_button
         "uia.keyboard().buttons()['Hide keyboard']"
       end
 
-      # dismisses a iPad keyboard by touching the 'Hide keyboard' button and waits
-      # for the keyboard to disappear
+      # Dismisses a iPad keyboard by touching the 'Hide keyboard' button and waits
+      # for the keyboard to disappear.
       #
-      # raises an error if the device is not an iPad.  the dismiss keyboard
-      # key does not exist on the iPhone or iPod
+      # @note
+      #  the dismiss keyboard key does not exist on the iPhone or iPod
+      #
+      # @raise [RuntimeError] if the device is not an iPad
       def dismiss_ipad_keyboard
         screenshot_and_raise 'cannot dismiss keyboard on iphone' if device_family_iphone?
 
@@ -429,13 +524,16 @@ module Calabash
         end
       end
 
-      # returns the activation point of the iPad keyboard mode key.
+      # @!visibility private
+      # Returns the activation point of the iPad keyboard mode key.
       #
-      # the mode key is also known as the <tt>Hide keyboard</tt> key.
+      # The mode key is also known as the 'Hide keyboard' key.
       #
-      # raises an error when
-      # * the device is not an iPad
-      # * the app was not launched with instruments i.e. there is no <tt>run_loop</tt>
+      # @note
+      #  This is only available when running under instruments.
+      #
+      # @raise [RuntimeError] when the device is not an iPad
+      # @raise [RuntimeError] the app was not launched with instruments
       def _point_for_ipad_keyboard_mode_key
         raise 'the keyboard mode does not exist on the on the iphone' if device_family_iphone?
         raise 'cannot detect keyboard mode key without launching with instruments' unless uia_available?
@@ -448,23 +546,21 @@ module Calabash
         #{:x => (origin['x']  (size['width']/2)), :y => (origin['y']  (size['height']/2))}
       end
 
-
-      # returns a query string for touching one of the options that appears when
+      # @!visibility private
+      # Returns a query string for touching one of the options that appears when
       # the iPad mode key is touched and held.
       #
-      # the mode key is also know as the <tt>Hide keyboard</tt> key.
+      # The mode key is also know as the 'Hide keyboard' key.
       #
-      # valid arguments are:
-      #   top_or_bottom :top | :bottom
-      #   mode :docked | :undocked | :skipped
+      # @note
+      #  This is only available when running outside of instruments.
       #
-      # use <tt>_point_for_keyboard_mode_key</tt> if there is a <tt>run_loop</tt>
-      # available
+      # @param [Symbol] top_or_bottom can be one of `{:top | :bottom}`
+      # @param [Symbol] mode `{:docked | :undocked | :skipped}`
       #
-      # raises an error when
-      # * the device is not an iPad
-      # * the app was launched with Instruments i.e. there is a <tt>run_loop</tt>
-      # * it is passed invalid arguments
+      # @raise [RuntimeError] the device is not an iPad
+      # @raise [RuntimeError] the app was not launched with instruments
+      # @raise [RuntimeError] the method is passed invalid arguments
       def _query_for_touch_for_keyboard_mode_option(top_or_bottom, mode)
         raise 'the keyboard mode does not exist on the iphone' if device_family_iphone?
 
@@ -492,12 +588,15 @@ module Calabash
         "label marked:'#{mark}'"
       end
 
-      # returns a query for touching the iPad keyboard mode key.
+      # @!visibility private
+      # Returns a query for touching the iPad keyboard mode key.
       #
-      # the mode key is also know as the <tt>Hide keyboard</tt> key.
+      # The mode key is also know as the 'Hide keyboard' key.
       #
-      # use <tt>_point_for_keyboard_mode_key</tt> if there is a <tt>run_loop</tt>
-      # available
+      # @note
+      #  This is only available when running outside of instruments.  Use
+      #  ` _point_for_ipad_keyboard_mode_key` when the app is _not_ launched
+      #  with instruments.
       #
       # raises an error when
       # * the device is not an iPad
@@ -512,12 +611,13 @@ module Calabash
         "#{qstr} index:#{idx}"
       end
 
-      # touches the bottom option on the popup dialog that is presented when the
-      # the iPad keyboard +mode+ key is touched and held.
+      # @!visibility private
+      # Touches the bottom option on the popup dialog that is presented when the
+      # the iPad keyboard `mode` key is touched and held.
       #
-      # the +mode+ key is also know as the <tt>Hide keyboard</tt> key.
+      # The `mode` key is also know as the 'Hide keyboard' key.
       #
-      # the +mode+ key allows the user to undock, dock, or split the keyboard.
+      # The `mode` key allows the user to undock, dock, or split the keyboard.
       def _touch_bottom_keyboard_mode_row
         mode = ipad_keyboard_mode
         if uia_available?
@@ -534,12 +634,12 @@ module Calabash
         2.times { sleep(0.5) }
       end
 
-      # touches the top option on the popup dialog that is presented when the
+      # Touches the top option on the popup dialog that is presented when the
       # the iPad keyboard mode key is touched and held.
       #
-      # the mode key is also know as the <tt>Hide keyboard</tt> key.
+      # The `mode` key is also know as the 'Hide keyboard' key.
       #
-      # the mode key allows the user to undock, dock, or split the keyboard.
+      # The `mode` key allows the user to undock, dock, or split the keyboard.
       def _touch_top_keyboard_mode_row
         mode = ipad_keyboard_mode
         if uia_available?
@@ -558,16 +658,15 @@ module Calabash
         2.times { sleep(0.5) }
       end
 
-      # ensures that the iPad keyboard is docked
+      # Ensures that the iPad keyboard is docked.
       #
-      # docked means the keyboard is pinned to bottom of the view
+      # Docked means the keyboard is pinned to bottom of the view.
       #
-      # if the device is not an iPad, this is behaves like a call to
-      # <tt>wait_for_keyboard</tt>
+      # If the device is not an iPad, this is behaves like a call to
+      # `wait_for_keyboard`.
       #
-      # raises an error when
-      # * there is no visible keyboard or
-      # * the docked keyboard cannot be achieved
+      # @raise [RuntimeError] if there is no visible keyboard
+      # @raise [RuntimeError] a docked keyboard was not achieved
       def ensure_docked_keyboard
         wait_for_keyboard
 
@@ -597,16 +696,18 @@ module Calabash
       end
 
 
-      # ensures that the iPad keyboard is undocked
+      # Ensures that the iPad keyboard is undocked.
       #
-      # undocked means the keyboard is floating in the middle of the view
+      # Undocked means the keyboard is floating in the middle of the view.
       #
-      # if the device is not an iPad, this is behaves like a call to
-      # <tt>wait_for_keyboard</tt>
+      # If the device is not an iPad, this is behaves like a call to
+      # `wait_for_keyboard`.
       #
-      # raises an error when
-      # * there is no visible keyboard or
-      # * the an undocked keyboard cannot be achieved
+      # If the device is not an iPad, this is behaves like a call to
+      # `wait_for_keyboard`.
+      #
+      # @raise [RuntimeError] if there is no visible keyboard
+      # @raise [RuntimeError] an undocked keyboard was not achieved
       def ensure_undocked_keyboard
         wait_for_keyboard()
 
@@ -641,17 +742,19 @@ module Calabash
       end
 
 
-      # ensures that the iPad keyboard is split
+      # Ensures that the iPad keyboard is split.
       #
-      # split means the keyboard is floating in the middle of the view and is
+      # Split means the keyboard is floating in the middle of the view and is
       # split into two sections to enable faster thumb typing.
       #
-      # if the device is not an iPad, this is behaves like a call to
-      # <tt>wait_for_keyboard</tt>
+      # If the device is not an iPad, this is behaves like a call to
+      # `wait_for_keyboard`.
       #
-      # raises an error when
-      # * there is no visible keyboard or
-      # * the an undocked keyboard cannot be achieved
+      # If the device is not an iPad, this is behaves like a call to
+      # `wait_for_keyboard`.
+      #
+      # @raise [RuntimeError] if there is no visible keyboard
+      # @raise [RuntimeError] a split keyboard was not achieved
       def ensure_split_keyboard
         wait_for_keyboard
 
@@ -695,13 +798,16 @@ module Calabash
         end
       end
 
-      # used for detecting keyboards that are not normally visible to calabash
-      # e.g. the keyboard on 'z'
+      # Used for detecting keyboards that are not normally visible to calabash;
+      # e.g. the keyboard on the `MFMailComposeViewController`
       #
-      # IMPORTANT this should only be used when the app does not respond to
-      # <tt>keyboard_visible?</tt>
+      # @note
+      #  IMPORTANT this should only be used when the app does not respond to
+      #  `keyboard_visible?`.
       #
-      # raises an error if the there is no <tt>run_loop</tt>
+      # @see #keyboard_visible?
+      #
+      # @raise [RuntimeError] if the app was not launched with instruments
       def uia_keyboard_visible?
         unless uia_available?
           screenshot_and_raise 'only available if there is a run_loop i.e. the app was launched with Instruments'
@@ -710,13 +816,16 @@ module Calabash
         not res.eql?(':nil')
       end
 
-      # waits for a keyboard that is not normally visible to calabash
-      # e.g. the keyboard on MFMailComposeViewController
+      # Waits for a keyboard that is not normally visible to calabash;
+      # e.g. the keyboard on `MFMailComposeViewController`.
       #
-      # IMPORTANT this should only be used when the app does not respond to
-      # <tt>keyboard_visible?</tt>
+      # @note
+      #  IMPORTANT this should only be used when the app does not respond to
+      #  `keyboard_visible?`.
       #
-      # raises an error if the there is no <tt>run_loop</tt>
+      # @see #keyboard_visible?
+      #
+      # @raise [RuntimeError] if the app was not launched with instruments
       def uia_wait_for_keyboard(opts={})
         unless uia_available?
           screenshot_and_raise 'only available if there is a run_loop i.e. the app was launched with Instruments'
@@ -735,18 +844,16 @@ module Calabash
         end
       end
 
-
-      private
-
-      # returns the the text in the first responder
+      # @!visibility private
+      # Returns the the text in the first responder.
       #
-      # the first responder will be the UITextField or UITextView instance
+      # The first responder will be the UITextField or UITextView instance
       # that is associated with the visible keyboard.
       #
-      # returns empty string if no textField or textView elements are found to be
+      # Teturns empty string if no textField or textView elements are found to be
       # the first responder.
       #
-      # raises an exception if there is no visible keyboard
+      # @raise [RuntimeError] if there is no visible keyboard
       def _text_from_first_responder
         raise 'there must be a visible keyboard' unless keyboard_visible?
 
@@ -755,7 +862,7 @@ module Calabash
           return res.first unless res.empty?
         end
         #noinspection RubyUnnecessaryReturnStatement
-        return ""
+        return ''
       end
 
     end
