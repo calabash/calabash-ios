@@ -6,39 +6,42 @@ require 'cfpropertylist'
 module Calabash
   module Cucumber
 
-    # methods for checking and setting simulator accessibility
+    # Public methods for common simulator tasks and private methods for
+    # enabling accessibility on the simulator.
     module SimulatorAccessibility
 
       include Calabash::Cucumber::XcodeTools
       include Calabash::Cucumber::PlistBuddy
 
-      # quits the iOS Simulator
+      # Quits the iOS Simulator.
       #
       # ATM there can only be only simulator open at a time, so simply doing
       # what the sim_launcher gem does:
       #
-      #    def quit_simulator
-      #      `echo 'application "iPhone Simulator" quit' | osascript`
-      #    end
+      # ```
+      # def quit_simulator
+      #   `echo 'application "iPhone Simulator" quit' | osascript`
+      # end
+      # ```
       #
       # works.  I am not sure if we will ever be able to launch more than one
       # simulator, but in case we can, this method will quit the simulator
-      # that is indicated by +xcode-select+ or +DEVELOPER_DIR+.
+      # that is indicated by `xcode-select` or `DEVELOPER_DIR`.
       def quit_simulator
         dev_dir = xcode_developer_dir
         system "/usr/bin/osascript -e 'tell application \"#{dev_dir}/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app\" to quit'"
       end
 
-      # launches the iOS Simulator indicated by +xcode-select+ or +DEVELOPER_DIR+
+      # Launches the iOS Simulator indicated by `xcode-select` or `DEVELOPER_DIR`.
       def launch_simulator
         dev_dir = xcode_developer_dir
         system "open -a \"#{dev_dir}/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app\""
       end
 
-      # resets the simulator content and settings.  it is analogous to touching
+      # Resets the simulator content and settings.  It is analogous to touching
       # the menu item.
       #
-      # it works by deleting the following directories:
+      # It works by deleting the following directories:
       #
       # * ~/Library/Application Support/iPhone Simulator/Library
       # * ~/Library/Application Support/iPhone Simulator/Library/<sdk>[-64]
@@ -78,10 +81,11 @@ module Calabash
         end
       end
 
-      # enables accessibility on any existing iOS Simulator by adjusting the
+      # @!visibility private
+      # Enables accessibility on any existing iOS Simulator by adjusting the
       # simulator's Library/Preferences/com.apple.Accessibility.plist contents.
       #
-      # a simulator 'exists' if has an Application Support directory. for
+      # A simulator 'exists' if has an Application Support directory. for
       # example, the 6.1, 7.0.3-64, and 7.1 simulators exist if the following
       # directories are present:
       #
@@ -89,11 +93,11 @@ module Calabash
       #     ~/Library/Application Support/iPhone Simulator/Library/7.0.3-64
       #     ~/Library/Application Support/iPhone Simulator/Library/7.1
       #
-      # a simulator is 'possible' if the SDK is available in the Xcode version.
+      # A simulator is 'possible' if the SDK is available in the Xcode version.
       #
-      # this method merges (uniquely) the possible and existing SDKs.
+      # This method merges (uniquely) the possible and existing SDKs.
       #
-      # this method also hides the AXInspector.
+      # This method also hides the AXInspector.
       #
       # @param [Hash] opts controls the behavior of the method
       # @option opts [Boolean] :verbose controls logging output
@@ -111,17 +115,18 @@ module Calabash
 
       @private
 
-      # enables accessibility on the simulator indicated by
-      # +sim_app_support_sdk_dir+.
+      # @!visibility private
+      # Enables accessibility on the simulator indicated by `sim_app_support_sdk_dir.`
       #
-      # WARNING:  this will quit the simulator
+      # @warn This will quit the simulator.
       #
+      # @example
       #   path = '/6.1'
       #   enable_accessibility_in_sdk_dir(path)
       #
-      # this method also hides the AXInspector.
+      # This method also hides the AXInspector.
       #
-      # if the Library/Preferences/com.apple.Accessibility.plist does not exist
+      # If the Library/Preferences/com.apple.Accessibility.plist does not exist
       # this method will create a Library/Preferences/com.apple.Accessibility.plist
       # that (oddly) the Simulator will _not_ overwrite.
       #
@@ -182,7 +187,8 @@ module Calabash
       end
 
 
-      # a hash table of the accessibility properties that control whether or not
+      # @!visibility private
+      # A hash table of the accessibility properties that control whether or not
       # accessibility is enabled and whether the AXInspector is visible.
       # @return [Hash] table of accessibility properties found in the
       #  Library/Preferences/com.apple.Accessibility.plist
@@ -220,22 +226,25 @@ module Calabash
         }
       end
 
-      # the absolute path to the iPhone Simulator Application Support directory
+      # @!visibility private
+      # The absolute path to the iPhone Simulator Application Support directory.
       # @return [String] absolute path
       def simulator_app_support_dir
         File.expand_path('~/Library/Application Support/iPhone Simulator')
       end
 
-      # the absolute path to the SDK's com.apple.Accessibility.plist file
+      # @!visibility private
+      # The absolute path to the SDK's com.apple.Accessibility.plist file.
       # @param [String] sdk_dir base path the SDK directory
       # @return [String] an absolute path
       def plist_path_with_sdk_dir(sdk_dir)
         File.expand_path("#{sdk_dir}/Library/Preferences/com.apple.Accessibility.plist")
       end
 
-      # returns a list of absolute paths the existing simulator directories.
+      # @!visibility private
+      # Returns a list of absolute paths the existing simulator directories.
       #
-      # a simulator 'exists' if has an Application Support directory. for
+      # A simulator 'exists' if has an Application Support directory. for
       # example, the 6.1, 7.0.3-64, and 7.1 simulators exist if the following
       # directories are present:
       #
@@ -251,13 +260,14 @@ module Calabash
         }
       end
 
-      # returns a list of possible SDKs per Xcode version
+      # @!visibility private
+      # Returns a list of possible SDKs per Xcode version.
       #
-      # it is not enough to ask for the available sdks because of the new 64-bit
+      # It is not enough to ask for the available sdks because of the new 64-bit
       # variants that started to appear Xcode 5 and the potential for patch level
       # versions.
       #
-      # unfortunately, this method will need be maintained per Xcode version.
+      # Unfortunately, this method will need be maintained per Xcode version.
       #
       # @return [Array<String>] ex. ['6.1', '7.1', '7.0.3', '7.0.3-64']
       def possible_simulator_sdks
@@ -290,7 +300,8 @@ module Calabash
         (available - ['7.0']).uniq.sort
       end
 
-      # return absolute paths to possible simulator support sdk dirs
+      # @!visibility private
+      # Return absolute paths to possible simulator support sdk dirs.
       #
       # these directories may or may not exist
       # @return [Array<String>] an array of absolute paths
