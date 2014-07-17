@@ -38,11 +38,7 @@ describe 'simulator accessibility tool' do
     instruments_version = instruments(:version)
 
     if instruments_version == '5.1' or instruments_version == '5.1.1'
-      if travis_ci?
-        expected = ['6.1', '7.0.3', '7.0.3-64', '7.1']
-      else
-        expected = ['6.1', '7.0.3', '7.0.3-64', '7.1', '7.1-64']
-      end
+      expected = ['6.1', '7.0.3', '7.0.3-64', '7.1', '7.1-64']
       expect(actual).to be == expected
     else
       pending("Xcode version '#{instruments_version}' is not supported by this test - gem needs update!")
@@ -55,11 +51,7 @@ describe 'simulator accessibility tool' do
     actual = possible_simulator_support_sdk_dirs
     instruments_version = instruments(:version)
     if instruments_version == '5.1' or instruments_version == '5.1.1'
-      if travis_ci?
-        expect(actual.count).to be == 4
-      else
-        expect(actual.count).to be == 5
-      end
+      expect(actual.count).to be == 5
     else
       pending("Xcode version '#{instruments_version}' is not supported by this test - gem needs update!")
     end
