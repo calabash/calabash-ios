@@ -180,25 +180,31 @@ describe 'simulator accessibility tool' do
         # iOS 7 hardware
         # -1 Apple
         excluded = [
-              'iPhone - Simulator - iOS 7.0',
-              'iPhone - Simulator - iOS 7.1',
-              'iPhone Retina (4-inch 64-bit) - Simulator - iOS 6.1',
-              'iPad Retina (64-bit) - Simulator - iOS 6.1'
-        ]
+                    'iPhone - Simulator - iOS 7.0',
+                    'iPhone - Simulator - iOS 7.1',
+                    'iPhone Retina (4-inch 64-bit) - Simulator - iOS 6.1',
+                    'iPad Retina (64-bit) - Simulator - iOS 6.1'
+                   ]
 
+        # There are several sims flickering on travis ci; on the same run
+        # (across ruby versions) sometimes these pass and sometimes they fail.
+        #
+        # 'Failed to authorize rights (0x20) with status: -60007.'
+        #
+        # This means a security dialog has popped on the host machine.
+        #
+        # There is nothing we can about this, so we must disable these tests.
+        travis_excluded = []
         if travis_ci?
-          msg = ['skipping flickering simulator on travis ci - ',
-                 'iPad Retina (64-bit) - Simulator - iOS 7.1',
-                 'Failed to authorize rights (0x20) with status: -60007.',
-                 'Looks like the the test popped a security dialog.',
-                 '-1 for travis'].join("\n")
-          calabash_warn msg
-          excluded << 'iPad Retina (64-bit) - Simulator - iOS 7.1'
+          travis_excluded << 'iPad Retina (64-bit) - Simulator - iOS 7.1'
+          travis_excluded << 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
         end
 
         instruments(:sims).each do |simulator|
           if excluded.include?(simulator)
             calabash_warn("skipping simulator '#{simulator}' - instruments passed us an invalid configuration!")
+          elsif travis_excluded.include?(simulator)
+            calabash_warn("skipping simulator '#{simulator}' - security dialog has popped on travis ci")
           else
             @launch_args[:device_target] = simulator
             begin
@@ -211,14 +217,14 @@ describe 'simulator accessibility tool' do
           end
         end
 
-        if travis_ci?
-          begin
-            @launch_args[:device_target] = 'iPad Retina (64-bit) - Simulator - iOS 7.1'
-            expect { @launcher.new_run_loop(@launch_args) }.to raise_error(Calabash::Cucumber::Launcher::StartError)
-          ensure
-            @launcher.stop
-          end
-        end
+        # if travis_ci?
+        #   begin
+        #     @launch_args[:device_target] = 'iPad Retina (64-bit) - Simulator - iOS 7.1'
+        #     expect { @launcher.new_run_loop(@launch_args) }.to raise_error(Calabash::Cucumber::Launcher::StartError)
+        #   ensure
+        #     @launcher.stop
+        #   end
+        # end
       end
 
     end
