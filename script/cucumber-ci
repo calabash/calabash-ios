@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+cd calabash-cucumber
+
+RETVAL=$?
+if [ $RETVAL != 0 ]; then
+    echo "FAIL: failed to change directory to calabash-cucumber - should called as 'script/ci'"
+    exit $RETVAL
+else
+    echo "INFO: changed directory to ${PWD}"
+fi
+
+../script/shared-bundler-tasks.sh
+
+# on-simulator tests of features in test/cucumber
+cd test/cucumber
+rm -rf Gemfile
+rm -rf Gemfile.lock
+rm -rf .bundle
+rm -rf vendor
+bundle install --deployment
+
+# remove any stale targets
+bundle exec calabash-ios sim reset
+
+# Disable exiting on error so script continues if tests fail
+set +o errexit
+
+export APP_BUNDLE_PATH="./LPSimpleExample-cal.app"
+
+RETVAL=0
+
+bundle exec cucumber -p sim61_4in $CUCUMBER_ARGS
+RETVAL=$(($RETVAL+$?))
+
+bundle exec cucumber -p sim71_4in $CUCUMBER_ARGS
+ RETVAL=$(($RETVAL+$?))
+
+# Will not pass on travis although a similar rspec test does.
+# Instead we run on the 4in 7.0 64 bit simulator.
+if [ -z $TRAVIS ]; then
+    bundle exec cucumber -p sim71_64b $CUCUMBER_ARGS
+    RETVAL=$(($RETVAL+$?))
+else
+    # bundle exec cucumber -p sim71_64b $CUCUMBER_ARGS
+    # EXPECT_FAIL=$?
+    # if [ $EXPECT_FAIL = 0 ]; then
+    #     echo "FAIL: expected iPhone iOS 7.1 64b to fail"
+    #     exit $EXPECT_FAIL
+    # fi
+    bundle exec cucumber -p sim70_64b $CUCUMBER_ARGS
+    RETVAL=$(($RETVAL+$?))
+fi
+
+bundle exec cucumber -p sim61r $CUCUMBER_ARGS
+RETVAL=$(($RETVAL+$?))
+bundle exec cucumber -p sim71r $CUCUMBER_ARGS
+RETVAL=$(($RETVAL+$?))
+
+bundle exec cucumber -p sim61_ipad_r $CUCUMBER_ARGS
+RETVAL=$(($RETVAL+$?))
+bundle exec cucumber -p sim71_ipad_r $CUCUMBER_ARGS
+RETVAL=$(($RETVAL+$?))
+
+if [ -z $TRAVIS ]; then
+    bundle exec cucumber -p sim71_ipad_r_64b $CUCUMBER_ARGS
+    RETVAL=$(($RETVAL+$?))
+else
+    # bundle exec cucumber -p sim71_ipad_r_64b $CUCUMBER_ARGS
+    # EXPECT_FAIL=$?
+    # if [ $EXPECT_FAIL = 0 ]; then
+    #     echo "FAIL: expected iPad iOS 7.1 64b to fail"
+    #     exit $EXPECT_FAIL
+    # fi
+    bundle exec cucumber -p sim70_ipad_r_64b $CUCUMBER_ARGS
+    RETVAL=$(($RETVAL+$?))
+fi
+
+bundle exec cucumber -p sim61_sl $CUCUMBER_ARGS
+RETVAL=$(($RETVAL+$?))
+
+set -o errexit
+
+if [ $RETVAL != 0 ]; then
+    echo "FAIL: failed $RETVAL out of 9 simulators"
+    exit $RETVAL
+fi
+
+exit $RETVAL

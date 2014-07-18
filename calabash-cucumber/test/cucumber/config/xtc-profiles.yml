@@ -1,0 +1,17 @@
+# careful using the @not_xtc tag
+# use for stuff like Scenario Outlines which are nyi on XTC
+not_xtc:     --tags ~@not_xtc
+not_sim:     --tags ~@simulator --tags ~@simulator_only
+no_launch:   --tags ~@no_launch
+iphone_only: --tags ~@ipad --tags ~@ipad_only
+ipad_only:   --tags ~@iphone --tags ~@iphone_only
+
+tags:        -p not_xtc -p not_sim -p no_launch
+
+default:     -p tags
+
+wip:         -p tags --tags @wip
+flicker:     -p tags --tags @flickering
+iphone:      -p tags -p iphone_only
+ipad:        -p tags -p ipad_only
+

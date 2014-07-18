@@ -3,6 +3,7 @@ language: objective-c
 script:
   - script/rspec-ci
   - script/unit-ci
+  - script/cucumber-ci
 
 rvm:
   - 1.9.3
