@@ -16,6 +16,12 @@ Methods:       466 (  242 undocumented)
 
 Docs are generated in the `docs` directory.
 
+### See What is Undocumented
+
+```
+$ be yard stats --list-undoc
+```
+
 ### Start a Local Server
 
 ```
