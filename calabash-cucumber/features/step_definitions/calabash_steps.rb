@@ -17,7 +17,7 @@ Then /^I (?:press|touch) "([^\"]*)"$/ do |name|
   sleep(STEP_PAUSE)
 end
 
-Then /^I (?:press|touch) (\d+)% right and (\d+)% down from "([^\"]*)" $/ do |x,y,name|
+Then /^I (?:press|touch) (\d+)% right and (\d+)% down from "([^\"]*)"$/ do |x,y,name|
   raise "This step is not yet implemented on iOS"
 end
 
