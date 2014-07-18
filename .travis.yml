@@ -1,7 +1,11 @@
 language: objective-c
+
+script:
+  - script/rspec-ci
+  - script/unit-ci
+
 rvm:
-     - "1.9.3"
-     - "2.0.0"
-     - "2.1.1"
-script: cd calabash-cucumber; bundle install; bundle exec rake spec
+  - 1.9.3
+  - 2.1.0
+  - 2.1.1
 

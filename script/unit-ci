@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+cd calabash-cucumber
+
+RETVAL=$?
+if [ $RETVAL != 0 ]; then
+    echo "FAIL: failed to change directory to calabash-cucumber - should called as 'script/ci'"
+    exit $RETVAL
+else
+    echo "INFO: changed directory to ${PWD}"
+fi
+
+../script/shared-bundler-tasks.sh
+
+bundle exec ruby lib/calabash-cucumber/version.rb
+RETVAL=$?
+if [ $RETVAL != 0 ]; then
+    echo "FAIL: lib/calabash-cucumber/version.rb unit tests"
+    exit $RETVAL
+else
+    echo "INFO: lib/calabash-cucumber/version.rb unit tests passed"
+fi
+
+exit $RETVAL
