@@ -31,29 +31,32 @@ describe 'simulator accessibility tool' do
     expect(actual).to be == expected
   end
 
-  # brittle because some users will not have installed 6.1 or 7.0, but hey, why
-  # are them gem dev'ing or gem testing?
-  it 'should be able to return possible SDKs' do
-    actual = possible_simulator_sdks
-    instruments_version = instruments(:version)
+  # These tests flicker on travis-ci because some machines have different configs.
+  unless travis_ci?
+    # Brittle because some users will not have installed 6.1 or 7.0, but hey, why
+    # are them gem dev'ing or gem testing?
+    it 'should be able to return possible SDKs' do
+      actual = possible_simulator_sdks
+      instruments_version = instruments(:version)
 
-    if instruments_version == '5.1' or instruments_version == '5.1.1'
-      expected = ['6.1', '7.0.3', '7.0.3-64', '7.1', '7.1-64']
-      expect(actual).to be == expected
-    else
-      pending("Xcode version '#{instruments_version}' is not supported by this test - gem needs update!")
+      if instruments_version == '5.1' or instruments_version == '5.1.1'
+        expected = ['6.1', '7.0.3', '7.0.3-64', '7.1', '7.1-64']
+        expect(actual).to be == expected
+      else
+        pending("Xcode version '#{instruments_version}' is not supported by this test - calabash-ios gem does not support this version of Xcode")
+      end
     end
-  end
 
-  # brittle because some users will not have installed 6.1 or 7.0, but hey, why
-  # are them gem dev'ing or gem testing?
-  it 'should be able to return Simulator Support SDK dirs' do
-    actual = possible_simulator_support_sdk_dirs
-    instruments_version = instruments(:version)
-    if instruments_version == '5.1' or instruments_version == '5.1.1'
-      expect(actual.count).to be == 5
-    else
-      pending("Xcode version '#{instruments_version}' is not supported by this test - gem needs update!")
+    # brittle because some users will not have installed 6.1 or 7.0, but hey, why
+    # are them gem dev'ing or gem testing?
+    it 'should be able to return Simulator Support SDK dirs' do
+      actual = possible_simulator_support_sdk_dirs
+      instruments_version = instruments(:version)
+      if instruments_version == '5.1' or instruments_version == '5.1.1'
+        expect(actual.count).to be == 5
+      else
+        pending("Xcode version '#{instruments_version}' is not supported by this test - calabash-ios gem does not support this version of Xcode")
+      end
     end
   end
 
@@ -114,36 +117,38 @@ describe 'simulator accessibility tool' do
         reset_simulator_content_and_settings
       end
 
-      it 'should not be able to launch LPSimpleExample-app b/c accessibility is not enabled' do
-        msgs =
-              [
-                    'Will throw a "ScriptAgent quit unexpectedly" UI dialog!',
-                    '',
-                    'This dialog is generated because the app failed to a launch',
-                    'correctly on the simulator.  I checked run_loop and this is not',
-                    'caused by anything there.',
-                    '',
-                    'AFAICT there is nothing to be done about this.']
-        calabash_warn(msgs.join("\n"))
-        begin
-          expect { @launcher.new_run_loop(@launch_args) }.to raise_error(Calabash::Cucumber::Launcher::StartError)
-        ensure
-          @launcher.stop
-        end
-      end
-
-      it 'should be able to enable accessibility for the latest sdk' do
-        repopulate_sim_app_support_for_sdk(@latest_sdk)
-
-        dir = File.join(simulator_app_support_dir, "#{@latest_sdk}")
-        enable_accessibility_in_sdk_dir(dir)
-
-        begin
-          expect(@launcher.new_run_loop(@launch_args)).to be_a(Hash)
-        ensure
-          @launcher.stop
+      # These are not worth testing on travis-ci because they can flicker.
+      unless travis_ci?
+        it 'should not be able to launch LPSimpleExample-app b/c accessibility is not enabled' do
+          msgs =
+                [
+                      'Will throw a "ScriptAgent quit unexpectedly" UI dialog!',
+                      '',
+                      'This dialog is generated because the app failed to a launch',
+                      'correctly on the simulator.  I checked run_loop and this is not',
+                      'caused by anything there.',
+                      '',
+                      'AFAICT there is nothing to be done about this.']
+          calabash_warn(msgs.join("\n"))
+          begin
+            expect { @launcher.new_run_loop(@launch_args) }.to raise_error(Calabash::Cucumber::Launcher::StartError)
+          ensure
+            @launcher.stop
+          end
         end
 
+        it 'should be able to enable accessibility for the latest sdk' do
+          repopulate_sim_app_support_for_sdk(@latest_sdk)
+
+          dir = File.join(simulator_app_support_dir, "#{@latest_sdk}")
+          enable_accessibility_in_sdk_dir(dir)
+
+          begin
+            expect(@launcher.new_run_loop(@launch_args)).to be_a(Hash)
+          ensure
+            @launcher.stop
+          end
+        end
       end
     end
 
@@ -152,7 +157,7 @@ describe 'simulator accessibility tool' do
         quit_simulator
         sleep(2)
         existing_simulator_support_sdk_dirs.each do |dir|
-           FileUtils.rm_rf(dir)
+          FileUtils.rm_rf(dir)
         end
 
         reset_simulator_content_and_settings
@@ -162,71 +167,64 @@ describe 'simulator accessibility tool' do
         sleep(2)
       end
 
-      it 'should be able to enable accessibility on all possible simulators' do
-        enable_accessibility_on_simulators
-        @launch_args[:sdk_version] = nil
-        @launch_args[:timeout] = 20
-        @launch_args[:launch_retries] = 3
+      # See comment below about flickering specs on travis-ci.
+      unless travis_ci?
+        it 'should be able to enable accessibility on all possible simulators' do
+          enable_accessibility_on_simulators
+          @launch_args[:sdk_version] = nil
+          @launch_args[:timeout] = 20
+          @launch_args[:launch_retries] = 3
 
-        # these configurations correspond to iOS/Hardware configurations that
-        # do not exist.  As an example, there is no iOS 6.1 64-bit implementation,
-        # so a simulator like:
-        #
-        # 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 6.1'
-        #
-        # does not even make sense.
-        #
-        # ditto for 'iPhone - Simulator - iOS 7.0' - there is no non-retina
-        # iOS 7 hardware
-        # -1 Apple
-        excluded = [
-                    'iPhone - Simulator - iOS 7.0',
-                    'iPhone - Simulator - iOS 7.1',
-                    'iPhone Retina (4-inch 64-bit) - Simulator - iOS 6.1',
-                    'iPad Retina (64-bit) - Simulator - iOS 6.1'
-                   ]
+          # these configurations correspond to iOS/Hardware configurations that
+          # do not exist.  As an example, there is no iOS 6.1 64-bit implementation,
+          # so a simulator like:
+          #
+          # 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 6.1'
+          #
+          # does not even make sense.
+          #
+          # ditto for 'iPhone - Simulator - iOS 7.0' - there is no non-retina
+          # iOS 7 hardware
+          # -1 Apple
+          excluded = [
+                'iPhone - Simulator - iOS 7.0',
+                'iPhone - Simulator - iOS 7.1',
+                'iPhone Retina (4-inch 64-bit) - Simulator - iOS 6.1',
+                'iPad Retina (64-bit) - Simulator - iOS 6.1'
+          ]
 
-        # There are several sims flickering on travis ci; on the same run
-        # (across ruby versions) sometimes these pass and sometimes they fail.
-        #
-        # 'Failed to authorize rights (0x20) with status: -60007.'
-        #
-        # This means a security dialog has popped on the host machine.
-        #
-        # There is nothing we can about this, so we must disable these tests.
-        travis_excluded = []
-        if travis_ci?
-          travis_excluded << 'iPad Retina (64-bit) - Simulator - iOS 7.1'
-          travis_excluded << 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
-        end
+          # There are several sims flickering on travis ci; on the same run
+          # (across ruby versions) sometimes these pass and sometimes they fail.
+          #
+          # 'Failed to authorize rights (0x20) with status: -60007.'
+          #
+          # This means a security dialog has popped on the host machine.
+          #
+          # There is nothing we can about this, so we must disable these tests.
+          travis_excluded = []
+          if travis_ci?
+            travis_excluded << 'iPad Retina (64-bit) - Simulator - iOS 7.1'
+            travis_excluded << 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
+          end
 
-        instruments(:sims).each do |simulator|
-          if excluded.include?(simulator)
-            calabash_warn("skipping simulator '#{simulator}' - instruments passed us an invalid configuration!")
-          elsif travis_excluded.include?(simulator)
-            calabash_warn("skipping simulator '#{simulator}' - security dialog has popped on travis ci")
-          else
-            @launch_args[:device_target] = simulator
-            begin
-              calabash_info("starting simulator '#{simulator}'")
-              expect(@launcher.new_run_loop(@launch_args)).to be_a(Hash)
-            ensure
-              @launcher.stop
-              sleep(2)
+          instruments(:sims).each do |simulator|
+            if excluded.include?(simulator)
+              calabash_warn("skipping simulator '#{simulator}' - instruments passed us an invalid configuration!")
+            elsif travis_excluded.include?(simulator)
+              calabash_warn("skipping simulator '#{simulator}' - security dialog has popped on travis ci")
+            else
+              @launch_args[:device_target] = simulator
+              begin
+                calabash_info("starting simulator '#{simulator}'")
+                expect(@launcher.new_run_loop(@launch_args)).to be_a(Hash)
+              ensure
+                @launcher.stop
+                sleep(2)
+              end
             end
           end
         end
-
-        # if travis_ci?
-        #   begin
-        #     @launch_args[:device_target] = 'iPad Retina (64-bit) - Simulator - iOS 7.1'
-        #     expect { @launcher.new_run_loop(@launch_args) }.to raise_error(Calabash::Cucumber::Launcher::StartError)
-        #   ensure
-        #     @launcher.stop
-        #   end
-        # end
       end
-
     end
   end
 end
