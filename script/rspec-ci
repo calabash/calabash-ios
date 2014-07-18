@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+cd calabash-cucumber
+
+RETVAL=$?
+if [ $RETVAL != 0 ]; then
+    echo "FAIL: failed to change directory to calabash-cucumber - should called as 'script/ci'"
+    exit $RETVAL
+else
+    echo "INFO: changed directory to ${PWD}"
+fi
+
+../script/shared-bundler-tasks.sh
+
+# rspec tests
+bundle exec rake spec
+RETVAL=$?
+if [ $RETVAL != 0 ]; then
+    echo "FAIL: failed rspec tests"
+    exit $RETVAL
+else
+    echo "INFO: passed rspec tests"
+fi
+
+exit $RETVAL
