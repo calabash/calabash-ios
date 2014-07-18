@@ -5,134 +5,175 @@ require 'calabash-cucumber/utils/logging'
 module Calabash
   module Cucumber
 
-    # methods that describe the runtime environment
+    # Methods to expose the runtime environment and details about the device
+    # under test.
+    #
+    # @note
+    #  The `OS` environmental variable has been deprecated.  It should never
+    #  be set.
     module EnvironmentHelpers
 
       include Calabash::Cucumber::Logging
 
-      # returns +true+ if UIAutomation functions are available
+      # Are the uia* methods available?
       #
-      # UIAutomation is only available if the app has been launched with
-      # Instruments
+      # @note
+      #  UIAutomation is only available if the app has been launched with
+      #  instruments.
+      #
+      # @return [Boolean] Returns true if the app has been launched with
+      #  instruments.
       def uia_available?
         Calabash::Cucumber::Launcher.instruments?
       end
 
-      # returns +true+ if UIAutomation functions are not available
+      # Are the uia* methods un-available?
       #
-      # UIAutomation is only available if the app has been launched with
-      # Instruments
+      # @note
+      #  UIAutomation is only available if the app has been launched with
+      #  instruments.
+      #
+      # @return [Boolean] Returns true if the app has been not been launched with
+      #  instruments.
       def uia_not_available?
         not uia_available?
       end
 
-      # returns +true+ if cucumber is running in the test cloud
+      # Are we running in the Xamarin Test Cloud?
+      #
+      # @return [Boolean] Returns true if cucumber is running in the test cloud.
       def xamarin_test_cloud?
         ENV['XAMARIN_TEST_CLOUD'] == '1'
       end
 
-      # returns the default Device
+      # Returns the default Device that is connected the current launcher.
+      #
+      # @return [Calabash::Cucumber::Device] An instance of Device.
       def default_device
         l = Calabash::Cucumber::Launcher.launcher_if_used
         l && l.device
       end
 
-      # returns +true+ if the target device is an ipad
+      # Is the device under test an iPad?
       #
-      # raises an error if the server cannot be reached
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is an iPad.
       def ipad?
         _default_device_or_create().ipad?
       end
 
-      # returns +true+ if the target device is an iphone
+      # Is the device under test an iPhone?
       #
-      # raises an error if the server cannot be reached
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is an iPhone.
       def iphone?
         _default_device_or_create().iphone?
       end
 
-      # returns +true+ if the target device is an ipod
+      # Is the device under test an iPod?
       #
-      # raises an error if the server cannot be reached
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is an iPod.
       def ipod?
         _default_device_or_create().ipod?
       end
-      
-      # returns +true+ if the target device is an iphone or ipod
+
+      # Is the device under test an iPhone or iPod?
       #
-      # raises an error if the server cannot be reached
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is an iPhone or iPod.
       def device_family_iphone?
         iphone? or ipod?
       end
 
-      # returns +true+ if the target device is a simulator (not a physical device)
+      # Is the device under test a simulator?
       #
-      # raises an error if the server cannot be reached
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is a simulator.
       def simulator?
         _default_device_or_create().simulator?
       end
 
-      # returns +true+ if the target device or simulator is a 4in model
-      #
-      # raises an error if the server cannot be reached
+      # @deprecated 0.9.168 replaced with `iphone_4in?`
+      # @see #iphone_4in?
       def iphone_5?
         _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
         iphone_4in?
       end
 
-      # returns +true+ if the target device or simulator is a 4in model
+      # Does the device under test have 4in screen?
       #
-      # raises an error if the server cannot be reached
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test has a 4in screen.
       def iphone_4in?
         _default_device_or_create().iphone_4in?
       end
 
-      # returns +true+ if the OS major version is 5
+      # Is the device under test running iOS 5?
       #
-      # raises an error if the server cannot be reached
+      # @note
+      #  **WARNING:** The `OS` env variable has been deprecated and should
+      #  never be set.
       #
-      # WARNING: setting the +OS+ env variable will override the value returned
-      #          by querying the device
+      # @note
+      #  **WARNING:* Setting the `OS` env variable will override the value returned
+      #  by querying the device.
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 5
       def ios5?
         _OS_ENV.eql?(_canonical_os_version(:ios5)) || _default_device_or_create().ios5?
       end
 
-      # returns +true+ if the OS major version is 6
+      # Is the device under test running iOS 6?
       #
-      # raises an error if the server cannot be reached
+      # @note
+      #  **WARNING:** The `OS` env variable has been deprecated and should
+      #  never be set.
       #
-      # WARNING: setting the +OS+ env variable will override the value returned
-      #          by querying the device
+      # @note
+      #  **WARNING:* Setting the `OS` env variable will override the value returned
+      #  by querying the device.
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 6
       def ios6?
         _OS_ENV.eql?(_canonical_os_version(:ios6)) || _default_device_or_create().ios6?
       end
 
 
-      # returns +true+ if the OS major version is 7
+      # Is the device under test running iOS 7?
       #
-      # raises an error if the server cannot be reached
+      # @note
+      #  **WARNING:** The `OS` env variable has been deprecated and should
+      #  never be set.
       #
-      # WARNING: setting the +OS+ env variable will override the value returned
-      #          by querying the device
+      # @note
+      #  **WARNING:* Setting the `OS` env variable will override the value returned
+      #  by querying the device.
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 7
       def ios7?
         _OS_ENV.eql?(_canonical_os_version(:ios7)) || _default_device_or_create().ios7?
       end
 
-      # returns +true+ if the app is an iphone app emulated on an ipad
+      # Is the app that is being tested an iPhone app emulated on an iPad?
       #
-      # raises an error if the server cannot be reached
+      # @see Calabash::Cucumber::IPad
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if app is being emulated on an iPad.
       def iphone_app_emulated_on_ipad?
         _default_device_or_create().iphone_app_emulated_on_ipad?
       end
 
       private
-      # returns the device that is currently being tested against
+      # @!visibility private
+      # Returns the device that is currently being tested against.
       #
-      # returns the +device+ attr of <tt>Calabash::Cucumber::Launcher</tt> if
-      # it is defined.  otherwise, creates a new <tt>Calabash::Cucumber::Device</tt>
+      # Returns the device attr of `Calabash::Cucumber::Launcher` if
+      # it is defined.  otherwise, creates a new `Calabash::Cucumber::Device`
       # by querying the server.
-      #
-      # raises an error if the server cannot be reached
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Calabash::Cucumber::Device] an instance of Device
       def _default_device_or_create
         device = default_device
         if device.nil?
@@ -141,17 +182,21 @@ module Calabash
         device
       end
 
-      # returns the value of the environmental variable +OS+
+      # Returns the value of the environmental variable OS.
+      #
+      # @note
+      #  The `OS` env has been deprecated for some time.  It should never be set.
       def _OS_ENV
         ENV['OS']
       end
 
+      # @!visibility private
       CANONICAL_IOS_VERSIONS = {:ios5 => 'ios5',
                                 :ios6 => 'ios6',
                                 :ios7 => 'ios7'}
 
 
-      # returns the canonical value iOS versions as strings
+      # Returns the canonical value iOS versions as strings.
       def _canonical_os_version(key)
         CANONICAL_IOS_VERSIONS[key]
       end
