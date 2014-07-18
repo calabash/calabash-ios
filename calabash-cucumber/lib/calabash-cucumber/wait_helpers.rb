@@ -12,6 +12,7 @@ module Calabash
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
 
+      # @!visibility private
       CLIENT_TIMEOUT_ADDITION = 5
 
       # `WaitError` is the error type raised

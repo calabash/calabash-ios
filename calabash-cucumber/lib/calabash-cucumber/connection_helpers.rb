@@ -6,10 +6,12 @@ module Calabash
     # @!visibility private
     module ConnectionHelpers
 
+      # @!visibility private
       def http(*args)
         connection.http(*args)
       end
 
+      # @!visibility private
       def connection
         Calabash::Cucumber::Connection.instance
       end

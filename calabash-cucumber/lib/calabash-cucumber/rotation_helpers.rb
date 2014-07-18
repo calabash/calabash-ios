@@ -9,6 +9,7 @@ module Calabash
 
       include Calabash::Cucumber::Logging
 
+      # @!visibility private
       def rotation_candidates
         %w(rotate_left_home_down rotate_left_home_left rotate_left_home_right rotate_left_home_up
            rotate_right_home_down rotate_right_home_left rotate_right_home_right rotate_right_home_up)

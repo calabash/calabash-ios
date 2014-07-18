@@ -775,6 +775,7 @@ module Calabash
         _wait_for_keyboard_in_mode(:split)
       end
 
+      # @!visibility private
       def _wait_for_keyboard_in_mode(mode, opts={})
         default_opts = {:post_timeout => 1.0}
         opts = default_opts.merge(opts)

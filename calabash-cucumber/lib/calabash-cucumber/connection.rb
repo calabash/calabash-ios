@@ -9,6 +9,7 @@ module Calabash
       include Singleton
       include HTTPHelpers
 
+      # @!visibility private
       def client
         @http
       end

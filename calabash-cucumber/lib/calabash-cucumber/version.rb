@@ -183,9 +183,11 @@ if __FILE__ == $0
   require 'test/unit'
 
   # @!visibility private
+  # Unit testing of Version class
   class LocalTest < Test::Unit::TestCase
     include Calabash::Cucumber
 
+    # @!visibility private
     def test_version
       a = Version.new('0.9.169')
       assert_equal(0, a.major)
@@ -195,18 +197,21 @@ if __FILE__ == $0
       assert_nil(a.pre_version)
     end
 
+    # @!visibility private
     def test_unnumbered_prerelease
       a = Version.new('0.9.169.pre')
       assert_equal('pre', a.pre)
       assert_nil(a.pre_version)
     end
 
+    # @!visibility private
     def test_numbered_prerelease
       a = Version.new('0.9.169.pre1')
       assert_equal('pre1', a.pre)
       assert_equal(1, a.pre_version)
     end
 
+    # @!visibility private
     def test_compare_equal
       a = Version.new('0.9.169')
       b = Version.new('0.9.169')
@@ -222,11 +227,11 @@ if __FILE__ == $0
 
     end
 
+    # @!visibility private
     def test_compare_not_equal
       a = Version.new('0.9.168')
       b = Version.new('0.9.169')
       assert(a != b)
-
 
       a = Version.new('0.9.169')
       b = Version.new('0.9.169.pre1')
@@ -241,6 +246,7 @@ if __FILE__ == $0
       assert(a != b)
     end
 
+    # @!visibility private
     def test_compare_lt
       a = Version.new('0.9.168')
       b = Version.new('0.9.169')
@@ -259,6 +265,7 @@ if __FILE__ == $0
       assert(a < b)
     end
 
+    # @!visibility private
     def test_compare_gt
       a = Version.new('0.9.169')
       b = Version.new('0.9.168')
@@ -277,6 +284,7 @@ if __FILE__ == $0
       assert(a > b)
     end
 
+    # @!visibility private
     def test_compare_lte
       a = Version.new('0.9.168')
       b = Version.new('0.9.169')
@@ -285,6 +293,7 @@ if __FILE__ == $0
       assert(a <= b)
     end
 
+    # @!visibility private
     def test_compare_gte
       a = Version.new('0.9.169')
       b = Version.new('0.9.168')

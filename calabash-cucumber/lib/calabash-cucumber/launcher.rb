@@ -17,11 +17,21 @@ class Calabash::Cucumber::Launcher
   include Calabash::Cucumber::Logging
   include Calabash::Cucumber::SimulatorAccessibility
 
+  # @!visibility private
   KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
 
+  # noinspection RubyClassVariableUsageInspection
+
+  # Class variable for accessing the currently defined launcher.
   @@launcher = nil
 
+  # @!visibility private
   SERVER_VERSION_NOT_AVAILABLE = '0.0.0'
+  # noinspection RubyClassVariableUsageInspection
+
+  # @!visibility private
+  # Class variable for caching the embedded server version so we only need to
+  # check the server version one time.
   @@server_version = nil
 
   attr_accessor :run_loop
@@ -30,6 +40,8 @@ class Calabash::Cucumber::Launcher
   attr_accessor :launch_args
   attr_accessor :simulator_launcher
 
+  # @!visibility private
+  # Generated when calabash cannot launch the app.
   class StartError < RuntimeError
     attr_accessor :error
 
@@ -37,11 +49,14 @@ class Calabash::Cucumber::Launcher
       self.error= err
     end
 
+    # @!visibility private
     def to_s
       "#{super.to_s}: #{error}"
     end
   end
 
+  # @!visibility private
+  # Generated when calabash cannot communicate with the app.
   class CalabashLauncherTimeoutErr < Timeout::Error
   end
 

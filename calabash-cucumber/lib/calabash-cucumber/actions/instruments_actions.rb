@@ -10,22 +10,27 @@ class Calabash::Cucumber::InstrumentsActions
   include Calabash::Cucumber::QueryHelpers
   include Calabash::Cucumber::Map
 
+  # @!visibility private
   def touch(options)
     query_action(options, :uia_tap_offset)
   end
 
+  # @!visibility private
   def wait_tap(options)
     uia_wait_tap(options[:query], options)
   end
 
+  # @!visibility private
   def double_tap(options)
     query_action(options, :uia_double_tap_offset)
   end
 
+  # @!visibility private
   def two_finger_tap(options)
     query_action(options, :uia_two_finger_tap_offset)
   end
 
+  # @!visibility private
   def flick(options)
     query_action(options) do |offset|
       delta = {:offset => options[:delta] || {}}
@@ -33,7 +38,7 @@ class Calabash::Cucumber::InstrumentsActions
     end
   end
 
-
+  # @!visibility private
   def touch_hold(options)
     query_action(options) do |offset|
       duration = options[:duration] || 3
@@ -41,20 +46,22 @@ class Calabash::Cucumber::InstrumentsActions
     end
   end
 
+  # @!visibility private
   def swipe(dir, options={})
     options = options.merge(:direction => dir)
     query_action(options, :uia_swipe_offset, options)
   end
 
+  # @!visibility private
   def pan(from, to, options={})
     query_action(:query => from) do |from_offset|
       query_action(:query => to) do |to_offset|
         uia_pan_offset(from_offset, to_offset, options)
       end
     end
-
   end
 
+  # @!visibility private
   def pinch(in_out, options)
     query_action(options) do |offset|
       options[:duration] = options[:duration] || 0.5
@@ -62,12 +69,14 @@ class Calabash::Cucumber::InstrumentsActions
     end
   end
 
+  # @!visibility private
   def send_app_to_background(secs)
     uia_send_app_to_background(secs)
   end
 
   private
 
+  # @!visibility private
   # Data interface
   # options[:query] or options[:offset]
   def query_action(options, action=nil, *args, &block)
@@ -94,6 +103,7 @@ class Calabash::Cucumber::InstrumentsActions
     end
   end
 
+  # @!visibility private
   def find_and_normalize(ui_query)
     raw_result = raw_map(ui_query, :query)
     orientation = raw_result['status_bar_orientation']
@@ -107,6 +117,7 @@ class Calabash::Cucumber::InstrumentsActions
     res
   end
 
+  # @!visibility private
   def normalize_rect_for_orientation!(orientation, rect)
     orientation = orientation.to_sym
     launcher = Calabash::Cucumber::Launcher.launcher
@@ -129,6 +140,5 @@ class Calabash::Cucumber::InstrumentsActions
         # no-op by design.
     end
   end
-
 
 end
