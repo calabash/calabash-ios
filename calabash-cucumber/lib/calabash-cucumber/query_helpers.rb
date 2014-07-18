@@ -1,5 +1,7 @@
 module Calabash
   module Cucumber
+
+    # A module of methods that can help you construct queries.
     module QueryHelpers
 
       # call this method to properly escape single quotes in Calabash queries

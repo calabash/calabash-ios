@@ -3,26 +3,27 @@ require 'sim_launcher'
 module Calabash
   module Cucumber
 
-    # this module has been replaced by Simulator Launcher
+    # This module has been replaced by Simulator Launcher
     #
-    # @deprecated Use the SimulatorLauncher class instead
-    # @since 0.9.169
+    # @deprecated 0.9.169 Use the SimulatorLauncher class instead.
     module SimulatorHelper
 
-      # quits the simulator
+      # Quits the simulator.
       #
-      # this has been deprecated, but it appears in legacy launch hooks
+      # This has been deprecated, but it appears in legacy launch hooks.
       #
-      # use this pattern instead:
+      # Use this pattern instead:
       #
-      #   at_exit do
-      #     launcher = Calabash::Cucumber::Launcher.new
-      #     if launcher.simulator_target?
-      #       launcher.simulator_launcher.stop unless launcher.calabash_no_stop?
-      #     end
+      # ```
+      # at_exit do
+      #   launcher = Calabash::Cucumber::Launcher.new
+      #   if launcher.simulator_target?
+      #     launcher.simulator_launcher.stop unless launcher.calabash_no_stop?
       #   end
+      # end
+      # ```
       #
-      # @deprecated use the SimulatorLauncher.new().stop instead
+      # @deprecated 0.9.169 replaced with SimulatorLauncher.new().stop
       def self.stop
         unless ENV['CALABASH_NO_DEPRECATION'] == '1'
           if RUBY_VERSION < '2.0'

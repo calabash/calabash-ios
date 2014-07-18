@@ -3,6 +3,8 @@ require 'calabash-cucumber/http_helpers'
 
 module Calabash
   module Cucumber
+
+    # @!visibility private
     class Connection
       include Singleton
       include HTTPHelpers

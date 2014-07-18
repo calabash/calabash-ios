@@ -5,6 +5,8 @@ require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
+
+    # A collection of methods that help you wait for things.
     module WaitHelpers
       include Calabash::Cucumber::Logging
       include Calabash::Cucumber::Core
@@ -352,7 +354,7 @@ module Calabash
       end
 
       # Performs a lambda action until the element (a query string) disappears.
-      # The default action is to do nothing. 
+      # The default action is to do nothing.
       #
       # Raises an error if no uiquery is specified.
       #

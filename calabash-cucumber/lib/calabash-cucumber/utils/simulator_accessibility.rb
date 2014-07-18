@@ -118,7 +118,7 @@ module Calabash
       # @!visibility private
       # Enables accessibility on the simulator indicated by `sim_app_support_sdk_dir.`
       #
-      # @warn This will quit the simulator.
+      # @note  This will quit the simulator.
       #
       # @example
       #   path = '/6.1'

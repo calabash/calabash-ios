@@ -15,6 +15,8 @@ require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
+
+    # A module for wrapping the public APIs of this gem.
     module Operations
 
       include Test::Unit::Assertions

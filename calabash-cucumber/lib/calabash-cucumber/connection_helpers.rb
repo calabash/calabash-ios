@@ -2,6 +2,8 @@ require 'calabash-cucumber/connection'
 
 module Calabash
   module Cucumber
+
+    # @!visibility private
     module ConnectionHelpers
 
       def http(*args)

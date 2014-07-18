@@ -2,6 +2,8 @@ require 'calabash-cucumber/failure_helpers'
 
 module Calabash
   module Cucumber
+
+    # A collection of methods to help you write tests.
     module TestsHelpers
 
       include Calabash::Cucumber::FailureHelpers
