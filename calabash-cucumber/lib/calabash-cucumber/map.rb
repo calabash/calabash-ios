@@ -2,20 +2,22 @@ require 'json'
 
 module Calabash
   module Cucumber
-    module Map #=> Connection
 
-      # returns an array of views matched by the +query+ or the result of
-      # performing the Objective-C sequence defined by the +method_name+ and
-      # +method_args+ on all the views matched by the +query+
+    # @!visibility private
+    module Map
+
+      # returns an array of views matched by the `query` or the result of
+      # performing the Objective-C sequence defined by the `method_name` and
+      # `method_args` on all the views matched by the `query`
       #
       # the query language is documented here: https://github.com/calabash/calabash-ios/wiki
       #
       # returns a JSON representation of each view that is matched
       #
-      # when the +method_name+ is a calabash operation, returns an array that
-      # contains the result of calling the objc selector +description+ on each
-      # matched view.  these are examples of calabash operations: +:flash+,
-      # +:scrollToRowWithMark+, +:changeDatePickerDate+.
+      # when the `method_name` is a calabash operation, returns an array that
+      # contains the result of calling the objc selector `description` on each
+      # matched view.  these are examples of calabash operations: `:flash`,
+      # `:scrollToRowWithMark`, `:changeDatePickerDate`.
       def map(query, method_name, *method_args)
         #todo calabash operations should return 'views touched' in JSON format
         raw_map(query, method_name, *method_args)['results']
@@ -24,26 +26,26 @@ module Calabash
       # returns a JSON object the represents the result of performing an http
       # query against the calabash server.
       #
-      # gem users should _not_ call this method directly; call +map+ instead.
+      # gem users should _not_ call this method directly; call `map` instead.
       #
-      # raises an error and takes a screenshot if the value of the +outcome+ key
+      # raises an error and takes a screenshot if the value of the `outcome` key
       # is _not_ 'SUCCESS'
       #
       # the JSON object contains the following keys:
       #
-      #     +outcome+ => indicates the success or failure of the query
+      #     `outcome` => indicates the success or failure of the query
       #
-      #     +status_bar_orientation+ => the orientation of the status bar
+      #     `status_bar_orientation` => the orientation of the status bar
       #
-      #     +results+ => views matched by the +query+ or the result of
+      #     `results` => views matched by the `query` or the result of
       #                  performing the Objective-C selector sequence defined by
-      #                  the +method_name+ with arguments defined in
-      #                  +method_args+ on all views matched by the +query+
+      #                  the `method_name` with arguments defined in
+      #                  `method_args` on all views matched by the `query`
       #
       # the query language is documented here: https://github.com/calabash/calabash-ios/wiki
       #
-      # here are some examples that clarify how the +method_name+ and +method_args+
-      # influence the value of the +results+ key
+      # here are some examples that clarify how the `method_name` and `method_args`
+      # influence the value of the `results` key
       #
       # simple examples:
       #
@@ -76,20 +78,20 @@ module Calabash
         res
       end
 
-      # asserts the result of a calabash +map+ call and raises an error with
-      # +msg+ if no valid results are found.
+      # asserts the result of a calabash `map` call and raises an error with
+      # `msg` if no valid results are found.
       #
       # casual gem users should never need to call this method; this is a
       # convenience method for gem maintainers.
       #
-      # raises an error if +map_results+:
+      # raises an error if `map_results`:
       #
       #              is an empty list #=> []
       #    contains a '<VOID>' string #=> [ "<VOID>" ]
       #       contains '*****' string #=> [ "*****"  ]
       #         contains a single nil #=> [ nil ]
       #
-      # when evaluating whether a +map+ call is successful it is important to
+      # when evaluating whether a `map` call is successful it is important to
       # note that sometimes a <tt>[ nil ]</tt> or <tt>[nil, <val>, nil]</tt> is
       # a valid result.
       #
@@ -110,7 +112,7 @@ module Calabash
       #
       # here a <tt>[ nil ]</tt> should be considered invalid because the
       # the operation could not be performed because there is not row that
-      # matches +mark+
+      # matches `mark`
       def assert_map_results(map_results, msg)
         compact = map_results.compact
         if compact.empty? or compact.member? '<VOID>' or compact.member? '*****'

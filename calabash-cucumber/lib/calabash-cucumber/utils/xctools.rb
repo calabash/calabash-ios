@@ -79,7 +79,7 @@ module Calabash
       # @param [String] version (instruments(:version))
       #   a major.minor[.patch] version string
       #
-      # @return [Boolean] true iff the version is >= 5.*
+      # @return [Boolean] true if the version is >= 5.*
       def instruments_supports_hyphen_s?(version=instruments(:version))
         tokens = version.split('.')
         return false if tokens[0].to_i < 5

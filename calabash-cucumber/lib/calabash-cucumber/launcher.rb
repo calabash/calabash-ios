@@ -102,7 +102,7 @@ class Calabash::Cucumber::Launcher
 
   # Are we running using instruments?
   #
-  # @return {Boolean} true iff we're using instruments to launch
+  # @return {Boolean} true if we're using instruments to launch
   def self.instruments?
     l = launcher_if_used
     return false unless l

@@ -2,6 +2,8 @@ require 'httpclient'
 
 module Calabash
   module Cucumber
+
+    # @!visibility private
     module HTTPHelpers
 
       CAL_HTTP_RETRY_COUNT=3

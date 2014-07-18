@@ -2,6 +2,8 @@ require 'fileutils'
 
 module Calabash
   module Cucumber
+
+    # A collection of methods that help you handle Step failures.
     module FailureHelpers
 
       # Generates a screenshot of the app UI and saves to a file (prefer `screenshot_embed`).

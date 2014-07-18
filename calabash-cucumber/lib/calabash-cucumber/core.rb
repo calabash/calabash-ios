@@ -21,6 +21,8 @@ require 'calabash-cucumber/launch/simulator_helper'
 
 module Calabash
   module Cucumber
+
+    # A collection of methods that provide the core calabash behaviors.
     module Core
 
       include Calabash::Cucumber::Logging

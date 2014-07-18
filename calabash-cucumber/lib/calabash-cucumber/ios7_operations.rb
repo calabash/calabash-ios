@@ -6,17 +6,16 @@ require 'calabash-cucumber/environment_helpers'
 
 module Calabash
   module Cucumber
+
+    # @deprecated The methods in this module have all been deprecated.
+    #
+    # All the methods have abstracted to actions/instruments_actions.rb.
     module IOS7Operations
       include Calabash::Cucumber::UIA
       include Calabash::Cucumber::EnvironmentHelpers
 
       # todo deprecate the Calabash::Cucumber::IOS7Operations
 
-
-      # <b>DEPRECATED</b>
-      #
-      # abstracted into <tt>actions/instruments_actions.rb</tt> - actions that
-      # can be performed under instruments
       # @!visibility private
       def touch_ios7(options)
         ui_query = options[:query]

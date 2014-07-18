@@ -5,6 +5,8 @@ require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
+
+    # A collection of methods that help you wait for things.
     module WaitHelpers
       include Calabash::Cucumber::Logging
       include Calabash::Cucumber::Core
@@ -352,7 +354,7 @@ module Calabash
       end
 
       # Performs a lambda action until the element (a query string) disappears.
-      # The default action is to do nothing. 
+      # The default action is to do nothing.
       #
       # Raises an error if no uiquery is specified.
       #
@@ -407,7 +409,7 @@ module Calabash
       # screenshot based on the value of +screenshot_on_error+.
       # @param [Exception,nil] ex an exception to raise
       # @param [String,nil] timeout_message the message of the raise
-      # @param [Boolean] screenshot_on_error iff true takes a screenshot before
+      # @param [Boolean] screenshot_on_error if true takes a screenshot before
       #  raising an error
       # @return [nil]
       # @raise RuntimeError based on +ex+ and +timeout_message+

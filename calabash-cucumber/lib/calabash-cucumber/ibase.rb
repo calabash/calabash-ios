@@ -78,7 +78,7 @@ class Calabash::IBase
 
   # Returns true if the current view shows this page's `trait`.
   # @see #trait
-  # @return [Boolean] true iff `element_exists(trait)`
+  # @return [Boolean] true if `element_exists(trait)`
   def current_page?
     element_exists(trait)
   end
@@ -111,7 +111,7 @@ class Calabash::IBase
   #   (see {Calabash::Cucumber::WaitHelpers#wait_for} and
   #   {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS}).
   # @option wait_opts [Boolean] :await_animation (false)
-  #   iff true, will wait for `self.transition_duration` after this page's
+  #   if true, will wait for `self.transition_duration` after this page's
   #   `trait` appears
   # @return {IBase} self
   def await(wait_opts={})
@@ -160,10 +160,10 @@ class Calabash::IBase
   #  that triggers the transition.  This is useful for waiting for animations to
   #  complete.  Defaults to `true`.
   #
-  # @option transition_options [Hash] :tap_options Iff a `tap` gesture is defined
+  # @option transition_options [Hash] :tap_options if a `tap` gesture is defined
   #  then these options will be passed to `touch`.
   #
-  # @option transition_options [Hash] :wait_options Iff the :await key is true,
+  # @option transition_options [Hash] :wait_options if the :await key is true,
   #  then these options are passed to the `page.await` method.
   #
   # @return [IBase] the page that is transitioned to

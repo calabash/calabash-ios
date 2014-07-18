@@ -46,7 +46,7 @@ module Calabash
       attr_accessor :patch
 
       # @!attribute [rw] pre
-      #   @return [Boolean] true iff this is a pre-release version
+      #   @return [Boolean] true if this is a pre-release version
       attr_accessor :pre
 
       # @!attribute [rw] pre_version
@@ -95,42 +95,42 @@ module Calabash
 
       # Compare this version to another for equality.
       # @param [Version] other the version to compare against
-      # @return [Boolean] true iff this Version is the same as `other`
+      # @return [Boolean] true if this Version is the same as `other`
       def == (other)
         compare(self, other) == 0
       end
 
       # Compare this version to another for inequality.
       # @param [Version] other the version to compare against
-      # @return [Boolean] true iff this Version is not the same as `other`
+      # @return [Boolean] true if this Version is not the same as `other`
       def != (other)
         compare(self, other) != 0
       end
 
       # Is this version less-than another version?
       # @param [Version] other the version to compare against
-      # @return [Boolean] true iff this Version is less-than `other`
+      # @return [Boolean] true if this Version is less-than `other`
       def < (other)
         compare(self, other) < 0
       end
 
       # Is this version greater-than another version?
       # @param [Version] other the version to compare against
-      # @return [Boolean] true iff this Version is greater-than `other`
+      # @return [Boolean] true if this Version is greater-than `other`
       def > (other)
         compare(self, other) > 0
       end
 
       # Is this version less-than or equal to another version?
       # @param [Version] other the version to compare against
-      # @return [Boolean] true iff this Version is less-than or equal `other`
+      # @return [Boolean] true if this Version is less-than or equal `other`
       def <= (other)
         compare(self, other) <= 0
       end
 
       # Is this version greater-than or equal to another version?
       # @param [Version] other the version to compare against
-      # @return [Boolean] true iff this Version is greater-than or equal `other`
+      # @return [Boolean] true if this Version is greater-than or equal `other`
       def >= (other)
         compare(self, other) >= 0
       end
