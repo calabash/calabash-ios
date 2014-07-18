@@ -193,7 +193,7 @@ describe 'simulator accessibility tool' do
                  'Looks like the the test popped a security dialog.',
                  '-1 for travis'].join("\n")
           calabash_warn msg
-          excluded < 'iPad Retina (64-bit) - Simulator - iOS 7.1'
+          excluded << 'iPad Retina (64-bit) - Simulator - iOS 7.1'
         end
 
         instruments(:sims).each do |simulator|
