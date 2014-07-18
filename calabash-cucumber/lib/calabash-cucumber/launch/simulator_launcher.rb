@@ -7,50 +7,76 @@ require 'calabash-cucumber/utils/logging'
 module Calabash
   module Cucumber
 
-    # acts as a bridge to the sim_launcher SimLauncher and SdkDetector classes
+    # Acts as a bridge to the sim_launcher SimLauncher and SdkDetector classes.
+    #
+    # Runtime Environmental Variables
+    #
+    # * `PROJECT_DIR` (ENV['PWD']) - the path to the .xcproject directory
+    # * `DEVICE_ENDPOINT` (http://localhost:37265/) - the ip:port of the
+    #   device under test
+    # * `CALABASH_VERSION_PATH` (version) - the path to server version route
+    # * `MAX_CONNECT_RETRY` (2) the number of times retry
+    #   establishing a connection to the server.
+    # * `CONNECT_TIMEOUT` (30) how long to wait for the server before timing
+    #   out
+    #
     class SimulatorLauncher
       include Calabash::Cucumber::Logging
 
-      # custom error indicating a timeout in launching and connecting to the
-      # embedded calabash server
-      # todo is duplicated in Launcher class - consider exceptions.rb module
+      # Custom error indicating a timeout in launching and connecting to the
+      # embedded calabash server.
+      # @todo This is duplicated in Launcher class - consider exceptions.rb module.
       class TimeoutErr < RuntimeError
       end
 
-      # the file path to the default Xcode DerivedData directory
+      # @!visibility private
+      # The file path to the default Xcode DerivedData directory.
       DERIVED_DATA = File.expand_path('~/Library/Developer/Xcode/DerivedData')
 
-      # REGEX for finding application Info.plist
+      # @!visibility private
+      # REGEX for finding application Info.plist.
       DEFAULT_DERIVED_DATA_INFO = File.expand_path("#{DERIVED_DATA}/*/info.plist")
 
-      # if CONNECT_TIMEOUT is not set, wait this long for the app to launch
-      # in the simulator before retrying
+      # @!visibility private
+      # If `CONNECT_TIMEOUT` is not set, wait this long for the app to launch
+      # in the simulator before retrying.
       DEFAULT_SIM_WAIT = 30
 
-      # if MAX_CONNECT_RETRY is not set, try to launch the app this many times
+      # If `MAX_CONNECT_RETRY` is not set, try to launch the app this many times
       # in the simulator before giving up
       DEFAULT_SIM_RETRY = 2
 
-      # an instance of Calabash::Cucumber::Device
+      # @!visibility private
+      # An instance of Calabash::Cucumber::Device.
       attr_accessor :device
 
-      # an instance of SimLauncher::Simulator
+      # @!visibility private
+      # An instance of SimLauncher::Simulator.
       attr_accessor :simulator
 
-      # an instance of SimLauncher::SdkDetector
+      # @!visibility private
+      # An instance of SimLauncher::SdkDetector.
       attr_accessor :sdk_detector
 
-      # the launch args passed from Calabash::Cucumber::Launcher to the
-      # launch and relaunch methods.
+      # @!visibility private
+      # The launch args passed from Calabash::Cucumber::Launcher to the launch
+      # and relaunch methods.
       attr_accessor :launch_args
 
-      # creates a new instance an sets the :simulator and :sdk_detector attributes
+      # Creates a new instance an sets the :simulator and :sdk_detector attributes.
       def initialize
         @simulator = SimLauncher::Simulator.new
         @sdk_detector = SimLauncher::SdkDetector.new()
       end
 
-      # uses heuristics to deduce the derived data directory for the project
+      # Stops (quits) the simulator.
+      def stop
+        self.simulator.quit_simulator
+      end
+
+
+      # @!visibility private
+      # Uses heuristics to deduce the derived data directory for the project
       # so the path to the app bundle (.app) can be detected.
       # @return [String] absolute path to derived data directory
       # @raise [RuntimeError] if the derived data directory cannot be found
@@ -134,21 +160,25 @@ module Calabash
         end
       end
 
-      # returns the absolute path to the project directory
-      # unless PROJECT_DIR is defined, returns the absolute path to the current
-      # directory
+      # @!visibility private
+      # Returns the absolute path to the project directory.
+      #
+      # Unless `PROJECT_DIR` is defined, returns the absolute path to the current
+      # directory.
+      #
       # @return [String] absolute path to the project directory
-      # todo migrate PROJECT_DIR to environment_helpers.rb
+      # @todo migrate `PROJECT_DIR` to environment_helpers.rb
       def project_dir
         File.expand_path(ENV['PROJECT_DIR'] || Dir.pwd)
       end
 
-      # attempts to deduce the app bundle path
+      # @!visibility private
+      # Attempts to deduce the app bundle path
       # @param [String] path NEEDS DOCUMENTATION
       # @param [String] device_build_dir NEEDS DOCUMENTATION
-      # @return [String] absolute path to app bundle (.app)
-      # @return [nil] iff app bundle cannot be found
-      # todo methods should not use 2 optional arguments
+      # @return [String] absolute path to app bundle (.app) or `nil` if the
+      #  app bundle cannot be found.
+      # @todo methods should not use 2 optional arguments
       def detect_app_bundle(path=nil,device_build_dir='iPhoneSimulator')
         begin
           app_bundle_or_raise(path,device_build_dir)
@@ -157,12 +187,13 @@ module Calabash
         end
       end
 
-      # attempts to deduce the path the to the app bundle (.app)
+      # @!visibility private
+      # Attempts to deduce the path the to the app bundle (.app).
       # @param [String] path NEEDS DOCUMENTATION
       # @param [String] device_build_dir NEEDS DOCUMENTATION
       # @return [String] absolute path to app bundle (.app)
       # @raise [RuntimeError] if app bundle (.app) cannot be found
-      # todo methods should not use 2 optional arguments
+      # @todo methods should not use 2 optional arguments
       def app_bundle_or_raise(path=nil, device_build_dir='iPhoneSimulator')
         path = File.expand_path(path) if path
 
@@ -226,13 +257,15 @@ module Calabash
         bundle_path
       end
 
-      # is this a Xamarin IDE project?
-      # @return [Boolean] true iff the project is a Xamarin IDE project
+      # @!visibility private
+      # Is this a Xamarin IDE project?
+      # @return [Boolean] true if the project is a Xamarin IDE project
       def xamarin_project?
         xamarin_ios_csproj_path != nil
       end
 
-      # path to the Xamarin IDE project
+      # @!visibility private
+      # Path to the Xamarin IDE project.
       # @return [String] absolute path to the Xamarin IDE project
       def xamarin_ios_csproj_path
         solution_path = Dir['*.sln'].first
@@ -268,20 +301,22 @@ module Calabash
 
       end
 
-      # is this the Xamarin iOS bin directory?
-      # @return [Boolean] true iff this is the Xamarin iOS bin directory
+      # @!visibility private
+      # Is this the Xamarin iOS bin directory?
+      # @return [Boolean] true if this is the Xamarin iOS bin directory
       def xamarin_ios_bin_dir?(bin_dir)
         File.directory?(bin_dir) &&
             (File.directory?(File.join(bin_dir,'iPhoneSimulator')) ||
                 File.directory?(File.join(bin_dir,'iPhone')))
       end
 
-      # attempts to deduce the path to the app bundle path (*.app) using
-      # heuristics and checking for executables linked with the Calabash server
+      # @!visibility private
+      # Attempts to deduce the path to the app bundle path (*.app) using
+      # heuristics and checking for executables linked with the Calabash server.
       #
       # @param [String] device_build_dir NEEDS DOCUMENTATION
-      # @return [String] absolute path the app bundle .app
-      # @return [nil] iff the app bundle cannot be found
+      # @return [String] absolute path the app bundle .app or `nil` if the
+      #  the app bundle cannot be found.
       def bundle_path_from_xamarin_project(device_build_dir='iPhoneSimulator')
         ios_project_path = xamarin_ios_csproj_path
         conf_glob = File.join(ios_project_path,'bin',device_build_dir,'*')
@@ -299,11 +334,12 @@ module Calabash
         Dir[File.join(bundle_path,'*.app')].first if bundle_path
       end
 
-      # searches +d+ for a file linked with Calabash server
+      # @!visibility private
+      # Searches `d` for a file linked with Calabash server.
       # @param [String] d path to a directory
-      # @return [Boolean] true iff there is a file that is linked with the
+      # @return [Boolean] true if there is a file that is linked with the
       #   Calabash server
-      # todo why are we not grep'ing for executable files? see server_version_from_bundle
+      # @todo why are we not grep'ing for executable files? see server_version_from_bundle
       def linked_with_calabash?(d)
         skipped_formats = ['.png', '.jpg', '.jpeg', '.plist', '.nib', '.lproj']
         dir = File.expand_path(d)
@@ -322,28 +358,30 @@ module Calabash
         false
       end
 
-      # @return [String] the first path in +sim_dirs+ that contains a binary
-      #   linked with Calabash server
-      # @return [nil] iff there is no path in +sim_dirs+ that contains a binary
-      #   linked with Calabash server
+      # !@visibility private
+      # Finds the preferred(?) directory.
+      # @return [String] The first path in `sim_dirs` that contains a binary
+      #   linked with Calabash server. Returns `nil` if there is no path in
+      #   `sim_dirs` that contains a binary linked with Calabash server.
       # @param [Array<String>] sim_dirs eke! why sim_dirs?  why not a list of any directories?
-      # todo find_preferred_dir is a bad name - preferred for what?
-      # todo sim_dirs arg is a bad name - we can be iterating over any directory
+      # @todo find_preferred_dir is a bad name - preferred for what?
+      # @todo sim_dirs arg is a bad name - we can be iterating over any directory
       def find_preferred_dir(sim_dirs)
         sim_dirs.find do |d|
           linked_with_calabash?(d)
         end
       end
 
-
-      # ping the version route of the calabash server embedded in the app
+      # !@visibility private
+      # Ping the version route of the calabash server embedded in the app,
       #
-      # has the side effect of setting self.device attribute if successful
+      # @note
+      #   Has the side effect of setting self.device attribute if successful.
       #
       # @return [String] returns the server status - '200' is a success
-      # todo migrate DEVICE_ENDPOINT to environment_helpers
-      # todo migrate CALABASH_VERSION_PATH to environment_helpers
-      # todo this is an exact duplicate of Launcher ping method
+      # @todo migrate DEVICE_ENDPOINT to environment_helpers
+      # @todo migrate CALABASH_VERSION_PATH to environment_helpers
+      # @todo this is an exact duplicate of Launcher ping method
       def ping_app
         url = URI.parse(ENV['DEVICE_ENDPOINT']|| 'http://localhost:37265/')
         if full_console_logging?
@@ -374,6 +412,7 @@ module Calabash
         status
       end
 
+      # @!visibility private
       # Attempts to connect to launch the app and connect to the embedded
       # calabash server.
       #
@@ -440,6 +479,7 @@ module Calabash
         end
       end
 
+      # @!visibility private
       # Launches the app.
       #
       # @param [String] app_bundle_path path to the .app that should be launched
@@ -457,15 +497,16 @@ module Calabash
         simulator
       end
 
-      # relaunches the app at +app_path+ in the simulator using +sdk+ and +args+
+      # @!visibility private
+      # Relaunches the app in the simulator.
       #
       # @param [String] app_path the path to the .app
       # @param [String] sdk eg. 6.0.3, 6.1
       # @param [Hash] args the only option we are interested in is :device
       #
-      # todo args was originally intended to be the args passed to the application @ launch
-      # todo it is _very_ likely that args[:app] == app_path so we might be able
-      # to eliminate an argument
+      # @todo args was originally intended to be the args passed to the application @ launch
+      # @todo it is _very_ likely that args[:app] == app_path so we might be able
+      #   to eliminate an argument
       def relaunch(app_path, sdk, args)
         app_bundle_path = app_bundle_or_raise(app_path)
 
@@ -490,30 +531,21 @@ module Calabash
         ensure_connectivity(app_bundle_path, _sdk, device_family, args)
       end
 
-      # stops (quits) the simulator
-      def stop
-        self.simulator.quit_simulator
-      end
-
-
-      # @deprecated Calabash::Cucumber::Launcher.launcher.device instance methods
-      # @since 0.9.169
+      # @deprecated 0.9.169 Calabash::Cucumber::Launcher.launcher.device instance methods
       # @raise [NotImplementedError] no longer implemented
       def get_version
         _deprecated('0.9.169', 'use an instance Device class instead', :warn)
         raise(NotImplementedError, 'this method has been deprecated')
       end
 
-      # @deprecated Calabash::Cucumber::Launcher.launcher.device instance methods
-      # @since 0.9.169
+      # @deprecated 0.9.169 Calabash::Cucumber::Launcher.launcher.device instance methods
       # @raise [NotImplementedError] no longer implemented
       def ios_version
         _deprecated('0.9.169', 'use an instance Device class instead', :warn)
         raise(NotImplementedError, 'this method has been deprecated')
       end
 
-      # @deprecated use Calabash::Cucumber::Launcher.launcher.ios_major_version
-      # @since 0.9.169
+      # @deprecated 0.9.169 use Calabash::Cucumber::Launcher.launcher.ios_major_version
       # @raise [NotImplementedError] no longer implemented
       def ios_major_version
         _deprecated('0.9.169', 'use an instance Device class instead', :warn)
@@ -523,8 +555,7 @@ module Calabash
 
       # noinspection RubyUnusedLocalVariable
 
-      # @deprecated version checking is done in Launcher
-      # @since 0.9.169
+      # @deprecated 0.9.169 version checking is done in Launcher
       # @raise [NotImplementedError] no longer implemented
       def version_check(version)
         _deprecated('0.9.169', 'check is now done in Launcher', :warn)
