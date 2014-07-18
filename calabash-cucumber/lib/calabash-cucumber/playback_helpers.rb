@@ -3,12 +3,25 @@ require 'calabash-cucumber/device'
 
 module Calabash
   module Cucumber
+
+    # This module provides methods for interaction with UIAutomation's
+    # record-and-playback features.
+    #
+    # @note
+    #  In iOS 7, the record-and-playback feature was dropped from UIAutomation.
+    #  As such, using the record-and-playback API is not recommended.
+    #
+    # @note
+    #  We expect that this module will be deprecated once iOS 6 testing is no
+    #  longer supported.
     module PlaybackHelpers
 
       include Calabash::Cucumber::Logging
 
+      # @!visibility private
       DATA_PATH = File.expand_path(File.dirname(__FILE__))
 
+      # @!visibility private
       def recording_name_for(recording_name, os, device)
         #noinspection RubyControlFlowConversionInspection
         if !recording_name.end_with? '.base64'
@@ -18,6 +31,7 @@ module Calabash
         end
       end
 
+      # @!visibility private
       def load_recording(recording, rec_dir)
         directories = playback_file_directories(rec_dir)
         directories.each { |dir|
@@ -29,6 +43,7 @@ module Calabash
         nil
       end
 
+      # @!visibility private
       def playback_file_directories (rec_dir)
         # rec_dir is either ENV['PLAYBACK_DIR'] or ./features/playback
         [File.expand_path(rec_dir),
@@ -38,6 +53,7 @@ module Calabash
          "#{DATA_PATH}/resources/"].uniq
       end
 
+      # @!visibility private
       def load_playback_data(recording_name, options={})
         device = options['DEVICE'] || ENV['DEVICE'] || 'iphone'
 
@@ -79,6 +95,7 @@ EOF
         data
       end
 
+      # @!visibility private
       def find_compatible_recording (recording_name, os, rec_dir, device, candidates)
         recording = recording_name_for(recording_name, os, device)
         data = load_recording(recording, rec_dir)
@@ -99,6 +116,9 @@ EOF
         data
       end
 
+      # Plays back a recording.
+      # @param [String] recording the filename of the recording
+      # @param [Hash] options can control the behavior of the recording
       def playback(recording, options={})
         data = load_playback_data(recording)
 
@@ -119,6 +139,9 @@ EOF
         res['results']
       end
 
+      # Plays back a recording but interpolates it first.
+      # @param [String] recording the filename of the recording
+      # @param [Hash] options can control the behavior of the recording
       def interpolate(recording, options={})
         data = load_playback_data(recording)
 
@@ -138,10 +161,13 @@ EOF
         res['results']
       end
 
+      # Begins a recording.
       def record_begin
         http({:method => :post, :path => 'record'}, {:action => :start})
       end
 
+      # Ends a recording and saves it.
+      # @param [String] file_name where to save the recording.
       def record_end(file_name)
         res = http({:method => :post, :path => 'record'}, {:action => :stop})
         File.open('_recording.plist', 'wb') do |f|
