@@ -101,7 +101,7 @@ module Calabash
       #
       # @param [Hash] opts controls the behavior of the method
       # @option opts [Boolean] :verbose controls logging output
-      # @return [Boolean] true iff enabling accessibility worked on all sdk
+      # @return [Boolean] true if enabling accessibility worked on all sdk
       #  directories
       def enable_accessibility_on_simulators(opts={})
         possible = possible_simulator_support_sdk_dirs
@@ -137,7 +137,7 @@ module Calabash
       #
       # @param [Hash] opts controls the behavior of the method
       # @option opts [Boolean] :verbose controls logging output
-      # @return [Boolean] iff the plist exists and the plist was successfully
+      # @return [Boolean] if the plist exists and the plist was successfully
       #   updated.
       def enable_accessibility_in_sdk_dir(sim_app_support_sdk_dir, opts={})
         default_opts = {:verbose => false}

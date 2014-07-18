@@ -105,12 +105,12 @@ module Calabash
       #  emulated.
       #
       # @attribute [r] iphone_app_emulated_on_ipad
-      # @return [Boolean] `true` iff the app under test is emulated
+      # @return [Boolean] `true` if the app under test is emulated
       attr_reader :iphone_app_emulated_on_ipad
 
       # Indicates whether or not this device has a 4in screen.
       # @attribute [r] iphone_4in
-      # @return [Boolean] `true` iff this device has a 4in screen.
+      # @return [Boolean] `true` if this device has a 4in screen.
       attr_reader :iphone_4in
 
       # @deprecated 0.10.0 no replacement
@@ -138,37 +138,37 @@ module Calabash
       end
 
       # Is this device a simulator or physical device?
-      # @return [Boolean] true iff this device is a simulator
+      # @return [Boolean] true if this device is a simulator
       def simulator?
         system.eql?(GESTALT_SIM_SYS)
       end
 
       # Is this device a device or simulator?
-      # @return [Boolean] true iff this device is a physical device
+      # @return [Boolean] true if this device is a physical device
       def device?
         not simulator?
       end
 
       # Is this device an iPhone?
-      # @return [Boolean] true iff this device is an iphone
+      # @return [Boolean] true if this device is an iphone
       def iphone?
         device_family.eql? GESTALT_IPHONE
       end
 
       # Is this device an iPod?
-      # @return [Boolean] true iff this device is an ipod
+      # @return [Boolean] true if this device is an ipod
       def ipod?
         device_family.eql? GESTALT_IPOD
       end
 
       # Is this device an iPad?
-      # @return [Boolean] true iff this device is an ipad
+      # @return [Boolean] true if this device is an ipad
       def ipad?
         device_family.eql? GESTALT_IPAD
       end
 
       # Is this device a 4in iPhone?
-      # @return [Boolean] true iff this device is a 4in iphone
+      # @return [Boolean] true if this device is a 4in iphone
       def iphone_4in?
         @iphone_4in
       end
@@ -177,7 +177,7 @@ module Calabash
       # @see #iphone_4in?
       # Is this device an iPhone 5?
       # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
-      # @return [Boolean] true iff this device is an iPhone 5
+      # @return [Boolean] true if this device is an iPhone 5
       def iphone_5?
         _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
         iphone_4in?
@@ -198,19 +198,19 @@ module Calabash
       end
 
       # Is this device running iOS 7?
-      # @return [Boolean] true iff the major version of the OS is 7
+      # @return [Boolean] true if the major version of the OS is 7
       def ios7?
         ios_major_version.eql?('7')
       end
 
       # Is this device running iOS 6?
-      # @return [Boolean] true iff the major version of the OS is 6
+      # @return [Boolean] true if the major version of the OS is 6
       def ios6?
         ios_major_version.eql?('6')
       end
 
       # Is this device running iOS 5?
-      # @return [Boolean] true iff the major version of the OS is 5
+      # @return [Boolean] true if the major version of the OS is 5
       def ios5?
         ios_major_version.eql?('5')
       end
@@ -234,7 +234,7 @@ module Calabash
       # @note If the app is running in emulation mode, there will be a 1x or 2x
       #   scale button visible on the iPad.
       #
-      # @return [Boolean] true iff the app running on this devices is an
+      # @return [Boolean] true if the app running on this devices is an
       #   iPhone-only app emulated on an iPad
       def iphone_app_emulated_on_ipad?
         iphone_app_emulated_on_ipad

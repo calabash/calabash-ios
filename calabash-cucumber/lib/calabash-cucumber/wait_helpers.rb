@@ -407,7 +407,7 @@ module Calabash
       # screenshot based on the value of +screenshot_on_error+.
       # @param [Exception,nil] ex an exception to raise
       # @param [String,nil] timeout_message the message of the raise
-      # @param [Boolean] screenshot_on_error iff true takes a screenshot before
+      # @param [Boolean] screenshot_on_error if true takes a screenshot before
       #  raising an error
       # @return [nil]
       # @raise RuntimeError based on +ex+ and +timeout_message+
