@@ -9,7 +9,6 @@ require 'cfpropertylist'
 require 'calabash-cucumber/version'
 require 'calabash-cucumber/utils/logging'
 
-
 # Class used to launch apps for testing in iOS Simulator or on iOS Devices
 # Uses instruments to launch, but has legacy support for using `sim_launcher`.
 class Calabash::Cucumber::Launcher
@@ -178,8 +177,11 @@ class Calabash::Cucumber::Launcher
   # @option opts [String] :sdk the target sdk
   # @option opts [String] :path path to the application bundle
   def reset_app_sandbox(opts={})
-    if device_target?
-      calabash_warn("calling 'reset_app_sandbox' when targeting a device is not allowed")
+
+    # Cannot use environment_helpers xamarin_test_cloud? because the
+    # EnvironmentHelpers module requires this file.
+    if device_target? and ENV['XAMARIN_TEST_CLOUD'] != '1'
+      calabash_warn("calling 'reset_app_sandbox' when targeting a device outside the XTC is not supported.")
       return
     end
 

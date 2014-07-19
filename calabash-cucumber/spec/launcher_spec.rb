@@ -109,7 +109,7 @@ describe 'Calabash Launcher' do
         out = capture_stderr do
           @launcher.reset_app_sandbox(args)
         end
-        expect(out.string).to be == "\e[34m\nWARN: calling 'reset_app_sandbox' when targeting a device is not allowed\e[0m\n"
+        expect(out.string).to be == "\e[34m\nWARN: calling 'reset_app_sandbox' when targeting a device outside the XTC is not supported.\e[0m\n"
       end
 
       it 'should remove the correct items from the sandbox' do
