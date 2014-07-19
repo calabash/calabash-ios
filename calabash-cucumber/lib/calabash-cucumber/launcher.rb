@@ -154,7 +154,7 @@ class Calabash::Cucumber::Launcher
     device.ios_version
   end
 
-  # @deprecated Use {#reset_app_sandbox} instead.
+  # @deprecated 0.10.0 Replaced with {#reset_app_sandbox}.
   # Reset the app sandbox for a device.
   def reset_app_jail(sdk=nil, path=nil)
     # will be deprecated in a future version
@@ -165,13 +165,14 @@ class Calabash::Cucumber::Launcher
   # Resets the app's content and settings by deleting the following directories
   # from application sandbox:
   #
-  # @todo Currently only works on iOS Simulator and in Xamarin Test Cloud.
+  # * Library
+  # * Documents
+  # * tmp
   #
-  #  * Library
-  #  * Documents
-  #  * tmp
+  # @note Currently only works on iOS Simulator and in Xamarin Test Cloud.
   #
-  # Generates a warning if called when targeting a physical device
+  # Generates a warning if called when targeting a physical device that is not
+  # in the Xamarin Test Cloud.
   #
   # @param [Hash] opts can pass the target sdk or the path to the application bundle
   # @option opts [String] :sdk the target sdk
@@ -210,8 +211,8 @@ class Calabash::Cucumber::Launcher
   # simulates touching the iOS Simulator > Reset Content and Settings... menu
   # item.
   #
-  #  **WARNING** This is a destructive operation.
-  #  You have been warned.
+  # @note
+  #  **WARNING** This is a destructive operation.  You have been warned.
   #
   # @raise RuntimeError if called when targeting a physical device
   def reset_simulator
@@ -493,8 +494,6 @@ class Calabash::Cucumber::Launcher
     else
       args[:app]
     end
-
-
   end
 
   # @!visibility private
