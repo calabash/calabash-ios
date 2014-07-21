@@ -9,20 +9,36 @@ require 'cfpropertylist'
 require 'calabash-cucumber/version'
 require 'calabash-cucumber/utils/logging'
 
-
-# Class used to launch apps for testing in iOS Simulator or on iOS Devices
-# Uses instruments to launch, but has legacy support for using `sim_launcher`.
+# Used to launch apps for testing in iOS Simulator or on iOS Devices.  By default
+# it uses Apple's `instruments` process to launch your app, but has legacy support
+# for using `sim_launcher`.
+#
+# ###  Accessing the current launcher from ruby.
+#
+# If you need a reference to the current launcher in your ruby code.
+# This is usually not required, but might be useful in `support/01_launch.rb`.
+#
+# `Calabash::Cucumber::Launcher.launcher`
+#
+# ### Attaching to the current launcher in a console
+#
+# If Calabash already running and you want to attach to the current launcher,
+# use `console_attach`.  This is useful when a cucumber Scenario has failed and
+# you want to query the current state of the app.
+#
+# * **Pro Tip:** set the `NO_STOP` environmental variable to 1 so calabash does
+#  not exit the simulator when a Scenario fails.
 class Calabash::Cucumber::Launcher
 
   include Calabash::Cucumber::Logging
   include Calabash::Cucumber::SimulatorAccessibility
 
-  # @!visibility private
+  # A hash of known privacy settings that calabash can control.
   KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
 
   # noinspection RubyClassVariableUsageInspection
 
-  # Class variable for accessing the currently defined launcher.
+  # @!visibility private
   @@launcher = nil
 
   # @!visibility private
