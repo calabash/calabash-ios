@@ -513,7 +513,7 @@ class Calabash::Cucumber::Launcher
 
     args[:device] ||= detect_device_from_args(args)
 
-    if args[:reset]
+    if simulator_target?(args) and args[:reset]
       # attempt to find the sdk version from the :device_target
       sdk = sdk_version_for_simulator_target(args)
 
