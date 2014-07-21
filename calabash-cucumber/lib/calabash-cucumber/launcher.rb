@@ -676,6 +676,7 @@ class Calabash::Cucumber::Launcher
     sdk
   end
 
+  # @!visibility private
   def use_instruments_env?
     ENV['LAUNCH_VIA'] == 'instruments'
   end
