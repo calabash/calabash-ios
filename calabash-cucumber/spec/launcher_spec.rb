@@ -79,6 +79,32 @@ describe 'Calabash Launcher' do
       hash = {:foobar => 'foobar'}
       expect(@launcher.simulator_target?(hash)).to be == false
     end
+  end
+
+  describe 'resetting application content and settings' do
+
+    SANDBOX_DIRS = ['Library', 'Documents', 'tmp']
+
+    def populate_app_sandbox(path=args_for_reset_app_sandbox[:path])
+      app_udid_dir = File.expand_path(File.join(path, '..'))
+      SANDBOX_DIRS.each do |dir|
+        dir_path = File.expand_path(File.join(app_udid_dir, dir))
+        FileUtils.mkdir_p(dir_path)
+      end
+      app_udid_dir
+    end
+
+    def args_for_reset_app_sandbox(sdk='7.1')
+      sub_dir = 'resources/launcher'
+      dir_udid = '1FCBF253-E5EC-4FD5-839D-0AC526F28D10'
+      app_name = 'LPSimpleExample-cal.app'
+      joined = File.join(__FILE__, '..', sub_dir, sdk, 'Applications', dir_udid, app_name)
+      {
+            :path => File.expand_path(joined),
+            :sdk => sdk
+      }
+    end
+
     describe 'should be able to detect the base simulator sdk from the launch args' do
       it 'should return nil if the test targets a device' do
         expect(@launcher).to receive(:device_target?).and_return(true)
@@ -104,6 +130,61 @@ describe 'Calabash Launcher' do
         expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be == '7.0'
       end
     end
+
+    describe 'reset_app_sandbox should reset the application sandbox' do
+      it 'should generate a warning if called against a device' do
+        expect(@launcher).to receive(:device_target?).and_return(true)
+        args = args_for_reset_app_sandbox
+        out = capture_stderr do
+          @launcher.reset_app_sandbox(args)
+        end
+        expect(out.string).to be == "\e[34m\nWARN: calling 'reset_app_sandbox' when targeting a device.\e[0m\n"
+      end
+
+      it 'should remove the correct items from the sandbox' do
+        args = args_for_reset_app_sandbox '7.1'
+
+        # make the expected directories and expect they are there
+        app_udid_path = populate_app_sandbox(args[:path])
+        directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
+        expected = ['LPSimpleExample-cal.app'].concat(SANDBOX_DIRS)
+        expect(directories.map { |dir| File.basename(dir) }).to match_array(expected)
+
+        # need to mock the output of directories_for_sdk_prefix method by mocking
+        # the simulator_app_support_dir method
+        mocked_support_dir = File.expand_path(File.join(__FILE__, '..', 'resources/launcher'))
+        expect(@launcher).to receive(:simulator_app_support_dir).and_return(mocked_support_dir)
+
+        @launcher.reset_app_sandbox(args)
+        directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
+        expect(directories.map { |dir| File.basename(dir) }).to contain_exactly('LPSimpleExample-cal.app')
+      end
+
+      it 'should remove the correct items from _all_ sandboxes when pass :all' do
+        support_dir = File.expand_path(File.join(__FILE__, '..', 'resources/launcher'))
+        sdks = Dir["#{support_dir}/*"].select { |x| x =~ SIM_SDK_DIR_REGEX }.map { |x| File.basename(x) }
+        app_udid_paths = []
+        sdks.each do |sdk|
+          args = args_for_reset_app_sandbox sdk
+          app_udid_path = populate_app_sandbox(args[:path])
+          app_udid_paths << app_udid_path
+          directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
+          expected = ['LPSimpleExample-cal.app'].concat(SANDBOX_DIRS)
+          expect(directories.map { |dir| File.basename(dir) }).to match_array(expected)
+        end
+
+        expect(@launcher).to receive(:simulator_app_support_dir).and_return(support_dir)
+        # we need the :path to be set correctly and then we can change to :all
+        args = args_for_reset_app_sandbox('7.1')
+        args[:sdk ] = :all
+        @launcher.reset_app_sandbox(args)
+        app_udid_paths.each do |app_udid_path|
+          directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
+          expect(directories.map { |dir| File.basename(dir) }).to contain_exactly('LPSimpleExample-cal.app')
+        end
+      end
+    end
+  end
 
   describe 'reset_simulator' do
     it 'should raise an error if running on a device' do

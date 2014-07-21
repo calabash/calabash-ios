@@ -170,26 +170,108 @@ class Calabash::Cucumber::Launcher
     device.ios_version
   end
 
-  # Reset the app sandbox for a device
-  # @todo currently only works on iOS Simulator and in Xamarin Test Cloud
-  # @param {String} sdk the sdk version to reset (for simulator)
-  # @param {String} path the app bundle path to reset (for simulator)
+  # @deprecated 0.10.0 Replaced with {#reset_app_sandbox}.
+  # Reset the app sandbox for a device.
   def reset_app_jail(sdk=nil, path=nil)
-    sdk ||= sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
-    path ||= self.simulator_launcher.app_bundle_or_raise(app_path)
+    # will be deprecated in a future version
+    #_deprecated('0.10.0', 'use reset_app_sandbox instead', :warn)
+    reset_app_sandbox({:sdk => sdk, :path => path})
+  end
+
+  # Resets the app's content and settings by deleting the following directories
+  # from application sandbox:
+  #
+  # * Library
+  # * Documents
+  # * tmp
+  #
+  # @note It is not recommended that you call this method directly.  See the
+  #  examples below for how use the `RESET_BETWEEN_SCENARIOS` environmental
+  #  variable to reset the app sandbox.
+  #
+  # @note This method is only available for the iOS Simulator.
+  #
+  # @note Generates a warning if called when targeting a physical device and
+  #  otherwise has no effect.
+  #
+  # @note When testing against the Xamarin Test Cloud, this method is never
+  #  called.  Use the `RESET_BETWEEN_SCENARIOS` environmental variable.
+  #  See the examples.
+  #
+  # @example Use `RESET_BETWEEN_SCENARIOS` to reset the app sandbox before every Scenario.
+  #  When testing devices outside the Xamarin Test Cloud this has no effect.
+  #
+  #  On the Xamarin Test Cloud, the app sandbox will be reset, but this method
+  #  will not be called; the resetting is done via an alternative mechanism.
+  #
+  #  When testing simulators, this method will be called.
+  #
+  #  Launch cucumber with RESET_BETWEEN_SCENARIOS=1
+  #
+  #  $ RESET_BETWEEN_SCENARIOS=1 bundle exec cucumber
+  #
+  # @example Use tags and a Before hook to reset the app sandbox before specific Scenarios.
+  #  # in your .feature file
+  #
+  #  @reset_app_before_hook
+  #  Scenario:  some scenario that requires the app be reset
+  #
+  #  # in your support/01_launch.rb file
+  #  #
+  #  # 1. add a Before hook
+  #  Before('@reset_app_before_hook') do
+  #    ENV['RESET_BETWEEN_SCENARIOS'] = '1'
+  #  end
+  #
+  #  # 2. after launching, revert the env var value
+  #  Before do |scenario|
+  #    # launch the app
+  #    launcher = Calabash::Cucumber::Launcher.new
+  #    unless launcher.calabash_no_launch?
+  #      launcher.relaunch
+  #      launcher.calabash_notify(self)
+  #    end
+  #    # disable resetting between Scenarios
+  #    ENV['RESET_BETWEEN_SCENARIOS'] = ''
+  #  end
+  #
+  # @param [Hash] opts can pass the target sdk or the path to the application bundle
+  # @option opts [String, Symbol] :sdk (nil) The target sdk.  If nil is
+  #  passed, then only app sandbox for the latest sdk will be deleted.  If
+  #  `:all` is passed, then the sandboxes for all sdks will be deleted.
+  # @option opts [String] :path (nil) path to the application bundle
+  def reset_app_sandbox(opts={})
+
+    if device_target?
+      calabash_warn("calling 'reset_app_sandbox' when targeting a device.")
+      return
+    end
+
+    default_opts = {:sdk => nil, :path => nil}
+    merged_opts = default_opts.merge opts
+
+    sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
+    path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
 
     app = File.basename(path)
-    directories_for_sdk_prefix(sdk).each do |dir|
-      bundle = `find "#{dir}/Applications" -type d -depth 2 -name "#{app}" | head -n 1`
+
+    directories_for_sdk_prefix(sdk).each do |sdk_dir|
+      app_dir = File.expand_path("#{sdk_dir}/Applications")
+      next unless File.exists?(app_dir)
+
+      bundle = `find "#{app_dir}" -type d -depth 2 -name "#{app}" | head -n 1`
+
       next if bundle.empty? # Assuming we're already clean
+
       if debug_logging?
         puts "Reset app state for #{bundle}"
       end
       sandbox = File.dirname(bundle)
-      ['Library', 'Documents', 'tmp'].each do |dir|
-        FileUtils.rm_rf(File.join(sandbox, dir))
+      ['Library', 'Documents', 'tmp'].each do |content_dir|
+        FileUtils.rm_rf(File.join(sandbox, content_dir))
       end
     end
+  end
 
   # simulates touching the iOS Simulator > Reset Content and Settings... menu
   # item.
@@ -207,7 +289,11 @@ class Calabash::Cucumber::Launcher
 
   # @!visibility private
   def directories_for_sdk_prefix(sdk)
-    Dir["#{ENV['HOME']}/Library/Application Support/iPhone Simulator/#{sdk}*"]
+    if sdk == :all
+      existing_simulator_support_sdk_dirs
+    else
+      Dir["#{simulator_app_support_dir}/#{sdk}*"]
+    end
   end
 
   # Call as update_privacy_settings('com.my.app', {:photos => {:allow => true}})
@@ -256,7 +342,6 @@ class Calabash::Cucumber::Launcher
         end
       end
     end
-
   end
 
   # @!visibility private
@@ -428,9 +513,25 @@ class Calabash::Cucumber::Launcher
 
     args[:device] ||= detect_device_from_args(args)
 
+    if args[:reset]
+      # attempt to find the sdk version from the :device_target
+      sdk = sdk_version_for_simulator_target(args)
 
-    reset_app_jail if args[:reset]
-
+      # *** LEGACY SUPPORT ***
+      # If DEVICE_TARGET has not been set and is not a device UDID, then
+      # :device_target will be 'simulator'.  In that case, we cannot know what
+      # SDK version of the app sandbox we should reset.  The user _might_ give
+      # us a hint with SDK_VERSION, but we want to deprecate that variable ASAP.
+      #
+      # If passed a nil SDK arg, reset_app_sandbox will reset the _latest_ SDK.
+      # This is not good, because this is probably _not_ the SDK that should be
+      # reset.  Our only option is to reset every sandbox for all SDKs by
+      # passing :sdk => :all to reset_app_sandbox.
+      if sdk.nil? and args[:device_target] == 'simulator'
+        sdk = :all
+      end
+      reset_app_sandbox({:sdk => sdk, :path => args[:app]})
+    end
 
     if args[:privacy_settings]
       if simulator_target?(args)
@@ -478,8 +579,6 @@ class Calabash::Cucumber::Launcher
     else
       args[:app]
     end
-
-
   end
 
   # @!visibility private
@@ -621,7 +720,6 @@ class Calabash::Cucumber::Launcher
       world.on_launch
     end
   end
-
 
   # @!visibility private
   def info_plist_as_hash(plist_path)
