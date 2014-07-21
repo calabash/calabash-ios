@@ -1,4 +1,4 @@
-# Calabash iOS [![Build Status](https://travis-ci.org/calabash/calabash-ios.png)](https://travis-ci.org/calabash/calabash-ios) [![License](https://go-shields.herokuapp.com/license-Eclipse-blue.png)](http://opensource.org/licenses/MIT)
+    [![Build Status](https://travis-ci.org/calabash/calabash-ios.png)](https://travis-ci.org/calabash/calabash-ios) [![License](https://go-shields.herokuapp.com/license-Eclipse-blue.png)](http://opensource.org/licenses/EPL-1.0)
 
 # Welcome to Calabash for iOS
 
