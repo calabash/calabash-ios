@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+CUCUMBER_ARGS=$*
+
 cd calabash-cucumber
 
 RETVAL=$?
@@ -30,56 +32,159 @@ export APP_BUNDLE_PATH="./LPSimpleExample-cal.app"
 
 RETVAL=0
 
-bundle exec cucumber -p sim61_4in $CUCUMBER_ARGS
-RETVAL=$(($RETVAL+$?))
+NL=$'\n'
+SIMS_PASSING="PASSING SIMS${NL}"
+SIMS_FAILING="FAILING SIMS${NL}"
 
-bundle exec cucumber -p sim71_4in $CUCUMBER_ARGS
- RETVAL=$(($RETVAL+$?))
-
-# Will not pass on travis although a similar rspec test does.
-# Instead we run on the 4in 7.0 64 bit simulator.
-if [ -z $TRAVIS ]; then
-    bundle exec cucumber -p sim71_64b $CUCUMBER_ARGS
-    RETVAL=$(($RETVAL+$?))
+SIM_PROFILE=sim61_4in
+SIM='iPhone Retina (4-inch) - Simulator - iOS 6.1'
+MSG="$SIM_PROFILE => $SIM${NL}"
+bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+PASS_FAIL=$?
+if [ $PASS_FAIL = 0 ]; then
+    SIMS_PASSING="${SIMS_PASSING}${MSG}"
 else
-    # bundle exec cucumber -p sim71_64b $CUCUMBER_ARGS
-    # EXPECT_FAIL=$?
-    # if [ $EXPECT_FAIL = 0 ]; then
-    #     echo "FAIL: expected iPhone iOS 7.1 64b to fail"
-    #     exit $EXPECT_FAIL
-    # fi
-    bundle exec cucumber -p sim70_64b $CUCUMBER_ARGS
-    RETVAL=$(($RETVAL+$?))
+    SIMS_FAILING="${SIMS_FAILING}${MSG}"
+fi
+RETVAL=$(($RETVAL+$PASS_FAIL))
+
+SIM_PROFILE=sim71_4in
+SIM='iPhone Retina (4-inch) - Simulator - iOS 7.1'
+bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+PASS_FAIL=$?
+MSG="$SIM_PROFILE => $SIM${NL}"
+if [ $PASS_FAIL = 0 ]; then
+    SIMS_PASSING="${SIMS_PASSING}${MSG}"
+else
+    SIMS_FAILING="${SIMS_FAILING}${MSG}"
+fi
+RETVAL=$(($RETVAL+$PASS_FAIL))
+
+# iOS 7.1 64 bit flickers on travis ci because the
+# host VM sometimes pops a security dialog.
+# Instead we run on the 7.0 64 bit simulator.
+if [ -z $TRAVIS ]; then
+    SIM_PROFILE=sim71_64b
+    SIM='iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
+    MSG="$SIM_PROFILE => $SIM${NL}"
+    bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+    PASS_FAIL=$?
+    if [ $PASS_FAIL = 0 ]; then
+        SIMS_PASSING="${SIMS_PASSING}${MSG}"
+    else
+        SIMS_FAILING="${SIMS_FAILING}${MSG}"
+    fi
+    RETVAL=$(($RETVAL+$PASS_FAIL))
+else
+    SIM_PROFILE=sim70_64b
+    SIM='iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'
+    MSG="$SIM_PROFILE => $SIM${NL}"
+    bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+    PASS_FAIL=$?
+    if [ $PASS_FAIL = 0 ]; then
+        SIMS_PASSING="${SIMS_PASSING}${MSG}"
+    else
+        SIMS_FAILING="${SIMS_FAILING}${MSG}"
+    fi
+    RETVAL=$(($RETVAL+$PASS_FAIL))
 fi
 
-bundle exec cucumber -p sim61r $CUCUMBER_ARGS
-RETVAL=$(($RETVAL+$?))
-bundle exec cucumber -p sim71r $CUCUMBER_ARGS
-RETVAL=$(($RETVAL+$?))
-
-bundle exec cucumber -p sim61_ipad_r $CUCUMBER_ARGS
-RETVAL=$(($RETVAL+$?))
-bundle exec cucumber -p sim71_ipad_r $CUCUMBER_ARGS
-RETVAL=$(($RETVAL+$?))
-
-if [ -z $TRAVIS ]; then
-    bundle exec cucumber -p sim71_ipad_r_64b $CUCUMBER_ARGS
-    RETVAL=$(($RETVAL+$?))
+SIM_PROFILE=sim61r
+SIM='iPhone Retina (3.5-inch) - Simulator - iOS 6.1'
+MSG="$SIM_PROFILE => $SIM${NL}"
+bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+PASS_FAIL=$?
+if [ $PASS_FAIL = 0 ]; then
+    SIMS_PASSING="${SIMS_PASSING}${MSG}"
 else
-    # bundle exec cucumber -p sim71_ipad_r_64b $CUCUMBER_ARGS
-    # EXPECT_FAIL=$?
-    # if [ $EXPECT_FAIL = 0 ]; then
-    #     echo "FAIL: expected iPad iOS 7.1 64b to fail"
-    #     exit $EXPECT_FAIL
-    # fi
-    bundle exec cucumber -p sim70_ipad_r_64b $CUCUMBER_ARGS
-    RETVAL=$(($RETVAL+$?))
+    SIMS_FAILING="${SIMS_FAILING}${MSG}"
+fi
+RETVAL=$(($RETVAL+$PASS_FAIL))
+
+SIM_PROFILE=sim71r
+SIM='iPhone Retina (3.5-inch) - Simulator - iOS 6.1'
+MSG="$SIM_PROFILE => $SIM${NL}"
+bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+PASS_FAIL=$?
+if [ $PASS_FAIL = 0 ]; then
+    SIMS_PASSING="${SIMS_PASSING}${MSG}"
+else
+    SIMS_FAILING="${SIMS_FAILING}${MSG}"
+fi
+RETVAL=$(($RETVAL+$PASS_FAIL))
+
+SIM_PROFILE=sim61_ipad_r
+SIM='iPad Retina - Simulator - iOS 6.1'
+MSG="$SIM_PROFILE => $SIM${NL}"
+bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+PASS_FAIL=$?
+if [ $PASS_FAIL = 0 ]; then
+    SIMS_PASSING="${SIMS_PASSING}${MSG}"
+else
+    SIMS_FAILING="${SIMS_FAILING}${MSG}"
+fi
+RETVAL=$(($RETVAL+$PASS_FAIL))
+
+SIM_PROFILE=sim71_ipad_r
+SIM='iPad Retina - Simulator - iOS 7.1'
+MSG="$SIM_PROFILE => $SIM${NL}"
+bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+PASS_FAIL=$?
+if [ $PASS_FAIL = 0 ]; then
+    SIMS_PASSING="${SIMS_PASSING}${MSG}"
+else
+    SIMS_FAILING="${SIMS_FAILING}${MSG}"
+fi
+RETVAL=$(($RETVAL+$PASS_FAIL))
+
+# iOS 7.1 64 bit flickers on travis ci because the
+# host VM sometimes pops a security dialog.
+# Instead we run on the 7.0 64 bit simulator.
+if [ -z $TRAVIS ]; then
+    SIM_PROFILE=sim71_ipad_r_64b
+    SIM='iPad Retina (64-bit) - Simulator - iOS 7.1'
+    MSG="$SIM_PROFILE => $SIM${NL}"
+    bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+    PASS_FAIL=$?
+    if [ $PASS_FAIL = 0 ]; then
+        SIMS_PASSING="${SIMS_PASSING}${MSG}"
+    else
+        SIMS_FAILING="${SIMS_FAILING}${MSG}"
+    fi
+    RETVAL=$(($RETVAL+$PASS_FAIL))
+else
+    SIM_PROFILE=sim70_ipad_r_64b
+    SIM='iPad Retina (64-bit) - Simulator - iOS 7.0'
+    MSG="$SIM_PROFILE => $SIM${NL}"
+    bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+    PASS_FAIL=$?
+    if [ $PASS_FAIL = 0 ]; then
+        SIMS_PASSING="${SIMS_PASSING}${MSG}"
+    else
+        SIMS_FAILING="${SIMS_FAILING}${MSG}"
+    fi
+    RETVAL=$(($RETVAL+$PASS_FAIL))
 fi
 
-bundle exec cucumber -p sim61_sl $CUCUMBER_ARGS
-RETVAL=$(($RETVAL+$?))
+SIM_PROFILE=sim61_sl
+SIM='iPhone (3.5-inch) - Simulator - iOS 6.1 (launched with ios-sim)'
+MSG="$SIM_PROFILE => $SIM${NL}"
+bundle exec cucumber -p $SIM_PROFILE $CUCUMBER_ARGS
+PASS_FAIL=$?
+if [ $PASS_FAIL = 0 ]; then
+    SIMS_PASSING="${SIMS_PASSING}${MSG}"
+else
+    SIMS_FAILING="${SIMS_FAILING}${MSG}"
+fi
+RETVAL=$(($RETVAL+$PASS_FAIL))
 
 set -o errexit
+
+echo "=== SUMMARY ==="
+echo $"${SIMS_PASSING}"
+echo ""
+echo $"${SIMS_FAILING}"
+echo ""
 
 if [ $RETVAL != 0 ]; then
     echo "FAIL: failed $RETVAL out of 9 simulators"
