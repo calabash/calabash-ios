@@ -63,7 +63,7 @@ class Calabash::IBase
     should_await = merged_transitions_opts[:await]
 
     if action.nil? && uiquery.nil?
-      raise MissingArgument "Called transition without providing a gesture (:tap or :action) #{transition_options}"
+      raise(ArgumentError, "Called transition without providing a gesture (:tap or :action) #{transition_options}")
     end
 
     if uiquery
