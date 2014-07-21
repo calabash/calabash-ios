@@ -9,7 +9,6 @@ require 'cfpropertylist'
 require 'calabash-cucumber/version'
 require 'calabash-cucumber/utils/logging'
 
-
 # Class used to launch apps for testing in iOS Simulator or on iOS Devices
 # Uses instruments to launch, but has legacy support for using `sim_launcher`.
 class Calabash::Cucumber::Launcher
@@ -154,28 +153,75 @@ class Calabash::Cucumber::Launcher
     device.ios_version
   end
 
-  # Reset the app sandbox for a device
-  # @todo currently only works on iOS Simulator and in Xamarin Test Cloud
-  # @param {String} sdk the sdk version to reset (for simulator)
-  # @param {String} path the app bundle path to reset (for simulator)
+  # @deprecated 0.10.0 Replaced with {#reset_app_sandbox}.
+  # Reset the app sandbox for a device.
   def reset_app_jail(sdk=nil, path=nil)
-    sdk ||= sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
-    path ||= self.simulator_launcher.app_bundle_or_raise(app_path)
+    # will be deprecated in a future version
+    #_deprecated('0.10.0', 'use reset_app_sandbox instead', :warn)
+    reset_app_sandbox({:sdk => sdk, :path => path})
+  end
+
+  # Resets the app's content and settings by deleting the following directories
+  # from application sandbox:
+  #
+  # * Library
+  # * Documents
+  # * tmp
+  #
+  # @note Currently only works on iOS Simulator and in Xamarin Test Cloud.
+  #
+  # Generates a warning if called when targeting a physical device that is not
+  # in the Xamarin Test Cloud.
+  #
+  # @param [Hash] opts can pass the target sdk or the path to the application bundle
+  # @option opts [String] :sdk the target sdk
+  # @option opts [String] :path path to the application bundle
+  def reset_app_sandbox(opts={})
+
+    # Cannot use environment_helpers xamarin_test_cloud? because the
+    # EnvironmentHelpers module requires this file.
+    if device_target? and ENV['XAMARIN_TEST_CLOUD'] != '1'
+      calabash_warn("calling 'reset_app_sandbox' when targeting a device outside the XTC is not supported.")
+      return
+    end
+
+    default_opts = {:sdk => nil,:path => nil}
+    merged_opts = default_opts.merge opts
+
+    sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
+    path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
 
     app = File.basename(path)
-    directories_for_sdk_prefix(sdk).each do |dir|
-      bundle = `find "#{dir}/Applications" -type d -depth 2 -name "#{app}" | head -n 1`
+    directories_for_sdk_prefix(sdk).each do |sdk_dir|
+      app_dir = File.expand_path("#{sdk_dir}/Applications")
+      next unless File.exists?(app_dir)
+
+      bundle = `find "#{app_dir}" -type d -depth 2 -name "#{app}" | head -n 1`
+
       next if bundle.empty? # Assuming we're already clean
+
       if debug_logging?
         puts "Reset app state for #{bundle}"
       end
       sandbox = File.dirname(bundle)
-      ['Library', 'Documents', 'tmp'].each do |dir|
-        FileUtils.rm_rf(File.join(sandbox, dir))
+      ['Library', 'Documents', 'tmp'].each do |content_dir|
+        FileUtils.rm_rf(File.join(sandbox, content_dir))
       end
     end
+  end
 
-
+  # simulates touching the iOS Simulator > Reset Content and Settings... menu
+  # item.
+  #
+  # @note
+  #  **WARNING** This is a destructive operation.  You have been warned.
+  #
+  # @raise RuntimeError if called when targeting a physical device
+  def reset_simulator
+    if device_target?
+      raise "calling 'reset_simulator' when targeting a device is not allowed"
+    end
+    reset_simulator_content_and_settings
   end
 
   # @!visibility private
@@ -229,7 +275,6 @@ class Calabash::Cucumber::Launcher
         end
       end
     end
-
   end
 
   # @!visibility private
@@ -402,7 +447,7 @@ class Calabash::Cucumber::Launcher
     args[:device] ||= detect_device_from_args(args)
 
 
-    reset_app_jail if args[:reset]
+    reset_app_sandbox({:sdk => nil, :path => args[:app]}) if args[:reset]
 
 
     if args[:privacy_settings]
@@ -451,8 +496,6 @@ class Calabash::Cucumber::Launcher
     else
       args[:app]
     end
-
-
   end
 
   # @!visibility private
