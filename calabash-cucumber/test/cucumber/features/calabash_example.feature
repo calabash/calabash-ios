@@ -11,6 +11,5 @@ Feature: to reset or not reset
   Scenario: Use a Before hook to reset the simulator and then type some text
     Then I type "Hello"
 
-  @wip
   Scenario: Try to reproduce the minitest problem by calling an operations method
     Then I use the operations module method labels
