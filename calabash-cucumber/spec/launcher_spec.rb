@@ -109,7 +109,7 @@ describe 'Calabash Launcher' do
 
   describe 'default launch args should respect DEVICE_TARGET' do
 
-    it "it should return 'simulator' if DEVICE_TARGET nil" do
+    it "should return 'simulator' if DEVICE_TARGET nil" do
       args = @launcher.default_launch_args
       expect(args[:device_target]).to be == 'simulator'
     end

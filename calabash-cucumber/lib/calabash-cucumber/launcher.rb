@@ -306,7 +306,7 @@ class Calabash::Cucumber::Launcher
     end
 
     if args[:device_target].nil?
-      args[:device_target] = 'simulator'
+      args[:device_target] = device_tgt || 'simulator'
     end
     args
   end
