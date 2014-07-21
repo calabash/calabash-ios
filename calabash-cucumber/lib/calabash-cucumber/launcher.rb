@@ -660,6 +660,22 @@ class Calabash::Cucumber::Launcher
   end
 
   # @!visibility private
+  def sdk_version_for_simulator_target(launch_args)
+    return nil if device_target?
+    value = launch_args[:device_target]
+    return nil if value.nil?
+    return nil unless value.downcase.include?('simulator')
+    # we have a string like:
+    # iPhone Retina (4-inch) - Simulator - iOS 7.1
+    # iPad Retina - Simulator - iOS 6.1
+    # iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0
+    sdk = value.split(' ').last
+
+    # legacy support for DEVICE_TARGET=simulator
+    return nil if sdk == 'simulator'
+    sdk
+  end
+
   def use_instruments_env?
     ENV['LAUNCH_VIA'] == 'instruments'
   end

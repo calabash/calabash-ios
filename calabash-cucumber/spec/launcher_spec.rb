@@ -1,11 +1,15 @@
 require 'spec_helper'
 require 'calabash-cucumber/launcher'
+require 'calabash-cucumber/utils/simulator_accessibility'
+
 require 'run_loop'
 
 describe 'Calabash Launcher' do
 
+  SIM_SDK_DIR_REGEX = /(\d)\.(\d)\.?(\d)?(-64)?/
   UDID = '66h3hfgc466836ehcg72738eh8f322842855d2fd'
   IPHONE_4IN_R_64 = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
+
   before(:each) do
     @launcher = Calabash::Cucumber::Launcher.new
   end
@@ -74,6 +78,31 @@ describe 'Calabash Launcher' do
     it 'should return false when passed a hash with no :device_target key' do
       hash = {:foobar => 'foobar'}
       expect(@launcher.simulator_target?(hash)).to be == false
+    end
+    describe 'should be able to detect the base simulator sdk from the launch args' do
+      it 'should return nil if the test targets a device' do
+        expect(@launcher).to receive(:device_target?).and_return(true)
+        expect(@launcher.sdk_version_for_simulator_target({})).to be nil
+      end
+
+      it 'should return nil if :device_target is nil' do
+        expect(@launcher.sdk_version_for_simulator_target({})).to be nil
+      end
+
+      it 'should return nil if :device_target is not a simulator' do
+        launch_args = {:device_target => UDID}
+        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be nil
+      end
+
+      it "should return nil if :device_target is 'simulator'" do
+        launch_args = {:device_target => 'simulator'}
+        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be nil
+      end
+
+      it 'should return an SDK if :device_target is an Xcode 5.1+ simulator string' do
+        launch_args = {:device_target => 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'}
+        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be == '7.0'
+      end
     end
 
   end
