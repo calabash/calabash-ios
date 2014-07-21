@@ -61,8 +61,10 @@ end
 
 Given(/^I turn the switch on$/) do
   wait_for_element_exists qstr_for_switch
-  sleep(1.0) if uia_not_available?
   unless switch_state
+    # having a very hard time touching this switch. :(
+    # wait_tap does work. :(
+    sleep(1.0)
     touch qstr_for_switch
     sleep(0.4)
   end
