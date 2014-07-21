@@ -105,6 +105,15 @@ describe 'Calabash Launcher' do
       end
     end
 
+  describe 'reset_simulator' do
+    it 'should raise an error if running on a device' do
+      ENV['DEVICE_TARGET'] = UDID
+      expect {  @launcher.reset_simulator  }.to raise_error(RuntimeError)
+    end
+
+    it 'should reset the simulator' do
+      @launcher.reset_simulator
+    end
   end
 
   describe 'default launch args should respect DEVICE_TARGET' do
