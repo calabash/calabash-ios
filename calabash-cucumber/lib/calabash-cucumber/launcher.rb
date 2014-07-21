@@ -17,7 +17,7 @@ class Calabash::Cucumber::Launcher
   include Calabash::Cucumber::Logging
   include Calabash::Cucumber::SimulatorAccessibility
 
-  # @!visibility private
+  # A hash of known privacy settings that calabash can control.
   KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
 
   # noinspection RubyClassVariableUsageInspection
