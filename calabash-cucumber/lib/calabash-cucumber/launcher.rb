@@ -22,7 +22,7 @@ class Calabash::Cucumber::Launcher
 
   # noinspection RubyClassVariableUsageInspection
 
-  # Class variable for accessing the currently defined launcher.
+  # @!visibility private
   @@launcher = nil
 
   # @!visibility private
