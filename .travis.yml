@@ -3,9 +3,17 @@ language: objective-c
 script:
   - script/rspec-ci
   - script/unit-ci
+  - script/cucumber-ci
 
 rvm:
   - 1.9.3
   - 2.1.0
   - 2.1.1
 
+notifications:
+  email: false
+  hipchat:
+    rooms:
+      secure: 2GKzpN6s6XEqxo4B5/bdV7RqTXGKOaF2Ta/gNaZs4QhGFdfkvNFsDqBoaIh50aTVXCv6JIznNkjwXJAB1qiAkSXkYl6NFFwIzws0JTWryn3T9HFzLlonU4GU2lhFIpraBoyAbSVc6HTkX4zKF3fSw/RuwGnTlToVhrdU/idZpKM=
+      template:
+       - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}'
