@@ -64,7 +64,9 @@ no_stop:      NO_STOP=1
 ipad:   DEVICE=ipad   -p common --tags ~@iphone --tags ~@iphone_only
 iphone: DEVICE=iphone -p common --tags ~@ipad --tags ~@ipad_only
 
-simulator:     -p common -p ss_path -p html_report --tags ~@device_only --tags ~@device
+abp:           APP_BUNDLE_PATH=LPSimpleExample-cal.app
+
+simulator:     -p common -p ss_path -p html_report --tags ~@device_only --tags ~@device -p abp
 sim_launch:    -p simulator -p do_launch -p no_reset_btw -p no_stop
 sim_no_launch: -p simulator -p no_launch -p no_reset_btw
 
