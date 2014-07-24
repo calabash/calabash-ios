@@ -35,10 +35,13 @@ task :build_server do
 
   FRAMEWORK='calabash.framework'
   ZIP_FILE="#{FRAMEWORK}.zip"
+  FRANK_CALABASH='libFrankCalabash.a'
+  FRANK_CAL_PATH='./build/Debug-iphonesimulator/libFrankCalabash.a'
 
   def build_server
     return if ENV['SKIP_SERVER']
     framework_zip = nil
+    lib_frank_cal = nil
     dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
     unless File.exist?(dir)
       raise <<EOF
@@ -52,6 +55,7 @@ EOF
       puts 'INFO: building server...'
       puts "INFO: $ cd #{File.expand_path(dir)} ; make"
       `make`
+      `./build-frank.sh` if File.exist?('build-frank.sh')
       unless File.exist?(FRAMEWORK)
         puts 'FAIL:  unable to build calabash.framework'
         puts "FAIL:  run 'make' in #{File.expand_path(dir)} to diagnose"
@@ -69,12 +73,21 @@ EOF
         puts "FAIL:  run '#{zip_cmd}' in #{File.expand_path(dir)} to diagnose"
         raise 'Unable to zip down framework...'
       end
+
+      if File.exist?(FRANK_CAL_PATH)
+        lib_frank_cal = File.expand_path(FRANK_CAL_PATH)
+      end
     end
 
     FileUtils.mkdir_p('staticlib')
     output_path = File.join('staticlib', ZIP_FILE)
     FileUtils.mv(framework_zip,output_path, :force => true)
     puts "INFO: calabash.framework.zip installed in #{output_path}"
+
+    if lib_frank_cal && File.exist?(lib_frank_cal)
+      FileUtils.mv(lib_frank_cal, 'staticlib', :force => true)
+      puts 'INFO: libFrankCalabash.a copied to staticlib'
+    end
 
   end
 
