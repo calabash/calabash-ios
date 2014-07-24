@@ -12,7 +12,7 @@ additional_bin_files = %w(bin/cal.xcconfig bin/CalabashSetup bin/calabash-ios)
 staticlib = %w(staticlib/calabash.framework.zip staticlib/libFrankCalabash.a)
 
 # files in script
-scripts = %w(scripts/.irbrc scripts/launch.rb)
+scripts = %w(scripts/.irbrc scripts/launch.rb scripts/calabash.xcconfig.erb)
 
 # files in script/data
 scripts_data = Dir.glob('scripts/data/*.plist')
