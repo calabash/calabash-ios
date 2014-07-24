@@ -1,22 +1,43 @@
-calabash-cucumber/pkg
-calabash-cucumber/Markdown.pl
-calabash-cucumber/.idea
-examples/LPSimpleExample.xcodeproj/project.xcworkspace
-examples/LPSimpleExample.xcodeproj/xcuserdata/krukow.xcuserdatad
-examples/LPSimpleExample.xcodeproj/project.xcworkspace/xcuserdata
-examples/LPSimpleExample.xcodeproj/xcuserdata/krukow.xcuserdatad
-examples/LPSimpleExample.xcodeproj/xcuserdata
-examples/LPSimpleExample.xcodeproj/project.xcworkspace/xcuserdata/krukow.xcuserdatad/UserInterfaceState.xcuserstate
-Markdown.pl
-examples_development
-*.swp
 *.gem
+*.rbi
+.config
+coverage
+InstalledFiles
+pkg
+vendor
+spec/reports
+test/tmp
+test/version_tmp
+tmp
 
-# rvm and .rbenv versions
+# Documentation cache and generated files:
+.yardoc
+_yardoc
+doc
+rdoc
+
+# for a library or gem, you might want to ignore these files since the code is
+# intended to run in multiple environments; otherwise, check them in:
+Gemfile.lock
 .ruby-version
+.ruby-gemset
+.bundle
+
+# unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
+.rvmrc
+
+# RubyMine
+.idea
 
 # notes
 notes
 
-# RubyMine
-.idea
+# part of the gem
+calabash-cucumber/staticlib
+
+# MacOS
+.DS_Store
+__MACOSX
+
+# emacs
+(.*/)?\#[^/]*\#$
