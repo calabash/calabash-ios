@@ -394,7 +394,8 @@ module Calabash
         end
       end
 
-      # touches the keyboard action key
+      # @deprecated 0.10.0 replaced with `tap_keyboard_action_key`
+      # @see #tap_keyboard_action_key
       #
       # Touches the keyboard action key.
       #
