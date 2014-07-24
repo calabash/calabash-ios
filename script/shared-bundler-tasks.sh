@@ -21,7 +21,7 @@ else
     echo "INFO: installed bundler"
 fi
 
-bundle install --deployment
+bundle install
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     echo "FAIL: failed to bundle install"
