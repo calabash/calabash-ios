@@ -60,6 +60,20 @@ def uninstall_frank_plugin
   end
 end
 
+def console
+  require 'frank-cucumber/console'
+  require 'frank-calabash'
+  require 'calabash-cucumber/operations'
+  require 'pry'
+  ENV['CALABASH_VERSION_PATH']='calabash_version'
+  console = Frank::Console.new
+  console.extend ::Frank::Calabash
+  console.extend ::Calabash::Cucumber::Operations
+  def console.embed(*args)
+  end
+  console.pry
+end
+
 unless ARGV.length == 1
   print_usage
   exit(false)
@@ -71,6 +85,8 @@ case cmd
     install_frank_plugin
   when 'uninstall'
     uninstall_frank_plugin
+  when 'console'
+    console
   else
     puts "Unsupported command #{cmd}"
     exit(false)
