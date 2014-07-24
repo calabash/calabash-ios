@@ -12,8 +12,7 @@ Then /^I use the operations module method labels$/ do
 end
 
 Then(/^I type "([^"]*)"$/) do |text_to_type|
-  # wait_tap 'textField' fails here on _devices_ (ipad ios 7 landscape aka venus)
-  wait_for_element_exists('textField')
+  wait_for_element_exists('textField', {:post_timeout => 0.4})
   sleep 1.0 if uia_not_available?
   touch 'textField'
   sleep 0.4 if uia_not_available?

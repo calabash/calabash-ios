@@ -1,3 +1,4 @@
+@no_ci
 @resetting
 Feature:  can persist a keychain item over app restart
 
