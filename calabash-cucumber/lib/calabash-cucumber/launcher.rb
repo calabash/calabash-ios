@@ -273,7 +273,7 @@ class Calabash::Cucumber::Launcher
     end
   end
 
-  # simulates touching the iOS Simulator > Reset Content and Settings... menu
+  # Simulates touching the iOS Simulator > Reset Content and Settings... menu
   # item.
   #
   # @note
@@ -296,7 +296,7 @@ class Calabash::Cucumber::Launcher
     end
   end
 
-  # Call as update_privacy_settings('com.my.app', {:photos => {:allow => true}})
+  # Call as `update_privacy_settings('com.my.app', {:photos => {:allow => true}})`
   # @!visibility private
   def update_privacy_settings(bundle_id, opts={})
     if debug_logging?
@@ -834,17 +834,19 @@ class Calabash::Cucumber::Launcher
     msg.join("\n")
   end
 
-  # extracts server version from the app binary at +app_bundle_path+ by
+  # @!visibility private
+  # Extracts server version from the app binary at `app_bundle_path` by
   # inspecting the binary's strings table.
   #
-  # SPECIAL: sets the +@@server_version+ class variable to cache the server
-  # version because the server version will never change during runtime.
+  # @note
+  #  SPECIAL: sets the `@@server_version` class variable to cache the server
+  #  version because the server version will never change during runtime.
   #
   # @return [String] the server version
   # @param [String] app_bundle_path file path (usually) to the application bundle
-  # @raise [RuntimeError] if there is no executable at +app_bundle_path+
+  # @raise [RuntimeError] if there is no executable at `app_bundle_path`
   # @raise [RuntimeError] if the server version cannot be extracted from any
-  #   binary at +app_bundle_path+
+  #   binary at `app_bundle_path`
   def server_version_from_bundle(app_bundle_path)
     return @@server_version unless @@server_version.nil?
     exe_paths = []
