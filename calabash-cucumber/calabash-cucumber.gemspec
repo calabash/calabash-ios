@@ -40,6 +40,8 @@ Gem::Specification.new do |s|
   s.test_files    = []
   s.executables   = 'calabash-ios'
   s.require_paths = ['lib']
+  s.license       = 'EPL-1.0'
+
 
   s.add_dependency('cucumber', '~> 1.3.0')
   s.add_dependency('calabash-common', '~> 0.0.1')
