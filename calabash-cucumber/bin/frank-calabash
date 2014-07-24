@@ -45,7 +45,7 @@ def install_frank_plugin
   FileUtils.mkdir_p CAL_PLUGIN_DIR
   FileUtils.cp([LIB_FRANK_CAL, XCCONFIG], CAL_PLUGIN_DIR)
   puts "Copied files #{Dir[File.join(CAL_PLUGIN_DIR,'*')].join(', ')}"
-  puts "\n\nInstalled Frank-Calabash plugin."
+  puts "\nInstalled Frank-Calabash plugin."
   puts 'Please rebuild using frank build.'
 
 end
