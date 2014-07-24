@@ -5,7 +5,7 @@ module Calabash
 
     # @!visibility public
     # The Calabash iOS gem version.
-    VERSION = '0.10.0.pre1'
+    VERSION = '0.10.0.pre2'
 
     # @!visibility public
     # The minimum required version of the calabash.framework or, for Xamarin
