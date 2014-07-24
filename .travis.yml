@@ -4,6 +4,7 @@ script:
   - script/rspec-ci
   - script/unit-ci
   - script/cucumber-ci.rb --tags ~@no_ci
+  - script/install-gem-ci.rb
 
 rvm:
   - 1.9.3
