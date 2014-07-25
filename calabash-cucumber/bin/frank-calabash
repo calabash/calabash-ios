@@ -68,7 +68,7 @@ def console
   ENV['CALABASH_VERSION_PATH']='calabash_version'
   console = Frank::Console.new
   console.extend ::Frank::Calabash
-  console.extend ::Calabash::Cucumber::Operations
+
   def console.embed(*args)
   end
   console.pry
