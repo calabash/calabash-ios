@@ -37,6 +37,10 @@ module Frank
       launcher.relaunch(options)
     end
 
+    def calabash_client
+      Client.new
+    end
+
     module Operations
       include ::Calabash::Cucumber::Operations
     end
