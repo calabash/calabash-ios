@@ -28,7 +28,6 @@ end
 
 module Frank
   module Calabash
-
     def launch(options={})
       launcher = ::Calabash::Cucumber::Launcher.launcher
       #noinspection RubyResolve
@@ -40,18 +39,11 @@ module Frank
 
     module Operations
       include ::Calabash::Cucumber::Operations
-      alias_method :touch_cal, :touch
-
-
-      def touch(uiquery)
-        query_result = frankly_map(uiquery,:query).first
-        unless query_result
-          raise "could not find anything matching [#{uiquery}] to touch"
-        else
-          touch_cal(query_result)
-        end
-      end
-
     end
+
+    class Client
+      include Operations
+    end
+
   end
 end
