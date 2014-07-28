@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
-require File.expand_path(File.join(File.dirname(__FILE__), 'ci_helpers'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
 
-working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', 'calabash-cucumber'))
+working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'calabash-cucumber'))
 
 # Enable binaries to be installed.
 #
@@ -19,13 +19,15 @@ Dir.chdir working_directory do
   do_system 'mkdir -p staticlib'
   do_system 'mv calabash.framework.zip staticlib/'
   do_system 'rm calabash.framework'
-  do_system('gem install --no-document bundler',
-            {:pass_msg => 'installed gem',
-             :fail_msg => 'could not install gem'})
 
-  do_system('bundle install',
-            {:pass_msg => 'bundled',
-             :fail_msg => 'could not bundle'})
+  do_system('touch staticlib/calabash.framework.zip',
+            {:pass_msg => 'installed (empty) staticlib/calabash.framework.zip',
+             :fail_msg => 'could not install (empty) staticlib/calabash.framework.zip'})
+
+  do_system('touch staticlib/libFrankCalabash.a',
+            {:pass_msg => 'installed (empty) staticlib/libFrankCalabash.a',
+             :fail_msg => 'could not install (empty) staticlib/libFrankCalabash.a'})
+
 end
 
 exit 0

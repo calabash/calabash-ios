@@ -1,18 +1,10 @@
 #!/usr/bin/env ruby
 
-require File.expand_path(File.join(File.dirname(__FILE__), 'ci_helpers'))
-
-shared_bundler_script_path = File.join(File.dirname(__FILE__), 'shared-bundler-tasks.rb')
-
-do_system(shared_bundler_script_path,
-          {:pass_msg => 'completed bundle tasks',
-           :fail_msg => 'did not complete bundle tasks'})
-
+require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
 cucumber_args = "#{ARGV.join(' ')}"
 
-working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', 'calabash-cucumber/test/cucumber'))
-
+working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'calabash-cucumber/test/cucumber'))
 
 # on-simulator tests of features in test/cucumber
 Dir.chdir(working_directory) do
