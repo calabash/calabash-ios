@@ -50,7 +50,7 @@ module Calabash
       #   simulators, or the path to the instruments binary
       # @raise [ArgumentError] if invalid +cmd+ is passed
       def instruments(cmd=nil)
-        instruments = "#{xcode_bin_dir}/instruments"
+        instruments = 'xcrun instruments'
         return instruments if cmd == nil
 
         case cmd
