@@ -9,9 +9,7 @@ describe 'calabash ios sim cli' do
     out = capture_stderr do
       quit_sim
     end
-    tokens = out.string.split("\n")
-    puts tokens
-    expect(tokens[1]).to be == "WARN: deprecated '0.9.169' - 'use Calabash::Cucumber::SimulatorAccessibility.quit_simulator'"
+    expect(out.string.split(' ').include?('deprecated')).to be == true
   end
 
   it 'should be able to reset the content and settings of the simulator' do

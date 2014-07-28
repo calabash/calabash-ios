@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'calabash-cucumber/utils/xctools'
 
 include Calabash::Cucumber::XcodeTools
@@ -20,19 +21,15 @@ describe 'xcode tools module' do
       expect(xcode_developer_dir).to be == actual
     end
 
-    it 'should find the developer usr/bin directory' do
-      actual = File.join(xcode_developer_dir, '/usr/bin')
-      expect(xcode_bin_dir).to be == "#{actual}"
-      expect(File.exists?("#{xcode_bin_dir}/xcodebuild")).to be == true
+    it 'should deprecate xcode_bin_dir' do
+      out = capture_stderr do
+        xcode_bin_dir
+      end
+      expect(out.string.split(' ').include?('deprecated')).to be true
     end
   end
 
   describe 'instruments function' do
-
-    it 'should find the binary' do
-      actual = File.join(xcode_bin_dir, 'instruments')
-      expect(instruments).to be == actual
-    end
 
     it 'should check its arguments' do
       expect { instruments(:foo) }.to raise_error(ArgumentError)
@@ -40,7 +37,7 @@ describe 'xcode tools module' do
 
     it 'should report its version' do
       version = instruments(:version)
-      expect(['5.1.1', '5.1'].include?(version)).to be == true
+      expect(['5.1.1', '5.1', '6.0', '5.0', '5.0.1'].include?(version)).to be == true
     end
 
     it 'should be tell if it supports the -s flag' do
