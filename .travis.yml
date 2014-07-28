@@ -1,10 +1,15 @@
 language: objective-c
 
+before_script:
+  - gem uninstall -Vax --force --no-abort-on-dependent calabash-cucumber
+  - script/ci/travis/install-static-libs.rb
+  - script/ci/travis/bundle-install.rb
+
 script:
-  - script/rspec-ci
-  - script/unit-ci
-  - script/cucumber-ci.rb --tags ~@no_ci
-  - script/install-gem-ci.rb
+  - script/ci/travis/install-gem-ci.rb
+  - script/ci/travis/rspec-ci.rb
+  - script/ci/travis/unit-ci.rb
+  - script/ci/travis/cucumber-ci.rb --tags ~@no_ci
 
 rvm:
   - 1.9.3
