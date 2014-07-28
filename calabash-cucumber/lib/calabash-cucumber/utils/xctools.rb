@@ -27,9 +27,11 @@ module Calabash
         `xcode-select --print-path`.chomp
       end
 
+      # @deprecated 0.10.0 not replaced
       # Returns the path to the current developer `usr/bin` directory.
       # @return [String] path to the current xcode binaries
       def xcode_bin_dir
+        _deprecated('0.10.0', 'no replacement', :warn)
         File.expand_path("#{xcode_developer_dir}/usr/bin")
       end
 
