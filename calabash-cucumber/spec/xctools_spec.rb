@@ -37,7 +37,7 @@ describe 'xcode tools module' do
 
     it 'should report its version' do
       version = instruments(:version)
-      expect(['5.1.1', '5.1'].include?(version)).to be == true
+      expect(['5.1.1', '5.1', '6.0', '5.0', '5.0.1'].include?(version)).to be == true
     end
 
     it 'should be tell if it supports the -s flag' do
