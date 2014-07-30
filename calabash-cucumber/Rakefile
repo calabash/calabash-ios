@@ -54,6 +54,7 @@ EOF
     FileUtils.cd(dir) do
       puts 'INFO: building server...'
       puts "INFO: $ cd #{File.expand_path(dir)} ; make"
+      `make clean`
       `make`
       `./build-frank.sh` if File.exist?('build-frank.sh')
       unless File.exist?(FRAMEWORK)
