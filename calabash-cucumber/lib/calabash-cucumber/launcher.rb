@@ -379,9 +379,9 @@ class Calabash::Cucumber::Launcher
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
         :sdk_version => sdk_version,
-        # do not advertise this to users!
-        # for example, don't include documentation about this
-        # this is used to instrument internal testing
+        # Do not advertise this to users!
+        # For example, don't include documentation about this option.
+        # This is used to instrument internal testing (failing fast).
         :launch_retries => 5
     }
 
