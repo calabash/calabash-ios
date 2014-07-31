@@ -13,16 +13,29 @@ module Calabash
 
       include Calabash::Cucumber::Logging
 
-      # executes raw JavaScript in the UIAutomation environment (using `eval`).
-      # @param {String} command the JavaScript snipplet to execute
+      # Executes raw JavaScript in the UIAutomation environment (using `eval`).
+      # @param {String} command the JavaScript snippet to execute
       # @return {Object} the result returned by the UIA process
       def uia(command,options={})
-        res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          raise "uia action failed because: #{res['reason']}\n#{res['details']}"
+        uia_strategy = ENV['UIA_STRATEGY'] || 'http'
+        case uia_strategy
+          when 'http'
+            res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
+            res = JSON.parse(res)
+            if res['outcome'] != 'SUCCESS'
+              raise "uia action failed because: #{res['reason']}\n#{res['details']}"
+            end
+            res['results'].first
+          when 'run_loop'
+            launcher =  Calabash::Cucumber::Launcher.launcher_if_used
+            run_loop = launcher && launcher.active? && launcher.run_loop
+            raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
+            raise ArgumentError, 'please supply :command' unless command
+            RunLoop.send_command(run_loop, command)
+          else
+            candidates = ['http', 'run_loop']
+            raise ArgumentError, "expected '#{uia_strategy}' to be one of #{candidates}"
         end
-        res['results'].first
       end
 
       # @!visibility private

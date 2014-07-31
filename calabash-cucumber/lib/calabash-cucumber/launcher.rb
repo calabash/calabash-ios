@@ -547,6 +547,18 @@ class Calabash::Cucumber::Launcher
     end
 
     if run_with_instruments?(args)
+
+      uia_strategy = ENV['UIA_STRATEGY'] || 'http'
+      case uia_strategy
+        when 'http'
+          args[:script] = :run_loop_fast_uia
+        when 'run_loop'
+          args[:script] = :run_loop_host
+        else
+          candidates = ['http', 'run_loop']
+          raise ArgumentError, "expected '#{uia_strategy}' to be one of #{candidates}"
+      end
+
       self.run_loop = new_run_loop(args)
       self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
