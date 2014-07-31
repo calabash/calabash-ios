@@ -17,7 +17,8 @@ run_loop_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '.
 
 Dir.chdir run_loop_dir do
 
-  do_system('scripts/ci/travis/install-gem-ci.rb')
+  do_system('bundle install')
+  do_system('bundle exec rake install')
 
 end
 
