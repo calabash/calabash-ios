@@ -23,14 +23,16 @@ module Calabash
 
     # A model of a release version that can be used to compare two version.
     #
-    # Calabash tries very hard to comply with Semantic Versioning rules.
+    # Calabash tries very hard to comply with Semantic Versioning rules. However,
+    # the semantic versioning spec is incompatible with RubyGem's patterns for
+    # pre-release gems.
     #
-    # However, our test workflow requires that we use `.pre` to denote
-    # pre-release versions instead of the recommended `-alpha`, `-beta`, or, `-pre`.
+    # > "But returning to the practical: No release version of SemVer is compatible with Rubygems." - _David Kellum_
     #
     # Calabash version numbers will be in the form `<major>.<minor>.<patch>[.pre<N>]`.
     #
     # @see http://semver.org/
+    # @see http://gravitext.com/2012/07/22/versioning.html
     class Version
 
       # @!attribute [rw] major
@@ -73,9 +75,18 @@ module Calabash
       #  version.pre_release => 5
       #
       # @param [String] version the version string to parse.
+      # @raise [ArgumentError] if version is not in the form 5, 6.1, 7.1.2, 8.2.3.pre1
       def initialize(version)
-        tokens = version.split('.')
+        tokens = version.strip.split('.')
         count = tokens.count
+        if tokens.empty?
+          raise ArgumentError, "expected '#{version}' to be like 5, 6.1, 7.1.2, 8.2.3.pre1"
+        end
+
+        if count < 4 and tokens.any? { |elm| elm =~ /\D/ }
+          raise ArgumentError, "expected '#{version}' to be like 5, 6.1, 7.1.2, 8.2.3.pre1"
+        end
+
         if count == 4
           @pre = tokens[3]
           pre_tokens = @pre.scan(/\D+|\d+/)
@@ -88,7 +99,7 @@ module Calabash
       # Returns an string representation of this version.
       # @return [String] a string in the form `<major>.<minor>.<patch>[.pre<N>]`
       def to_s
-        str = [@major, @minor, @patch].join('.')
+        str = [@major, @minor, @patch].compact.join('.')
         str = "#{str}.#{@pre}" if @pre
         str
       end
@@ -97,42 +108,42 @@ module Calabash
       # @param [Version] other the version to compare against
       # @return [Boolean] true if this Version is the same as `other`
       def == (other)
-        compare(self, other) == 0
+        Version.compare(self, other) == 0
       end
 
       # Compare this version to another for inequality.
       # @param [Version] other the version to compare against
       # @return [Boolean] true if this Version is not the same as `other`
       def != (other)
-        compare(self, other) != 0
+        Version.compare(self, other) != 0
       end
 
       # Is this version less-than another version?
       # @param [Version] other the version to compare against
       # @return [Boolean] true if this Version is less-than `other`
       def < (other)
-        compare(self, other) < 0
+        Version.compare(self, other) < 0
       end
 
       # Is this version greater-than another version?
       # @param [Version] other the version to compare against
       # @return [Boolean] true if this Version is greater-than `other`
       def > (other)
-        compare(self, other) > 0
+        Version.compare(self, other) > 0
       end
 
       # Is this version less-than or equal to another version?
       # @param [Version] other the version to compare against
       # @return [Boolean] true if this Version is less-than or equal `other`
       def <= (other)
-        compare(self, other) <= 0
+        Version.compare(self, other) <= 0
       end
 
       # Is this version greater-than or equal to another version?
       # @param [Version] other the version to compare against
       # @return [Boolean] true if this Version is greater-than or equal `other`
       def >= (other)
-        compare(self, other) >= 0
+        Version.compare(self, other) >= 0
       end
 
       # Compare version `a` to version `b`.
@@ -143,18 +154,18 @@ module Calabash
       #   compare Version.new(0.9.0),  Version.new(0.9.0)  =>  0
       #
       # @return [Integer] an integer `(-1, 1)`
-      def compare(a, b)
+      def self.compare(a, b)
 
         if a.major != b.major
           return a.major > b.major ? 1 : -1
         end
 
         if a.minor != b.minor
-          return a.minor > b.minor ? 1 : -1
+          return a.minor.to_i  > b.minor.to_i ? 1 : -1
         end
 
         if a.patch != b.patch
-          return a.patch > b.patch ? 1 : -1
+          return a.patch.to_i > b.patch.to_i ? 1 : -1
         end
 
         return 1 if a.pre and (not b.pre)
@@ -164,7 +175,7 @@ module Calabash
         return -1 if (not a.pre_version) and b.pre_version
 
         if a.pre_version != b.pre_version
-          return a.pre_version > b.pre_version ? 1 : -1
+          return a.pre_version.to_i > b.pre_version.to_i ? 1 : -1
         end
 
         0
@@ -195,6 +206,14 @@ if __FILE__ == $0
       assert_equal(169, a.patch)
       assert_nil(a.pre)
       assert_nil(a.pre_version)
+    end
+
+    def test_new_passed_invalid_arg
+
+      assert_raise(ArgumentError) { Version.new(' ') }
+      assert_raise(ArgumentError) { Version.new('5.1.pre3') }
+      assert_raise(ArgumentError) { Version.new('5.pre2') }
+
     end
 
     # @!visibility private
@@ -300,6 +319,30 @@ if __FILE__ == $0
       assert(a >= b)
       b = Version.new('0.9.169')
       assert(a >= b)
+    end
+
+    def test_compare_missing_patch_level
+      a = Version.new('6.0')
+      b = Version.new('5.1.1')
+      assert(Version.compare(a, b) == 1)
+      assert(a > b)
+
+      a = Version.new('5.1.1')
+      b = Version.new('6.0')
+      assert(Version.compare(a, b) == -1)
+      assert(a < b)
+    end
+
+    def test_compare_missing_minor_level
+      a = Version.new('5.1')
+      b = Version.new('5.1.1')
+      assert(Version.compare(a, b) == -1)
+      assert(a < b)
+
+      a = Version.new('5.1.1')
+      b = Version.new('5.1')
+      assert(Version.compare(a, b) == 1)
+      assert(a > b)
     end
 
   end
