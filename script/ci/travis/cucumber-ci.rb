@@ -44,7 +44,11 @@ Dir.chdir(working_directory) do
   end
 
   # noinspection RubyStringKeysInHashInspection
-  env_vars = {'APP_BUNDLE_PATH' => './LPSimpleExample-cal.app'}
+  env_vars =
+        {
+              'APP_BUNDLE_PATH' => './LPSimpleExample-cal.app',
+              'DEVELOPER_DIR' => '/Applications/Xcode.app/Contents/Developer'
+        }
   passed_sims = []
   failed_sims = []
   profiles.each do |profile, name|

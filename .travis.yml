@@ -2,6 +2,8 @@ language: objective-c
 
 before_script:
   - gem uninstall -Vax --force --no-abort-on-dependent calabash-cucumber
+  - gem uninstall -Vax --force --no-abort-on-dependent run_loop
+  - script/ci/travis/clone-and-install-run-loop.rb
   - script/ci/travis/install-static-libs.rb
   - script/ci/travis/bundle-install.rb
 
@@ -17,4 +19,7 @@ rvm:
   - 2.1.1
 
 notifications:
-  email: true
+  email:
+    on_success: change
+    on_failure: always
+

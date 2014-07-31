@@ -4,6 +4,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
 # before_script
 uninstall_gem 'calabash-cucumber'
+uninstall_gem 'run_loop'
 
 working_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..'))
 
@@ -12,11 +13,15 @@ working_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..
 env_vars =
       {
             'TRAVIS' => '1',
+            'DEVELOPER_DIR' => '/Applications/Xcode.app/Contents/Developer'
       }
 
 Dir.chdir working_dir do
 
   # before_script
+  do_system('script/ci/travis/clone-and-install-run-loop.rb',
+            {:env_vars => env_vars})
+
   do_system('script/ci/travis/install-static-libs.rb',
             {:env_vars => env_vars})
 
