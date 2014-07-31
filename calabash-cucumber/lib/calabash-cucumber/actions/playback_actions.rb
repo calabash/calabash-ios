@@ -23,10 +23,14 @@ class Calabash::Cucumber::PlaybackActions
     playback('double_tap', options)
   end
 
+  # noinspection RubyUnusedLocalVariable
+
   # @!visibility private
   def two_finger_tap(*args)
     raise error_message('two_finger_tap')
   end
+
+  # noinspection RubyUnusedLocalVariable
 
   # @!visibility private
   def flick(*args)
@@ -94,16 +98,18 @@ class Calabash::Cucumber::PlaybackActions
 
   # @!visibility private
   def pinch(in_out,options)
-    file = "pinch_in"
+    file = 'pinch_in'
     if in_out==:out
-      file = "pinch_out"
+      file = 'pinch_out'
     end
     playback(file, options)
   end
 
+  # noinspection RubyUnusedLocalVariable
+
   # @!visibility private
   def send_app_to_background(secs)
-    raise 'Not implemented when running without instruments / UIA'
+    raise error_message 'send_app_to_background'
   end
 
   private
