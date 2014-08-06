@@ -8,7 +8,7 @@ ruby_files = Dir.glob('lib/**/*.rb') + Dir.glob('bin/**/*.rb')
 # addition files in bin
 additional_bin_files = %w(bin/cal.xcconfig bin/CalabashSetup bin/calabash-ios)
 
-# the calabash framework
+# the calabash framework and frank lib
 staticlib = %w(staticlib/calabash.framework.zip staticlib/libFrankCalabash.a)
 
 # files in script
@@ -37,7 +37,6 @@ Gem::Specification.new do |s|
   s.summary     = %q{Client for calabash-ios-server for automated functional testing on iOS}
   s.description = %q{calabash-cucumber drives tests for native iOS apps. You must link your app with calabash-ios-server framework to execute tests.}
   s.files         = gem_files
-  s.test_files    = []
   s.executables   = %w(calabash-ios frank-calabash)
   s.require_paths = %w(lib)
   s.license       = 'EPL-1.0'
@@ -54,8 +53,8 @@ Gem::Specification.new do |s|
   s.add_dependency('geocoder', '~>1.1.8')
   s.add_dependency('httpclient', '~> 2.3.3')
   s.add_dependency('bundler', '~> 1.1')
-  s.add_dependency('run_loop', '>= 1.0.0.pre', '< 1.1')
   s.add_dependency('awesome_print')
+  s.add_dependency('run_loop', '~> 0.2')
 
   s.add_development_dependency 'rake', '~> 10.3'
   s.add_development_dependency 'rspec', '~> 3.0'
