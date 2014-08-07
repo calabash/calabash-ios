@@ -26,13 +26,14 @@ Dir.chdir(working_directory) do
 
   # todo - parse the config/cucumber.yml file for this info
   profiles =
-        {:sim61_4in => 'iPhone Retina (4-inch) - Simulator - iOS 6.1',
-         :sim71_4in => 'iPhone Retina (4-inch) - Simulator - iOS 7.1',
-         :sim61r => 'iPhone Retina (3.5-inch) - Simulator - iOS 6.1',
-         :sim71r => 'iPhone Retina (3.5-inch) - Simulator - iOS 7.1',
-         :sim61_ipad_r => 'iPad Retina - Simulator - iOS 6.1',
-         :sim71_ipad_r => 'iPad Retina - Simulator - iOS 7.1',
-         :sim61_sl => 'iPhone (3.5-inch) - Simulator - iOS 6.1 (launched with ios-sim)'
+        {
+              :sim61_4in => 'iPhone Retina (4-inch) - Simulator - iOS 6.1',
+              :sim71_4in => 'iPhone Retina (4-inch) - Simulator - iOS 7.1',
+              :sim61r => 'iPhone Retina (3.5-inch) - Simulator - iOS 6.1',
+              :sim71r => 'iPhone Retina (3.5-inch) - Simulator - iOS 7.1',
+              :sim61_ipad_r => 'iPad Retina - Simulator - iOS 6.1',
+              :sim71_ipad_r => 'iPad Retina - Simulator - iOS 7.1',
+              :sim61_sl => 'iPhone (3.5-inch) - Simulator - iOS 6.1 (launched with ios-sim)'
         }
 
   if travis_ci?
