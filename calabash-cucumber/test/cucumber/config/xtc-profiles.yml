@@ -9,7 +9,7 @@ ipad_only:   --tags ~@iphone --tags ~@iphone_only
 tags:        -p not_xtc -p not_sim -p no_launch
 
 default:     -p tags
-ci           -p tags --tags ~@no_ci
+ci:          -p tags --tags ~@no_ci
 
 wip:         -p tags --tags @wip
 flicker:     -p tags --tags @flickering
