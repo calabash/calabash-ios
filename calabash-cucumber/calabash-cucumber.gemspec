@@ -57,7 +57,7 @@ Gem::Specification.new do |s|
   s.add_dependency('geocoder', '~>1.1.8')
   s.add_dependency('httpclient', '~> 2.3.3')
   s.add_dependency('bundler', '~> 1.1')
-  s.add_dependency('run_loop', '~> 0.2')
+  s.add_dependency('run_loop', '0.2.1')
   s.add_dependency('awesome_print')
 
   s.add_development_dependency 'rake', '~> 10.3'
