@@ -5,8 +5,11 @@ require 'calabash-cucumber/version'
 # ruby files
 ruby_files = Dir.glob('lib/**/*.rb') + Dir.glob('bin/**/*.rb')
 
-# addition files in bin
+# additional files in bin
 additional_bin_files = %w(bin/cal.xcconfig bin/CalabashSetup bin/calabash-ios)
+
+# bin help file
+bin_help = %w(doc/calabash-ios-help.txt)
 
 # the calabash framework
 staticlib = %w(staticlib/calabash.framework.zip staticlib/libFrankCalabash.a)
@@ -28,7 +31,7 @@ playback = Dir.glob('lib/calabash-cucumber/resources/**/*.base64')
 
 license = %w(LICENSE)
 
-gem_files = ruby_files + additional_bin_files + staticlib + scripts + scripts_data + features + features_skeleton + license + playback
+gem_files = ruby_files + additional_bin_files + bin_help + staticlib + scripts + scripts_data + features + features_skeleton + license + playback
 
 Gem::Specification.new do |s|
   s.name        = 'calabash-cucumber'
