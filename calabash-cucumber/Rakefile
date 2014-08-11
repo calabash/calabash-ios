@@ -42,6 +42,7 @@ task :build_server do
     return if ENV['SKIP_SERVER']
     framework_zip = nil
     lib_frank_cal = nil
+    dylibs = nil
     dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
     unless File.exist?(dir)
       raise <<EOF
@@ -56,7 +57,10 @@ EOF
       puts "INFO: $ cd #{File.expand_path(dir)} ; make"
       `make clean`
       `make`
+      puts 'INFO: build libFrankCalabash.a'
       `./build-frank.sh` if File.exist?('build-frank.sh')
+      puts 'INFO: build calabash dylibs'
+      `make dylibs` if ENV['CALABASH_BUILD_DYLIBS']=='1'
       unless File.exist?(FRAMEWORK)
         puts 'FAIL:  unable to build calabash.framework'
         puts "FAIL:  run 'make' in #{File.expand_path(dir)} to diagnose"
@@ -78,6 +82,11 @@ EOF
       if File.exist?(FRANK_CAL_PATH)
         lib_frank_cal = File.expand_path(FRANK_CAL_PATH)
       end
+
+      if DYLIB_PATHS.all? {|path| File.exist?(path)}
+        dylibs = DYLIB_PATHS.map {|dylib| File.expand_path(dylib)}
+      end
+
     end
 
     FileUtils.mkdir_p('staticlib')
@@ -88,6 +97,14 @@ EOF
     if lib_frank_cal && File.exist?(lib_frank_cal)
       FileUtils.mv(lib_frank_cal, 'staticlib', :force => true)
       puts 'INFO: libFrankCalabash.a copied to staticlib'
+    end
+
+    if dylibs
+      FileUtils.mkdir_p('dylibs')
+      dylibs.each do |dylib|
+        FileUtils.mv(dylib, 'dylibs', :force => true)
+        puts "INFO: #{File.basename(dylib)} copied to dylibs"
+      end
     end
 
   end
