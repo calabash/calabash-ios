@@ -8,9 +8,7 @@ module Calabash
   module Cucumber
     # Collection of methods for interacting with the keyboard.
     #
-    # There are two environmental variables you can use to control the speed of
-    # typing.  We've gone to great lengths to provide the fastest keyboard
-    # entry possible.
+    # We've gone to great lengths to provide the fastest keyboard entry possible.
     #
     # If you are having trouble with skipped or are receiving JSON octet
     # errors when typing, you might be able to resolve the problems by slowing
