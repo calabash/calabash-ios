@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'calabash-cucumber/launcher'
 require 'calabash-cucumber/utils/simulator_accessibility'
 

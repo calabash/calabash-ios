@@ -1,4 +1,3 @@
-require 'rspec'
 require 'calabash-cucumber/utils/logging'
 
 include Calabash::Cucumber::Logging
