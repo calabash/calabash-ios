@@ -345,6 +345,23 @@ Use a `Before` hook + a `tag` to control when calabash will reset the app sandbo
 
 See this Stack Overflow post: http://stackoverflow.com/questions/24493634/reset-ios-app-in-calabash-ios 
 
+### `SCREENSHOT_PATH`
+
+Use this variable to tell Calabash in which directory to save screenshots.
+
+#### Special
+
+If the path defined by this variable does not exist or is not a directory,
+`screenshot` will raise an error.
+
+@see {Calabash::Cucumber::FailureHelpers#screenshot}
+
+#### Example
+
+```
+SCREENSHOT_PATH=/path/to/a/directory
+```
+
 ### `SDK_VERSION`
 
 ***iOS Simulator testing only.***
