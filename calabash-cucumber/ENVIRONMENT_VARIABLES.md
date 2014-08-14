@@ -396,44 +396,6 @@ increasing sleep times.  This slows down the tests and hides bugs.
 * @see {Calabash::Cucumber::Core#wait_tap}
 * @see {Calabash::Cucumber::WaitHelpers}
 
-## Keyboard Variables
-
-We've gone to great lengths to provide the fastest keyboard entry possible.  There are a number of Apple bugs in UIAutomation which make this very difficult.  
-
-We spend a lot of time and effort testing the keyboard API and we recommend you stick with the default configurations.  If you do choose to use the variables below, please read the documentation carefully.
-
-**NOTE:** These variables have no effect if you are use instruments to launch your applications.
-
-**NOTE:** These variables are candidates for deprecation.
-
-### `POST_ENTER_KEYBOARD`
-
-If you are having trouble with skipped or are receiving errors when typing, errors when typing, you might be able to resolve the problems by slowing down the rate of typing.
- 
-This variable has no effect if you are using UIA to type strings unless you follow the example provide and type each character one at a time.
-
-The default value for this variable is 0.05.   This value was arrived at by experimentation.
-
-#### Example:  Use `keyboard_enter_char + POST_ENTER_KEYBOARD`
-
-```
-$ POST_ENTER_KEYBOARD=0.1 bundle exec cucumber
-
-In your tests:
-
-str.each_char do |char|
-  keyboard_enter_char(char)
-end
-```
-
-### `KEYPLANE_SEARCH_STEP_PAUSE`
-
-Use this variable to control how quickly the next keyplane is searched.  Increase this value if you encounter problems with missed keystrokes on alternative keyplanes.
-
-This variable has no effect if you are using UIA to type strings.
-
-The default variable for this variable is 0.2.  This value was arrived at by experimentation.
-
 ## Variables for Gem Developers
 
 These variables are reserved for gem developers.  Normal users should not set alter these variables.
