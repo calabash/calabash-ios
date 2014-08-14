@@ -78,6 +78,8 @@ def is_json?(str)
  str[0..0] == '{'
 end
 
+# @!visibility private
+# @deprecated Replaced with test-cloud gem
 def calabash_submit(args)
   if args.size < 2
    msg("Error") do
