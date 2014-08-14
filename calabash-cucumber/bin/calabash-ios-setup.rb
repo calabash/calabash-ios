@@ -79,6 +79,7 @@ def calabash_download(args)
   download_calabash(File.expand_path("."))
 end
 
+# @todo eval for deprecation - has no callers.
 def has_proxy?
   ENV['http_proxy'] ? true : false
 end
