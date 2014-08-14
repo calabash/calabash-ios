@@ -13,7 +13,6 @@ require 'calabash-cucumber/utils/logging'
 
 # The base module for Calabash iOS.
 module Calabash
-  # todo in 1.0 release consider changing Cucumber module to iOS module
   # The base sub module for Calabash iOS
   module Cucumber
 
