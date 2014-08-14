@@ -208,6 +208,7 @@ if __FILE__ == $0
       assert_nil(a.pre_version)
     end
 
+    # @!visibility private
     def test_new_passed_invalid_arg
 
       assert_raise(ArgumentError) { Version.new(' ') }
@@ -321,6 +322,7 @@ if __FILE__ == $0
       assert(a >= b)
     end
 
+    # @!visibility private
     def test_compare_missing_patch_level
       a = Version.new('6.0')
       b = Version.new('5.1.1')
@@ -333,6 +335,7 @@ if __FILE__ == $0
       assert(a < b)
     end
 
+    # @!visibility private
     def test_compare_missing_minor_level
       a = Version.new('5.1')
       b = Version.new('5.1.1')
