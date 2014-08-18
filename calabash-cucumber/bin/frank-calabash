@@ -12,6 +12,8 @@ def print_usage
       Frank/plugins/calabash
     uninstall
       uninstalls Frank.Calabash by removing Frank/plugins/calabash
+    console
+      starts the Frank console prepared for Calabash: use c = calabash_client to obtain a Calabash client. Use launch to launch using instruments.
 EOF
 end
 
