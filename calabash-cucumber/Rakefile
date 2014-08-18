@@ -36,7 +36,7 @@ task :build_server do
   FRAMEWORK='calabash.framework'
   ZIP_FILE="#{FRAMEWORK}.zip"
   FRANK_CALABASH='libFrankCalabash.a'
-  FRANK_CAL_PATH='./build/Debug-iphonesimulator/libFrankCalabash.a'
+  FRANK_CAL_PATH='./build/Debug-combined/libFrankCalabash.a'
 
   def build_server
     return if ENV['SKIP_SERVER']
