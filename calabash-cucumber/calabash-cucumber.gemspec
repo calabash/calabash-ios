@@ -14,6 +14,9 @@ bin_help = %w(doc/calabash-ios-help.txt)
 # the calabash framework
 staticlib = %w(staticlib/calabash.framework.zip staticlib/libFrankCalabash.a)
 
+# calabash dylibs
+dylibs = %w(dylibs/libCalabashDyn.dylib dylibs/libCalabashDynSim.dylib)
+
 # files in script
 scripts = %w(scripts/.irbrc scripts/launch.rb scripts/calabash.xcconfig.erb)
 
@@ -32,6 +35,10 @@ playback = Dir.glob('lib/calabash-cucumber/resources/**/*.base64')
 license = %w(LICENSE)
 
 gem_files = ruby_files + additional_bin_files + bin_help + staticlib + scripts + scripts_data + features + features_skeleton + license + playback
+
+if File.exist?(dylibs.first)
+  gem_files += dylibs
+end
 
 Gem::Specification.new do |s|
   s.name        = 'calabash-cucumber'
