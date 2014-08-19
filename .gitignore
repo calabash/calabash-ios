@@ -35,8 +35,9 @@ Gemfile.lock
 # notes
 notes
 
-# part of the gem
+# libraries that are included in the gem
 calabash-cucumber/staticlib
+calabash-cucumber/dylibs
 
 # MacOS
 .DS_Store
