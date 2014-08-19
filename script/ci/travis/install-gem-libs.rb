@@ -28,6 +28,14 @@ Dir.chdir working_directory do
             {:pass_msg => 'installed (empty) staticlib/libFrankCalabash.a',
              :fail_msg => 'could not install (empty) staticlib/libFrankCalabash.a'})
 
+  do_system 'mkdir -p dylibs'
+
+  dylibs = ['dylibs/libCalabashDyn.dylib', 'dylibs/libCalabashDynSim.dylib']
+  dylibs.each do |dylib|
+    do_system("touch #{dylib}",
+              {:pass_msg => "installed (empty) #{dylib}",
+               :fail_msg => "could not install (empty) #{dylib}"})
+  end
 end
 
 exit 0
