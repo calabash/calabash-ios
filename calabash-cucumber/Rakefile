@@ -39,7 +39,6 @@ task :build_server do
   DYLIB_PATHS = ['./calabash.dylibs/libCalabashDynSim.dylib','./calabash.dylibs/libCalabashDyn.dylib']
 
   def build_server
-    return if ENV['SKIP_SERVER']
     framework_zip = nil
     lib_frank_cal = nil
     dylibs = []
