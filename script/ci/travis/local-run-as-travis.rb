@@ -22,7 +22,7 @@ Dir.chdir working_dir do
   do_system('script/ci/travis/clone-and-install-run-loop.rb v0.2.1',
             {:env_vars => env_vars})
 
-  do_system('script/ci/travis/install-static-libs.rb',
+  do_system('script/ci/travis/install-gem-libs.rb',
             {:env_vars => env_vars})
 
   do_system('script/ci/travis/bundle-install.rb',
