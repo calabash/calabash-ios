@@ -35,7 +35,7 @@ ss_path = "./screenshots/"
 %>
 
 verbose: CALABASH_FULL_CONSOLE_OUTPUT=1 DEBUG=1
-common: --no-source -f 'Slowhandcuke::Formatter'
+common: -f progress
 
 ss_path: SCREENSHOT_PATH=<%= ss_path %>
 
