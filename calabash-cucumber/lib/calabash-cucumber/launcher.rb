@@ -580,7 +580,11 @@ class Calabash::Cucumber::Launcher
     end
     self.launch_args = args
     ensure_connectivity
-    check_server_gem_compatibility
+
+    # skip compatibility check if injecting dylib
+    unless args.fetch(:inject_dylib, false)
+      check_server_gem_compatibility
+    end
   end
 
   # @!visibility private
