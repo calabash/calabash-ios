@@ -7,6 +7,7 @@ require 'cfpropertylist'
 module Calabash
   module Cucumber
 
+    # @deprecated 0.10.0 Replaced with RunLoop::SimControl
     # Public methods for common simulator tasks and private methods for
     # enabling accessibility on the simulator.
     module SimulatorAccessibility
@@ -118,6 +119,7 @@ module Calabash
 
       @private
 
+      # @deprecated 0.10.0 no replacement
       # @!visibility private
       # Enables accessibility on the simulator indicated by `sim_app_support_sdk_dir.`
       #
@@ -143,6 +145,7 @@ module Calabash
       # @return [Boolean] if the plist exists and the plist was successfully
       #   updated.
       def enable_accessibility_in_sdk_dir(sim_app_support_sdk_dir, opts={})
+        _deprecated('0.10.0', 'no replacement', :warn)
         default_opts = {:verbose => false}
         merged = default_opts.merge(opts)
 
@@ -190,12 +193,14 @@ module Calabash
       end
 
 
+      # @deprecated 0.10.0 no replacement
       # @!visibility private
       # A hash table of the accessibility properties that control whether or not
       # accessibility is enabled and whether the AXInspector is visible.
       # @return [Hash] table of accessibility properties found in the
       #  Library/Preferences/com.apple.Accessibility.plist
       def accessibility_properties_hash
+        _deprecated('0.10.0', 'no replacement', :warn)
         {
               # this is required
               :access_enabled => {:key => 'AccessibilityEnabled',
@@ -229,21 +234,26 @@ module Calabash
         }
       end
 
+      # @deprecated 0.10.0 no replacement
       # @!visibility private
       # The absolute path to the iPhone Simulator Application Support directory.
       # @return [String] absolute path
+      # @todo add deprecation message - ATM {Calabash::Cucumber::Launcher.reset_app_sandbox} is using this
       def simulator_app_support_dir
         File.expand_path('~/Library/Application Support/iPhone Simulator')
       end
 
+      # @deprecated 0.10.0 no replacement
       # @!visibility private
       # The absolute path to the SDK's com.apple.Accessibility.plist file.
       # @param [String] sdk_dir base path the SDK directory
       # @return [String] an absolute path
       def plist_path_with_sdk_dir(sdk_dir)
+        _deprecated('0.10.0', 'no replacement', :warn)
         File.expand_path("#{sdk_dir}/Library/Preferences/com.apple.Accessibility.plist")
       end
 
+      # @deprecated 0.10.0 no replacement
       # @!visibility private
       # Returns a list of absolute paths the existing simulator directories.
       #
@@ -256,6 +266,7 @@ module Calabash
       #     ~/Library/Application Support/iPhone Simulator/Library/7.1
       #
       # @return[Array<String>] a list of absolute paths to simulator directories
+      # @todo add deprecation message - ATM ::reset_content_and_settings is using this
       def existing_simulator_support_sdk_dirs
         sim_app_support_path = simulator_app_support_dir()
         Dir.glob("#{sim_app_support_path}/*").select { |path|
@@ -263,6 +274,7 @@ module Calabash
         }
       end
 
+      # @deprecated 0.10 no replacement
       # @!visibility private
       # Returns a list of possible SDKs per Xcode version.
       #
@@ -274,6 +286,7 @@ module Calabash
       #
       # @return [Array<String>] ex. ['6.1', '7.1', '7.0.3', '7.0.3-64']
       def possible_simulator_sdks
+        _deprecated('0.10.0', 'no replacement', :warn)
         sdk_detector = SimLauncher::SdkDetector.new
         available = sdk_detector.available_sdk_versions
         instruments_version = instruments(:version)
@@ -303,12 +316,14 @@ module Calabash
         (available - ['7.0']).uniq.sort
       end
 
+      # @deprecated 0.10.0 no replacement
       # @!visibility private
       # Return absolute paths to possible simulator support sdk dirs.
       #
       # these directories may or may not exist
       # @return [Array<String>] an array of absolute paths
       def possible_simulator_support_sdk_dirs
+        _deprecated('0.10.0', 'no replacement', :warn)
         base_dir = simulator_app_support_dir
         possible_simulator_sdks.map { |sdk|
           "#{base_dir}/#{sdk}"
