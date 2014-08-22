@@ -19,7 +19,7 @@ env_vars =
 Dir.chdir working_dir do
 
   # before_script
-  do_system('script/ci/travis/clone-and-install-run-loop.rb v0.2.1',
+  do_system('script/ci/travis/clone-and-install-run-loop.rb',
             {:env_vars => env_vars})
 
   do_system('script/ci/travis/install-gem-libs.rb',
