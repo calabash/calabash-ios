@@ -15,6 +15,7 @@ module Calabash
       #   Uses ENV['SCREENSHOT_PATH'] if nil or '' if ENV['SCREENSHOT_PATH'] is nil
       # @option options {String} :name ('screenshot') the base name and extension of the file (e.g. 'login.png')
       # @return {String} path to the generated screenshot
+      # @todo deprecated the current behavior of SCREENSHOT_PATH; it is confusing
       def screenshot(options={:prefix => nil, :name => nil})
         prefix = options[:prefix]
         name = options[:name]
