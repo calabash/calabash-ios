@@ -1,5 +1,6 @@
 require 'calabash-cucumber/utils/xctools'
 require 'calabash-cucumber/utils/plist_buddy'
+require 'calabash-cucumber/utils/logging'
 require 'sim_launcher'
 require 'cfpropertylist'
 
@@ -81,6 +82,7 @@ module Calabash
         end
       end
 
+      # @deprecated 0.10.0 replaced with RunLoop::SimControl#enable_accessibility_on_simulators
       # @!visibility private
       # Enables accessibility on any existing iOS Simulator by adjusting the
       # simulator's Library/Preferences/com.apple.Accessibility.plist contents.
@@ -104,6 +106,7 @@ module Calabash
       # @return [Boolean] true if enabling accessibility worked on all sdk
       #  directories
       def enable_accessibility_on_simulators(opts={})
+        _deprecated('0.10.0', 'replaced with RunLoop::SimControl#enable_accessibility_on_simulators', :warn)
         possible = possible_simulator_support_sdk_dirs
         existing = existing_simulator_support_sdk_dirs
         dirs = (possible + existing).uniq
