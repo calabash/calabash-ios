@@ -15,24 +15,14 @@ module Calabash
       #   Uses ENV['SCREENSHOT_PATH'] if nil or '' if ENV['SCREENSHOT_PATH'] is nil
       # @option options {String} :name ('screenshot') the base name and extension of the file (e.g. 'login.png')
       # @return {String} path to the generated screenshot
-      # @raise [RuntimeError] If the directory indicated by SCREENSHOT_PATH does
-      #  not exist or is not a directory.
-      def screenshot(options={:prefix => '', :name => nil})
+      # @todo deprecated the current behavior of SCREENSHOT_PATH; it is confusing
+      def screenshot(options={:prefix => nil, :name => nil})
         prefix = options[:prefix]
         name = options[:name]
 
         @@screenshot_count ||= 0
         res = http({:method => :get, :path => 'screenshot'})
-
-        screenshot_path = ''
-        screenshot_env_var = ENV['SCREENSHOT_PATH']
-        if screenshot_env_var
-          screenshot_path = File.expand_path(screenshot_env_var)
-          unless File.directory?(screenshot_path)
-            raise "cannot create screenshot because directory does not exist.\n#{screenshot_path}"
-          end
-        end
-
+        prefix = prefix || ENV['SCREENSHOT_PATH'] || ''
         if name.nil?
           name = 'screenshot'
         else
@@ -41,8 +31,7 @@ module Calabash
           end
         end
 
-        path = File.expand_path(File.join(screenshot_path, prefix, "#{name}_#{@@screenshot_count}.png"))
-
+        path = "#{prefix}#{name}_#{@@screenshot_count}.png"
         File.open(path, 'wb') do |f|
           f.write res
         end

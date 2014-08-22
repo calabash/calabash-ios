@@ -347,19 +347,32 @@ See this Stack Overflow post: http://stackoverflow.com/questions/24493634/reset-
 
 ### `SCREENSHOT_PATH`
 
-Use this variable to tell Calabash in which directory to save screenshots.
+Use this variable to apply a 'prefix' to a screenshot when saving.  See the examples.
+
+#### Note
+
+The behavior of this variable is subject to change.
 
 #### Special
 
-If the path defined by this variable does not exist or is not a directory,
-`screenshot` will raise an error.
+If the the *path* portion of SCREENSHOT_PATH does not exist, `screenshot` will raise an error.
 
 @see {Calabash::Cucumber::FailureHelpers#screenshot}
 
-#### Example
+#### Example: Specify a prefix
 
 ```
-SCREENSHOT_PATH=/path/to/a/directory
+SCREENSHOT_PATH=ipad_                   => ipad_screenshot_0.png
+SCREENSHOT_PATH="screenshots/iphone5s-" => screenshots/iphone5s-screenshot_0.png
+```
+
+#### Example: Specify a directory
+
+```
+# correct!
+SCREENSHOT_PATH=/path/to/a/directory/ => path/to/a/directory/screenshot_0.png
+# incorrect :(
+SCREENSHOT_PATH=/path/to/a/directory  => path/to/a/directoryscreenshot_0.png
 ```
 
 ### `SDK_VERSION`
