@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'calabash-cucumber/utils/xctools'
 
 include Calabash::Cucumber::XcodeTools
