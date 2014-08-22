@@ -22,4 +22,13 @@ describe 'simulator accessibility tool' do
     sleep(4)
     expect(`#{cmd}`.split("\n").count).to be == 1
   end
+
+  describe 'deprecations:' do
+    it '.enable_accessibility_on_simulators' do
+      out = capture_stderr do
+        Calabash::Cucumber::SimulatorAccessibility.enable_accessibility_on_simulators
+      end
+      expect(out).to_not be == nil
+    end
+  end
 end
