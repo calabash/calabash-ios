@@ -543,10 +543,6 @@ class Calabash::Cucumber::Launcher
       end
     end
 
-    if simulator_target?(args)
-      enable_accessibility_on_simulators
-    end
-
     # The public API is true/false, but we need to pass a path to a dylib to
     # run-loop.
     if args.fetch(:inject_dylib, false)
