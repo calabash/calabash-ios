@@ -417,6 +417,22 @@ increasing sleep times.  This slows down the tests and hides bugs.
 
 These variables are reserved for gem developers.  Normal users should not set alter these variables.
 
+### `CALABASH_NO_DYLIBS`
+
+Use this variable to control whether or not the rake `build_server` task should try to build the calabash dynamic libraries (dylibs).  Dylibs require inserting .xcspec files directly into the Xcode.app bundle, which is not something every user wants to do.  The default behavior is to try to build the dylibs.
+
+### `CALABASH_SERVER_PATH`
+
+Use this variable to tell the rake `build_server` task to where your calabash-ios-server repository is located.  By default, the task expects the server sources to be located two directories up in a directory named `calabash-ios-server`.
+
+#### Example
+
+```
+$ cd calabash-ios/calabash-cucumber
+$ tree -d -L 1 ../../calabash-ios-server
+../../calabash-ios-server
+```
+
 ### `CALABASH_VERSION_PATH`
 
 This variable should be deprecated.  

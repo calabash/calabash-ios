@@ -19,10 +19,10 @@ env_vars =
 Dir.chdir working_dir do
 
   # before_script
-  do_system('script/ci/travis/clone-and-install-run-loop.rb v0.2.1',
+  do_system('script/ci/travis/clone-and-install-run-loop.rb',
             {:env_vars => env_vars})
 
-  do_system('script/ci/travis/install-static-libs.rb',
+  do_system('script/ci/travis/install-gem-libs.rb',
             {:env_vars => env_vars})
 
   do_system('script/ci/travis/bundle-install.rb',
@@ -39,6 +39,9 @@ Dir.chdir working_dir do
             {:env_vars => env_vars})
 
   do_system('script/ci/travis/cucumber-ci.rb --tags ~@no_ci',
+            {:env_vars => env_vars})
+
+  do_system('script/ci/travis/cucumber-dylib-ci.rb',
             {:env_vars => env_vars})
 
 end

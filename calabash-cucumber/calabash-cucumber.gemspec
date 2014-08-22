@@ -14,6 +14,9 @@ bin_help = %w(doc/calabash-ios-help.txt)
 # the calabash framework
 staticlib = %w(staticlib/calabash.framework.zip staticlib/libFrankCalabash.a)
 
+# calabash dylibs
+dylibs = %w(dylibs/libCalabashDyn.dylib dylibs/libCalabashDynSim.dylib)
+
 # files in script
 scripts = %w(scripts/.irbrc scripts/launch.rb scripts/calabash.xcconfig.erb)
 
@@ -31,7 +34,7 @@ playback = Dir.glob('lib/calabash-cucumber/resources/**/*.base64')
 
 license = %w(LICENSE)
 
-gem_files = ruby_files + additional_bin_files + bin_help + staticlib + scripts + scripts_data + features + features_skeleton + license + playback
+gem_files = ruby_files + additional_bin_files + bin_help + staticlib + scripts + scripts_data + features + features_skeleton + license + playback + dylibs
 
 Gem::Specification.new do |s|
   s.name        = 'calabash-cucumber'
@@ -60,8 +63,8 @@ Gem::Specification.new do |s|
   s.add_dependency('geocoder', '~>1.1.8')
   s.add_dependency('httpclient', '~> 2.3.3')
   s.add_dependency('bundler', '~> 1.1')
-  s.add_dependency('run_loop', '0.2.1')
   s.add_dependency('awesome_print')
+  s.add_dependency('run_loop', '>= 1.0.0.pre4')
 
   s.add_development_dependency 'rake', '~> 10.3'
   s.add_development_dependency 'rspec', '~> 3.0'
