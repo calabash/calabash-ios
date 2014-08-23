@@ -442,7 +442,7 @@ class Calabash::Cucumber::Launcher
     return :instruments if major && major >= 7 # Only instruments supported for iOS7+
     return :sim_launcher if major # and then we have <= 6
 
-    if RunLoop::Core.above_or_eql_version?('5.1', RunLoop::Core.xcode_version)
+    if RunLoop::XCTools.new.xcode_version_gte_51?
       return use_sim_launcher_env? ? :sim_launcher : :instruments
     end
 
@@ -644,8 +644,7 @@ class Calabash::Cucumber::Launcher
     # for stability, quit the simulator if Xcode version is > 5.1 and the
     # target device is the simulator
     target_is_sim = simulator_target?(args)
-    xcode_gte_51 = RunLoop::Core.above_or_eql_version?('5.1', RunLoop::Core.xcode_version)
-    if target_is_sim and xcode_gte_51
+    if target_is_sim and RunLoop::XCTools.new.xcode_version_gte_51?
       self.simulator_launcher.stop
     end
 
