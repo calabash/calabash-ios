@@ -15,6 +15,11 @@ Dir.chdir(gem_dir) do
   dylib_dir = File.join(gem_dir, 'dylibs')
   FileUtils.mkdir_p dylib_dir
   sim_dylib = File.join(dylib_dir, 'libCalabashDynSim.dylib')
+
+  ### => WARNING <= ###
+  # brute force delete! Remove this once we can build dylibs in the calabash-ios-server
+  FileUtils.rm_rf sim_dylib
+
   unless File.exist? sim_dylib
     do_system("curl --silent -o #{sim_dylib} https://s3.amazonaws.com/littlejoysoftware/public/libCalabashDynSim.dylib",
               { :pass_msg => "downloaded '#{sim_dylib}'",
