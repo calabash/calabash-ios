@@ -34,7 +34,6 @@ desc 'build the calabash.framework and install it in ./staticlib/.'
 task :build_server do
 
   def build_server
-    dylibs = []
     calabash_server_dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
     unless File.exist?(calabash_server_dir)
       raise <<EOF
@@ -100,6 +99,7 @@ EOF
         puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make dylibs"
         `make dylibs`
         dylib_paths = ['./calabash-dylibs/libCalabashDynSim.dylib','./calabash-dylibs/libCalabashDyn.dylib']
+        dylibs = []
         dylib_paths.each do |dylib|
           if File.exist? dylib
             dylibs << File.expand_path(dylib)
