@@ -43,7 +43,6 @@ end
 desc 'Build and install the Objective-C libraries that this gem requires.'
 task :build_server do
 
-  def build_server
     calabash_server_dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
     unless File.exist?(calabash_server_dir)
       raise <<EOF
@@ -129,9 +128,6 @@ EOF
     end
   end
 
-  build_server
-
-end
 
 task :install_server => [:build_server]
 task :release_server => [:build_server]
