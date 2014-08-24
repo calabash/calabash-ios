@@ -33,7 +33,6 @@ end
 desc 'build the calabash.framework and install it in ./staticlib/.'
 task :build_server do
 
-  FRANK_LIB='libFrankCalabash.a'
   DYLIB_PATHS = ['./calabash.dylibs/libCalabashDynSim.dylib','./calabash.dylibs/libCalabashDyn.dylib']
 
   def build_server
@@ -83,15 +82,16 @@ EOF
       # frank
       puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make frank"
       `make frank`
-      if File.exist? FRANK_LIB
-        lib_frank_cal = File.expand_path(FRANK_LIB)
+      frank_library_name='libFrankCalabash.a'
+      if File.exist? frank_library_name
+        path_to_frank_library = File.expand_path(frank_library_name)
       else
         puts 'FAIL: unable to build the frank library'
         puts "FAIL:  run 'make frank' in #{File.expand_path(calabash_server_dir)} to diagnose"
         raise 'could not build libFrankCalabash.a'
       end
 
-      FileUtils.mv(lib_frank_cal, 'staticlib', :force => true)
+      FileUtils.mv(path_to_frank_library, 'staticlib', :force => true)
       puts 'INFO: libFrankCalabash.a installed in staticlib'
 
       # dylibs
