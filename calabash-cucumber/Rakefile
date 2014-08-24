@@ -33,8 +33,6 @@ end
 desc 'build the calabash.framework and install it in ./staticlib/.'
 task :build_server do
 
-  FRAMEWORK='calabash.framework'
-  ZIP_FILE="#{FRAMEWORK}.zip"
   FRANK_LIB='libFrankCalabash.a'
   DYLIB_PATHS = ['./calabash.dylibs/libCalabashDynSim.dylib','./calabash.dylibs/libCalabashDyn.dylib']
 
@@ -57,12 +55,15 @@ EOF
       # framework
       puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make framework"
       `make framework`
-      if File.exist?(FRAMEWORK)
+
+      framework_dir='calabash.framework'
+      framework_zip="#{framework_dir}.zip"
+      if File.exist?(framework_dir)
         puts 'INFO:  creating a zip archive of calabash.framework'
-        zip_cmd = "zip -y -q -r #{ZIP_FILE} #{FRAMEWORK}"
+        zip_cmd = "zip -y -q -r #{framework_zip} #{framework_dir}"
         puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; #{zip_cmd}"
         `#{zip_cmd}`
-        framework_zip = File.expand_path(ZIP_FILE)
+        framework_zip = File.expand_path(framework_zip)
         unless File.exist?(framework_zip)
           puts 'FAIL:  unable to create a zip archive of calabash.framework'
           puts "FAIL:  run '#{zip_cmd}' in #{File.expand_path(calabash_server_dir)} to diagnose"
@@ -75,7 +76,7 @@ EOF
       end
 
       FileUtils.mkdir_p('staticlib')
-      output_path = File.join('staticlib', ZIP_FILE)
+      output_path = File.join('staticlib', framework_zip)
       FileUtils.mv(framework_zip,output_path, :force => true)
       puts 'INFO: calabash.framework.zip installed in staticlib'
 
