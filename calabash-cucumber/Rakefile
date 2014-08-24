@@ -90,6 +90,9 @@ EOF
         raise 'could not build libFrankCalabash.a'
       end
 
+      FileUtils.mv(lib_frank_cal, 'staticlib', :force => true)
+      puts 'INFO: libFrankCalabash.a installed in staticlib'
+
       # dylibs
       if skip_dylibs
         puts "WARN: Skipping dylibs because CALABASH_NO_DYLIBS = '#{ENV['CALABASH_NO_DYLIBS']}'"
@@ -109,8 +112,6 @@ EOF
       end
     end
 
-    FileUtils.mv(lib_frank_cal, 'staticlib', :force => true)
-    puts 'INFO: libFrankCalabash.a installed in staticlib'
 
     unless skip_dylibs
       FileUtils.mkdir_p('dylibs')
