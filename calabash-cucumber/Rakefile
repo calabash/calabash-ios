@@ -74,6 +74,11 @@ EOF
         raise 'could not build the calabash.framework'
       end
 
+      FileUtils.mkdir_p('staticlib')
+      output_path = File.join('staticlib', ZIP_FILE)
+      FileUtils.mv(framework_zip,output_path, :force => true)
+      puts 'INFO: calabash.framework.zip installed in staticlib'
+
       # frank
       puts "INFO: $ cd #{File.expand_path(dir)} ; make frank"
       `make frank`
@@ -103,11 +108,6 @@ EOF
         end
       end
     end
-
-    FileUtils.mkdir_p('staticlib')
-    output_path = File.join('staticlib', ZIP_FILE)
-    FileUtils.mv(framework_zip,output_path, :force => true)
-    puts 'INFO: calabash.framework.zip installed in staticlib'
 
     FileUtils.mv(lib_frank_cal, 'staticlib', :force => true)
     puts 'INFO: libFrankCalabash.a installed in staticlib'
