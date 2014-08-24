@@ -21,16 +21,26 @@ rescue Exception => _
   warn 'skipping yard requirement because it is a development dependency'
 end
 
-# REQUIRES that the calabash-ios-server source code is located
+# Builds and installs the Objective-C libraries that this gem requires.
 #
-#   ../../calabash-ios-server.
+# * staticlib/calabash.framework.zip
+# * staticlib/libFrankCalabash.a
+# * dylibs/libCalabashDyn.dylib
+# * dylibs/libCalabashDynSim.dylib
 #
-# if your server source code is in a different location, you can use:
+# Expects that the calabash-ios-server source code is located in:
+#  `../../calabash-ios-server.` If your server source code is in a different
+# location, you can use the `CALABASH_SERVER_PATH` variable to specify an
+# alternative location.
 #
-# $ CALABASH_SERVER_PATH=/your/path rake build_server'
+# @example Build the server libraries.
+#  $ bundle
+#  $ rake build_server
 #
-# to specify an alternative server location
-desc 'build the calabash.framework and install it in ./staticlib/.'
+# @example Using `CALABASH_SERVER_PATH` to point to alternative server sources.
+#  $ bundle
+#  $ CALABASH_SERVER_PATH=/your/path rake build_server
+desc 'Build and install the Objective-C libraries that this gem requires.'
 task :build_server do
 
   def build_server
