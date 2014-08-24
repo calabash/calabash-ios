@@ -39,8 +39,6 @@ task :build_server do
   DYLIB_PATHS = ['./calabash.dylibs/libCalabashDynSim.dylib','./calabash.dylibs/libCalabashDyn.dylib']
 
   def build_server
-    framework_zip = nil
-    lib_frank_cal = nil
     dylibs = []
     dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
     unless File.exist?(dir)
