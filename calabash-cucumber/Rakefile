@@ -46,7 +46,7 @@ EOF
 
     skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
 
-    FileUtils.cd(calabash_server_dir) do
+    Dir.chdir(calabash_server_dir) do
       puts 'INFO: building the server libraries...'
 
       # framework
