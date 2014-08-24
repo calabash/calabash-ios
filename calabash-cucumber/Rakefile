@@ -33,8 +33,6 @@ end
 desc 'build the calabash.framework and install it in ./staticlib/.'
 task :build_server do
 
-  DYLIB_PATHS = ['./calabash.dylibs/libCalabashDynSim.dylib','./calabash.dylibs/libCalabashDyn.dylib']
-
   def build_server
     dylibs = []
     calabash_server_dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
@@ -101,7 +99,8 @@ EOF
       else
         puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make dylibs"
         `make dylibs`
-        DYLIB_PATHS.each do |dylib|
+        dylib_paths = ['./calabash.dylibs/libCalabashDynSim.dylib','./calabash.dylibs/libCalabashDyn.dylib']
+        dylib_paths.each do |dylib|
           if File.exist? dylib
             dylibs << File.expand_path(dylib)
           else
