@@ -109,15 +109,12 @@ EOF
             raise 'could not build dylibs'
           end
         end
-      end
-    end
 
-
-    unless skip_dylibs
-      FileUtils.mkdir_p('dylibs')
-      dylibs.each do |dylib|
-        FileUtils.mv(dylib, 'dylibs', :force => true)
-        puts "INFO: #{File.basename(dylib)} installed in staticlib/dylibs"
+        FileUtils.mkdir_p('dylibs')
+        dylibs.each do |dylib|
+          FileUtils.mv(dylib, 'dylibs', :force => true)
+          puts "INFO: #{File.basename(dylib)} installed in dylibs/"
+        end
       end
     end
   end
