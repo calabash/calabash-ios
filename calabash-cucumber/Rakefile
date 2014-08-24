@@ -99,7 +99,7 @@ EOF
       else
         puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make dylibs"
         `make dylibs`
-        dylib_paths = ['./calabash.dylibs/libCalabashDynSim.dylib','./calabash.dylibs/libCalabashDyn.dylib']
+        dylib_paths = ['./calabash-dylibs/libCalabashDynSim.dylib','./calabash-dylibs/libCalabashDyn.dylib']
         dylib_paths.each do |dylib|
           if File.exist? dylib
             dylibs << File.expand_path(dylib)
