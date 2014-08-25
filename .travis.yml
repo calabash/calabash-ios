@@ -1,6 +1,7 @@
 language: objective-c
 
 before_script:
+  - gem install json
   - gem uninstall -Vax --force --no-abort-on-dependent calabash-cucumber
   - gem uninstall -Vax --force --no-abort-on-dependent run_loop
   - script/ci/travis/clone-and-install-run-loop.rb

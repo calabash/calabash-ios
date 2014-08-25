@@ -5,6 +5,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 # before_script
 uninstall_gem 'calabash-cucumber'
 uninstall_gem 'run_loop'
+install_gem 'json'
 
 working_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..'))
 
