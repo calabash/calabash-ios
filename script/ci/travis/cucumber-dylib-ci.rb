@@ -15,6 +15,8 @@ Dir.chdir(gem_dir) do
   dylib_dir = File.join(gem_dir, 'dylibs')
   FileUtils.mkdir_p dylib_dir
   sim_dylib = File.join(dylib_dir, 'libCalabashDynSim.dylib')
+  device_dylib = File.join(dylib_dir, 'libCalabashDyn.dylib')
+  do_system("touch '#{device_dylib}'")
 
   ### => WARNING <= ###
   # brute force delete! Remove this once we can build dylibs in the calabash-ios-server

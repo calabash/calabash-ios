@@ -54,6 +54,12 @@ EOF
 
   skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
 
+  gem_static_libs_dir = File.expand_path('staticlib')
+  FileUtils.mkdir_p gem_static_libs_dir
+
+  gem_dylibs_dir = File.expand_path('dylibs')
+  FileUtils.mkdir_p gem_dylibs_dir
+
   Dir.chdir(calabash_server_dir) do
     puts 'INFO: building the server libraries...'
 
@@ -80,10 +86,8 @@ EOF
       raise 'could not build the calabash.framework'
     end
 
-    FileUtils.mkdir_p('staticlib')
-    output_path = File.join('staticlib', framework_zip)
-    FileUtils.mv(framework_zip,output_path, :force => true)
-    puts 'INFO: calabash.framework.zip installed in staticlib'
+    FileUtils.mv(framework_zip, gem_static_libs_dir, :force => true)
+    puts "INFO: calabash.framework.zip installed in #{gem_static_libs_dir}"
 
     # frank
     puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make frank"
@@ -97,8 +101,8 @@ EOF
       raise 'could not build libFrankCalabash.a'
     end
 
-    FileUtils.mv(path_to_frank_library, 'staticlib', :force => true)
-    puts 'INFO: libFrankCalabash.a installed in staticlib'
+    FileUtils.mv(path_to_frank_library, gem_static_libs_dir, :force => true)
+    puts "INFO: libFrankCalabash.a installed in #{gem_static_libs_dir}"
 
     # dylibs
     if skip_dylibs
@@ -121,8 +125,8 @@ EOF
 
       FileUtils.mkdir_p('dylibs')
       dylibs.each do |dylib|
-        FileUtils.mv(dylib, 'dylibs', :force => true)
-        puts "INFO: #{File.basename(dylib)} installed in dylibs/"
+        FileUtils.mv(dylib, gem_dylibs_dir, :force => true)
+        puts "INFO: #{File.basename(dylib)} installed in '#{gem_dylibs_dir}'"
       end
     end
   end
