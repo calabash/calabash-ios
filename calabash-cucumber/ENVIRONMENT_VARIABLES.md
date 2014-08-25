@@ -476,21 +476,3 @@ If you are going to fail, doing it sooner is better than waiting.  Decrease both
 ### `DETECT_CONNECTED_DEVICE`
 
 This variable should be deprecated.
-
-
-### `UIA_STRATEGY`
-
-There are two strategies for passing UIA commands to the instruments process:  `http` and `run_loop`.
-      
-Mere mortals will never need to set the variable.  It is provided for developers who are trying to debug UIA communication problems.
-   
-The `http` strategy uses a route in the embedded calabash server to read/write commands to `NSUserDefaults standardUserDefaults` via the `UIAApplication` preferences JS functions.  Since ~Nov 2013, this is the default strategy and is by far faster than the `run_loop` strategy.
-     
-The `run_loop` (AKA `host/cat`) strategy uses the `UIAHost.performTaskWithPathArgumentsTimeout` to read/write commands to a tmp file on the host computer.
-
-#### Example
-
-```
-UIA_STRATEGY=http cucumber
-UIA_STRATEGY=run_loop cucumber
-```
