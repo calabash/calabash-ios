@@ -16,27 +16,29 @@ module Calabash
       # Executes raw JavaScript in the UIAutomation environment (using `eval`).
       # @param {String} command the JavaScript snippet to execute
       # @return {Object} the result returned by the UIA process
-      def uia(command,options={})
-        uia_strategy = ENV['UIA_STRATEGY'] || 'http'
-        case uia_strategy
-          when 'http'
+      def uia(command, options={})
+        # UIA only makes sense if there is a run loop
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        run_loop = launcher && launcher.active? && launcher.run_loop
+        raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
+        raise ArgumentError, 'please supply :command' unless command
+
+        case run_loop[:uia_strategy]
+          when :preferences
             res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
             res = JSON.parse(res)
             if res['outcome'] != 'SUCCESS'
               raise "uia action failed because: #{res['reason']}\n#{res['details']}"
             end
             res['results'].first
-          when 'run_loop'
-            launcher =  Calabash::Cucumber::Launcher.launcher_if_used
-            run_loop = launcher && launcher.active? && launcher.run_loop
-            raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
-            raise ArgumentError, 'please supply :command' unless command
+          when :host
             RunLoop.send_command(run_loop, command)
           else
-            candidates = ['http', 'run_loop']
-            raise ArgumentError, "expected '#{uia_strategy}' to be one of #{candidates}"
+            candidates = [:preferences, :host]
+            raise ArgumentError, "expected '#{run_loop[:uia_strategy]}' to be one of #{candidates}"
         end
       end
+
 
       # @!visibility private
       def uia_wait_tap(query, options={})
@@ -229,7 +231,7 @@ module Calabash
       # @!visibility private
       def uia_type_string(string, opt_text_before='', escape=true)
         if escape && string.index(/\\/)
-          indexes = string.enum_for(:scan,/\\/).map { Regexp.last_match.begin(0) }
+          indexes = string.enum_for(:scan, /\\/).map { Regexp.last_match.begin(0) }
           indexes.reverse.each { |idx| string = string.insert(idx, '\\') }
         end
         res = uia_handle_command(:typeString, string, opt_text_before)
@@ -254,7 +256,7 @@ module Calabash
           search_results = Geocoder.search(place)
           raise "Got no results for #{place}" if search_results.empty?
           loc = search_results.first
-          loc_data = {'latitude'=>loc.latitude, 'longitude'=>loc.longitude}
+          loc_data = {'latitude' => loc.latitude, 'longitude' => loc.longitude}
         elsif options.is_a?(Hash)
           loc_data = options
         end
@@ -292,7 +294,7 @@ module Calabash
                          "#{m}(#{serialized_args})"
                        else
                          raise "Invalid invocation spec #{invocation}"
-          end
+                     end
         end
         command = "#{js_cmd}.#{js_args.join('.')}"
         if debug_logging?
@@ -365,7 +367,7 @@ module Calabash
             (options[:longitude] and not options[:latitude])
           raise 'Both latitude and longitude must be specified if either is.'
         elsif not options[:place]
-            raise 'Either :place or :latitude and :longitude must be specified.'
+          raise 'Either :place or :latitude and :longitude must be specified.'
         end
       end
 
@@ -380,7 +382,6 @@ module Calabash
           s
         end
       end
-
 
 
     end
