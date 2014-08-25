@@ -80,8 +80,8 @@ def install_gem(gem_name, opts={})
   no_document = merged_opts[:no_document] ? '--no-document' : ''
 
   do_system("gem install #{no_document} #{gem_name} #{pre}",
-            {:pass_msg => 'install calabash-cucumber',
-             :fail_msg => 'could not install calabash-cucumber'})
+            {:pass_msg => "installed #{gem_name}",
+             :fail_msg => "could not install #{gem_name}"})
 end
 
 # return a +Hash+ of XTC device sets where the key is some arbitrary description
