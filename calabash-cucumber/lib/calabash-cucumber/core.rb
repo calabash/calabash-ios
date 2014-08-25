@@ -1051,6 +1051,12 @@ module Calabash
       end
 
       # @!visibility private
+      def run_loop
+        l = Calabash::Cucumber::Launcher.launcher_if_used
+        l && l.run_loop
+      end
+
+      # @!visibility private
       def query_action_with_options(action, uiquery, options)
         uiquery, options = extract_query_and_options(uiquery, options)
         views_touched = launcher.actions.send(action, options)
