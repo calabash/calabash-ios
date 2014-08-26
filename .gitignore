@@ -32,6 +32,9 @@ Gemfile.lock
 # RubyMine
 .idea
 
+# PRIVATE - do not commit .env files
+.env
+
 # notes
 notes
 
