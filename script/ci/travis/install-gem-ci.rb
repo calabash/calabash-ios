@@ -33,4 +33,22 @@ Dir.chdir working_directory do
     log_pass "successfully reported version as '#{out}'"
     exit 0
   end
+
+  # Reproduces the dread 'minitest' bug when exiting the console
+  Open3.popen3('sh') do |stdin, stdout, stderr, _|
+    stdin.puts 'calabash-ios console <<EOF'
+    stdin.puts 'exit'
+    stdin.puts 'EOF'
+    stdin.close
+    out = stdout.read.strip
+    err = stderr.read.strip
+    if err != ''
+      log_fail 'could not exit the shell cleanly'
+      log_fail err
+      exit 1
+    end
+    # skip the 'out' - it only says "Switch to inspect mode."
+    log_pass 'exited calabash-console cleanly'
+  end
+
 end
