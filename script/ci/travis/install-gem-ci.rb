@@ -6,7 +6,8 @@ working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 
 Dir.chdir working_directory do
 
-  do_system('bundle exec rake install',
+  do_system('bundle install')
+  do_system('rake install',
             {:pass_msg => 'successfully used rake to install the gem',
              :fail_msg => 'could not install the gem with rake'})
 
