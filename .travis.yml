@@ -9,6 +9,10 @@ before_script:
   - script/ci/travis/bundle-install.rb
 
 script:
+  # Skip XTC run on all but 2.1.1 to avoid redundant testing. This is just a
+  # smoke test to ensure a job can be validated; the ruby version is immaterial.
+  # todo - Enable when we decide on a device set policy.
+  # - if [[ ( ! -z $XTC_API_TOKEN && `ruby -e 'print RUBY_VERSION'` == '2.1.1' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
   - script/ci/travis/install-gem-ci.rb
   - script/ci/travis/rspec-ci.rb
   - script/ci/travis/unit-ci.rb
@@ -25,3 +29,12 @@ notifications:
     on_success: change
     on_failure: always
 
+env:
+  global:
+    # todo - Should device sets be encrypted?
+    # todo - How should we rotate device sets?
+    # xtc api token          => script/ci/travis/xtc-submit-ci.rb
+    # -r calabash/calabash-ios
+    - secure: MH0JDvqaycLmlc/Ld69MjGMwIh1Q3b9wrb7NdK9u6PNP9MlMq2PAzaSKGISYmu+Mkrvca8NjUb2FdhXIhwClOw9uKtT8QJBHvLoKejU7y15T8iXzTT1s21pCg2WfR7/KN8SaxMyuI2/ppLbkuRjmMo3aToweEa0i9gQhu61THEI=
+    # -r jmoody/calabash-ios
+    - secure: tTNtqG9pVYw0+gKggHlivfutHAJ1EK6PZGRYOh8jojw3GMJyfwwJeVkwlIral18SH3ijBjxz5XLcqAVHgrq6KIvzZ03o1VrkgoKKF1uRApjXadhaN0LqsXXivoDFFkY12aGVWR0eSK5eBHxU6NA2RhJnNrjscQEdk400mzJJMmI=
