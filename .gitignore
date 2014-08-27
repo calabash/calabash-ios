@@ -9,6 +9,7 @@ spec/reports
 test/tmp
 test/version_tmp
 tmp
+.irb-history
 
 # CI - occasionally we need to pull down run_loop to test
 run_loop
