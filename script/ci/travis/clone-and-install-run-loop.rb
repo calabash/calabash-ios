@@ -22,7 +22,7 @@ Dir.chdir run_loop_dir do
 
   # rake is not part of the gem until 1.0.0.pre1
   do_system('bundle install')
-  do_system('bundle exec rake install')
+  do_system('rake install')
 
 end
 

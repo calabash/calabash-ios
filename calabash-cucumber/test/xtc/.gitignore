@@ -1,0 +1,4 @@
+# Ignore the Gemfile in this directory.
+# It is recreated by executing:
+# `$ script/ci/travis/xtc-submit-ci.rb`
+Gemfile

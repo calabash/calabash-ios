@@ -6,6 +6,7 @@ working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 
 Dir.chdir working_directory do
 
+  do_system('bundle install')
   do_system('rake install',
             {:pass_msg => 'successfully used rake to install the gem',
              :fail_msg => 'could not install the gem with rake'})
@@ -50,5 +51,4 @@ Dir.chdir working_directory do
     # skip the 'out' - it only says "Switch to inspect mode."
     log_pass 'exited calabash-console cleanly'
   end
-
 end
