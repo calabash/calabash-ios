@@ -1,5 +1,9 @@
 ## Gem Developer How To
 
+These instructions are for calabash-ios developers.
+
+These are not instructions for how to use the Calabash iOS BDD framework.
+
 ### Run the Tests
 
 ##### rspec
