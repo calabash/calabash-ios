@@ -78,7 +78,7 @@ The integration tests will overwrite existing calabash-cucumber/staticlib and ca
 
 #### Testing
 
-The integration tests delete and regenerate the `staticlib` and `dylibs` directories.  Please keep this in mind. 
+The integration tests delete and regenerate the `staticlib` and `dylibs` directories.  Please keep this in mind.
 
 Ideally you should run the rspec _and_ integration tests.  The integration tests re-run a sub-set of the rspec tests; some tests are not stable on Travis CI because of the simulator environment.
 
