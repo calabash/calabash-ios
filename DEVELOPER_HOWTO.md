@@ -1,5 +1,9 @@
 ## Gem Developer How To
 
+These instructions are for calabash-ios developers.
+
+These are not instructions for how to use the Calabash iOS BDD framework.
+
 ### Run the Tests
 
 ##### rspec
@@ -13,11 +17,16 @@ $ be rake spec
 
 ##### Integration Tests
 
-**WARNING:** The integration tests will overwrite existing calabash-cucumber/staticlib and calabash-cucumber/dylibs directories.  You have been warned.
+**WARNING:**
+
+The integration tests will overwrite existing calabash-cucumber/staticlib and calabash-cucumber/dylibs directories.
+
+**You have been warned.**
 
 ```
-# These are run from calabash-ios directory
+# Run from calabash-ios directory
 [calabash-ios] $ script/ci/test/local-run-as-travis.rb
+
 # Requires some configuration; see the script for details.
 [calabash-ios] $ script/ci/test/xtc-submit-ci.rb
 ```
@@ -33,26 +42,43 @@ $ be rake spec
 
 ### How to Release a New Version
 
-_Make sure you are on the master branches of `calabash-ios-server` and `calabash-ios` and that the branches are up-to-date._
 
-_Check CI for possible problems._
+#### Preflight Checklist
 
-_Make sure there are no outstanding pull requests._
+- [ ] Check CI for possible problems.
+- [ ] Double check that the run-loop version you want to target is released.
 
+###### Calabash iOS Server
+
+- [ ] You are on the master branch of `calabash-ios-server`.
+- [ ] There are no outstanding changes in your local repo.
+- [ ] All the required `calabash-ios-server` pull requests have been merged.
+
+###### Calabash iOS Gem
+
+- [ ] You are on the master branch of `calabash-ios`.
+- [ ] There are no outstanding changes in your local repo.
+- [ ] All the required `calabash-ios` pull requests have been merged.
+
+#### Release!
+
+```
 1. Test (see notes below)
-2. **calabash-ios:** update the lib/calabash-cucumber/version `VERSION`
-3. **calabash-ios:** update lib/calabash-cucumber/version `MIN_SERVER_VERSION`
-4. **run-loop:** make sure that correct version has been released
-5. **calabash-ios:** make sure the run-loop dependency is correct
-6. **calabash-ios/calabash-cucumber:** `$ rake build_server`
-7. **calabash-ios/calabash-cucumber:** `$ rake install`
-8. ***Make sure your changes are pushed to GitHub.***
-9. make sure changes are pushed to github
-10. **calabash-ios/calabash-cucumber:** `$ rake release`
+2. [calabash-ios] update the lib/calabash-cucumber/version VERSION
+3. [calabash-ios] update lib/calabash-cucumber/version MIN_SERVER_VERSION
+4. [run-loop] make sure that correct version has been released
+5. [calabash-ios] check that the run-loop dependency is correct in the gemspec
+6. [calabash-ios] push your version and gemspec changes to master
+7. Optional: Run a briar-toolchain-masters job on Jenkins [1]
+8. [calabash-ios] $ rake build_server
+9. [calabash-ios] $ rake release
+```
+
+- [1] http://ci.endoftheworl.de:8080/job/briar-toolchain-masters/
 
 #### Testing
 
-The integration tests delete and regenerate the `staticlib` and `dylibs` directories.  Please keep this in mind. 
+The integration tests delete and regenerate the `staticlib` and `dylibs` directories.  Please keep this in mind.
 
 Ideally you should run the rspec _and_ integration tests.  The integration tests re-run a sub-set of the rspec tests; some tests are not stable on Travis CI because of the simulator environment.
 
@@ -101,3 +127,27 @@ These tests will protect you from obvious mistakes, but they are incomplete.  Le
 # run some dylib tests! woot! dylibs!
 12. script/ci/travis/cucumber-dylib-ci.rb
 ```
+
+##### XTC Tests
+
+_This test is not part of the script/ci/travis/local-run-as-travis.rb or the Travis CI build._
+
+This test requires some configuration to run.
+
+```
+[calabash-ios] $ export XTC_API_TOKEN=token
+[calabash-ios] $ export XTC_DEVICE_SET=set
+[calabash-ios] $ script/ci/travis/xtc-submit-ci.rb
+```
+
+Alternatively, create a .env file in calabash-cucumber/test/xtc.
+
+```
+XTC_API_TOKEN=token
+XTC_DEVICE_SET=set
+# --async or --no-async
+# The default is --no-async (wait for results)
+XTC_WAIT_FOR_RESULTS=0
+```
+
+_The .env is gitignore'd.  Don't check in your .env file._
