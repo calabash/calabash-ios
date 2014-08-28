@@ -42,22 +42,39 @@ The integration tests will overwrite existing calabash-cucumber/staticlib and ca
 
 ### How to Release a New Version
 
-_Make sure you are on the master branches of `calabash-ios-server` and `calabash-ios` and that the branches are up-to-date._
 
-_Check CI for possible problems._
+#### Preflight Checklist
 
-_Make sure there are no outstanding pull requests._
+- [ ] Check CI for possible problems.
+- [ ] Double check that the run-loop version you want to target is released.
 
+###### Calabash iOS Server
+
+- [ ] You are on the master branch of `calabash-ios-server`.
+- [ ] There are no outstanding changes in your local repo.
+- [ ] All the required `calabash-ios-server` pull requests have been merged.
+
+###### Calabash iOS Gem
+
+- [ ] You are on the master branch of `calabash-ios`.
+- [ ] There are no outstanding changes in your local repo.
+- [ ] All the required `calabash-ios` pull requests have been merged.
+
+#### Release!
+
+```
 1. Test (see notes below)
-2. **calabash-ios:** update the lib/calabash-cucumber/version `VERSION`
-3. **calabash-ios:** update lib/calabash-cucumber/version `MIN_SERVER_VERSION`
-4. **run-loop:** make sure that correct version has been released
-5. **calabash-ios:** make sure the run-loop dependency is correct
-6. **calabash-ios/calabash-cucumber:** `$ rake build_server`
-7. **calabash-ios/calabash-cucumber:** `$ rake install`
-8. ***Make sure your changes are pushed to GitHub.***
-9. make sure changes are pushed to github
-10. **calabash-ios/calabash-cucumber:** `$ rake release`
+2. [calabash-ios] update the lib/calabash-cucumber/version VERSION
+3. [calabash-ios] update lib/calabash-cucumber/version MIN_SERVER_VERSION
+4. [run-loop] make sure that correct version has been released
+5. [calabash-ios] check that the run-loop dependency is correct in the gemspec
+6. [calabash-ios] push your version and gemspec changes to master
+7. Optional: Run a briar-toolchain-masters job on Jenkins [1]
+8. [calabash-ios] $ rake build_server
+9. [calabash-ios] $ rake release
+```
+
+- [1] http://ci.endoftheworl.de:8080/job/briar-toolchain-masters/
 
 #### Testing
 
