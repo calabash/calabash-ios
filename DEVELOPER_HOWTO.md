@@ -18,6 +18,7 @@ $ be rake spec
 ```
 # These are run from calabash-ios directory
 [calabash-ios] $ script/ci/test/local-run-as-travis.rb
+
 # Requires some configuration; see the script for details.
 [calabash-ios] $ script/ci/test/xtc-submit-ci.rb
 ```
@@ -101,3 +102,27 @@ These tests will protect you from obvious mistakes, but they are incomplete.  Le
 # run some dylib tests! woot! dylibs!
 12. script/ci/travis/cucumber-dylib-ci.rb
 ```
+
+##### XTC Tests
+
+_This test is not part of the script/ci/travis/local-run-as-travis.rb or the Travis CI build._
+
+This test requires some configuration to run.
+
+```
+[calabash-ios] $ export XTC_API_TOKEN=token
+[calabash-ios] $ export XTC_DEVICE_SET=set
+[calabash-ios] $ script/ci/travis/xtc-submit-ci.rb
+```
+
+Alternatively, create a .env file in calabash-cucumber/test/xtc.
+
+```
+XTC_API_TOKEN=token
+XTC_DEVICE_SET=set
+# --async or --no-async
+# The default is --no-async (wait for results)
+XTC_WAIT_FOR_RESULTS=0
+```
+
+_The .env is gitignore'd.  Don't check in your .env file._
