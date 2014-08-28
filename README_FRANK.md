@@ -1,5 +1,3 @@
-**DRAFT DRAFT DRAFT**
-
 ## Calabash Plugin for Frank
 
 As of 0.10.0, Calabash can be used a plug-in for Frank.  This is an alpha-level feature, which is our way of saying, "We haven't worked out all the kinks yet."
@@ -34,7 +32,7 @@ $ frank-calabash uninstall
 $ frank build
 ```
 
-#### < Section Title >
+#### Getting started
 
 To use Calabash with Frank, you must modify your test scripts and hooks to let Calabash launch your app using instruments. Using Frank's sim_launcher doesn't work as Calabash relies on Apple's "public" UIAutomation launched with instruments. 
 
@@ -57,15 +55,21 @@ You can then include the Frank::Calabash module which provides two important met
 
 ```
 $ frank-calabash console
-> ??? launch ???
+> launch(:uia_strategy => :preferences) # other strategies are available too 
+
+# Uses Calabash Selector engine for Frank methods
+> frankly_map("* {text BEGINSWITH 'foo'}", :touch) # for example, Calabash supports NSPredicate queries
 
 # Access the Calabash API via the client object
 > calabash = calabash_client()
-> calabash.touch("* view marked:'Second'")
-
-# this will not work
-> touch("* view marked:'Second'")
+> calabash.touch("* marked:'Second'")
+> calabash.swipe(:left)
+> client.query("webView css:'a'") # Hybrid/UIWebView support
+> client.touch("webView css:'a'") # Touch a link in a web view
+> client.send_app_to_background(4) # Calls UIAutomations deactivateAppForDuration
 ```
+
+For an informal demo: `http://screencast.com/t/hBtcdwzelfO`
 
 #### On-Device Testing
 
