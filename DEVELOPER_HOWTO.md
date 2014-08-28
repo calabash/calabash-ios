@@ -17,10 +17,14 @@ $ be rake spec
 
 ##### Integration Tests
 
-**WARNING:** The integration tests will overwrite existing calabash-cucumber/staticlib and calabash-cucumber/dylibs directories.  You have been warned.
+**WARNING:**
+
+The integration tests will overwrite existing calabash-cucumber/staticlib and calabash-cucumber/dylibs directories.
+
+**You have been warned.**
 
 ```
-# These are run from calabash-ios directory
+# Run from calabash-ios directory
 [calabash-ios] $ script/ci/test/local-run-as-travis.rb
 
 # Requires some configuration; see the script for details.
