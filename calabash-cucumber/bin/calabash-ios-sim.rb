@@ -1,20 +1,20 @@
 require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/utils/logging'
+require 'run_loop'
 
 include Calabash::Cucumber::Logging
 include Calabash::Cucumber::SimulatorAccessibility
 
 def quit_sim
-  _deprecated('0.9.169', 'use Calabash::Cucumber::SimulatorAccessibility.quit_simulator', :warn)
-  quit_simulator
+  RunLoop::SimControl.new.quit_sim
 end
 
 def calabash_sim_reset
-  reset_simulator_content_and_settings
+  RunLoop::SimControl.new.reset_sim_content_and_settings
 end
 
 def calabash_sim_accessibility
-  enable_accessibility_on_simulators
+  RunLoop::SimControl.new.enable_accessibility_on_sims
 end
 
 def calabash_sim_location(args)
