@@ -554,8 +554,7 @@ class Calabash::Cucumber::Launcher
     end
 
     if run_with_instruments?(args)
-
-      uia_strategy = args[:uia_strategy] || :preferences
+      args[:uia_strategy] ||= :preferences
       self.run_loop = new_run_loop(args)
       self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
