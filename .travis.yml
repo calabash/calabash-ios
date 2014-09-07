@@ -16,8 +16,8 @@ script:
   - script/ci/travis/install-gem-ci.rb
   - script/ci/travis/rspec-ci.rb
   - script/ci/travis/unit-ci.rb
-  - script/ci/travis/rake-build-server-ci.rb
   - script/ci/travis/cucumber-ci.rb --tags ~@no_ci
+  - script/ci/travis/rake-build-server-ci.rb
 
 rvm:
   - 1.9.3
