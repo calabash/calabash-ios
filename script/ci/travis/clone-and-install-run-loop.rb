@@ -1,19 +1,16 @@
 #!/usr/bin/env ruby
 require 'fileutils'
 
-clone_tag = ARGV[0]
+# ARGV[0] can be a git tag, branch, or sha
 
 require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
 working_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..'))
 
 Dir.chdir working_dir do
-
   do_system('rm -rf run_loop')
-  do_system('git clone --recursive https://github.com/calabash/run_loop')
-  # If we need to clone to a tag or branch
-  # do_system("git clone --branch #{clone_tag} --recursive https://github.com/calabash/run_loop")
-
+  clone_tag = ARGV.fetch(0, 'develop')
+  do_system("git clone --branch #{clone_tag} --recursive https://github.com/calabash/run_loop")
 end
 
 run_loop_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'run_loop'))
