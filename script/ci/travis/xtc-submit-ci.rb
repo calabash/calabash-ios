@@ -43,6 +43,16 @@ Dir.chdir xtc_test_dir do
   Dotenv.load if File.exist?('.env')
   token = ENV['XTC_API_TOKEN']
   device_set = ENV['XTC_DEVICE_SET']
+  unless device_set
+    # A collection of device sets that have one iOS 7* device.
+    device_set =
+          [
+                '78c84725', 'dd030a4d', '77388643', 'de3f1384', 'd3f07761', 'b354dd28',
+                '4d614d40', '7660a1f0', 'dfa1cb5a', '9a0124ff', 'beb5c652', '2ad574d4',
+                '3c9d9e38', '2fc6f411', 'a690cafd', 'cb8ce9a8', '1b12481d', 'c4e5ddfb'
+          ].sample
+  end
+
   if ENV['XTC_WAIT_FOR_RESULTS'] == '0'
     wait_for_results = '--async'
   else
