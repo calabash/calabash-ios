@@ -38,7 +38,6 @@ The integration tests will overwrite existing calabash-cucumber/staticlib and ca
 * https://travis-ci.org/calabash/calabash-ios-server
 * Calabash iOS toolchain testing - http://ci.endoftheworl.de:8080/
 
-##### 
 
 ### How to Release a New Version
 
