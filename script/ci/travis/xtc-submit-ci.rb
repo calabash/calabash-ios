@@ -26,17 +26,17 @@ Dir.chdir xtc_test_dir do
 
   log_pass("wrote new Gemfile with calabash-version '#{calabash_version}'")
 
-  # On Travis, the XTC api token and device set are _private_ and are only
-  # available to gem maintainers.  Pull requests and commits that do not
-  # originate from a maintainer skip the XTC step.
+  # On Travis, the XTC api token is _private_ and is available to gem
+  # maintainers.  Pull requests and commits that do not originate from a
+  # maintainer skip the XTC step.
   #
   # Locally, the XTC_API_TOKEN and XTC_DEVICE_SET can be set in a .env file and
   # accessed with with the dotenv gem, passed on the command line, or exported
   # to the shell.
   #
-  # The token and device are _private_. The .env should never be committed to git.
+  # The XCT_API_TOKEN is _private_. The .env should never be committed to git.
   #
-  # dotenv is _not_ calabash-cucumber gem dependency - it is installed and used
+  # Dotenv is _not_ calabash-cucumber gem dependency - it is installed and used
   # only during testing.
   #
   # The .env file should live in test/xtc
