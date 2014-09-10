@@ -18,6 +18,34 @@ describe 'Calabash Launcher' do
     ENV['DETECT_CONNECTED_DEVICE'] = nil
   end
 
+  describe '.default_uia_strategy' do
+    let (:sim_control) { RunLoop::SimControl.new }
+    let (:launcher) { Calabash::Cucumber::Launcher.new }
+    describe 'returns :preferences when target is' do
+      it 'a simulator' do
+        launch_args = { :device_target => 'simulator' }
+        actual = launcher.default_uia_strategy(launch_args, sim_control)
+        expect(actual).to be == :preferences
+      end
+
+      it 'an iOS device running iOS < 8.0' do
+        devices = [RunLoop::Device.new('name', '7.1', UDID)]
+        launch_args = { :device_target => UDID }
+        expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return(devices)
+        actual = launcher.default_uia_strategy(launch_args, sim_control)
+        expect(actual).to be == :preferences
+      end
+    end
+
+    it 'returns :host when target is an iOS device running iOS >= 8.0' do
+      devices = [RunLoop::Device.new('name', '8.0', UDID)]
+      launch_args = { :device_target => UDID }
+      expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return(devices)
+      actual = launcher.default_uia_strategy(launch_args, sim_control)
+      expect(actual).to be == :host
+    end
+  end
+
   def set_device_target(val)
     ENV['DEVICE_TARGET'] = val
   end

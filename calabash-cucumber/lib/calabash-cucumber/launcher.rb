@@ -554,7 +554,20 @@ class Calabash::Cucumber::Launcher
     end
 
     if run_with_instruments?(args)
-      args[:uia_strategy] ||= :preferences
+      # Patch for bug in Xcode 6 GM + iOS 8 device testing.
+      # http://openradar.appspot.com/radar?id=5891145586442240
+      #
+      # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
+      # of the Xcode tool calls, like instruments -s templates, take a long time
+      # to execute.  The SimControl instance has XCTool attribute which caches
+      # the results of many of these time-consuming calls so they only need to
+      # be called 1 time per launch.
+      # @todo Use SimControl in Launcher in place of methods like simulator_target?
+      args[:sim_control] = RunLoop::SimControl.new
+      uia_strategy = default_uia_strategy(args, args[:sim_control])
+      args[:uia_strategy] ||= uia_strategy
+      calabash_info "Using uia strategy: '#{args[:uia_strategy]}'" if debug_logging?
+
       self.run_loop = new_run_loop(args)
       self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
@@ -570,6 +583,37 @@ class Calabash::Cucumber::Launcher
       # skip compatibility check if injecting dylib
       unless args.fetch(:inject_dylib, false)
         check_server_gem_compatibility
+      end
+    end
+  end
+
+  # @!visibility private
+  #
+  # Choose the appropriate default UIA strategy based on the test target.
+  #
+  # This is a temporary (I hope) fix for a UIAApplication bug in
+  # setPreferencesValueForKey on iOS 8 devices in Xcode 6 GM.
+  #
+  # rdar://18296714
+  # http://openradar.appspot.com/radar?id=5891145586442240
+  def default_uia_strategy(launch_args, sim_control)
+    # Preferences strategy works on Xcode iOS Simulators.
+    if RunLoop::Core.simulator_target?(launch_args, sim_control)
+      :preferences
+    else
+      target_udid = launch_args[:device_target]
+      target_device = nil
+      sim_control.xctools.instruments(:devices).each do |device|
+        if device.udid == target_udid
+          target_device = device
+          break
+        end
+      end
+      # Preferences strategy works for iOS < 8.0, but not for iOS >= 8.0.
+      if target_device.version < RunLoop::Version.new('8.0')
+        :preferences
+      else
+        :host
       end
     end
   end
