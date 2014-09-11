@@ -1,6 +1,8 @@
 require 'calabash-cucumber'
 require 'calabash-cucumber/utils/logging'
 require 'awesome_print'
+require 'fileutils'
+require 'tmpdir'
 require 'resources'
 
 include Calabash::Cucumber::Logging
