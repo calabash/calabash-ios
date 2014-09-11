@@ -6,7 +6,6 @@ require 'calabash-cucumber/actions/instruments_actions'
 require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
-require 'calabash-cucumber/version'
 require 'calabash-cucumber/utils/logging'
 require 'calabash/dylibs'
 
