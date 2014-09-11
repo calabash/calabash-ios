@@ -25,7 +25,6 @@ describe 'calabash logging' do
   it 'should output deprecated messages' do
     version = '0.9.169'
     dep_msg = 'this is a deprecation message'
-    _deprecated(version, dep_msg, :warn)
     out = capture_stderr do
       _deprecated(version, dep_msg, :warn)
     end
