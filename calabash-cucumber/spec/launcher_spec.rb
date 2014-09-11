@@ -286,6 +286,26 @@ describe 'Calabash Launcher' do
       Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
     end
 
+    describe '#server_version_from_server' do
+
+      it 'returns a version by asking the running server' do
+        # We can't stand up the server, so we'll create a device and ask for
+        # its version.  It is the best we can do for now.
+        device = Resources.shared.device_for_mocking
+        actual = launcher.server_version_from_server
+        launcher.device = device
+        expect(actual).not_to be == nil
+        expect(RunLoop::Version.new(actual).to_s).to be == '0.10.0'
+      end
+
+      it "returns '@@server_version' if it is not nil" do
+        Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, '1.0.0')
+        actual = launcher.server_version_from_server
+        expect(actual).not_to be == nil
+        expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
+      end
+    end
+
     describe '#server_version_from_bundle' do
 
       describe 'returns calabash version an app bundle when' do
