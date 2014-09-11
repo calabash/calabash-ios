@@ -1,4 +1,5 @@
 require 'calabash-cucumber/utils/logging'
+require 'resources'
 
 include Calabash::Cucumber::Logging
 
