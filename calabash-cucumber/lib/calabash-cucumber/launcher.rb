@@ -910,13 +910,13 @@ class Calabash::Cucumber::Launcher
     @@server_version = self.device.server_version
   end
 
-  # checks the server and gem version compatibility and generates a warning if
+  # @!visibility private
+  # Checks the server and gem version compatibility and generates a warning if
   # the server and gem are not compatible.
   #
-  # WIP:  this is a proof-of-concept implementation and requires _strict_
-  # equality.  in the future we should allow minimum framework compatibility.
+  # @note  This is a proof-of-concept implementation and requires _strict_
+  #  equality.  in the future we should allow minimum framework compatibility.
   #
-  # @!visibility private
   # @return [nil] nothing to return
   def check_server_gem_compatibility
     app_bundle_path = self.launch_args[:app]
