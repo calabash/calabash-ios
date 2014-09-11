@@ -22,10 +22,7 @@ module Calabash
       #
       # @return [String] path to current developer directory
       def xcode_developer_dir
-        # respect DEVELOPER_DIR
-        return ENV['DEVELOPER_DIR'] if ENV['DEVELOPER_DIR']
-        # fall back to xcode-select
-        `xcode-select --print-path`.chomp
+        RunLoop::XCTools.new.xcode_developer_dir
       end
 
       # @deprecated 0.10.0 not replaced
