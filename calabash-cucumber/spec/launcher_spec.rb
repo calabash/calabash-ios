@@ -275,8 +275,7 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe '#server_version_from_bundle' do
-
+  describe 'checking server/gem compatibility' do
     let (:launcher) { Calabash::Cucumber::Launcher.new }
 
     before(:each) do
@@ -287,40 +286,43 @@ describe 'Calabash Launcher' do
       Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
     end
 
-    describe 'returns calabash version an app bundle when' do
-      it 'strings can find the version' do
-        abp = Resources.shared.app_bundle_path :lp_simple_example
-        actual = launcher.server_version_from_bundle abp
+    describe '#server_version_from_bundle' do
+
+      describe 'returns calabash version an app bundle when' do
+        it 'strings can find the version' do
+          abp = Resources.shared.app_bundle_path :lp_simple_example
+          actual = launcher.server_version_from_bundle abp
+          expect(actual).not_to be == nil
+          expect(RunLoop::Version.new(actual).to_s).to be == '0.9.169.pre2'
+        end
+
+        it 'and when there is a space is the path' do
+          abp = Resources.shared.app_bundle_path :lp_simple_example
+          dir = Dir.mktmpdir('path with space')
+          FileUtils.cp_r abp, dir
+          abp = File.expand_path(File.join(dir, 'LPSimpleExample-cal.app'))
+          actual = launcher.server_version_from_bundle abp
+          expect(actual).not_to be == nil
+          expect(RunLoop::Version.new(actual).to_s).to be == '0.9.169.pre2'
+        end
+      end
+
+      it "returns '0.0.0' when strings cannot extract a version" do
+        abp = Resources.shared.app_bundle_path :chou
+        actual = nil
+        capture_stderr do
+          actual = launcher.server_version_from_bundle abp
+        end
         expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '0.9.169.pre2'
+        expect(RunLoop::Version.new(actual).to_s).to be == '0.0.0'
       end
 
-      it 'and when there is a space is the path' do
-        abp = Resources.shared.app_bundle_path :lp_simple_example
-        dir = Dir.mktmpdir('path with space')
-        FileUtils.cp_r abp, dir
-        abp = File.expand_path(File.join(dir, 'LPSimpleExample-cal.app'))
-        actual = launcher.server_version_from_bundle abp
+      it "returns '@@server_version' if it is not nil" do
+        Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, '1.0.0')
+        actual = launcher.server_version_from_bundle nil
         expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '0.9.169.pre2'
+        expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
       end
-    end
-
-    it "returns '0.0.0' when strings cannot extract a version" do
-      abp = Resources.shared.app_bundle_path :chou
-      actual = nil
-      capture_stderr do
-        actual = launcher.server_version_from_bundle abp
-      end
-      expect(actual).not_to be == nil
-      expect(RunLoop::Version.new(actual).to_s).to be == '0.0.0'
-    end
-
-    it "returns '@@server_version' if it is not nil" do
-      Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, '1.0.0')
-      actual = launcher.server_version_from_bundle nil
-      expect(actual).not_to be == nil
-      expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
     end
   end
 end
