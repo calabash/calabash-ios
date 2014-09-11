@@ -15,7 +15,6 @@ describe 'calabash logging' do
 
   it 'should output warning messages' do
     warn_msg = 'this is a warning message'
-    calabash_warn(warn_msg)
     out = capture_stderr do
       calabash_warn(warn_msg)
     end
