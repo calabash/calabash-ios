@@ -6,7 +6,6 @@ require 'calabash-cucumber/actions/instruments_actions'
 require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
-require 'calabash-cucumber/version'
 require 'calabash-cucumber/utils/logging'
 require 'calabash/dylibs'
 
@@ -955,13 +954,13 @@ class Calabash::Cucumber::Launcher
     @@server_version = self.device.server_version
   end
 
-  # checks the server and gem version compatibility and generates a warning if
+  # @!visibility private
+  # Checks the server and gem version compatibility and generates a warning if
   # the server and gem are not compatible.
   #
-  # WIP:  this is a proof-of-concept implementation and requires _strict_
-  # equality.  in the future we should allow minimum framework compatibility.
+  # @note  This is a proof-of-concept implementation and requires _strict_
+  #  equality.  in the future we should allow minimum framework compatibility.
   #
-  # @!visibility private
   # @return [nil] nothing to return
   def check_server_gem_compatibility
     app_bundle_path = self.launch_args[:app]
@@ -976,18 +975,18 @@ class Calabash::Cucumber::Launcher
       return nil
     end
 
-    server_version = Calabash::Cucumber::Version.new(server_version)
-    gem_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::VERSION)
-    min_server_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
+    server_version = RunLoop::Version.new(server_version)
+    gem_version = RunLoop::Version.new(Calabash::Cucumber::VERSION)
+    min_server_version = RunLoop::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
 
     if server_version < min_server_version
-      msgs = []
-      msgs << 'server version is not compatible with gem version'
-      msgs << 'please update your server and gem'
-      msgs << "       gem version: '#{gem_version}'"
-      msgs << "min server version: '#{min_server_version}'"
-      msgs << "    server version: '#{server_version}'"
-
+      msgs = [
+            'The server version is not compatible with gem version.',
+            'Please update your server.',
+            'https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version',
+            "       gem version: '#{gem_version}'",
+            "min server version: '#{min_server_version}'",
+            "    server version: '#{server_version}'"]
       calabash_warn("#{msgs.join("\n")}")
     else
       if full_console_logging?

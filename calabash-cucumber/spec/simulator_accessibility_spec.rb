@@ -4,7 +4,7 @@ require 'sim_launcher'
 
 include Calabash::Cucumber::SimulatorAccessibility
 
-unless travis_ci?
+unless Resources.shared.travis_ci?
   describe 'simulator accessibility tool' do
 
     it 'should be able to find the simulator app support directory' do
