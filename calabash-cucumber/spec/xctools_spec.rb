@@ -1,5 +1,6 @@
 require 'calabash-cucumber/utils/xctools'
 
+# @todo 0.11.0 Remove this test when XcodeTools are deprecated
 include Calabash::Cucumber::XcodeTools
 
 describe 'xcode tools module' do
@@ -34,21 +35,19 @@ describe 'xcode tools module' do
       expect { instruments(:foo) }.to raise_error(ArgumentError)
     end
 
-    # @todo 0.11.0 Remove this test when XcodeTools are deprecated
     it 'should report its version' do
       # Wonky!  RunLoop:XCTools#instruments :version returns a version object.
       # Our API expects a String.
       expect(instruments(:version)).to be_a String
     end
 
-    # @todo 0.11.0 Remove this test when XcodeTools are deprecated
     it 'should be tell if it supports the -s flag' do
       expect(instruments_supports_hyphen_s?('5.1.1')).to be == true
     end
 
     it 'should be able to return a list of installed simulators' do
-      sims = instruments(:sims)
-      expect(installed_simulators).to be == sims
+      expect(instruments(:sims)).to be_a Array
+      expect(installed_simulators).to be_a Array
     end
   end
 end

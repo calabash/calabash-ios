@@ -59,8 +59,7 @@ module Calabash
           when :version
             RunLoop::XCTools.new.instruments(cmd).to_s
           when :sims
-            devices = `#{instruments} -s devices`.chomp.split("\n")
-            devices.select { |device| device.downcase.include?('simulator') }
+            RunLoop::XCTools.new.instruments(cmd)
           else
             candidates = [:version, :sims]
             raise(ArgumentError, "expected '#{cmd}' to be one of '#{candidates}'")
@@ -89,12 +88,8 @@ module Calabash
       # @raise [RuntimeError] if the currently active instruments version does
       #   not support the -s flag
       def installed_simulators
-        unless instruments_supports_hyphen_s?
-          raise(RuntimeError, "instruments '#{instruments(:version)}' does not support '-s devices' arguments")
-        end
         instruments(:sims)
       end
-
     end
   end
 end
