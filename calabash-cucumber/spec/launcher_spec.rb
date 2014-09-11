@@ -1,8 +1,6 @@
 require 'calabash-cucumber/launcher'
 require 'calabash-cucumber/utils/simulator_accessibility'
 
-require 'run_loop'
-
 describe 'Calabash Launcher' do
 
   SIM_SDK_DIR_REGEX = /(\d)\.(\d)\.?(\d)?(-64)?/
