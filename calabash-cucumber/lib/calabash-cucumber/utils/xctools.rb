@@ -78,11 +78,8 @@ module Calabash
       #   a major.minor[.patch] version string
       #
       # @return [Boolean] true if the version is >= 5.*
-      def instruments_supports_hyphen_s?(version=instruments(:version))
-        tokens = version.split('.')
-        return false if tokens[0].to_i < 5
-        return false if tokens[1].to_i < 1
-        true
+      def instruments_supports_hyphen_s?(version)
+        RunLoop::XCTools.new.instruments_supports_hyphen_s?(version)
       end
 
       # Returns a list of installed simulators by calling `$ instruments -s devices`.

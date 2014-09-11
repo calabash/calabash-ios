@@ -41,11 +41,9 @@ describe 'xcode tools module' do
       expect(instruments(:version)).to be_a String
     end
 
+    # @todo 0.11.0 Remove this test when XcodeTools are deprecated
     it 'should be tell if it supports the -s flag' do
       expect(instruments_supports_hyphen_s?('5.1.1')).to be == true
-      expect(instruments_supports_hyphen_s?('5.1')).to be == true
-      expect(instruments_supports_hyphen_s?('5.0.2')).to be == false
-      expect(instruments_supports_hyphen_s?('4.6.3')).to be == false
     end
 
     it 'should be able to return a list of installed simulators' do
