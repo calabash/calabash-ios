@@ -1,4 +1,5 @@
 require 'open3'
+require 'run_loop'
 
 module Calabash
   module Cucumber
@@ -54,14 +55,9 @@ module Calabash
       def instruments(cmd=nil)
         instruments = 'xcrun instruments'
         return instruments if cmd == nil
-
         case cmd
           when :version
-            # instruments, version 5.1.1 (55045)
-            # noinspection RubyUnusedLocalVariable
-            Open3.popen3("#{instruments}") do |stdin, stdout, stderr, wait_thr|
-              stderr.read.chomp.split(' ')[2]
-            end
+            RunLoop::XCTools.new.instruments(cmd).to_s
           when :sims
             devices = `#{instruments} -s devices`.chomp.split("\n")
             devices.select { |device| device.downcase.include?('simulator') }

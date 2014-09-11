@@ -34,9 +34,11 @@ describe 'xcode tools module' do
       expect { instruments(:foo) }.to raise_error(ArgumentError)
     end
 
+    # @todo 0.11.0 Remove this test when XcodeTools are deprecated
     it 'should report its version' do
-      version = instruments(:version)
-      expect(['5.1.1', '5.1', '6.0', '5.0', '5.0.1'].include?(version)).to be == true
+      # Wonky!  RunLoop:XCTools#instruments :version returns a version object.
+      # Our API expects a String.
+      expect(instruments(:version)).to be_a String
     end
 
     it 'should be tell if it supports the -s flag' do
