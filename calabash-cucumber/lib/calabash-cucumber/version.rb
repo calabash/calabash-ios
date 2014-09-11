@@ -22,8 +22,6 @@ module Calabash
       raise(NameError, "uninitialized constant Calabash::Cucumber::#{const_name}")
     end
 
-    # @deprecated since 0.10.0 - replaced with RunLoop::Version
-    #
     # A model of a release version that can be used to compare two version.
     #
     # Calabash tries very hard to comply with Semantic Versioning rules. However,
