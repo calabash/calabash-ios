@@ -15,6 +15,7 @@ describe 'version module' do
   end
 
   it 'should handle non-defined constants with NameError' do
+    # noinspection RubyResolve
     expect{ Calabash::Cucumber::MISSING_CONSTANT }.to raise_error(NameError, 'uninitialized constant Calabash::Cucumber::MISSING_CONSTANT')
   end
 
