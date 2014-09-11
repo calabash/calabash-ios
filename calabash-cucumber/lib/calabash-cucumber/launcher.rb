@@ -931,9 +931,9 @@ class Calabash::Cucumber::Launcher
       return nil
     end
 
-    server_version = Calabash::Cucumber::Version.new(server_version)
-    gem_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::VERSION)
-    min_server_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
+    server_version = RunLoop::Version.new(server_version)
+    gem_version = RunLoop::Version.new(Calabash::Cucumber::VERSION)
+    min_server_version = RunLoop::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
 
     if server_version < min_server_version
       msgs = [
