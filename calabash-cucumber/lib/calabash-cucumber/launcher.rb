@@ -936,14 +936,13 @@ class Calabash::Cucumber::Launcher
     min_server_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
 
     if server_version < min_server_version
-      msgs = []
-      msgs << 'The server version is not compatible with gem version.'
-      msgs << 'Please update your server.'
-      msgs << 'https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version'
-      msgs << "       gem version: '#{gem_version}'"
-      msgs << "min server version: '#{min_server_version}'"
-      msgs << "    server version: '#{server_version}'"
-
+      msgs = [
+            'The server version is not compatible with gem version.',
+            'Please update your server.',
+            'https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version',
+            "       gem version: '#{gem_version}'",
+            "min server version: '#{min_server_version}'",
+            "    server version: '#{server_version}'"]
       calabash_warn("#{msgs.join("\n")}")
     else
       if full_console_logging?
