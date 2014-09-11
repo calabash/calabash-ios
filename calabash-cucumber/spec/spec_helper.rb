@@ -1,3 +1,4 @@
+require 'calabash-cucumber'
 require 'calabash-cucumber/utils/logging'
 require 'awesome_print'
 require 'resources'
