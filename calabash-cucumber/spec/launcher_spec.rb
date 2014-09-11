@@ -344,5 +344,84 @@ describe 'Calabash Launcher' do
         expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
       end
     end
+
+    describe '#check_server_gem_compatibility' do
+
+      describe 'when targeting an .app' do
+        let (:app) { Resources.shared.app_bundle_path :chou }
+
+        describe 'prints a message if server' do
+          it 'and gem are compatible' do
+            launcher.launch_args = {:app => app}
+            min_server_version = Calabash::Cucumber::MIN_SERVER_VERSION
+            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
+            out = capture_stderr do
+              launcher.check_server_gem_compatibility
+            end
+            expect(out.string).to be == ''
+          end
+
+          it 'and gem are not compatible' do
+            launcher.launch_args = {:app => app}
+            min_server_version = '0.0.1'
+            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
+            out = capture_stderr do
+              launcher.check_server_gem_compatibility
+            end
+            expect(out.string).not_to be == nil
+            expect(out.string.length).not_to be == 0
+          end
+
+          it 'version cannot be found' do
+            launcher.launch_args = {:app => app}
+            min_server_version = Calabash::Cucumber::Launcher::SERVER_VERSION_NOT_AVAILABLE
+            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
+            out = capture_stderr do
+              launcher.check_server_gem_compatibility
+            end
+            expect(out.string).not_to be == nil
+            expect(out.string.length).not_to be == 0
+          end
+        end
+      end
+
+      describe 'when targeting an .ipa' do
+        let (:app) { 'foo.ipa' }
+
+        describe 'prints a message if server' do
+          it 'and gem are compatible' do
+            launcher.launch_args = {:app => app}
+            min_server_version = Calabash::Cucumber::MIN_SERVER_VERSION
+            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
+            out = capture_stderr do
+              launcher.check_server_gem_compatibility
+            end
+            expect(out.string).to be == ''
+          end
+
+          it 'and gem are not compatible' do
+            launcher.launch_args = {:app => app}
+            min_server_version = '0.0.1'
+            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
+            out = capture_stderr do
+              launcher.check_server_gem_compatibility
+            end
+            expect(out.string).not_to be == nil
+            expect(out.string.length).not_to be == 0
+          end
+
+          it 'version cannot be found' do
+            launcher.launch_args = {:app => app}
+            min_server_version = Calabash::Cucumber::Launcher::SERVER_VERSION_NOT_AVAILABLE
+            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
+            out = capture_stderr do
+              launcher.check_server_gem_compatibility
+            end
+            expect(out.string).not_to be == nil
+            expect(out.string.length).not_to be == 0
+          end
+        end
+      end
+    end
   end
 end
