@@ -3,13 +3,6 @@ require 'resources'
 
 include Calabash::Cucumber::Logging
 
-# spec_helper.rb
-RSpec.configure do |config|
-  config.expect_with :rspec do |c|
-    c.syntax = :expect
-  end
-end
-
 module Kernel
   def capture_stdout
     out = StringIO.new
