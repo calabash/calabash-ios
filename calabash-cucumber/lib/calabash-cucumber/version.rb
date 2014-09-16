@@ -11,7 +11,7 @@ module Calabash
     # @!visibility public
     # The minimum required version of the calabash.framework or, for Xamarin
     # users, the Calabash component.
-    MIN_SERVER_VERSION = '0.10.0'
+    MIN_SERVER_VERSION = '0.10.1'
 
     # @!visibility private
     def self.const_missing(const_name)
