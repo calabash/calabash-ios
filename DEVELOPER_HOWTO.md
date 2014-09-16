@@ -38,44 +38,62 @@ The integration tests will overwrite existing calabash-cucumber/staticlib and ca
 * https://travis-ci.org/calabash/calabash-ios-server
 * Calabash iOS toolchain testing - http://ci.endoftheworl.de:8080/
 
+## Releasing
 
-### How to Release a New Version
+### Create the release branch
 
+```
+$ git co develop
+$ git pull
+$ git checkout -b release-<next version> develop
+```
 
-#### Preflight Checklist
+No more features can be added.  All in-progress features and un-merged pull-requests must wait for the next release.
+
+You can, and should, make changes to the documentation.  You can bump the gem version and the minimum server version.
+
+***You may not touch the gemspec.***  If you need to update a dependency, like run-loop, do so before making the release and make sure the change makes it through CI.
+
+### Create a pull request for the release branch
+
+Do this very soon after you make the release branch to notify the team that you are planning a release.
+
+```
+$ git push -u origin release-<next version>
+```
+
+Again, no more features can be added to this pull request.  Only changes to documentation are allowed.  You can bump the gem version or change the minimum server version.  _That's it._
+
+### Pre-Flight Checklist
 
 - [ ] Check CI for possible problems.
-- [ ] Double check that the run-loop version you want to target is released.
+    * https://travis-ci.org/calabash/run_loop
+    * https://travis-ci.org/calabash/calabash-ios-server
+    * https://travis-ci.org/calabash/calabash-ios
+    * http://ci.endoftheworl.de:8080/ # Briar jobs.
+- [ ] Double check that the run-loop version you want to target has been released and is available on the RubyGems site.
+    * https://rubygems.org/gems/run_loop
 
-###### Calabash iOS Server
+#### Calabash iOS Server
 
 - [ ] You are on the master branch of `calabash-ios-server`.
 - [ ] There are no outstanding changes in your local repo.
 - [ ] All the required `calabash-ios-server` pull requests have been merged.
 
-###### Calabash iOS Gem
+#### Calabash iOS Gem
 
 - [ ] You are on the master branch of `calabash-ios`.
 - [ ] There are no outstanding changes in your local repo.
 - [ ] All the required `calabash-ios` pull requests have been merged.
+- [ ] lib/calabash-cucumber/version VERSION is correct
+- [ ] lib/calabash-cucumber/version MIN_SERVER_VERSION
+- [ ] calabash-cucumber.gemspec points to right version of run-loop
 
-#### Release!
+#### Test
 
-```
-1. Test (see notes below)
-2. [calabash-ios] update the lib/calabash-cucumber/version VERSION
-3. [calabash-ios] update lib/calabash-cucumber/version MIN_SERVER_VERSION
-4. [run-loop] make sure that correct version has been released
-5. [calabash-ios] check that the run-loop dependency is correct in the gemspec
-6. [calabash-ios] push your version and gemspec changes to master
-7. Optional: Run a briar-toolchain-masters job on Jenkins [1]
-8. [calabash-ios] $ rake build_server
-9. [calabash-ios] $ rake release
-```
+Optional: Run a briar-toolchain-masters job on Jenkins [1]
 
 - [1] http://ci.endoftheworl.de:8080/job/briar-toolchain-masters/
-
-#### Testing
 
 The integration tests delete and regenerate the `staticlib` and `dylibs` directories.  Please keep this in mind.
 
@@ -114,24 +132,21 @@ These tests will protect you from obvious mistakes, but they are incomplete.  Le
 # rspec - runs fewer tests than $ be rake spec
 8. script/ci/travis/rspec-ci.rb
 
-# unit tests - deprecated; these will be removed soon
-9. script/ci/travis/unit-ci.rb
-
 # clone the calabash-ios-server and build libraries
-10. script/ci/travis/rake-build-server-ci.rb
+9. script/ci/travis/rake-build-server-ci.rb
 
-# cucumber against all simulators; includes 1 test with sim_launcher
-11. script/ci/travis/cucumber-ci.rb --tags ~@no_ci
+# cucumber against many simulators; includes 1 test with sim_launcher
+10. script/ci/travis/cucumber-ci.rb --tags ~@no_ci
 
 # run some dylib tests! woot! dylibs!
-12. script/ci/travis/cucumber-dylib-ci.rb
+11. script/ci/travis/cucumber-dylib-ci.rb
 ```
 
 ##### XTC Tests
 
-_This test is not part of the script/ci/travis/local-run-as-travis.rb or the Travis CI build._
+_This test is not part of the script/ci/travis/local-run-as-travis.rb_
 
-This test requires some configuration to run.
+This test _is_ part of the Travis CI jobs.
 
 ```
 [calabash-ios] $ export XTC_API_TOKEN=token
@@ -150,3 +165,49 @@ XTC_WAIT_FOR_RESULTS=0
 ```
 
 _The .env is gitignore'd.  Don't check in your .env file._
+
+#### rake release
+
+Make sure all pull requests have been merged to `develop`
+
+```
+# Check CI!
+# * https://travis-ci.org/calabash/run_loop
+# * https://travis-ci.org/calabash/calabash-ios-server
+# * https://travis-ci.org/calabash/calabash-ios
+# * http://ci.endoftheworl.de:8080/ # Briar jobs.
+
+# Get the latest develop.
+$ git co develop
+$ git pull origin develop
+
+# Get the latest master.
+$ git co master
+$ git pull origin master
+
+# Get the latest release.
+$ git fetch
+$ git co -t origin/release-<next version>
+
+# Merge release into master, run the tests and push.
+$ git co master
+$ git merge release-<next version>
+$ be rake rspec
+$ git push
+
+# Merge release into develop, run the tests and push.
+$ git co develop
+$ git merge release-<next version>
+$ be rake rspec
+$ git push
+
+# Delete the release branch
+$ git push origin :release-<next version>
+$ git br -d release-<next version>
+
+# All is well!
+$ git co master
+$ gem update --system
+$ rake build_server
+$ rake release
+```
