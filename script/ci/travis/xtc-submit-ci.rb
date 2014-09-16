@@ -26,23 +26,35 @@ Dir.chdir xtc_test_dir do
 
   log_pass("wrote new Gemfile with calabash-version '#{calabash_version}'")
 
-  # On Travis, the XTC api token and device set are _private_ and are only
-  # available to gem maintainers.  Pull requests and commits that do not
-  # originate from a maintainer skip the XTC step.
+  # On Travis, the XTC api token is _private_ and is available to gem
+  # maintainers.  Pull requests and commits that do not originate from a
+  # maintainer skip the XTC step.
   #
   # Locally, the XTC_API_TOKEN and XTC_DEVICE_SET can be set in a .env file and
   # accessed with with the dotenv gem, passed on the command line, or exported
   # to the shell.
   #
-  # The token and device are _private_. The .env should never be committed to git.
+  # The XCT_API_TOKEN is _private_. The .env should never be committed to git.
   #
-  # dotenv is _not_ calabash-cucumber gem dependency - it is installed and used
+  # Dotenv is _not_ calabash-cucumber gem dependency - it is installed and used
   # only during testing.
   #
   # The .env file should live in test/xtc
   Dotenv.load if File.exist?('.env')
   token = ENV['XTC_API_TOKEN']
   device_set = ENV['XTC_DEVICE_SET']
+  unless device_set
+    # A collection of device sets that have one iOS 7* device.
+    device_set =
+          [
+                '78c84725', 'dd030a4d', '77388643', 'de3f1384', 'd3f07761', 'b354dd28',
+                '4d614d40', '7660a1f0', 'dfa1cb5a', '9a0124ff', 'beb5c652', '2ad574d4',
+                '3c9d9e38', '2fc6f411', 'a690cafd', 'cb8ce9a8', '1b12481d', 'c4e5ddfb',
+                '61331267', '58d479d8', '7e8bfc9a', '8cdd13fe', '69329018', '4396bc4e',
+                'bf5471ab', '92f59830', '40d1d879', '2a817e4a'
+          ].sample
+  end
+
   if ENV['XTC_WAIT_FOR_RESULTS'] == '0'
     wait_for_results = '--async'
   else
