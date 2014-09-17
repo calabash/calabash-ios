@@ -46,7 +46,7 @@ module Calabash
             :timeout_message => 'Timed out waiting...',
             # Calabash will generate a screenshot by default if waiting times out
             :screenshot_on_error => true
-      }.freeze
+      }
 
       # Waits for a condition to be true. The condition is specified by a given block that is called repeatedly.
       # If the block returns a 'trueish' value the condition is considered true and
