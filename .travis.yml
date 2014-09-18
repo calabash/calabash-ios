@@ -14,7 +14,6 @@ script:
   - if [[ ( ! -z $XTC_API_TOKEN && `ruby -e 'print RUBY_VERSION'` == '2.1.1' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
   - script/ci/travis/install-gem-ci.rb
   - script/ci/travis/rspec-ci.rb
-  - script/ci/travis/unit-ci.rb
   - script/ci/travis/cucumber-ci.rb --tags ~@no_ci
   - script/ci/travis/rake-build-server-ci.rb
 

@@ -6,7 +6,6 @@ require 'calabash-cucumber/actions/instruments_actions'
 require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
-require 'calabash-cucumber/version'
 require 'calabash-cucumber/utils/logging'
 require 'calabash/dylibs'
 
@@ -554,7 +553,20 @@ class Calabash::Cucumber::Launcher
     end
 
     if run_with_instruments?(args)
-      args[:uia_strategy] ||= :preferences
+      # Patch for bug in Xcode 6 GM + iOS 8 device testing.
+      # http://openradar.appspot.com/radar?id=5891145586442240
+      #
+      # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
+      # of the Xcode tool calls, like instruments -s templates, take a long time
+      # to execute.  The SimControl instance has XCTool attribute which caches
+      # the results of many of these time-consuming calls so they only need to
+      # be called 1 time per launch.
+      # @todo Use SimControl in Launcher in place of methods like simulator_target?
+      args[:sim_control] = RunLoop::SimControl.new
+      uia_strategy = default_uia_strategy(args, args[:sim_control])
+      args[:uia_strategy] ||= uia_strategy
+      calabash_info "Using uia strategy: '#{args[:uia_strategy]}'" if debug_logging?
+
       self.run_loop = new_run_loop(args)
       self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
@@ -570,6 +582,37 @@ class Calabash::Cucumber::Launcher
       # skip compatibility check if injecting dylib
       unless args.fetch(:inject_dylib, false)
         check_server_gem_compatibility
+      end
+    end
+  end
+
+  # @!visibility private
+  #
+  # Choose the appropriate default UIA strategy based on the test target.
+  #
+  # This is a temporary (I hope) fix for a UIAApplication bug in
+  # setPreferencesValueForKey on iOS 8 devices in Xcode 6 GM.
+  #
+  # rdar://18296714
+  # http://openradar.appspot.com/radar?id=5891145586442240
+  def default_uia_strategy(launch_args, sim_control)
+    # Preferences strategy works on Xcode iOS Simulators.
+    if RunLoop::Core.simulator_target?(launch_args, sim_control)
+      :preferences
+    else
+      target_udid = launch_args[:device_target]
+      target_device = nil
+      sim_control.xctools.instruments(:devices).each do |device|
+        if device.udid == target_udid
+          target_device = device
+          break
+        end
+      end
+      # Preferences strategy works for iOS < 8.0, but not for iOS >= 8.0.
+      if target_device.version < RunLoop::Version.new('8.0')
+        :preferences
+      else
+        :host
       end
     end
   end
@@ -911,13 +954,13 @@ class Calabash::Cucumber::Launcher
     @@server_version = self.device.server_version
   end
 
-  # checks the server and gem version compatibility and generates a warning if
+  # @!visibility private
+  # Checks the server and gem version compatibility and generates a warning if
   # the server and gem are not compatible.
   #
-  # WIP:  this is a proof-of-concept implementation and requires _strict_
-  # equality.  in the future we should allow minimum framework compatibility.
+  # @note  This is a proof-of-concept implementation and requires _strict_
+  #  equality.  in the future we should allow minimum framework compatibility.
   #
-  # @!visibility private
   # @return [nil] nothing to return
   def check_server_gem_compatibility
     app_bundle_path = self.launch_args[:app]
@@ -932,18 +975,18 @@ class Calabash::Cucumber::Launcher
       return nil
     end
 
-    server_version = Calabash::Cucumber::Version.new(server_version)
-    gem_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::VERSION)
-    min_server_version = Calabash::Cucumber::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
+    server_version = RunLoop::Version.new(server_version)
+    gem_version = RunLoop::Version.new(Calabash::Cucumber::VERSION)
+    min_server_version = RunLoop::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
 
     if server_version < min_server_version
-      msgs = []
-      msgs << 'server version is not compatible with gem version'
-      msgs << 'please update your server and gem'
-      msgs << "       gem version: '#{gem_version}'"
-      msgs << "min server version: '#{min_server_version}'"
-      msgs << "    server version: '#{server_version}'"
-
+      msgs = [
+            'The server version is not compatible with gem version.',
+            'Please update your server.',
+            'https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version',
+            "       gem version: '#{gem_version}'",
+            "min server version: '#{min_server_version}'",
+            "    server version: '#{server_version}'"]
       calabash_warn("#{msgs.join("\n")}")
     else
       if full_console_logging?

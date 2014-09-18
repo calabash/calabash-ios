@@ -1,4 +1,5 @@
 require 'open3'
+require 'run_loop'
 
 module Calabash
   module Cucumber
@@ -21,10 +22,7 @@ module Calabash
       #
       # @return [String] path to current developer directory
       def xcode_developer_dir
-        # respect DEVELOPER_DIR
-        return ENV['DEVELOPER_DIR'] if ENV['DEVELOPER_DIR']
-        # fall back to xcode-select
-        `xcode-select --print-path`.chomp
+        RunLoop::XCTools.new.xcode_developer_dir
       end
 
       # @deprecated 0.10.0 not replaced
@@ -54,17 +52,11 @@ module Calabash
       def instruments(cmd=nil)
         instruments = 'xcrun instruments'
         return instruments if cmd == nil
-
         case cmd
           when :version
-            # instruments, version 5.1.1 (55045)
-            # noinspection RubyUnusedLocalVariable
-            Open3.popen3("#{instruments}") do |stdin, stdout, stderr, wait_thr|
-              stderr.read.chomp.split(' ')[2]
-            end
+            RunLoop::XCTools.new.instruments(cmd).to_s
           when :sims
-            devices = `#{instruments} -s devices`.chomp.split("\n")
-            devices.select { |device| device.downcase.include?('simulator') }
+            RunLoop::XCTools.new.instruments(cmd)
           else
             candidates = [:version, :sims]
             raise(ArgumentError, "expected '#{cmd}' to be one of '#{candidates}'")
@@ -82,11 +74,8 @@ module Calabash
       #   a major.minor[.patch] version string
       #
       # @return [Boolean] true if the version is >= 5.*
-      def instruments_supports_hyphen_s?(version=instruments(:version))
-        tokens = version.split('.')
-        return false if tokens[0].to_i < 5
-        return false if tokens[1].to_i < 1
-        true
+      def instruments_supports_hyphen_s?(version)
+        RunLoop::XCTools.new.instruments_supports_hyphen_s?(version)
       end
 
       # Returns a list of installed simulators by calling `$ instruments -s devices`.
@@ -96,12 +85,8 @@ module Calabash
       # @raise [RuntimeError] if the currently active instruments version does
       #   not support the -s flag
       def installed_simulators
-        unless instruments_supports_hyphen_s?
-          raise(RuntimeError, "instruments '#{instruments(:version)}' does not support '-s devices' arguments")
-        end
         instruments(:sims)
       end
-
     end
   end
 end
