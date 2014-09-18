@@ -8,6 +8,7 @@ require 'calabash-cucumber/version'
 require 'calabash-cucumber/date_picker'
 require 'calabash-cucumber/ipad_1x_2x'
 require 'calabash-cucumber/utils/logging'
+require 'calabash-cucumber/deprecated'
 
 # stubs for documentation
 
