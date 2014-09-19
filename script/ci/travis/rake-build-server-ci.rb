@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'run_loop'
 require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
 working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'calabash-cucumber'))
@@ -19,10 +18,8 @@ Dir.chdir working_directory do
               'CALABASH_SERVER_PATH' => server_dir
         }
 
-  xcode_tools = RunLoop::XCTools.new
-
   # Xcode 6 supports dylib targets.
-  if xcode_tools.xcode_version_gte_6?
+  if xcode_version_gte_6?
     do_system('rake build_server',
               {:env_vars => env_vars,
                :pass_msg => 'built the framework, frank lib, and dylibs',
@@ -47,7 +44,7 @@ Dir.chdir working_directory do
   end
 
   # Xcode 6 supports dylib targets.
-  if xcode_tools.xcode_version_gte_6?
+  if xcode_version_gte_6?
     ['dylibs/libCalabashDyn.dylib', 'dylibs/libCalabashDynSim.dylib'].each do |lib|
       do_system("[ -e #{lib} ]",
                 {:pass_msg => "installed #{lib}",

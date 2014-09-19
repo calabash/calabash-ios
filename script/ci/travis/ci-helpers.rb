@@ -63,6 +63,15 @@ def travis_ci?
   ENV['TRAVIS']
 end
 
+def xcode_version
+  `xcrun xcodebuild -version`.split(/\s/)[1]
+end
+
+def xcode_version_gte_6?
+  version_parts = xcode_version.split('.')
+  version_parts.first.to_i >= 6
+end
+
 def update_rubygems
   do_system('gem update --system',
             {:pass_msg => 'updated rubygems',

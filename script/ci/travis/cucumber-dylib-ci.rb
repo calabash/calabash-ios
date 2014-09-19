@@ -1,10 +1,9 @@
 #!/usr/bin/env ruby
 require 'fileutils'
-require 'run_loop'
 
 require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
-if RunLoop::XCTools.new.xcode_version_gte_6?
+if xcode_version_gte_6?
   log_warn "Xcode >= 6 detected; skipping dylib because they don't run on Xcode 6"
   log_pass 'Exiting dylib tests with 0 because support for dylibs is experimental'
   exit 0
