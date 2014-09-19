@@ -1,5 +1,3 @@
-require 'calabash-cucumber/utils/logging'
-
 module Calabash
   module Cucumber
 
