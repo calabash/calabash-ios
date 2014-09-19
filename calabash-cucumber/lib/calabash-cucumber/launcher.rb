@@ -285,7 +285,7 @@ class Calabash::Cucumber::Launcher
   # @raise RuntimeError if called when targeting a physical device
   def reset_simulator
     if device_target?
-      raise "calling 'reset_simulator' when targeting a device is not allowed"
+      raise "Calling 'reset_simulator' when targeting a device is not allowed"
     end
     reset_simulator_content_and_settings
   end
