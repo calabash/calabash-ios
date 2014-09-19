@@ -287,7 +287,7 @@ class Calabash::Cucumber::Launcher
     if device_target?
       raise "Calling 'reset_simulator' when targeting a device is not allowed"
     end
-    reset_simulator_content_and_settings
+    RunLoop::SimControl.new.reset_sim_content_and_settings
   end
 
   # @!visibility private
