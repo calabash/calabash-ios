@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'erb'
-require 'run_loop'
 require 'yaml'
 
 require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
@@ -105,8 +104,7 @@ Dir.chdir(working_directory) do
   end
 
   # Travis CI on Xcode 5.1.1 has a hard time with 64 bit simulators.
-  xcode_tools = RunLoop::XCTools.new
-  if travis_ci? and not xcode_tools.xcode_version_gte_6?
+  if travis_ci? and not xcode_version_gte_6?
     profiles[:air] = simulator_profiles[:air_mid]
     profiles[:iphone5s] = simulator_profiles[:iphone5s_mid]
   end
