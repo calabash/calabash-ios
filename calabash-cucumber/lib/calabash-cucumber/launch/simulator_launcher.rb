@@ -3,6 +3,7 @@ require 'json'
 require 'net/http'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
+require 'run_loop'
 
 module Calabash
   module Cucumber
@@ -71,7 +72,7 @@ module Calabash
 
       # Stops (quits) the simulator.
       def stop
-        self.simulator.quit_simulator
+        RunLoop::SimControl.new.quit_sim
       end
 
 
