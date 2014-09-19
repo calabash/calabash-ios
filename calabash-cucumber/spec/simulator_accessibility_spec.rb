@@ -12,18 +12,6 @@ unless Resources.shared.travis_ci?
       expect(File.exist?(path)).to be == true
     end
 
-    it 'should be able to open and close the simulator' do
-      cmd = "ps auxw | grep \"iPhone Simulator.app/Contents/MacOS/iPhone Simulator\" | grep -v grep"
-
-      quit_simulator
-      sleep(2)
-      expect(`#{cmd}`.split("\n").count).to be == 0
-
-      launch_simulator
-      sleep(4)
-      expect(`#{cmd}`.split("\n").count).to be == 1
-    end
-
     describe 'deprecations:' do
       it '.enable_accessibility_on_simulators' do
         out = capture_stderr do
