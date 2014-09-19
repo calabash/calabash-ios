@@ -608,6 +608,10 @@ class Calabash::Cucumber::Launcher
           break
         end
       end
+
+      # Device could not be found; kick the problem down the road.
+      return :preferences if target_device.nil?
+
       # Preferences strategy works for iOS < 8.0, but not for iOS >= 8.0.
       if target_device.version < RunLoop::Version.new('8.0')
         :preferences
