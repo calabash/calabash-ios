@@ -273,8 +273,11 @@ class Calabash::Cucumber::Launcher
     end
   end
 
-  # Simulates touching the iOS Simulator > Reset Content and Settings... menu
-  # item.
+  # Erases the contents and setting for every available simulator.
+  #
+  # For Xcode 6, this is equivalent to calling: `$ xcrun simctl erase` on
+  # every available simulator.  For Xcode < 6, it is equivalent to touching
+  # the 'Reset Content & Settings' menu item.
   #
   # @note
   #  **WARNING** This is a destructive operation.  You have been warned.
