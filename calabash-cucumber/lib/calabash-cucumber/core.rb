@@ -767,7 +767,16 @@ module Calabash
         # or HTTPClient::KeepAliveDisconnected
         # which needs to be suppressed.
         begin
-          http({:method => :post, :path => 'exit', :retryable_errors => Calabash::Cucumber::HTTPHelpers::RETRYABLE_ERRORS - [Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected]})
+          http({
+                     :method => :post,
+                     :path => 'exit',
+                     :retryable_errors => Calabash::Cucumber::HTTPHelpers::RETRYABLE_ERRORS - [Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected]
+               },  {
+                     :post_resign_active_delay => 0.4,
+                     :post_will_terminate_delay => 0.4,
+                     :exit_code => 0
+               }
+          )
         rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected
           []
         end
