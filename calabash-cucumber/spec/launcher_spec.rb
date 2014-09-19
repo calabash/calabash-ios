@@ -33,6 +33,12 @@ describe 'Calabash Launcher' do
         actual = launcher.default_uia_strategy(launch_args, sim_control)
         expect(actual).to be == :preferences
       end
+
+      it 'not found' do
+        launch_args = { :device_target => 'a udid of a device that does not exist' }
+        actual = launcher.default_uia_strategy(launch_args, sim_control)
+        expect(actual).to be == :preferences
+      end
     end
 
     it 'returns :host when target is an iOS device running iOS >= 8.0' do
