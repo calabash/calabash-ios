@@ -31,7 +31,8 @@ Dir.chdir working_directory do
     # Expecting failures on Xcode 5.1.1 that do not have injected .xcspecs.
     exit_code = do_system('rake build_server',
                           {:env_vars => env_vars,
-                           :pass_msg => 'built the framework, frank lib, and dylibs'})
+                           :pass_msg => 'built the framework, frank lib, and dylibs',
+                           :exit_on_nonzero_status => false})
     if exit_code == 0
       log_fail 'did not expect to pass the rake build_server task; waiting for dylib targets'
     else
