@@ -250,25 +250,30 @@ class Calabash::Cucumber::Launcher
     default_opts = {:sdk => nil, :path => nil}
     merged_opts = default_opts.merge opts
 
-    sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
-    path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
+    sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
+    if sim_control.xcode_version_gte_6?
 
-    app = File.basename(path)
+    else
+      sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
+      path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
 
-    directories_for_sdk_prefix(sdk).each do |sdk_dir|
-      app_dir = File.expand_path("#{sdk_dir}/Applications")
-      next unless File.exists?(app_dir)
+      app = File.basename(path)
 
-      bundle = `find "#{app_dir}" -type d -depth 2 -name "#{app}" | head -n 1`
+      directories_for_sdk_prefix(sdk).each do |sdk_dir|
+        app_dir = File.expand_path("#{sdk_dir}/Applications")
+        next unless File.exists?(app_dir)
 
-      next if bundle.empty? # Assuming we're already clean
+        bundle = `find "#{app_dir}" -type d -depth 2 -name "#{app}" | head -n 1`
 
-      if debug_logging?
-        puts "Reset app state for #{bundle}"
-      end
-      sandbox = File.dirname(bundle)
-      ['Library', 'Documents', 'tmp'].each do |content_dir|
-        FileUtils.rm_rf(File.join(sandbox, content_dir))
+        next if bundle.empty? # Assuming we're already clean
+
+        if debug_logging?
+          puts "Reset app state for #{bundle}"
+        end
+        sandbox = File.dirname(bundle)
+        ['Library', 'Documents', 'tmp'].each do |content_dir|
+          FileUtils.rm_rf(File.join(sandbox, content_dir))
+        end
       end
     end
   end
