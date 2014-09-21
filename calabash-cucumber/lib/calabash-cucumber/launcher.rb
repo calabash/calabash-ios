@@ -252,7 +252,21 @@ class Calabash::Cucumber::Launcher
 
     sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
     if sim_control.xcode_version_gte_6?
+      default_sim = RunLoop::Core.default_simulator(sim_control.xctools)
+      udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
 
+      target_simulator = nil
+      sim_control.simulators.each do |device|
+        if device.name == udid || device.udid == udid
+          target_simulator = device
+        end
+      end
+
+      if target_simulator.nil?
+        raise "Could not find a simulator that matches '#{udid}'"
+      end
+
+      sim_control.reset_sim_content_and_settings({:sim_udid => udid})
     else
       sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
       path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
