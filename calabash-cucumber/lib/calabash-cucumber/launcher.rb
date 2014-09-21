@@ -495,6 +495,14 @@ class Calabash::Cucumber::Launcher
     # @todo Don't overwrite the _args_ parameter!
     args = default_launch_args.merge(args)
 
+    # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
+    # of the Xcode tool calls, like instruments -s templates, take a long time
+    # to execute.  The SimControl instance has XCTool attribute which caches
+    # the results of many of these time-consuming calls so they only need to
+    # be called 1 time per launch.
+    # @todo Use SimControl in Launcher in place of methods like simulator_target?
+    args[:sim_control] = RunLoop::SimControl.new
+
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
 
@@ -564,14 +572,6 @@ class Calabash::Cucumber::Launcher
     if run_with_instruments?(args)
       # Patch for bug in Xcode 6 GM + iOS 8 device testing.
       # http://openradar.appspot.com/radar?id=5891145586442240
-      #
-      # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
-      # of the Xcode tool calls, like instruments -s templates, take a long time
-      # to execute.  The SimControl instance has XCTool attribute which caches
-      # the results of many of these time-consuming calls so they only need to
-      # be called 1 time per launch.
-      # @todo Use SimControl in Launcher in place of methods like simulator_target?
-      args[:sim_control] = RunLoop::SimControl.new
       uia_strategy = default_uia_strategy(args, args[:sim_control])
       args[:uia_strategy] ||= uia_strategy
       calabash_info "Using uia strategy: '#{args[:uia_strategy]}'" if debug_logging?
