@@ -492,6 +492,7 @@ class Calabash::Cucumber::Launcher
     #TODO stopping is currently broken, but this works anyway because instruments stop the process before relaunching
     RunLoop.stop(run_loop) if run_loop
 
+    # @todo Don't overwrite the _args_ parameter!
     args = default_launch_args.merge(args)
 
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
