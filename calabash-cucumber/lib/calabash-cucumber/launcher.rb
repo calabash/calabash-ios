@@ -547,7 +547,10 @@ class Calabash::Cucumber::Launcher
       if sdk.nil? and args[:device_target] == 'simulator'
         sdk = :all
       end
-      reset_app_sandbox({:sdk => sdk, :path => args[:app], :udid => args[:udid]})
+      reset_app_sandbox({:sdk => sdk,
+                         :path => args[:app],
+                         :udid => args[:udid],
+                         :sim_control => args[:sim_control]})
     end
 
     if args[:privacy_settings]
