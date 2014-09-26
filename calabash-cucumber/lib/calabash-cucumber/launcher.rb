@@ -629,14 +629,16 @@ class Calabash::Cucumber::Launcher
     else
       target_udid = launch_args[:device_target]
       target_device = nil
-      sim_control.xctools.instruments(:devices).each do |device|
+      devices_connected = sim_control.xctools.instruments(:devices)
+      devices_connected.each do |device|
         if device.udid == target_udid
           target_device = device
           break
         end
       end
       if target_device.nil?
-        target_device = RunLoop::Core.detect_connected_device
+        target_device = devices_connected.first
+        launch_args[:device_target] = target_device.udid
       end
       unless target_device
         raise 'No device_target was specified and did not detect a connected device. Set a device_target option in the relaunch method.'
