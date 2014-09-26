@@ -386,7 +386,12 @@ module Calabash
       # @raise [RuntimeError] if the text cannot be typed.
       def tap_keyboard_action_key
         if uia_available?
-          uia_type_string '\n', '', false
+          run_loop = Calabash::Cucumber::Launcher.launcher.run_loop
+          if run_loop[:uia_strategy] == :host
+            uia_type_string "\\\\n", '', false
+          else
+            uia_type_string '\n', '', false
+          end
         else
           keyboard_enter_char 'Return'
         end

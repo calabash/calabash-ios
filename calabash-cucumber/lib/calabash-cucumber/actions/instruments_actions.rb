@@ -123,9 +123,15 @@ class Calabash::Cucumber::InstrumentsActions
     launcher = Calabash::Cucumber::Launcher.launcher
     if launcher.ios_major_version.to_i >= 8
       return ## Orientation management changed in iOS 8:
-      ## https://developer.apple.com/library/ios/documentation/UIKit/Reference/UICoordinateSpace_protocol/index.html
+    #  ## https://developer.apple.com/library/ios/documentation/UIKit/Reference/UICoordinateSpace_protocol/index.html
     end
-    screen_size = launcher.device.screen_size
+    dimensions = launcher.device.screen_dimensions
+    if dimensions
+      screen_size = {width: dimensions[:width]*dimensions[:sample]/dimensions[:scale],
+                     height: dimensions[:height]*dimensions[:sample]/dimensions[:scale]}
+    else
+      screen_size = launcher.device.screen_size
+    end
     case orientation
       when :right
         cx = rect['center_x']
