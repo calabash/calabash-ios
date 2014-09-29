@@ -761,8 +761,28 @@ module Calabash
         res['result']
       end
 
-      # Kills the app.
-      def calabash_exit
+      # Attempts to shut the app down gracefully by simulating the transition
+      # to closed steps.  The server will attempt to ensure that the following
+      # UIApplicationDelegate methods methods are called (in order).
+      #
+      # ```
+      #  - (void)applicationWillResignActive:(UIApplication *)application
+      #  - (void)applicationWillTerminate:(UIApplication *)application
+      # ```
+      #
+      # @todo Shutdown the CalabashServer and close connections.
+      #
+      # @param [Hash] opts Options for controlling the app shutdown process.
+      # @option opts [Float] :post_resign_active_delay (0.4) How long to wait
+      #  after calling 'application will resign active' before calling
+      #  'app will terminate'.
+      # @option opts [Float] :post_will_terminate_delay (0.4) How long to wait
+      #  after calling 'application will resign active' before calling 'exit'.
+      # @option opts [Integer] :exit_code What code should the application
+      #  exit with?  This exit code may or may not be used!  If the
+      #  UIApplication responds to `terminateWithSuccess`, then that method will
+      #  be called.  The exit code for `terminateWithSuccess` is undefined.
+      def calabash_exit(opts={})
         # Exiting the app shuts down the HTTP connection and generates ECONNREFUSED,
         # or HTTPClient::KeepAliveDisconnected
         # which needs to be suppressed.
