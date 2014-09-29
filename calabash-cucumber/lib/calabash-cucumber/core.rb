@@ -783,6 +783,10 @@ module Calabash
       #  UIApplication responds to `terminateWithSuccess`, then that method will
       #  be called.  The exit code for `terminateWithSuccess` is undefined.
       def calabash_exit(opts={})
+        default_opts = {:post_resign_active_delay => 0.4,
+                        :post_will_terminate_delay => 0.4,
+                        :exit_code => 0}
+        merged_opts = default_opts.merge(opts)
         # Exiting the app shuts down the HTTP connection and generates ECONNREFUSED,
         # or HTTPClient::KeepAliveDisconnected
         # which needs to be suppressed.
@@ -792,9 +796,9 @@ module Calabash
                      :path => 'exit',
                      :retryable_errors => Calabash::Cucumber::HTTPHelpers::RETRYABLE_ERRORS - [Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected]
                },  {
-                     :post_resign_active_delay => 0.4,
-                     :post_will_terminate_delay => 0.4,
-                     :exit_code => 0
+                     :post_resign_active_delay => merged_opts[:post_resign_active_delay],
+                     :post_will_terminate_delay => merged_opts[:post_will_terminate_delay],
+                     :exit_code => merged_opts[:exit_code]
                }
           )
         rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected
