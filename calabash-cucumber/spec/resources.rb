@@ -12,6 +12,13 @@ class Resources
     @travis_ci ||= ENV['TRAVIS'].to_s == 'true'
   end
 
+  def current_xcode_version
+    @current_xcode_version ||= lambda {
+      ENV.delete('DEVELOPER_DIR')
+      RunLoop::XCTools.new.xcode_version
+    }.call
+  end
+
   def resources_dir
     @resources_dir = File.expand_path(File.join(File.dirname(__FILE__),  'resources'))
   end
