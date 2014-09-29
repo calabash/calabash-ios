@@ -107,4 +107,101 @@ class Resources
     }.call.compact
   end
 
+  def ideviceinstaller_bin_path
+    @ideviceinstaller_bin_path ||= `which ideviceinstaller`.chomp!
+  end
+
+  def ideviceinstaller_available?
+    path = ideviceinstaller_bin_path
+    path and File.exist? ideviceinstaller_bin_path
+  end
+
+  def ideviceinstaller(device_udid, cmd, opts={})
+    default_opts = {:ipa => ipa_path,
+                    :bundle_id => bundle_id}
+
+    merged = default_opts.merge(opts)
+
+
+    bin_path = ideviceinstaller_bin_path
+    bundle_id = merged[:bundle_id]
+
+    case cmd
+      when :install
+        ipa = merged[:ipa]
+        Retriable.retriable do
+          uninstall device_udid, bundle_id, bin_path
+        end
+        Retriable.retriable do
+          install device_udid, ipa, bundle_id, bin_path
+        end
+      when :uninstall
+        Retriable.retriable do
+          uninstall device_udid, bundle_id, bin_path
+        end
+      else
+        cmds = [:install, :uninstall]
+        raise ArgumentError, "expected '#{cmd}' to be one of '#{cmds}'"
+    end
+  end
+
+  def bundle_installed?(udid, bundle_id, installer)
+    cmd = "#{installer} -u #{udid} -l"
+    if ENV['DEBUG_UNIX_CALLS'] == '1'
+      puts "\033[36mEXEC: #{cmd}\033[0m"
+    end
+    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
+      out = stdout.read.strip
+      err = stderr.read.strip
+      if ENV['DEBUG_UNIX_CALLS'] == '1'
+        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
+      end
+      out.strip.split(/\s/).include? bundle_id
+    end
+  end
+
+  def install(udid, ipa, bundle_id, installer)
+    if bundle_installed? udid, bundle_id, installer
+      if ENV['DEBUG_UNIX_CALLS'] == '1'
+        puts "\033[32mINFO: bundle '#{bundle_id}' is already installed\033[0m"
+      end
+      return true
+    end
+    cmd = "#{installer} -u #{udid} --install #{ipa}"
+    if ENV['DEBUG_UNIX_CALLS'] == '1'
+      puts "\033[36mEXEC: #{cmd}\033[0m"
+    end
+    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
+      out = stdout.read.strip
+      err = stderr.read.strip
+      if ENV['DEBUG_UNIX_CALLS'] == '1'
+        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
+      end
+    end
+    unless bundle_installed?(udid, bundle_id, installer)
+      raise "could not install '#{ipa}' on '#{udid}' with '#{bundle_id}'"
+    end
+    true
+  end
+
+  def uninstall(udid, bundle_id, installer)
+    unless bundle_installed? udid, bundle_id, installer
+      return true
+    end
+    cmd = "#{installer} -u #{udid} --uninstall #{bundle_id}"
+    if ENV['DEBUG_UNIX_CALLS'] == '1'
+      puts "\033[36mEXEC: #{cmd}\033[0m"
+    end
+    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
+      out = stdout.read.strip
+      err = stderr.read.strip
+      if ENV['DEBUG_UNIX_CALLS'] == '1'
+        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
+      end
+    end
+    if bundle_installed?(udid, bundle_id, installer)
+      raise "could not uninstall '#{bundle_id}' on '#{udid}'"
+    end
+    true
+  end
 end
