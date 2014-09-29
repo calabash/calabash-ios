@@ -34,6 +34,14 @@ class Resources
     end
   end
 
+  def ipa_path
+    @ipa_path ||= File.expand_path(File.join(resources_dir, 'LPSimpleExample-cal.ipa'))
+  end
+
+  def bundle_id
+    @bundle_id = 'com.lesspainful.example.LPSimpleExample-cal'
+  end
+
   def device_for_mocking
     endpoint = 'http://localhost:37265/'
     # noinspection RubyStringKeysInHashInspection
