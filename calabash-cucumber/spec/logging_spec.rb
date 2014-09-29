@@ -6,7 +6,6 @@ describe 'calabash logging' do
 
   it 'should output info messages' do
     info_msg = 'this is an info message'
-    calabash_info(info_msg)
     out = capture_stdout do
       calabash_info(info_msg)
     end
