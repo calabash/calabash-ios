@@ -58,4 +58,45 @@ class Resources
     }
     Calabash::Cucumber::Device.new(endpoint, version_data)
   end
+
+  def alt_xcode_install_paths
+    @alt_xcode_install_paths ||= lambda {
+      min_xcode_version = RunLoop::Version.new('5.1')
+      Dir.glob('/Xcode/*/*.app/Contents/Developer').map do |path|
+        xcode_version = path[/(\d\.\d(\.\d)?)/, 0]
+        if RunLoop::Version.new(xcode_version) >= min_xcode_version
+          path
+        else
+          nil
+        end
+      end
+    }.call.compact
+  end
+
+  def alt_xcodes_gte_xc51_hash
+    @alt_xcodes_gte_xc51_hash ||= lambda {
+      ENV.delete('DEVELOPER_DIR')
+      xcode_select_path = RunLoop::XCTools.new.xcode_developer_dir
+      paths =  alt_xcode_install_paths
+      paths.map do |path|
+        begin
+          ENV['DEVELOPER_DIR'] = path
+          version = RunLoop::XCTools.new.xcode_version
+          if path == xcode_select_path
+            nil
+          elsif version >= RunLoop::Version.new('5.1')
+            {
+                  :version => RunLoop::XCTools.new.xcode_version,
+                  :path => path
+            }
+          else
+            nil
+          end
+        ensure
+          ENV.delete('DEVELOPER_DIR')
+        end
+      end
+    }.call.compact
+  end
+
 end
