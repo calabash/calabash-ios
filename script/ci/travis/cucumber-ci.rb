@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+require 'erb'
+require 'yaml'
+
 require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
 cucumber_args = "#{ARGV.join(' ')}"
@@ -24,31 +27,92 @@ Dir.chdir(working_directory) do
              :fail_msg => 'could not reset the simulator'})
 
 
-  # todo - parse the config/cucumber.yml file for this info
-  profiles =
-        {
-              :sim61_4in => 'iPhone Retina (4-inch) - Simulator - iOS 6.1',
-              :sim71_4in => 'iPhone Retina (4-inch) - Simulator - iOS 7.1',
-              :sim61r => 'iPhone Retina (3.5-inch) - Simulator - iOS 6.1',
-              :sim71r => 'iPhone Retina (3.5-inch) - Simulator - iOS 7.1',
-              :sim61_ipad_r => 'iPad Retina - Simulator - iOS 6.1',
-              :sim71_ipad_r => 'iPad Retina - Simulator - iOS 7.1',
-              :sim61_sl => 'iPhone (3.5-inch) - Simulator - iOS 6.1 (launched with ios-sim)'
-        }
+  cucumber_profiles = File.expand_path('config/cucumber.yml')
+  evaled_erb = ERB.new(File.read cucumber_profiles)
+  # noinspection RubyResolve
+  parsed_yaml = YAML.load(evaled_erb.result)
+  simulators_str = parsed_yaml['simulators'].split('=')[1..-1].join(' =').gsub(/=>/, ' => ').gsub!(/\A"|"\Z/, '')
+  hash_ready = simulators_str[1..simulators_str.length-2]
+  tokens = hash_ready.split(',').map { |elm| elm.strip }
+  simulator_profiles = {}
+  tokens.each do |token|
+    key_value = token.split('=>').map { |elm| elm.strip }
+    simulator_profiles[key_value[0].tr(':', '').to_sym] = key_value[1].gsub!(/\A"|"\Z/, '')
+  end
 
   if travis_ci?
-    profiles[:sim70_64b] = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'
-    profiles[:sim70_ipad_r_64b] = 'iPad Retina (64-bit) - Simulator - iOS 7.0'
+    profiles =
+          {
+                #:ipad2 => simulator_profiles[:ipad2],
+                # Not yet, maybe never
+                #:ipad2_mid => simulator_profiles[:ipad2_mid],
+                #:ipad2_min => simulator_profiles[:ipad2_min],
+
+                :air => simulator_profiles[:air],
+                # Not yet, maybe never
+                #:air_mid => simulator_profiles[:air_mid],
+                #:air_min => simulator_profiles[:air_min],
+
+                #:ipad => simulator_profiles[:ipad],
+                # Stalls on Travis CI
+                #:ipad_mid => simulator_profiles[:ipad_mid],
+                # Not yet, maybe never
+                #:ipad_min => simulator_profiles[:ipad_min],
+
+                #:iphone4s => simulator_profiles[:iphone4s],
+                # Not yet, maybe never
+                #:iphone4s_mid => simulator_profiles[:iphone4s_mid],
+                #:iphone4s_min => simulator_profiles[:iphone4s_min],
+
+                #:iphone5s => simulator_profiles[:iphone5s],
+                # Not yet, maybe never
+                #:iphone5s_mid => simulator_profiles[:iphone5s_mid],
+                #:iphone5s_min => simulator_profiles[:iphone5s_min],
+
+                #:iphone5 => simulator_profiles[:iphone5],
+                # Not yet, maybe never
+                #:iphone5_mid => simulator_profiles[:iphone5_mid],
+                #:iphone5_min => simulator_profiles[:iphone5_min]
+          }
   else
-    profiles[:sim71_64b] = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
-    profiles[:sim71_ipad_r_64b] = 'iPad Retina (64-bit) - Simulator - iOS 7.1'
+    profiles =
+          {
+                :ipad2 => simulator_profiles[:ipad2],
+                :ipad2_mid => simulator_profiles[:ipad2_mid],
+                #:ipad2_min => simulator_profiles[:ipad2_min],
+
+                :air => simulator_profiles[:air],
+                :air_mid => simulator_profiles[:air_mid],
+                #:air_min => simulator_profiles[:air_min],
+
+                :ipad => simulator_profiles[:ipad],
+                :ipad_mid => simulator_profiles[:ipad_mid],
+                #:ipad_min => simulator_profiles[:ipad_min],
+
+                :iphone4s => simulator_profiles[:iphone4s],
+                :iphone4s_mid => simulator_profiles[:iphone4s_mid],
+                #:iphone4s_min => simulator_profiles[:iphone4s_min],
+
+                :iphone5s => simulator_profiles[:iphone5s],
+                :iphone5s_mid => simulator_profiles[:iphone5s_mid],
+                #:iphone5s_min => simulator_profiles[:iphone5s_min],
+
+                :iphone5 => simulator_profiles[:iphone5],
+                :iphone5_mid => simulator_profiles[:iphone5_mid],
+                #:iphone5_min => simulator_profiles[:iphone5_min]
+          }
+  end
+
+  # Travis CI on Xcode 5.1.1 has a hard time with 64 bit simulators.
+  if travis_ci? and not xcode_version_gte_6?
+    profiles[:air] = simulator_profiles[:air_mid]
+    profiles[:iphone5s] = simulator_profiles[:iphone5s_mid]
   end
 
   # noinspection RubyStringKeysInHashInspection
   env_vars =
         {
               'APP_BUNDLE_PATH' => './LPSimpleExample-cal.app',
-              'DEVELOPER_DIR' => '/Applications/Xcode.app/Contents/Developer'
         }
   passed_sims = []
   failed_sims = []

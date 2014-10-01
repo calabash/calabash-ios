@@ -3,6 +3,7 @@ require 'calabash-cucumber/utils/plist_buddy'
 require 'calabash-cucumber/utils/logging'
 require 'sim_launcher'
 require 'cfpropertylist'
+require 'run_loop'
 
 module Calabash
   module Cucumber
@@ -30,14 +31,12 @@ module Calabash
       # simulator, but in case we can, this method will quit the simulator
       # that is indicated by `xcode-select` or `DEVELOPER_DIR`.
       def quit_simulator
-        dev_dir = xcode_developer_dir
-        system "/usr/bin/osascript -e 'tell application \"#{dev_dir}/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app\" to quit'"
+        RunLoop::SimControl.new.quit_sim
       end
 
       # Launches the iOS Simulator indicated by `xcode-select` or `DEVELOPER_DIR`.
       def launch_simulator
-        dev_dir = xcode_developer_dir
-        system "open -a \"#{dev_dir}/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app\""
+        RunLoop::SimControl.new.launch_sim
       end
 
       # Resets the simulator content and settings.  It is analogous to touching

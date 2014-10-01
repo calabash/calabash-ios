@@ -3,6 +3,11 @@ require 'fileutils'
 
 require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
+if xcode_version_gte_6?
+  log_warn "Xcode >= 6 detected; skipping dylib because they don't run on Xcode 6"
+  log_pass 'Exiting dylib tests with 0 because support for dylibs is experimental'
+  exit 0
+end
 
 cal_repo_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'calabash-ios'))
 
@@ -23,6 +28,8 @@ Dir.chdir(gem_dir) do
   FileUtils.rm_rf sim_dylib
 
   unless File.exist? sim_dylib
+    log_warn('Fetching a copy of simulator dylib from AWS')
+    log_warn('We can stop doing this once Xcode can build dylibs')
     do_system("curl --silent -o #{sim_dylib} https://s3.amazonaws.com/littlejoysoftware/public/libCalabashDynSim.dylib",
               { :pass_msg => "downloaded '#{sim_dylib}'",
                 :fail_msg => 'could not download sim dylib from S3'})

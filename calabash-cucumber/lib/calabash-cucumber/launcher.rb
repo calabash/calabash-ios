@@ -250,31 +250,54 @@ class Calabash::Cucumber::Launcher
     default_opts = {:sdk => nil, :path => nil}
     merged_opts = default_opts.merge opts
 
-    sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
-    path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
+    sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
+    if sim_control.xcode_version_gte_6?
+      default_sim = RunLoop::Core.default_simulator(sim_control.xctools)
+      name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
 
-    app = File.basename(path)
-
-    directories_for_sdk_prefix(sdk).each do |sdk_dir|
-      app_dir = File.expand_path("#{sdk_dir}/Applications")
-      next unless File.exists?(app_dir)
-
-      bundle = `find "#{app_dir}" -type d -depth 2 -name "#{app}" | head -n 1`
-
-      next if bundle.empty? # Assuming we're already clean
-
-      if debug_logging?
-        puts "Reset app state for #{bundle}"
+      target_simulator = nil
+      sim_control.simulators.each do |device|
+        instruments_launch_name = "#{device.name} (#{device.version.to_s} Simulator)"
+        if instruments_launch_name == name_or_udid or device.udid == name_or_udid
+          target_simulator = device
+        end
       end
-      sandbox = File.dirname(bundle)
-      ['Library', 'Documents', 'tmp'].each do |content_dir|
-        FileUtils.rm_rf(File.join(sandbox, content_dir))
+
+      if target_simulator.nil?
+        raise "Could not find a simulator that matches '#{name_or_udid}'"
+      end
+
+      sim_control.reset_sim_content_and_settings({:sim_udid => target_simulator.udid})
+    else
+      sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
+      path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
+
+      app = File.basename(path)
+
+      directories_for_sdk_prefix(sdk).each do |sdk_dir|
+        app_dir = File.expand_path("#{sdk_dir}/Applications")
+        next unless File.exists?(app_dir)
+
+        bundle = `find "#{app_dir}" -type d -depth 2 -name "#{app}" | head -n 1`
+
+        next if bundle.empty? # Assuming we're already clean
+
+        if debug_logging?
+          puts "Reset app state for #{bundle}"
+        end
+        sandbox = File.dirname(bundle)
+        ['Library', 'Documents', 'tmp'].each do |content_dir|
+          FileUtils.rm_rf(File.join(sandbox, content_dir))
+        end
       end
     end
   end
 
-  # Simulates touching the iOS Simulator > Reset Content and Settings... menu
-  # item.
+  # Erases the contents and setting for every available simulator.
+  #
+  # For Xcode 6, this is equivalent to calling: `$ xcrun simctl erase` on
+  # every available simulator.  For Xcode < 6, it is equivalent to touching
+  # the 'Reset Content & Settings' menu item.
   #
   # @note
   #  **WARNING** This is a destructive operation.  You have been warned.
@@ -282,9 +305,9 @@ class Calabash::Cucumber::Launcher
   # @raise RuntimeError if called when targeting a physical device
   def reset_simulator
     if device_target?
-      raise "calling 'reset_simulator' when targeting a device is not allowed"
+      raise "Calling 'reset_simulator' when targeting a device is not allowed"
     end
-    reset_simulator_content_and_settings
+    RunLoop::SimControl.new.reset_sim_content_and_settings
   end
 
   # @!visibility private
@@ -484,7 +507,16 @@ class Calabash::Cucumber::Launcher
     #TODO stopping is currently broken, but this works anyway because instruments stop the process before relaunching
     RunLoop.stop(run_loop) if run_loop
 
+    # @todo Don't overwrite the _args_ parameter!
     args = default_launch_args.merge(args)
+
+    # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
+    # of the Xcode tool calls, like instruments -s templates, take a long time
+    # to execute.  The SimControl instance has XCTool attribute which caches
+    # the results of many of these time-consuming calls so they only need to
+    # be called 1 time per launch.
+    # @todo Use SimControl in Launcher in place of methods like simulator_target?
+    args[:sim_control] = RunLoop::SimControl.new
 
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
@@ -530,7 +562,10 @@ class Calabash::Cucumber::Launcher
       if sdk.nil? and args[:device_target] == 'simulator'
         sdk = :all
       end
-      reset_app_sandbox({:sdk => sdk, :path => args[:app]})
+      reset_app_sandbox({:sdk => sdk,
+                         :path => args[:app],
+                         :udid => args[:udid],
+                         :sim_control => args[:sim_control]})
     end
 
     if args[:privacy_settings]
@@ -555,14 +590,6 @@ class Calabash::Cucumber::Launcher
     if run_with_instruments?(args)
       # Patch for bug in Xcode 6 GM + iOS 8 device testing.
       # http://openradar.appspot.com/radar?id=5891145586442240
-      #
-      # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
-      # of the Xcode tool calls, like instruments -s templates, take a long time
-      # to execute.  The SimControl instance has XCTool attribute which caches
-      # the results of many of these time-consuming calls so they only need to
-      # be called 1 time per launch.
-      # @todo Use SimControl in Launcher in place of methods like simulator_target?
-      args[:sim_control] = RunLoop::SimControl.new
       uia_strategy = default_uia_strategy(args, args[:sim_control])
       args[:uia_strategy] ||= uia_strategy
       calabash_info "Using uia strategy: '#{args[:uia_strategy]}'" if debug_logging?
@@ -608,6 +635,10 @@ class Calabash::Cucumber::Launcher
           break
         end
       end
+
+      # Device could not be found; kick the problem down the road.
+      return :preferences if target_device.nil?
+
       # Preferences strategy works for iOS < 8.0, but not for iOS >= 8.0.
       if target_device.version < RunLoop::Version.new('8.0')
         :preferences

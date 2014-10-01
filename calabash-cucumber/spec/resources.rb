@@ -1,11 +1,22 @@
+require 'singleton'
+
 class Resources
 
+  include Singleton
+
   def self.shared
-    @resources ||= Resources.new
+    Resources.instance
   end
 
   def travis_ci?
-    @travis_ci ||= ENV['TRAVIS'].to_s == 'true'
+    @travis_ci ||= ENV['TRAVIS']
+  end
+
+  def current_xcode_version
+    @current_xcode_version ||= lambda {
+      ENV.delete('DEVELOPER_DIR')
+      RunLoop::XCTools.new.xcode_version
+    }.call
   end
 
   def resources_dir
@@ -21,6 +32,14 @@ class Resources
       else
         raise "unexpected argument '#{bundle_name}'"
     end
+  end
+
+  def ipa_path
+    @ipa_path ||= File.expand_path(File.join(resources_dir, 'LPSimpleExample-cal.ipa'))
+  end
+
+  def bundle_id
+    @bundle_id = 'com.lesspainful.example.LPSimpleExample-cal'
   end
 
   def device_for_mocking
@@ -46,5 +65,152 @@ class Resources
           'simulator' => ''
     }
     Calabash::Cucumber::Device.new(endpoint, version_data)
+  end
+
+  def alt_xcode_install_paths
+    @alt_xcode_install_paths ||= lambda {
+      min_xcode_version = RunLoop::Version.new('5.1')
+      Dir.glob('/Xcode/*/*.app/Contents/Developer').map do |path|
+        xcode_version = path[/(\d\.\d(\.\d)?)/, 0]
+        if RunLoop::Version.new(xcode_version) >= min_xcode_version
+          path
+        else
+          nil
+        end
+      end
+    }.call.compact
+  end
+
+  def xcode_select_xcode_hash
+    @xcode_select_xcode_hash ||= lambda {
+      ENV.delete('DEVELOPER_DIR')
+      xcode_tools = RunLoop::XCTools.new
+      {:path => xcode_tools.xcode_developer_dir,
+       :version => xcode_tools.xcode_version}
+    }.call
+  end
+
+  def alt_xcodes_gte_xc51_hash
+    @alt_xcodes_gte_xc51_hash ||= lambda {
+      ENV.delete('DEVELOPER_DIR')
+      xcode_select_path = RunLoop::XCTools.new.xcode_developer_dir
+      paths =  alt_xcode_install_paths
+      paths.map do |path|
+        begin
+          ENV['DEVELOPER_DIR'] = path
+          version = RunLoop::XCTools.new.xcode_version
+          if path == xcode_select_path
+            nil
+          elsif version >= RunLoop::Version.new('5.1')
+            {
+                  :version => RunLoop::XCTools.new.xcode_version,
+                  :path => path
+            }
+          else
+            nil
+          end
+        ensure
+          ENV.delete('DEVELOPER_DIR')
+        end
+      end
+    }.call.compact
+  end
+
+  def ideviceinstaller_bin_path
+    @ideviceinstaller_bin_path ||= `which ideviceinstaller`.chomp!
+  end
+
+  def ideviceinstaller_available?
+    path = ideviceinstaller_bin_path
+    path and File.exist? ideviceinstaller_bin_path
+  end
+
+  def ideviceinstaller(device_udid, cmd, opts={})
+    default_opts = {:ipa => ipa_path,
+                    :bundle_id => bundle_id}
+
+    merged = default_opts.merge(opts)
+
+
+    bin_path = ideviceinstaller_bin_path
+    bundle_id = merged[:bundle_id]
+
+    case cmd
+      when :install
+        ipa = merged[:ipa]
+        Retriable.retriable do
+          uninstall device_udid, bundle_id, bin_path
+        end
+        Retriable.retriable do
+          install device_udid, ipa, bundle_id, bin_path
+        end
+      when :uninstall
+        Retriable.retriable do
+          uninstall device_udid, bundle_id, bin_path
+        end
+      else
+        cmds = [:install, :uninstall]
+        raise ArgumentError, "expected '#{cmd}' to be one of '#{cmds}'"
+    end
+  end
+
+  def bundle_installed?(udid, bundle_id, installer)
+    cmd = "#{installer} -u #{udid} -l"
+    if ENV['DEBUG_UNIX_CALLS'] == '1'
+      puts "\033[36mEXEC: #{cmd}\033[0m"
+    end
+    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
+      out = stdout.read.strip
+      err = stderr.read.strip
+      if ENV['DEBUG_UNIX_CALLS'] == '1'
+        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
+      end
+      out.strip.split(/\s/).include? bundle_id
+    end
+  end
+
+  def install(udid, ipa, bundle_id, installer)
+    if bundle_installed? udid, bundle_id, installer
+      if ENV['DEBUG_UNIX_CALLS'] == '1'
+        puts "\033[32mINFO: bundle '#{bundle_id}' is already installed\033[0m"
+      end
+      return true
+    end
+    cmd = "#{installer} -u #{udid} --install #{ipa}"
+    if ENV['DEBUG_UNIX_CALLS'] == '1'
+      puts "\033[36mEXEC: #{cmd}\033[0m"
+    end
+    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
+      out = stdout.read.strip
+      err = stderr.read.strip
+      if ENV['DEBUG_UNIX_CALLS'] == '1'
+        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
+      end
+    end
+    unless bundle_installed?(udid, bundle_id, installer)
+      raise "could not install '#{ipa}' on '#{udid}' with '#{bundle_id}'"
+    end
+    true
+  end
+
+  def uninstall(udid, bundle_id, installer)
+    unless bundle_installed? udid, bundle_id, installer
+      return true
+    end
+    cmd = "#{installer} -u #{udid} --uninstall #{bundle_id}"
+    if ENV['DEBUG_UNIX_CALLS'] == '1'
+      puts "\033[36mEXEC: #{cmd}\033[0m"
+    end
+    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
+      out = stdout.read.strip
+      err = stderr.read.strip
+      if ENV['DEBUG_UNIX_CALLS'] == '1'
+        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
+      end
+    end
+    if bundle_installed?(udid, bundle_id, installer)
+      raise "could not uninstall '#{bundle_id}' on '#{udid}'"
+    end
+    true
   end
 end

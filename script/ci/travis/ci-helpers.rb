@@ -8,6 +8,10 @@ def log_pass(msg)
   puts "\033[32mPASS: #{msg}\033[0m" if msg
 end
 
+def log_warn(msg)
+  warn "\033[34mWARN: #{msg}\033[0m"
+end
+
 def log_fail(msg)
   puts "\033[31mFAIL: #{msg}\033[0m" if msg
 end
@@ -57,6 +61,15 @@ end
 
 def travis_ci?
   ENV['TRAVIS']
+end
+
+def xcode_version
+  `xcrun xcodebuild -version`.split(/\s/)[1]
+end
+
+def xcode_version_gte_6?
+  version_parts = xcode_version.split('.')
+  version_parts.first.to_i >= 6
 end
 
 def update_rubygems
