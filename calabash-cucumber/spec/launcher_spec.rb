@@ -11,10 +11,16 @@ describe 'Calabash Launcher' do
     @launcher = Calabash::Cucumber::Launcher.new
   end
 
-  before(:each) do
-    ENV['DEVICE_TARGET'] = nil
-    ENV['DETECT_CONNECTED_DEVICE'] = nil
-  end
+  before(:each) {
+    ENV.delete('DEVICE_TARGET')
+    ENV.delete('DETECT_CONNECTED_DEVICE')
+    RunLoop::SimControl.terminate_all_sims
+  }
+
+  after(:each) {
+    ENV.delete('DEVICE_TARGET')
+    ENV.delete('DETECT_CONNECTED_DEVICE')
+  }
 
   describe '.default_uia_strategy' do
     let (:sim_control) { RunLoop::SimControl.new }

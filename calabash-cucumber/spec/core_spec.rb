@@ -8,6 +8,7 @@ describe Calabash::Cucumber::Core do
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')
+    ENV.delete('DEVICE_TARGET')
     RunLoop::SimControl.terminate_all_sims
   }
 
@@ -15,6 +16,7 @@ describe Calabash::Cucumber::Core do
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')
+    ENV.delete('DEVICE_TARGET')
   }
 
   describe '#calabash_exit' do
