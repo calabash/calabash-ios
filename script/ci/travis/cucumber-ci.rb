@@ -43,7 +43,7 @@ Dir.chdir(working_directory) do
   if travis_ci?
     profiles =
           {
-                :ipad2 => simulator_profiles[:ipad2],
+                #:ipad2 => simulator_profiles[:ipad2],
                 # Not yet, maybe never
                 #:ipad2_mid => simulator_profiles[:ipad2_mid],
                 #:ipad2_min => simulator_profiles[:ipad2_min],
@@ -53,23 +53,23 @@ Dir.chdir(working_directory) do
                 #:air_mid => simulator_profiles[:air_mid],
                 #:air_min => simulator_profiles[:air_min],
 
-                :ipad => simulator_profiles[:ipad],
+                #:ipad => simulator_profiles[:ipad],
                 # Stalls on Travis CI
                 #:ipad_mid => simulator_profiles[:ipad_mid],
                 # Not yet, maybe never
                 #:ipad_min => simulator_profiles[:ipad_min],
 
-                :iphone4s => simulator_profiles[:iphone4s],
+                #:iphone4s => simulator_profiles[:iphone4s],
                 # Not yet, maybe never
                 #:iphone4s_mid => simulator_profiles[:iphone4s_mid],
                 #:iphone4s_min => simulator_profiles[:iphone4s_min],
 
-                :iphone5s => simulator_profiles[:iphone5s],
+                #:iphone5s => simulator_profiles[:iphone5s],
                 # Not yet, maybe never
                 #:iphone5s_mid => simulator_profiles[:iphone5s_mid],
                 #:iphone5s_min => simulator_profiles[:iphone5s_min],
 
-                :iphone5 => simulator_profiles[:iphone5],
+                #:iphone5 => simulator_profiles[:iphone5],
                 # Not yet, maybe never
                 #:iphone5_mid => simulator_profiles[:iphone5_mid],
                 #:iphone5_min => simulator_profiles[:iphone5_min]
@@ -113,7 +113,6 @@ Dir.chdir(working_directory) do
   env_vars =
         {
               'APP_BUNDLE_PATH' => './LPSimpleExample-cal.app',
-              'DEVELOPER_DIR' => '/Applications/Xcode.app/Contents/Developer'
         }
   passed_sims = []
   failed_sims = []
