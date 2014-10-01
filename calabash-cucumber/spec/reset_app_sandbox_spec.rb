@@ -56,7 +56,7 @@ module Calabash
             target_simulator
           else
             min_ios_version = RunLoop::Version.new('7.1')
-            sim_control.simulators.delete_if { |device| device.version >= min_ios_version }.sample
+            sim_control.simulators.delete_if { |device| device.version < min_ios_version }.sample
           end
         end
 
