@@ -79,27 +79,27 @@ Dir.chdir(working_directory) do
           {
                 :ipad2 => simulator_profiles[:ipad2],
                 :ipad2_mid => simulator_profiles[:ipad2_mid],
-                :ipad2_min => simulator_profiles[:ipad2_min],
+                #:ipad2_min => simulator_profiles[:ipad2_min],
 
                 :air => simulator_profiles[:air],
                 :air_mid => simulator_profiles[:air_mid],
-                :air_min => simulator_profiles[:air_min],
+                #:air_min => simulator_profiles[:air_min],
 
                 :ipad => simulator_profiles[:ipad],
                 :ipad_mid => simulator_profiles[:ipad_mid],
-                :ipad_min => simulator_profiles[:ipad_min],
+                #:ipad_min => simulator_profiles[:ipad_min],
 
                 :iphone4s => simulator_profiles[:iphone4s],
                 :iphone4s_mid => simulator_profiles[:iphone4s_mid],
-                :iphone4s_min => simulator_profiles[:iphone4s_min],
+                #:iphone4s_min => simulator_profiles[:iphone4s_min],
 
                 :iphone5s => simulator_profiles[:iphone5s],
                 :iphone5s_mid => simulator_profiles[:iphone5s_mid],
-                :iphone5s_min => simulator_profiles[:iphone5s_min],
+                #:iphone5s_min => simulator_profiles[:iphone5s_min],
 
                 :iphone5 => simulator_profiles[:iphone5],
                 :iphone5_mid => simulator_profiles[:iphone5_mid],
-                :iphone5_min => simulator_profiles[:iphone5_min]
+                #:iphone5_min => simulator_profiles[:iphone5_min]
           }
   end
 

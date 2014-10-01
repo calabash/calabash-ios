@@ -48,15 +48,19 @@ Feature:  can persist a keychain item over app restart
   @user_defaults
   @reset_app_btw_scenarios
   Scenario: 20 I turn the switch on the first view on
+    And I drop some files in the sandbox
     Given I turn the switch on
 
   @user_defaults
   @reset_app_btw_scenarios
   Scenario: 21 The switch should be on because I did not reset the app before this Scenario
+    Then I should see the files I put in the sandbox
     Then I should see the switch is on
 
   @user_defaults
   @reset_app_btw_scenarios
   @reset_app_before_hook
   Scenario: 22 The switch should be off because I did reset the app before this Scenario
+    Then I should not see the files I put in the sandbox
     Then I should see the switch is off
+
