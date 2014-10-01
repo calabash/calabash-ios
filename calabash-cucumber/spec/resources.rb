@@ -81,6 +81,15 @@ class Resources
     }.call.compact
   end
 
+  def xcode_select_xcode_hash
+    @xcode_select_xcode_hash ||= lambda {
+      ENV.delete('DEVELOPER_DIR')
+      xcode_tools = RunLoop::XCTools.new
+      {:path => xcode_tools.xcode_developer_dir,
+       :version => xcode_tools.xcode_version}
+    }.call
+  end
+
   def alt_xcodes_gte_xc51_hash
     @alt_xcodes_gte_xc51_hash ||= lambda {
       ENV.delete('DEVELOPER_DIR')
