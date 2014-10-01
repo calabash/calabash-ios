@@ -9,7 +9,7 @@ class Resources
   end
 
   def travis_ci?
-    @travis_ci ||= ENV['TRAVIS'].to_s == 'true'
+    @travis_ci ||= ENV['TRAVIS']
   end
 
   def current_xcode_version
