@@ -14,7 +14,6 @@ working_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..
 env_vars =
       {
             'TRAVIS' => '1',
-            'DEVELOPER_DIR' => '/Applications/Xcode.app/Contents/Developer'
       }
 
 Dir.chdir working_dir do
