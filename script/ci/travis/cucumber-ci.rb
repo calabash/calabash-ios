@@ -113,7 +113,6 @@ Dir.chdir(working_directory) do
   env_vars =
         {
               'APP_BUNDLE_PATH' => './LPSimpleExample-cal.app',
-              'DEVELOPER_DIR' => '/Applications/Xcode.app/Contents/Developer'
         }
   passed_sims = []
   failed_sims = []
