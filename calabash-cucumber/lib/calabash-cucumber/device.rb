@@ -118,6 +118,22 @@ module Calabash
       # @return [String] The udid of this device.
       attr_accessor :udid
 
+      # For Calabash server version > 0.10.2 provides
+      # device specific screen information.
+      #
+      # This is a hash of form:
+      #  {
+      #    :sample => 1,
+      #    :height => 1334,
+      #    :width => 750,
+      #    :scale" => 2
+      #  }
+      #
+      #
+      # @attribute [r] screen_dimensions
+      # @return [Hash] screen dimensions, scale and down/up sampling fraction.
+      attr_reader :screen_dimensions
+
       # Creates a new instance of Device.
       #
       # @see Calabash::Cucumber::Core#server_version
@@ -135,6 +151,13 @@ module Calabash
         @server_version = version_data['version']
         @iphone_app_emulated_on_ipad = version_data['iphone_app_emulated_on_ipad']
         @iphone_4in = version_data['4inch']
+        screen_dimensions = version_data['screen_dimensions']
+        if screen_dimensions
+          @screen_dimensions = {}
+          screen_dimensions.each_pair do |key,val|
+            @screen_dimensions[key.to_sym] = val
+          end
+        end
       end
 
       # Is this device a simulator or physical device?
@@ -224,6 +247,7 @@ module Calabash
       # @return [Hash] representation of the screen size as a hash with keys
       #  `:width` and `:height`
       def screen_size
+        return screen_dimensions if screen_dimensions
         return { :width => 768, :height => 1024 } if ipad?
         return { :width => 320, :height => 568 } if iphone_4in?
         { :width => 320, :height => 480 }

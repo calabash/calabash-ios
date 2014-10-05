@@ -121,7 +121,17 @@ class Calabash::Cucumber::InstrumentsActions
   def normalize_rect_for_orientation!(orientation, rect)
     orientation = orientation.to_sym
     launcher = Calabash::Cucumber::Launcher.launcher
-    screen_size = launcher.device.screen_size
+    if launcher.ios_major_version.to_i >= 8
+      return ## Orientation management changed in iOS 8:
+    #  ## https://developer.apple.com/library/ios/documentation/UIKit/Reference/UICoordinateSpace_protocol/index.html
+    end
+    dimensions = launcher.device.screen_dimensions
+    if dimensions
+      screen_size = {width: dimensions[:width]*dimensions[:sample]/dimensions[:scale],
+                     height: dimensions[:height]*dimensions[:sample]/dimensions[:scale]}
+    else
+      screen_size = launcher.device.screen_size
+    end
     case orientation
       when :right
         cx = rect['center_x']

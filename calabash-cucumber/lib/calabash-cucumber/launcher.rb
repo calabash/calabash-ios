@@ -629,16 +629,22 @@ class Calabash::Cucumber::Launcher
     else
       target_udid = launch_args[:device_target]
       target_device = nil
-      sim_control.xctools.instruments(:devices).each do |device|
+      devices_connected = sim_control.xctools.instruments(:devices)
+      devices_connected.each do |device|
         if device.udid == target_udid
           target_device = device
           break
         end
       end
-
-      # Device could not be found; kick the problem down the road.
-      return :preferences if target_device.nil?
-
+      if target_device.nil?
+        target_device = devices_connected.first
+        if target_device
+          launch_args[:device_target] = target_device.udid
+        end
+      end
+      unless target_device
+        raise 'No device_target was specified and did not detect a connected device. Set a device_target option in the relaunch method.'
+      end
       # Preferences strategy works for iOS < 8.0, but not for iOS >= 8.0.
       if target_device.version < RunLoop::Version.new('8.0')
         :preferences

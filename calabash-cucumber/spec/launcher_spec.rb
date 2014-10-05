@@ -42,8 +42,8 @@ describe 'Calabash Launcher' do
 
       it 'not found' do
         launch_args = { :device_target => 'a udid of a device that does not exist' }
-        actual = launcher.default_uia_strategy(launch_args, sim_control)
-        expect(actual).to be == :preferences
+        expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return([])
+        expect {launcher.default_uia_strategy(launch_args, sim_control)}.to raise_error(RuntimeError)
       end
     end
 
@@ -299,7 +299,7 @@ describe 'Calabash Launcher' do
           abp = Resources.shared.app_bundle_path :lp_simple_example
           actual = launcher.server_version_from_bundle abp
           expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '0.10.1'
+          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.0'
         end
 
         it 'and when there is a space is the path' do
@@ -309,7 +309,7 @@ describe 'Calabash Launcher' do
           abp = File.expand_path(File.join(dir, 'LPSimpleExample-cal.app'))
           actual = launcher.server_version_from_bundle abp
           expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '0.10.1'
+          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.0'
         end
       end
 
