@@ -42,8 +42,8 @@ describe 'Calabash Launcher' do
 
       it 'not found' do
         launch_args = { :device_target => 'a udid of a device that does not exist' }
+        expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return([])
         expect {launcher.default_uia_strategy(launch_args, sim_control)}.to raise_error(RuntimeError)
-
       end
     end
 
