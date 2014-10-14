@@ -265,7 +265,10 @@ module Calabash
 
       # @!visibility private
       def uia_send_app_to_background(secs)
-        uia_handle_command(:deactivate, secs)
+        #uia_handle_command(:deactivate, secs)
+        #Temporary workaround: https://github.com/calabash/calabash-ios/issues/556
+        js_deactivate = %Q[var x = target.deactivateAppForDuration(#{secs}); var MAX_RETRY=5, retry_count = 0; while (!x && retry_count < MAX_RETRY) { x = target.deactivateAppForDuration(#{secs}); retry_count += 1}; x]
+        uia(js_deactivate)
       end
 
       # @!visibility private
