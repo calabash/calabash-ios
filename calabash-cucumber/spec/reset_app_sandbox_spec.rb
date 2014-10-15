@@ -224,11 +224,6 @@ describe Calabash::Cucumber::Launcher do
           describe "Xcode #{xcode6[:version]}" do
             let(:helper) { Calabash::Rspec::ResetAppSandbox::Helper.new }
 
-            if Resources.shared.travis_ci?
-              it 'Skipping default simulator test on Travis CI; Simulator environment is not stable enough' do
-                expect(true).to be == true
-              end
-            else
               it 'can reset the default simulator' do
                 ENV['DEVELOPER_DIR'] = xcode6[:path]
                 sim_control = RunLoop::SimControl.new
@@ -248,7 +243,6 @@ describe Calabash::Cucumber::Launcher do
                 containers = helper.path_to_containers(udid, target_simulator)
                 expect(File).not_to exist(containers)
               end
-            end
 
             describe 'can reset a simulator if :udid option is passed' do
               helper = Calabash::Rspec::ResetAppSandbox::Helper.new
