@@ -961,7 +961,7 @@ class Calabash::Cucumber::Launcher
 
     server_version = nil
     exe_paths.each do |path|
-      server_version_string = `strings "#{path}" | grep -E 'CALABASH VERSION'`.chomp!
+      server_version_string = `xcrun strings "#{path}" | grep -E 'CALABASH VERSION'`.chomp!
       if server_version_string
         server_version = server_version_string.split(' ').last
         break
