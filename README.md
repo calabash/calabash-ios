@@ -18,6 +18,10 @@ This document explains how to install Calabash iOS. For introductory informatio
 
 [Change log](https://github.com/calabash/calabash-ios/tree/master/changelog)
 
+### Failing Travis CI builds
+
+Travis updated to Xcode 6 and since then our CI has been failing because the instruments process is popping a Finder dialog requesting permission to 'analyze other processes'.  We are working with the Travis team to resolve this issue.
+
 # This guide explains how to setup and use Calabash for iOS
 
 Running Calabash requires Mac OSX.  After completing this guide you will be able to run tests locally
