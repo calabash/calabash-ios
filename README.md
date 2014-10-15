@@ -181,9 +181,27 @@ In the 0.10.x line, Calabash will optionally be supplied as a 'plugin' to the [F
 Updating
 ========
 
-If you are already using Calabash iOS in a project and you want to update to the latest version, this is very simple.
+Updating Calabash iOS is usually very simple. First install the latest calabash-cucumber gem.
 
-[Updating your Calabash iOS version](https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version)
+```
+$ gem install calabash-cucumber
+```
+
+Or, if you're using bundler, run
+
+```
+$ bundle update calabash-cucumber
+```
+
+Then, in the directory that contains the calabash.framework run
+
+```
+$ calabash-ios download
+```
+
+Finally, deep clean (Shift + Option + Command + K) and rebuild your project.
+
+For more detailed instructions, or if you have trouble, read [Updating your Calabash iOS version](https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version)
 
 
 Important notice
