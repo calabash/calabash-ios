@@ -18,6 +18,10 @@ This document explains how to install Calabash iOS. For introductory informatio
 
 [Change log](https://github.com/calabash/calabash-ios/tree/master/changelog)
 
+### Failing Travis CI builds
+
+Travis updated to Xcode 6 and since then our CI has been failing because the instruments process is popping a Finder dialog requesting permission to 'analyze other processes'.  We are working with the Travis team to resolve this issue.
+
 # This guide explains how to setup and use Calabash for iOS
 
 Running Calabash requires Mac OSX.  After completing this guide you will be able to run tests locally
@@ -181,9 +185,27 @@ In the 0.10.x line, Calabash will optionally be supplied as a 'plugin' to the [F
 Updating
 ========
 
-If you are already using Calabash iOS in a project and you want to update to the latest version, this is very simple.
+Updating Calabash iOS is usually very simple. First install the latest calabash-cucumber gem.
 
-[Updating your Calabash iOS version](https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version)
+```
+$ gem install calabash-cucumber
+```
+
+Or, if you're using bundler, run
+
+```
+$ bundle update calabash-cucumber
+```
+
+Then, in the directory that contains the calabash.framework run
+
+```
+$ calabash-ios download
+```
+
+Finally, deep clean (Shift + Option + Command + K) and rebuild your project.
+
+For more detailed instructions, or if you have trouble, read [Updating your Calabash iOS version](https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version)
 
 
 Important notice

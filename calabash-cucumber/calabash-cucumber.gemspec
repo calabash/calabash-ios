@@ -53,7 +53,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 1.9'
 
-  s.add_dependency('cucumber', '~> 1.3.0')
+  s.add_dependency('cucumber', '~> 1.3.17')
   s.add_dependency('calabash-common', '~> 0.0.1')
   s.add_dependency('json', '~> 1.8')
   s.add_dependency('edn', '~> 1.0.6')
@@ -65,7 +65,7 @@ Gem::Specification.new do |s|
   # match the xamarin-test-cloud dependency
   s.add_dependency('bundler', '~> 1.3')
   s.add_dependency('awesome_print', '~> 1.2.0')
-  s.add_dependency('run_loop', '~> 1.0.8')
+  s.add_dependency('run_loop', '~> 1.0.9')
 
   s.add_development_dependency 'rake', '~> 10.3'
   s.add_development_dependency 'rspec', '~> 3.0'
