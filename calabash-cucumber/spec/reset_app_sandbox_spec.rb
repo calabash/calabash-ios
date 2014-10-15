@@ -224,25 +224,25 @@ describe Calabash::Cucumber::Launcher do
           describe "Xcode #{xcode6[:version]}" do
             let(:helper) { Calabash::Rspec::ResetAppSandbox::Helper.new }
 
-              it 'can reset the default simulator' do
-                ENV['DEVELOPER_DIR'] = xcode6[:path]
-                sim_control = RunLoop::SimControl.new
-                helper.launch_and_stop_simulator(launcher, sim_control, 'simulator')
+            it 'can reset the default simulator' do
+              ENV['DEVELOPER_DIR'] = xcode6[:path]
+              sim_control = RunLoop::SimControl.new
+              helper.launch_and_stop_simulator(launcher, sim_control, 'simulator')
 
-                target_simulator = helper.default_simulator_as_device(sim_control)
-                udid = target_simulator.udid
+              target_simulator = helper.default_simulator_as_device(sim_control)
+              udid = target_simulator.udid
 
-                app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
-                expect(File).to exist(app_bundles)
+              app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
+              expect(File).to exist(app_bundles)
 
-                installed_apps = helper.installed_apps(udid, target_simulator)
-                expect(installed_apps).to include('LPSimpleExample-cal.app')
+              installed_apps = helper.installed_apps(udid, target_simulator)
+              expect(installed_apps).to include('LPSimpleExample-cal.app')
 
-                launcher.reset_app_sandbox
+              launcher.reset_app_sandbox
 
-                containers = helper.path_to_containers(udid, target_simulator)
-                expect(File).not_to exist(containers)
-              end
+              containers = helper.path_to_containers(udid, target_simulator)
+              expect(File).not_to exist(containers)
+            end
 
             describe 'can reset a simulator if :udid option is passed' do
               helper = Calabash::Rspec::ResetAppSandbox::Helper.new
