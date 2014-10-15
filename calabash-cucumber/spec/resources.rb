@@ -59,6 +59,12 @@ class Resources
                 'branch' => 'master',
                 'revision' => 'e494e30'
           },
+          'screen_dimensions' => {
+                'scale' => 2,
+                'width' => 640,
+                'sample' => 1,
+                'height' => 1136
+          },
           'app_version' => '1.4.0',
           'iOS_version' => '8.0',
           'system' => 'x86_64',
