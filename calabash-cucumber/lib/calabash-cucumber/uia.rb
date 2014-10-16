@@ -404,8 +404,6 @@ module Calabash
           s
         end
       end
-
-
     end
   end
 end
