@@ -235,12 +235,31 @@ module Calabash
           indexes.reverse.each { |idx| string = string.insert(idx, '\\') }
         end
         res = uia_handle_command(:typeString, string, opt_text_before)
+
+        # When :status == 'success', we get back result[:value].  Sometimes, the
+        # :value key is not present in the result.  In which case we assume
+        # success without error.
+        return if res.nil?
+
+        # Typing on UIWebViews returns result[:value] => ':nil'.  There might
+        # be other edge cases.
+        return unless res.is_a? Hash
+
+        # If there is no :status key, then we assume success.  Syntax errors
+        # should be caught upstream.
+        # https://github.com/calabash/calabash-ios/issues/374
+        return unless res.has_key? 'status'
+
         status = res['status']
-        if status.eql?('error')
-          value = res['value']
-          raise "could not type '#{string}' - '#{value}'"
+
+        # If status is not 'error' we punt.  Should never happen.
+        return if status != 'error'
+
+        if res.has_key? 'value'
+          raise "Could not type '#{string}' - UIAutomation returned an error: '#{res['value']}'"
+        else
+          raise "Could not type '#{string}' - UIAutomation returned '#{res}'"
         end
-        status
       end
 
       # @!visibility private
