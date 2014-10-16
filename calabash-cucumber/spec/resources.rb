@@ -59,12 +59,52 @@ class Resources
                 'branch' => 'master',
                 'revision' => 'e494e30'
           },
+          'screen_dimensions' => {
+                'scale' => 2,
+                'width' => 640,
+                'sample' => 1,
+                'height' => 1136
+          },
           'app_version' => '1.4.0',
           'iOS_version' => '8.0',
           'system' => 'x86_64',
           'simulator' => ''
     }
     Calabash::Cucumber::Device.new(endpoint, version_data)
+  end
+
+  def server_version(device_or_simulator)
+    case device_or_simulator
+      when :device
+        {}
+      when :simulator
+        {
+              'app_version' => '1.0',
+              'outcome' => 'SUCCESS',
+              'app_id' => 'com.xamarin.chou-cal',
+              'simulator_device' => 'iPhone',
+              'version' => '0.11.0',
+              'app_name' => 'chou-cal',
+              'iphone_app_emulated_on_ipad' => false,
+              '4inch' => true,
+              'git' => {
+                    'remote_origin' => 'git@github.com:calabash/calabash-ios-server.git',
+                    'branch' => 'develop',
+                    'revision' => '652b20b'
+              },
+              'screen_dimensions' => {
+                    'scale' => 2,
+                    'width' => 640,
+                    'sample' => 1,
+                    'height' => 1136
+              },
+              'iOS_version' => '7.1',
+              'system' => 'x86_64',
+              'simulator' => 'CoreSimulator 110.2 - Device: iPhone 5 - Runtime: iOS 7.1 (11D167) - DeviceType: iPhone 5'
+        }
+      else
+        raise "expected '#{device_or_simulator}' to be one of #{[:simulator, :device]}"
+    end
   end
 
   def alt_xcode_install_paths

@@ -155,6 +155,18 @@ module Calabash
         _OS_ENV.eql?(_canonical_os_version(:ios7)) || _default_device_or_create().ios7?
       end
 
+      # Is the device under test running iOS 8?
+      #
+      # @note
+      #  **WARNING:** The `OS` env variable has been deprecated and should
+      #  never be set.
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 8
+      def ios8?
+       _default_device_or_create.ios8?
+      end
+
       # Is the app that is being tested an iPhone app emulated on an iPad?
       #
       # @see Calabash::Cucumber::IPad
