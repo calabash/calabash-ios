@@ -17,19 +17,19 @@ describe Calabash::Cucumber::UIA do
       it "value of the 'value' key when key exists" do
         value = {:key => :value }
         input = {'status' => 'success', 'value' => value, 'index' =>0}
-        expect(test_obj.instance_eval { uia_result input }).to be == value
+        expect(test_obj.send(:uia_result, input)).to be == value
       end
 
       it "empty hash when 'value' key does not exist" do
         input = {'status' => 'success', 'index' =>0}
-        expect(test_obj.instance_eval { uia_result input }).to be == nil
+        expect(test_obj.send(:uia_result, input)).to be == nil
       end
     end
 
     describe "when 'status' key is not 'success' returns" do
       it 'the argument it was passed' do
         input = {'status' => 'error', 'value' => nil, 'index' =>0}
-        expect(test_obj.instance_eval { uia_result input }).to be == input
+        expect(test_obj.send(:uia_result, input)).to be == input
       end
     end
   end
