@@ -236,16 +236,16 @@ module Calabash
         end
         result = uia_handle_command(:typeString, string, opt_text_before)
 
-        # When :status == 'success', we get back result[:value].  Sometimes, the
-        # :value key is not present in the result.  In which case we assume
+        # When 'status' == 'success', we get back result['value'].  Sometimes,
+        # the 'value' key is not present in the result - in which case we assume
         # success without error.
         return if result.nil?
 
-        # Typing on UIWebViews returns result[:value] => ':nil'.  There might
-        # be other edge cases.
+        # Typing on UIWebViews returns result['value'] => ':nil'.  There might
+        # be other cases where result is _not_ a Hash.
         return unless result.is_a? Hash
 
-        # If there is no :status key, then we assume success.  Syntax errors
+        # If there is no 'status' key, then we assume success.  Syntax errors
         # should be caught upstream.
         # https://github.com/calabash/calabash-ios/issues/374
         return unless result.has_key? 'status'
