@@ -234,13 +234,32 @@ module Calabash
           indexes = string.enum_for(:scan, /\\/).map { Regexp.last_match.begin(0) }
           indexes.reverse.each { |idx| string = string.insert(idx, '\\') }
         end
-        res = uia_handle_command(:typeString, string, opt_text_before)
-        status = res['status']
-        if status.eql?('error')
-          value = res['value']
-          raise "could not type '#{string}' - '#{value}'"
+        result = uia_handle_command(:typeString, string, opt_text_before)
+
+        # When 'status' == 'success', we get back result['value'].  Sometimes,
+        # the 'value' key is not present in the result - in which case we assume
+        # success without error.
+        return if result.nil?
+
+        # Typing on UIWebViews returns result['value'] => ':nil'.  There might
+        # be other cases where result is _not_ a Hash.
+        return unless result.is_a? Hash
+
+        # If there is no 'status' key, then we assume success.  Syntax errors
+        # should be caught upstream.
+        # https://github.com/calabash/calabash-ios/issues/374
+        return unless result.has_key? 'status'
+
+        status = result['status']
+
+        # If status is not 'error' we punt.  Should never happen.
+        return if status != 'error'
+
+        if result.has_key? 'value'
+          raise "Could not type '#{string}' - UIAutomation returned an error: '#{result['value']}'"
+        else
+          raise "Could not type '#{string}' - UIAutomation returned '#{result}'"
         end
-        status
       end
 
       # @!visibility private
@@ -385,8 +404,6 @@ module Calabash
           s
         end
       end
-
-
     end
   end
 end
