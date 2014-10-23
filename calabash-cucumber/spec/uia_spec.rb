@@ -3,6 +3,7 @@ module Calabash
     module UIA
       class TestObject
         include Calabash::Cucumber::UIA
+        include Calabash::Cucumber::HTTPHelpers
       end
     end
   end
@@ -67,6 +68,18 @@ describe Calabash::Cucumber::UIA do
         mocked_value = {'status' => 'error', 'index' =>0}
         expect(test_obj).to receive(:uia_handle_command).and_return(mocked_value)
         expect { test_obj.uia_type_string 'foo' }.to raise_error
+      end
+    end
+  end
+
+  describe 'uia' do
+    describe 'raises an error' do
+      it 'when http returns nil - simulates an app crash' do
+        launcher = Calabash::Cucumber::Launcher.new
+        launcher.run_loop = {:uia_strategy => :preferences}
+        expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+        expect(test_obj).to receive(:http).and_return('')
+        expect { test_obj.uia('command') }.to raise_error
       end
     end
   end

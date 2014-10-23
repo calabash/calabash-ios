@@ -26,7 +26,13 @@ module Calabash
         case run_loop[:uia_strategy]
           when :preferences
             res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
-            res = JSON.parse(res)
+
+            begin
+              res = JSON.parse(res)
+            rescue TypeError, JSON::ParserError => _
+              raise "Could not parse response '#{res}'; the app has probably crashed"
+            end
+
             if res['outcome'] != 'SUCCESS'
               raise "uia action failed because: #{res['reason']}\n#{res['details']}"
             end
