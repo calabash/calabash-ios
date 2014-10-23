@@ -127,13 +127,19 @@ class Calabash::Cucumber::InstrumentsActions
     if launcher.ios_major_version.to_i >= 8
       return
     end
-    dimensions = launcher.device.screen_dimensions
-    if dimensions
-      screen_size = {width: dimensions[:width]*dimensions[:sample]/dimensions[:scale],
-                     height: dimensions[:height]*dimensions[:sample]/dimensions[:scale]}
+
+    # We cannot use Device#screen_dimensions here because on iPads the height
+    # and width are the opposite of what we expect.
+    # @todo Move all coordinate/orientation translation into the server.
+    device = launcher.device
+    if device.ipad?
+      screen_size = { :width => 768, :height => 1024 }
+    elsif device.iphone_4in?
+      screen_size = { :width => 320, :height => 568 }
     else
-      screen_size = launcher.device.screen_size
+      screen_size = { :width => 320, :height => 480 }
     end
+
     case orientation
       when :right
         cx = rect['center_x']
