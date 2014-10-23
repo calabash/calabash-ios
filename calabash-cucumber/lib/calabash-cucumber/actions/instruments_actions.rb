@@ -150,5 +150,4 @@ class Calabash::Cucumber::InstrumentsActions
         # no-op by design.
     end
   end
-
 end
