@@ -109,7 +109,7 @@ class Resources
 
   def alt_xcode_install_paths
     @alt_xcode_install_paths ||= lambda {
-      min_xcode_version = RunLoop::Version.new('5.1')
+      min_xcode_version = RunLoop::Version.new('5.1.1')
       Dir.glob('/Xcode/*/*.app/Contents/Developer').map do |path|
         xcode_version = path[/(\d\.\d(\.\d)?)/, 0]
         if RunLoop::Version.new(xcode_version) >= min_xcode_version
@@ -141,7 +141,7 @@ class Resources
           version = RunLoop::XCTools.new.xcode_version
           if path == xcode_select_path
             nil
-          elsif version >= RunLoop::Version.new('5.1')
+          elsif version >= RunLoop::Version.new('5.1.1')
             {
                   :version => RunLoop::XCTools.new.xcode_version,
                   :path => path
