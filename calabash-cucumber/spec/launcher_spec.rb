@@ -299,7 +299,7 @@ describe 'Calabash Launcher' do
           abp = Resources.shared.app_bundle_path :lp_simple_example
           actual = launcher.server_version_from_bundle abp
           expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.1'
+          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.2'
         end
 
         it 'and when there is a space is the path' do
@@ -309,7 +309,7 @@ describe 'Calabash Launcher' do
           abp = File.expand_path(File.join(dir, 'LPSimpleExample-cal.app'))
           actual = launcher.server_version_from_bundle abp
           expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.1'
+          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.2'
         end
       end
 
