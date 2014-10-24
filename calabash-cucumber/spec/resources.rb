@@ -130,7 +130,7 @@ class Resources
     }.call
   end
 
-  def alt_xcode_details_hash
+  def alt_xcode_details_hash(skip_versions=[RunLoop::Version.new('6.0')])
     @alt_xcodes_gte_xc51_hash ||= lambda {
       ENV.delete('DEVELOPER_DIR')
       xcode_select_path = RunLoop::XCTools.new.xcode_developer_dir
@@ -140,6 +140,8 @@ class Resources
           ENV['DEVELOPER_DIR'] = path
           version = RunLoop::XCTools.new.xcode_version
           if path == xcode_select_path
+            nil
+          elsif skip_versions.include?(version)
             nil
           elsif version >= RunLoop::Version.new('5.1.1')
             {
