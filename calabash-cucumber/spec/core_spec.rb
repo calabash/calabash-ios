@@ -92,7 +92,7 @@ describe Calabash::Cucumber::Core do
             end
           else
             physical_devices.each do |device|
-              if device.version >= RunLoop::Version.new('8.0') and xctools.xcode_version < RunLoop::Version.new('6.0')
+              if Resources.shared.incompatible_xcode_ios_version(device.version, xctools.xcode_version)
                 it "Skipping #{device.name} iOS #{device.version} with Xcode #{version} - combination not supported" do
                   expect(true).to be == true
                 end
@@ -131,7 +131,7 @@ describe Calabash::Cucumber::Core do
             version = install_hash[:version]
             path = install_hash[:path]
             physical_devices.each do |device|
-              if device.version >= RunLoop::Version.new('8.0') and version < RunLoop::Version.new('6.0')
+              if Resources.shared.incompatible_xcode_ios_version(device.version, version)
                 it "Skipping #{device.name} iOS #{device.version} with Xcode #{version} - combination not supported" do
                   expect(true).to be == true
                 end

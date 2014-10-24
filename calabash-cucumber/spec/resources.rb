@@ -256,6 +256,11 @@ class Resources
     true
   end
 
+  def incompatible_xcode_ios_version(device_version, xcode_version)
+    [(device_version >= RunLoop::Version.new('8.0') and xcode_version < RunLoop::Version.new('6.0')),
+     (device_version >= RunLoop::Version.new('8.1') and xcode_version < RunLoop::Version.new('6.1'))].any?
+  end
+
   def idevice_id_bin_path
     @idevice_id_bin_path ||= `which idevice_id`.chomp!
   end
