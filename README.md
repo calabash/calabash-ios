@@ -20,7 +20,9 @@ This document explains how to install Calabash iOS. For introductory informatio
 
 ### Failing Travis CI builds
 
-Travis updated to Xcode 6 and since then our CI has been failing because the instruments process is popping a Finder dialog requesting permission to 'analyze other processes'.  We are working with the Travis team to resolve this issue.
+**RESOLVED** ~~Travis updated to Xcode 6 and since then our CI has been failing because the instruments process is popping a Finder dialog requesting permission to 'analyze other processes'.  We are working with the Travis team to resolve this issue.~~
+
+The build queues for Travis are incredibly long at the moment:  6 - 8 hours at times.  This is too long for us to wait for feedback on changes so we are often canceling jobs or merging without waiting for Travis to respond with results.  We have been compensating by doing a lot more local testing and submitting more Jenkins jobs.
 
 # This guide explains how to setup and use Calabash for iOS
 
