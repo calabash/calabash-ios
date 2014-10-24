@@ -150,7 +150,7 @@ describe Calabash::Cucumber::Launcher do
 
     describe 'Xcode < 6' do
       xcode_selected = Resources.shared.xcode_select_xcode_hash
-      xcode_installs = Resources.shared.alt_xcodes_gte_xc51_hash + [xcode_selected]
+      xcode_installs = Resources.shared.alt_xcode_details_hash + [xcode_selected]
       max_version = RunLoop::Version.new('5.1.1')
       xcode5 = xcode_installs.delete_if { |hash| hash[:version] > max_version }.sample
       if xcode5.nil?
@@ -212,7 +212,7 @@ describe Calabash::Cucumber::Launcher do
 
     describe 'Xcode >= 6.0' do
       xcode_selected = Resources.shared.xcode_select_xcode_hash
-      xcode_installs = Resources.shared.alt_xcodes_gte_xc51_hash + [xcode_selected]
+      xcode_installs = Resources.shared.alt_xcode_details_hash + [xcode_selected]
       min_version = RunLoop::Version.new('6.0')
       xcode_versions = xcode_installs.delete_if { |hash| hash[:version] < min_version }
       if xcode_versions.empty?

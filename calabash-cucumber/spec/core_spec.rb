@@ -44,7 +44,7 @@ describe Calabash::Cucumber::Core do
       end
 
       describe 'Xcode regression' do
-        xcode_installs = Resources.shared.alt_xcodes_gte_xc51_hash
+        xcode_installs = Resources.shared.alt_xcode_details_hash
         if xcode_installs.empty?
           it 'no alternative Xcode installs' do
             expect(true).to be == true
@@ -123,8 +123,7 @@ describe Calabash::Cucumber::Core do
         let(:launcher) { Calabash::Cucumber::Launcher.new }
         let(:core_instance) { CoreIncluded.new }
 
-        xcode_installs = Resources.shared.alt_xcodes_gte_xc51_hash
-        physical_devices = RunLoop::XCTools.new.instruments :devices
+        xcode_installs = Resources.shared.alt_xcode_details_hash
         if not xcode_installs.empty? and Resources.shared.ideviceinstaller_available? and not physical_devices.empty?
           xcode_installs.each do |install_hash|
             version = install_hash[:version]

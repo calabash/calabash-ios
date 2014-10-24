@@ -130,7 +130,7 @@ class Resources
     }.call
   end
 
-  def alt_xcodes_gte_xc51_hash
+  def alt_xcode_details_hash
     @alt_xcodes_gte_xc51_hash ||= lambda {
       ENV.delete('DEVELOPER_DIR')
       xcode_select_path = RunLoop::XCTools.new.xcode_developer_dir
