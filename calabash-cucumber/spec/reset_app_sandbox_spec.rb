@@ -150,7 +150,7 @@ describe Calabash::Cucumber::Launcher do
 
     describe 'Xcode < 6' do
       xcode_selected = Resources.shared.xcode_select_xcode_hash
-      xcode_installs = Resources.shared.alt_xcodes_gte_xc51_hash + [xcode_selected]
+      xcode_installs = Resources.shared.alt_xcode_details_hash + [xcode_selected]
       max_version = RunLoop::Version.new('5.1.1')
       xcode5 = xcode_installs.delete_if { |hash| hash[:version] > max_version }.sample
       if xcode5.nil?
@@ -212,7 +212,7 @@ describe Calabash::Cucumber::Launcher do
 
     describe 'Xcode >= 6.0' do
       xcode_selected = Resources.shared.xcode_select_xcode_hash
-      xcode_installs = Resources.shared.alt_xcodes_gte_xc51_hash + [xcode_selected]
+      xcode_installs = Resources.shared.alt_xcode_details_hash + [xcode_selected]
       min_version = RunLoop::Version.new('6.0')
       xcode_versions = xcode_installs.delete_if { |hash| hash[:version] < min_version }
       if xcode_versions.empty?
@@ -224,34 +224,29 @@ describe Calabash::Cucumber::Launcher do
           describe "Xcode #{xcode6[:version]}" do
             let(:helper) { Calabash::Rspec::ResetAppSandbox::Helper.new }
 
-            if Resources.shared.travis_ci?
-              it 'Skipping default simulator test on Travis CI; Simulator environment is not stable enough' do
-                expect(true).to be == true
-              end
-            else
-              it 'can reset the default simulator' do
-                ENV['DEVELOPER_DIR'] = xcode6[:path]
-                sim_control = RunLoop::SimControl.new
-                helper.launch_and_stop_simulator(launcher, sim_control, 'simulator')
+            it 'can reset the default simulator' do
+              ENV['DEVELOPER_DIR'] = xcode6[:path]
+              sim_control = RunLoop::SimControl.new
+              helper.launch_and_stop_simulator(launcher, sim_control, 'simulator')
 
-                target_simulator = helper.default_simulator_as_device(sim_control)
-                udid = target_simulator.udid
+              target_simulator = helper.default_simulator_as_device(sim_control)
+              udid = target_simulator.udid
 
-                app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
-                expect(File).to exist(app_bundles)
+              app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
+              expect(File).to exist(app_bundles)
 
-                installed_apps = helper.installed_apps(udid, target_simulator)
-                expect(installed_apps).to include('LPSimpleExample-cal.app')
+              installed_apps = helper.installed_apps(udid, target_simulator)
+              expect(installed_apps).to include('LPSimpleExample-cal.app')
 
-                launcher.reset_app_sandbox
+              launcher.reset_app_sandbox
 
-                containers = helper.path_to_containers(udid, target_simulator)
-                expect(File).not_to exist(containers)
-              end
+              containers = helper.path_to_containers(udid, target_simulator)
+              expect(File).not_to exist(containers)
             end
 
             describe 'can reset a simulator if :udid option is passed' do
               helper = Calabash::Rspec::ResetAppSandbox::Helper.new
+              ENV['DEVELOPER_DIR'] = xcode6[:path]
               sim_control = RunLoop::SimControl.new
               target_simulator = helper.random_core_simulator(sim_control)
               instruments_launch_name = helper.instruments_launch_name(target_simulator)
@@ -276,6 +271,7 @@ describe Calabash::Cucumber::Launcher do
 
             describe 'respects the DEVICE_TARGET env var' do
               helper = Calabash::Rspec::ResetAppSandbox::Helper.new
+              ENV['DEVELOPER_DIR'] = xcode6[:path]
               sim_control = RunLoop::SimControl.new
               target_simulator = helper.random_core_simulator(sim_control)
               instruments_launch_name = helper.instruments_launch_name(target_simulator)

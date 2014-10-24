@@ -220,6 +220,12 @@ module Calabash
         version_hash(ios_version)[:major_version]
       end
 
+      # Is this device running iOS 8?
+      # @return [Boolean] true if the major version of the OS is 8
+      def ios8?
+        ios_major_version.eql?('8')
+      end
+
       # Is this device running iOS 7?
       # @return [Boolean] true if the major version of the OS is 7
       def ios7?
@@ -238,15 +244,13 @@ module Calabash
         ios_major_version.eql?('5')
       end
 
+      # @deprecated 0.11.2 Replaced with screen_dimensions.
+      #
       # The screen size of the device.
       #
-      # @note These values are not dynamically computed; they are constants.
-      #
-      # @note These values are for portrait or upside orientations
-      #
-      # @return [Hash] representation of the screen size as a hash with keys
-      #  `:width` and `:height`
+      # @return [Hash] representation of the screen size
       def screen_size
+        _deprecated('0.11.2', 'Replaced with screen_dimensions', :warn)
         return screen_dimensions if screen_dimensions
         return { :width => 768, :height => 1024 } if ipad?
         return { :width => 320, :height => 568 } if iphone_4in?

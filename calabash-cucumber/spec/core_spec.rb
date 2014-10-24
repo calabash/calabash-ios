@@ -44,7 +44,7 @@ describe Calabash::Cucumber::Core do
       end
 
       describe 'Xcode regression' do
-        xcode_installs = Resources.shared.alt_xcodes_gte_xc51_hash
+        xcode_installs = Resources.shared.alt_xcode_details_hash
         if xcode_installs.empty?
           it 'no alternative Xcode installs' do
             expect(true).to be == true
@@ -80,7 +80,7 @@ describe Calabash::Cucumber::Core do
           let(:core_instance) { CoreIncluded.new }
 
           xctools = RunLoop::XCTools.new
-          physical_devices = xctools.instruments :devices
+          physical_devices = Resources.shared.physical_devices_for_testing(xctools)
 
           if physical_devices.empty?
             it 'no devices attached to this computer' do
@@ -92,7 +92,7 @@ describe Calabash::Cucumber::Core do
             end
           else
             physical_devices.each do |device|
-              if device.version >= RunLoop::Version.new('8.0') and xctools.xcode_version < RunLoop::Version.new('6.0')
+              if Resources.shared.incompatible_xcode_ios_version(device.version, xctools.xcode_version)
                 it "Skipping #{device.name} iOS #{device.version} with Xcode #{version} - combination not supported" do
                   expect(true).to be == true
                 end
@@ -123,14 +123,15 @@ describe Calabash::Cucumber::Core do
         let(:launcher) { Calabash::Cucumber::Launcher.new }
         let(:core_instance) { CoreIncluded.new }
 
-        xcode_installs = Resources.shared.alt_xcodes_gte_xc51_hash
-        physical_devices = RunLoop::XCTools.new.instruments :devices
+        xcode_installs = Resources.shared.alt_xcode_details_hash
+        xctools = RunLoop::XCTools.new
+        physical_devices = Resources.shared.physical_devices_for_testing(xctools)
         if not xcode_installs.empty? and Resources.shared.ideviceinstaller_available? and not physical_devices.empty?
           xcode_installs.each do |install_hash|
             version = install_hash[:version]
             path = install_hash[:path]
             physical_devices.each do |device|
-              if device.version >= RunLoop::Version.new('8.0') and version < RunLoop::Version.new('6.0')
+              if Resources.shared.incompatible_xcode_ios_version(device.version, version)
                 it "Skipping #{device.name} iOS #{device.version} with Xcode #{version} - combination not supported" do
                   expect(true).to be == true
                 end

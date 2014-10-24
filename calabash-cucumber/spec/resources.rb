@@ -59,6 +59,12 @@ class Resources
                 'branch' => 'master',
                 'revision' => 'e494e30'
           },
+          'screen_dimensions' => {
+                'scale' => 2,
+                'width' => 640,
+                'sample' => 1,
+                'height' => 1136
+          },
           'app_version' => '1.4.0',
           'iOS_version' => '8.0',
           'system' => 'x86_64',
@@ -67,9 +73,43 @@ class Resources
     Calabash::Cucumber::Device.new(endpoint, version_data)
   end
 
+  def server_version(device_or_simulator)
+    case device_or_simulator
+      when :device
+        {}
+      when :simulator
+        {
+              'app_version' => '1.0',
+              'outcome' => 'SUCCESS',
+              'app_id' => 'com.xamarin.chou-cal',
+              'simulator_device' => 'iPhone',
+              'version' => '0.11.0',
+              'app_name' => 'chou-cal',
+              'iphone_app_emulated_on_ipad' => false,
+              '4inch' => true,
+              'git' => {
+                    'remote_origin' => 'git@github.com:calabash/calabash-ios-server.git',
+                    'branch' => 'develop',
+                    'revision' => '652b20b'
+              },
+              'screen_dimensions' => {
+                    'scale' => 2,
+                    'width' => 640,
+                    'sample' => 1,
+                    'height' => 1136
+              },
+              'iOS_version' => '7.1',
+              'system' => 'x86_64',
+              'simulator' => 'CoreSimulator 110.2 - Device: iPhone 5 - Runtime: iOS 7.1 (11D167) - DeviceType: iPhone 5'
+        }
+      else
+        raise "expected '#{device_or_simulator}' to be one of #{[:simulator, :device]}"
+    end
+  end
+
   def alt_xcode_install_paths
     @alt_xcode_install_paths ||= lambda {
-      min_xcode_version = RunLoop::Version.new('5.1')
+      min_xcode_version = RunLoop::Version.new('5.1.1')
       Dir.glob('/Xcode/*/*.app/Contents/Developer').map do |path|
         xcode_version = path[/(\d\.\d(\.\d)?)/, 0]
         if RunLoop::Version.new(xcode_version) >= min_xcode_version
@@ -90,7 +130,7 @@ class Resources
     }.call
   end
 
-  def alt_xcodes_gte_xc51_hash
+  def alt_xcode_details_hash(skip_versions=[RunLoop::Version.new('6.0')])
     @alt_xcodes_gte_xc51_hash ||= lambda {
       ENV.delete('DEVELOPER_DIR')
       xcode_select_path = RunLoop::XCTools.new.xcode_developer_dir
@@ -101,7 +141,9 @@ class Resources
           version = RunLoop::XCTools.new.xcode_version
           if path == xcode_select_path
             nil
-          elsif version >= RunLoop::Version.new('5.1')
+          elsif skip_versions.include?(version)
+            nil
+          elsif version >= RunLoop::Version.new('5.1.1')
             {
                   :version => RunLoop::XCTools.new.xcode_version,
                   :path => path
@@ -212,5 +254,35 @@ class Resources
       raise "could not uninstall '#{bundle_id}' on '#{udid}'"
     end
     true
+  end
+
+  def incompatible_xcode_ios_version(device_version, xcode_version)
+    [(device_version >= RunLoop::Version.new('8.0') and xcode_version < RunLoop::Version.new('6.0')),
+     (device_version >= RunLoop::Version.new('8.1') and xcode_version < RunLoop::Version.new('6.1'))].any?
+  end
+
+  def idevice_id_bin_path
+    @idevice_id_bin_path ||= `which idevice_id`.chomp!
+  end
+
+  def idevice_id_available?
+    path = idevice_id_bin_path
+    path and File.exist? path
+  end
+
+  def physical_devices_for_testing(xcode_tools)
+    # Xcode 6 + iOS 8 - devices on the same network, whether development or not,
+    # appear when calling $ xcrun instruments -s devices. For the purposes of
+    # testing, we will only try to connect to devices that are connected via
+    # udid.
+    @physical_devices_for_testing ||= lambda {
+      devices = xcode_tools.instruments(:devices)
+      if idevice_id_available?
+        white_list = `#{idevice_id_bin_path} -l`.strip.split("\n")
+        devices.select { | device | white_list.include?(device.udid) }
+      else
+        devices
+      end
+    }.call
   end
 end
