@@ -246,6 +246,7 @@ describe Calabash::Cucumber::Launcher do
 
             describe 'can reset a simulator if :udid option is passed' do
               helper = Calabash::Rspec::ResetAppSandbox::Helper.new
+              ENV['DEVELOPER_DIR'] = xcode6[:path]
               sim_control = RunLoop::SimControl.new
               target_simulator = helper.random_core_simulator(sim_control)
               instruments_launch_name = helper.instruments_launch_name(target_simulator)
@@ -270,6 +271,7 @@ describe Calabash::Cucumber::Launcher do
 
             describe 'respects the DEVICE_TARGET env var' do
               helper = Calabash::Rspec::ResetAppSandbox::Helper.new
+              ENV['DEVELOPER_DIR'] = xcode6[:path]
               sim_control = RunLoop::SimControl.new
               target_simulator = helper.random_core_simulator(sim_control)
               instruments_launch_name = helper.instruments_launch_name(target_simulator)
