@@ -80,7 +80,7 @@ describe Calabash::Cucumber::Core do
           let(:core_instance) { CoreIncluded.new }
 
           xctools = RunLoop::XCTools.new
-          physical_devices = xctools.instruments :devices
+          physical_devices = Resources.shared.physical_devices_for_testing(xctools)
 
           if physical_devices.empty?
             it 'no devices attached to this computer' do
@@ -124,6 +124,8 @@ describe Calabash::Cucumber::Core do
         let(:core_instance) { CoreIncluded.new }
 
         xcode_installs = Resources.shared.alt_xcode_details_hash
+        xctools = RunLoop::XCTools.new
+        physical_devices = Resources.shared.physical_devices_for_testing(xctools)
         if not xcode_installs.empty? and Resources.shared.ideviceinstaller_available? and not physical_devices.empty?
           xcode_installs.each do |install_hash|
             version = install_hash[:version]

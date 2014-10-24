@@ -255,4 +255,29 @@ class Resources
     end
     true
   end
+
+  def idevice_id_bin_path
+    @idevice_id_bin_path ||= `which idevice_id`.chomp!
+  end
+
+  def idevice_id_available?
+    path = idevice_id_bin_path
+    path and File.exist? path
+  end
+
+  def physical_devices_for_testing(xcode_tools)
+    # Xcode 6 + iOS 8 - devices on the same network, whether development or not,
+    # appear when calling $ xcrun instruments -s devices. For the purposes of
+    # testing, we will only try to connect to devices that are connected via
+    # udid.
+    @physical_devices_for_testing ||= lambda {
+      devices = xcode_tools.instruments(:devices)
+      if idevice_id_available?
+        white_list = `#{idevice_id_bin_path} -l`.strip.split("\n")
+        devices.select { | device | white_list.include?(device.udid) }
+      else
+        devices
+      end
+    }.call
+  end
 end
