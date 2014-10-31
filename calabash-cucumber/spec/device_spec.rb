@@ -17,4 +17,36 @@ describe Calabash::Cucumber::Device do
     end
   end
 
+  describe '#iphone_4in?' do
+    let(:device)  do
+      sim_control = RunLoop::SimControl.new
+      options = {
+        :app => Resources.shared.app_bundle_path(:lp_simple_example),
+        :device_target =>  device_target,
+        :sim_control => sim_control,
+        :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+      }
+      launcher = Calabash::Cucumber::Launcher.new
+      launcher.relaunch(options)
+      launcher.device
+    end
+
+    subject { device.iphone_4in? }
+    context "when device is iphone 4in" do
+      let(:device_target) { 'iPhone 5 (8.1 Simulator)' }
+      it { should be == true }
+    end
+    context 'when device is a 3.5" phone' do
+      let(:device_target) { 'iPhone 4s (8.1 Simulator)' }
+      it { should be == false }
+    end
+    context 'is a iphone 6' do
+      let(:device_target) { 'iPhone 6 (8.1 Simulator)' }
+      it { should be == false }
+    end
+    context 'is a iphone 6+' do
+      let(:device_target) { 'iPhone 6 Plus (8.1 Simulator)' }
+      it { should be == false }
+    end
+  end
 end
