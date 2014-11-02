@@ -32,19 +32,19 @@ describe Calabash::Cucumber::Device do
     end
 
     subject { device.iphone_4in? }
-    context "when device is iphone 4in" do
+    context 'device is an 4in iphone' do
       let(:device_target) { 'iPhone 5 (8.1 Simulator)' }
       it { should be == true }
     end
-    context 'when device is a 3.5" phone' do
+    context 'device is a 3.5" iphone' do
       let(:device_target) { 'iPhone 4s (8.1 Simulator)' }
       it { should be == false }
     end
-    context 'is a iphone 6' do
+    context 'device is an iphone 6' do
       let(:device_target) { 'iPhone 6 (8.1 Simulator)' }
       it { should be == false }
     end
-    context 'is a iphone 6+' do
+    context 'device is an iphone 6+' do
       let(:device_target) { 'iPhone 6 Plus (8.1 Simulator)' }
       it { should be == false }
     end
