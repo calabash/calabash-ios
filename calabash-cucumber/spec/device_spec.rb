@@ -1,5 +1,4 @@
 describe Calabash::Cucumber::Device do
-
   # noinspection RubyStringKeysInHashInspection
   let(:simulator_data) { Resources.shared.server_version :simulator }
   let(:endpoint) { 'http://localhost:37265' }
@@ -17,4 +16,16 @@ describe Calabash::Cucumber::Device do
     end
   end
 
+  describe '#iphone_4in?' do
+    let(:device) { Calabash::Cucumber::Device.new(double('end_point'), version_data) }
+    subject { device.iphone_4in? }
+    context 'when server says it is 4"' do
+      let(:version_data) { Resources.shared.server_version(:simulator).merge({'4inch' => true}) }
+      it { is_expected.to be_truthy }
+    end
+    context 'when server says it is not 4"' do
+      let(:version_data) { Resources.shared.server_version(:simulator).merge({'4inch' => false}) }
+      it { is_expected.not_to be_truthy }
+    end
+  end
 end

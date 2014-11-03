@@ -158,6 +158,16 @@ class Resources
     }.call.compact
   end
 
+  def supported_xcode_version_paths(skip_versions=[RunLoop::Version.new('6.0')])
+    @supported_xcode_version_paths ||= lambda {
+      developer_dir = ENV.delete('DEVELOPER_DIR')
+      ret = [ RunLoop::XCTools.new.xcode_developer_dir ] +
+            alt_xcode_details_hash(skip_versions).map { |elm| elm[:path] }
+      ENV['DEVELOPER_DIR'] = developer_dir
+      ret
+    }.call
+  end
+
   def ideviceinstaller_bin_path
     @ideviceinstaller_bin_path ||= `which ideviceinstaller`.chomp!
   end
