@@ -136,8 +136,6 @@ class Calabash::Cucumber::Launcher
       puts "\n\n WARNING \n\n"
       puts 'Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems'
     end
-
-
     self
   end
 
