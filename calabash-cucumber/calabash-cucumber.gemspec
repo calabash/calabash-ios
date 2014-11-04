@@ -75,4 +75,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry', '~> 0.9'
   s.add_development_dependency 'pry-nav', '~> 0.2'
   s.add_development_dependency 'guard-rspec', '~> 4.3'
+  s.add_development_dependency 'guard-bundler', '~> 2.0'
+  s.add_development_dependency 'growl', '~> 1.0'
 end
