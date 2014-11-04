@@ -113,10 +113,20 @@ class Calabash::Cucumber::Launcher
       self.actions= Calabash::Cucumber::PlaybackActions.new
     end
 
-    self.run_loop= rl
-
+    # Sets the device attribute.
     ensure_connectivity(max_retry, timeout)
 
+    if self.device.simulator?
+      rl[:uia_strategy] = :preferences
+    else
+      if self.device.ios_major_version < '8'
+        rl[:uia_strategy] = :preferences
+      else
+        rl[:uia_strategy] = :host
+      end
+    end
+
+    self.run_loop = rl
     major = self.device.ios_major_version
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
       puts "\n\n WARNING \n\n"
