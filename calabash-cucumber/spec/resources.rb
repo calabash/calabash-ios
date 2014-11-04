@@ -29,6 +29,8 @@ class Resources
         return @lp_cal_app_bundle_path ||= File.join(self.resources_dir, 'LPSimpleExample-cal.app')
       when :chou
         return @chou_app_bundle_path ||= File.join(self.resources_dir, 'chou.app')
+      when :server_gem_compatibility
+        return @server_gem_compatibility_app_bundle_path ||= File.join(self.resources_dir, 'server-gem-compatibility.app')
       else
         raise "unexpected argument '#{bundle_name}'"
     end

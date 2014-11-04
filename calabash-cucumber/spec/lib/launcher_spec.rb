@@ -204,20 +204,20 @@ describe 'Calabash Launcher' do
 
       describe 'returns calabash version an app bundle when' do
         it 'strings can find the version' do
-          abp = Resources.shared.app_bundle_path :lp_simple_example
+          abp = Resources.shared.app_bundle_path :server_gem_compatibility
           actual = launcher.server_version_from_bundle abp
           expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.3'
+          expect(RunLoop::Version.new(actual).to_s).to be == '11.11.11'
         end
 
         it 'and when there is a space is the path' do
-          abp = Resources.shared.app_bundle_path :lp_simple_example
+          abp = Resources.shared.app_bundle_path :server_gem_compatibility
           dir = Dir.mktmpdir('path with space')
           FileUtils.cp_r abp, dir
-          abp = File.expand_path(File.join(dir, 'LPSimpleExample-cal.app'))
+          abp = File.expand_path(File.join(dir, 'server-gem-compatibility.app'))
           actual = launcher.server_version_from_bundle abp
           expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.3'
+          expect(RunLoop::Version.new(actual).to_s).to be == '11.11.11'
         end
       end
 
