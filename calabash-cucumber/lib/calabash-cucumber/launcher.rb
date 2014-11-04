@@ -105,9 +105,9 @@ class Calabash::Cucumber::Launcher
     pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
     pids = pids_str.split(',').map { |pid| pid.to_i }
     pid = pids.first
-    rl = {}
+    run_loop = {}
     if pid
-      rl[:pid] = pid
+      run_loop[:pid] = pid
       self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
       self.actions= Calabash::Cucumber::PlaybackActions.new
@@ -117,16 +117,16 @@ class Calabash::Cucumber::Launcher
     ensure_connectivity(max_retry, timeout)
 
     if self.device.simulator?
-      rl[:uia_strategy] = :preferences
+      run_loop[:uia_strategy] = :preferences
     else
       if self.device.ios_major_version < '8'
-        rl[:uia_strategy] = :preferences
+        run_loop[:uia_strategy] = :preferences
       else
-        rl[:uia_strategy] = :host
+        run_loop[:uia_strategy] = :host
       end
     end
 
-    self.run_loop = rl
+    self.run_loop = run_loop
     major = self.device.ios_major_version
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
       puts "\n\n WARNING \n\n"
