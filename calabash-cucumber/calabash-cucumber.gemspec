@@ -74,5 +74,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'redcarpet', '~> 3.1'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
+  s.add_development_dependency 'guard-rspec'
 
 end
