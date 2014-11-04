@@ -134,7 +134,7 @@ class Calabash::Cucumber::Launcher
       puts 'To fix this you must let Calabash or instruments launch the app'
       puts 'Continuing... query et al will work.'
       puts "\n\n WARNING \n\n"
-      puts "Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems"
+      puts 'Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems'
     end
 
 
