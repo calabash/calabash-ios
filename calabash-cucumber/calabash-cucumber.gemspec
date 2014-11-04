@@ -72,8 +72,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.0'
   s.add_development_dependency 'yard', '~> 0.8'
   s.add_development_dependency 'redcarpet', '~> 3.1'
-  s.add_development_dependency 'pry'
-  s.add_development_dependency 'pry-nav'
   s.add_development_dependency 'guard-rspec'
 
+  s.add_development_dependency 'pry', '~> 0.9'
+  s.add_development_dependency 'pry-nav', '~> 0.2'
 end
