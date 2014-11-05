@@ -128,14 +128,14 @@ end
 
 describe Calabash::Cucumber::Launcher do
 
-  before(:each) {
+  before(:example) {
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_TARGET')
     RunLoop::SimControl.terminate_all_sims
   }
 
-  after(:each) {
+  after(:example) {
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')

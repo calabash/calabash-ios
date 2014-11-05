@@ -1,13 +1,13 @@
 describe Calabash::Cucumber::Device do
 
-  before(:each) do
+  before(:example) do
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEBUG_UNIX_CALLS')
     RunLoop::SimControl.terminate_all_sims
   end
 
-  after(:each) {
+  after(:example) {
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEBUG_UNIX_CALLS')

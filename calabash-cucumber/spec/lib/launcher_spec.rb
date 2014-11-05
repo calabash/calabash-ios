@@ -9,13 +9,13 @@ describe 'Calabash Launcher' do
 
   let (:launcher) { Calabash::Cucumber::Launcher.new }
 
-  before(:each) {
+  before(:example) {
     ENV.delete('DEVICE_TARGET')
     ENV.delete('DETECT_CONNECTED_DEVICE')
     RunLoop::SimControl.terminate_all_sims
   }
 
-  after(:each) {
+  after(:example) {
     ENV.delete('DEVICE_TARGET')
     ENV.delete('DETECT_CONNECTED_DEVICE')
   }
@@ -145,11 +145,11 @@ describe 'Calabash Launcher' do
 
   describe 'checking server/gem compatibility' do
 
-    before(:each) do
+    before(:example) do
       Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
     end
 
-    after(:each) do
+    after(:example) do
       Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
     end
 
@@ -311,7 +311,7 @@ describe 'Calabash Launcher' do
       describe 'running against devices' do
 
         describe 'when DEVICE_TARGET = < udid >' do
-          before(:each) do
+          before(:example) do
             ENV['DEVICE_TARGET'] = fake_udid
           end
 
@@ -323,7 +323,7 @@ describe 'Calabash Launcher' do
         end
 
         describe 'when DEVICE_TARGET = device' do
-          before(:each) do
+          before(:example) do
             ENV['DEVICE_TARGET'] = 'device'
           end
 
@@ -363,7 +363,7 @@ describe 'Calabash Launcher' do
 
           let(:device_target) { 'FAKE DEVICE TARGET' }
 
-          before(:each) do
+          before(:example) do
             ENV['DEVICE_TARGET'] = device_target
           end
 
