@@ -359,9 +359,10 @@ describe 'Calabash Launcher' do
       end
 
       describe 'running against simulators' do
-
         describe 'DEVICE_TARGET is an iphone in Xcode 5.1 format' do
+
           let(:device_target) { 'FAKE DEVICE TARGET' }
+
           before(:each) do
             ENV['DEVICE_TARGET'] = device_target
           end
@@ -370,9 +371,7 @@ describe 'Calabash Launcher' do
             args = launcher.default_launch_args
             expect(args[:device_target]).to be == device_target
           end
-
         end
-
       end
     end
   end
