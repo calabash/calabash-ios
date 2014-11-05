@@ -119,29 +119,6 @@ describe 'Calabash Launcher' do
   end
 
   describe 'resetting application content and settings' do
-
-    SANDBOX_DIRS = ['Library', 'Documents', 'tmp']
-
-    def populate_app_sandbox(path=args_for_reset_app_sandbox[:path])
-      app_udid_dir = File.expand_path(File.join(path, '..'))
-      SANDBOX_DIRS.each do |dir|
-        dir_path = File.expand_path(File.join(app_udid_dir, dir))
-        FileUtils.mkdir_p(dir_path)
-      end
-      app_udid_dir
-    end
-
-    def args_for_reset_app_sandbox(sdk='7.1')
-      sub_dir = 'resources/launcher'
-      dir_udid = '1FCBF253-E5EC-4FD5-839D-0AC526F28D10'
-      app_name = 'LPSimpleExample-cal.app'
-      joined = File.join(__FILE__, '..', sub_dir, sdk, 'Applications', dir_udid, app_name)
-      {
-            :path => File.expand_path(joined),
-            :sdk => sdk
-      }
-    end
-
     describe 'should be able to detect the base simulator sdk from the launch args' do
       it 'should return nil if the test targets a device' do
         expect(@launcher).to receive(:device_target?).and_return(true)
