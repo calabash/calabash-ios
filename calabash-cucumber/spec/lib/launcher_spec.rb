@@ -7,9 +7,7 @@ describe 'Calabash Launcher' do
   UDID = '66h3hfgc466836ehcg72738eh8f322842855d2fd'
   IPHONE_4IN_R_64 = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
 
-  before(:each) do
-    @launcher = Calabash::Cucumber::Launcher.new
-  end
+  let (:launcher) { Calabash::Cucumber::Launcher.new }
 
   before(:each) {
     ENV.delete('DEVICE_TARGET')
@@ -24,7 +22,6 @@ describe 'Calabash Launcher' do
 
   describe '.default_uia_strategy' do
     let (:sim_control) { RunLoop::SimControl.new }
-    let (:launcher) { Calabash::Cucumber::Launcher.new }
     describe 'returns :preferences when target is' do
       it 'a simulator' do
         launch_args = { :device_target => 'simulator' }
@@ -63,91 +60,90 @@ describe 'Calabash Launcher' do
   describe 'simulator_target? should respond correctly to DEVICE_TARGET' do
 
     it 'should return true if DEVICE_TARGET is nil' do
-      expect(@launcher.simulator_target?).to be == false
+      expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return true if DEVICE_TARGET is simulator' do
       set_device_target('simulator')
-      expect(@launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?).to be == true
     end
 
     it 'should return false if DEVICE_TARGET is device' do
       set_device_target('device')
-      expect(@launcher.simulator_target?).to be == false
+      expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return false if DEVICE_TARGET is udid' do
       # noinspection SpellCheckingInspection
       set_device_target(UDID)
-      expect(@launcher.simulator_target?).to be == false
+      expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return true for Xcode 5.1 style simulator names' do
       set_device_target('iPhone Retina (4-inch) - Simulator - iOS 7.1')
-      expect(@launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?).to be == true
 
       set_device_target('iPhone - Simulator - iOS 6.1')
-      expect(@launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?).to be == true
 
       set_device_target('iPad Retina (64-bit) - Simulator - iOS 7.0')
-      expect(@launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?).to be == true
     end
 
     it 'should return true when passed a hash with :device_target => a simulator' do
       hash = {:device_target => 'simulator'}
-      expect(@launcher.simulator_target?(hash)).to be == true
+      expect(launcher.simulator_target?(hash)).to be == true
 
       hash = {:device_target => 'iPhone Retina (4-inch) - Simulator - iOS 7.1'}
-      expect(@launcher.simulator_target?(hash)).to be == true
+      expect(launcher.simulator_target?(hash)).to be == true
     end
 
     it 'should return false when passed a hash with :device_target != a simulator' do
       hash = {:device_target => 'device'}
-      expect(@launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(hash)).to be == false
 
       hash = {:device_target => UDID}
-      expect(@launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(hash)).to be == false
 
       hash = {:device_target => 'foobar'}
-      expect(@launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(hash)).to be == false
     end
 
     it 'should return false when passed a hash with no :device_target key' do
       hash = {:foobar => 'foobar'}
-      expect(@launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(hash)).to be == false
     end
   end
 
   describe 'resetting application content and settings' do
     describe 'should be able to detect the base simulator sdk from the launch args' do
       it 'should return nil if the test targets a device' do
-        expect(@launcher).to receive(:device_target?).and_return(true)
-        expect(@launcher.sdk_version_for_simulator_target({})).to be nil
+        expect(launcher).to receive(:device_target?).and_return(true)
+        expect(launcher.sdk_version_for_simulator_target({})).to be nil
       end
 
       it 'should return nil if :device_target is nil' do
-        expect(@launcher.sdk_version_for_simulator_target({})).to be nil
+        expect(launcher.sdk_version_for_simulator_target({})).to be nil
       end
 
       it 'should return nil if :device_target is not a simulator' do
         launch_args = {:device_target => UDID}
-        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be nil
+        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be nil
       end
 
       it "should return nil if :device_target is 'simulator'" do
         launch_args = {:device_target => 'simulator'}
-        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be nil
+        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be nil
       end
 
       it 'should return an SDK if :device_target is an Xcode 5.1+ simulator string' do
         launch_args = {:device_target => 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'}
-        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be == '7.0'
+        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be == '7.0'
       end
     end
   end
 
   describe 'checking server/gem compatibility' do
-    let (:launcher) { Calabash::Cucumber::Launcher.new }
 
     before(:each) do
       Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
@@ -298,7 +294,6 @@ describe 'Calabash Launcher' do
 
   describe 'default launch args should respect DEVICE_TARGET' do
 
-    let(:launcher) { Calabash::Cucumber::Launcher.new }
     let(:fake_udid) { 'FAKE-UDID' }
 
     it "should return 'simulator' if DEVICE_TARGET nil" do
