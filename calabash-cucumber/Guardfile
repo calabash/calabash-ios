@@ -1,5 +1,11 @@
 notification :growl, sticky: false, priority: 0
 logger level: :info
+
+guard 'bundler' do
+  watch('Gemfile')
+  watch(/^.+\.gemspec/)
+end
+
 # NOTE: This Guardfile only watches unit specs.
 # Automatically running the integration specs would repeatedly launch the
 # simulator, stealing screen focus and making everyone cranky.
