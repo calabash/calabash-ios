@@ -29,6 +29,8 @@ class Resources
         return @lp_cal_app_bundle_path ||= File.join(self.resources_dir, 'LPSimpleExample-cal.app')
       when :chou
         return @chou_app_bundle_path ||= File.join(self.resources_dir, 'chou.app')
+      when :server_gem_compatibility
+        return @server_gem_compatibility_app_bundle_path ||= File.join(self.resources_dir, 'server-gem-compatibility.app')
       else
         raise "unexpected argument '#{bundle_name}'"
     end
@@ -156,6 +158,16 @@ class Resources
         end
       end
     }.call.compact
+  end
+
+  def supported_xcode_version_paths(skip_versions=[RunLoop::Version.new('6.0')])
+    @supported_xcode_version_paths ||= lambda {
+      developer_dir = ENV.delete('DEVELOPER_DIR')
+      ret = [ RunLoop::XCTools.new.xcode_developer_dir ] +
+            alt_xcode_details_hash(skip_versions).map { |elm| elm[:path] }
+      ENV['DEVELOPER_DIR'] = developer_dir
+      ret
+    }.call
   end
 
   def ideviceinstaller_bin_path

@@ -12,7 +12,15 @@ If you are writing a new feature or updating an existing one, test it with rspec
 
 ```
 $ cd calabash-cucumber
+# Runs all the specs, include those that launch the simulators
+# and launch apps on connected devices.  These specs are slow.
 $ be rake spec
+
+# Runs the 'fast' specs.
+$ be rspec spec/lib
+
+# Turn on Guard
+$ be guard start
 ```
 
 ##### Integration Tests
@@ -168,7 +176,7 @@ _The .env is gitignore'd.  Don't check in your .env file._
 
 #### rake release
 
-Make sure all pull requests have been merged to `develop`
+Make sure all pull requests have been merged to `develop`.
 
 ```
 # Check CI!

@@ -15,7 +15,7 @@ describe '.plist editing' do
     TEMPLATE_PLIST = File.expand_path('./spec/resources/plist_buddy/com.example.plist')
     TESTING_PLIST = File.expand_path('./spec/resources/plist_buddy/com.testing.plist')
 
-    before(:each) do
+    before(:example) do
       FileUtils.rm(TESTING_PLIST) if File.exist?(TESTING_PLIST)
       FileUtils.cp(TEMPLATE_PLIST, TESTING_PLIST)
     end

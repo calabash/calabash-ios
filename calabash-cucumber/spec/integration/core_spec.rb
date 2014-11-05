@@ -4,7 +4,7 @@ end
 
 describe Calabash::Cucumber::Core do
 
-  before(:each) {
+  before(:example) {
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')
@@ -12,7 +12,7 @@ describe Calabash::Cucumber::Core do
     RunLoop::SimControl.terminate_all_sims
   }
 
-  after(:each) {
+  after(:example) {
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')

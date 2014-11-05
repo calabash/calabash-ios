@@ -105,18 +105,28 @@ class Calabash::Cucumber::Launcher
     pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
     pids = pids_str.split(',').map { |pid| pid.to_i }
     pid = pids.first
-    rl = {}
+    run_loop = {}
     if pid
-      rl[:pid] = pid
+      run_loop[:pid] = pid
       self.actions= Calabash::Cucumber::InstrumentsActions.new
     else
       self.actions= Calabash::Cucumber::PlaybackActions.new
     end
 
-    self.run_loop= rl
-
+    # Sets the device attribute.
     ensure_connectivity(max_retry, timeout)
 
+    if self.device.simulator?
+      run_loop[:uia_strategy] = :preferences
+    else
+      if self.device.ios_major_version < '8'
+        run_loop[:uia_strategy] = :preferences
+      else
+        run_loop[:uia_strategy] = :host
+      end
+    end
+
+    self.run_loop = run_loop
     major = self.device.ios_major_version
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
       puts "\n\n WARNING \n\n"
@@ -124,10 +134,8 @@ class Calabash::Cucumber::Launcher
       puts 'To fix this you must let Calabash or instruments launch the app'
       puts 'Continuing... query et al will work.'
       puts "\n\n WARNING \n\n"
-      puts "Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems"
+      puts 'Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems'
     end
-
-
     self
   end
 

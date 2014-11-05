@@ -7,24 +7,21 @@ describe 'Calabash Launcher' do
   UDID = '66h3hfgc466836ehcg72738eh8f322842855d2fd'
   IPHONE_4IN_R_64 = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
 
-  before(:each) do
-    @launcher = Calabash::Cucumber::Launcher.new
-  end
+  let (:launcher) { Calabash::Cucumber::Launcher.new }
 
-  before(:each) {
+  before(:example) {
     ENV.delete('DEVICE_TARGET')
     ENV.delete('DETECT_CONNECTED_DEVICE')
     RunLoop::SimControl.terminate_all_sims
   }
 
-  after(:each) {
+  after(:example) {
     ENV.delete('DEVICE_TARGET')
     ENV.delete('DETECT_CONNECTED_DEVICE')
   }
 
   describe '.default_uia_strategy' do
     let (:sim_control) { RunLoop::SimControl.new }
-    let (:launcher) { Calabash::Cucumber::Launcher.new }
     describe 'returns :preferences when target is' do
       it 'a simulator' do
         launch_args = { :device_target => 'simulator' }
@@ -63,212 +60,96 @@ describe 'Calabash Launcher' do
   describe 'simulator_target? should respond correctly to DEVICE_TARGET' do
 
     it 'should return true if DEVICE_TARGET is nil' do
-      expect(@launcher.simulator_target?).to be == false
+      expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return true if DEVICE_TARGET is simulator' do
       set_device_target('simulator')
-      expect(@launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?).to be == true
     end
 
     it 'should return false if DEVICE_TARGET is device' do
       set_device_target('device')
-      expect(@launcher.simulator_target?).to be == false
+      expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return false if DEVICE_TARGET is udid' do
       # noinspection SpellCheckingInspection
       set_device_target(UDID)
-      expect(@launcher.simulator_target?).to be == false
+      expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return true for Xcode 5.1 style simulator names' do
       set_device_target('iPhone Retina (4-inch) - Simulator - iOS 7.1')
-      expect(@launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?).to be == true
 
       set_device_target('iPhone - Simulator - iOS 6.1')
-      expect(@launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?).to be == true
 
       set_device_target('iPad Retina (64-bit) - Simulator - iOS 7.0')
-      expect(@launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?).to be == true
     end
 
     it 'should return true when passed a hash with :device_target => a simulator' do
       hash = {:device_target => 'simulator'}
-      expect(@launcher.simulator_target?(hash)).to be == true
+      expect(launcher.simulator_target?(hash)).to be == true
 
       hash = {:device_target => 'iPhone Retina (4-inch) - Simulator - iOS 7.1'}
-      expect(@launcher.simulator_target?(hash)).to be == true
+      expect(launcher.simulator_target?(hash)).to be == true
     end
 
     it 'should return false when passed a hash with :device_target != a simulator' do
       hash = {:device_target => 'device'}
-      expect(@launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(hash)).to be == false
 
       hash = {:device_target => UDID}
-      expect(@launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(hash)).to be == false
 
       hash = {:device_target => 'foobar'}
-      expect(@launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(hash)).to be == false
     end
 
     it 'should return false when passed a hash with no :device_target key' do
       hash = {:foobar => 'foobar'}
-      expect(@launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(hash)).to be == false
     end
   end
 
   describe 'resetting application content and settings' do
-
-    SANDBOX_DIRS = ['Library', 'Documents', 'tmp']
-
-    def populate_app_sandbox(path=args_for_reset_app_sandbox[:path])
-      app_udid_dir = File.expand_path(File.join(path, '..'))
-      SANDBOX_DIRS.each do |dir|
-        dir_path = File.expand_path(File.join(app_udid_dir, dir))
-        FileUtils.mkdir_p(dir_path)
-      end
-      app_udid_dir
-    end
-
-    def args_for_reset_app_sandbox(sdk='7.1')
-      sub_dir = 'resources/launcher'
-      dir_udid = '1FCBF253-E5EC-4FD5-839D-0AC526F28D10'
-      app_name = 'LPSimpleExample-cal.app'
-      joined = File.join(__FILE__, '..', sub_dir, sdk, 'Applications', dir_udid, app_name)
-      {
-            :path => File.expand_path(joined),
-            :sdk => sdk
-      }
-    end
-
     describe 'should be able to detect the base simulator sdk from the launch args' do
       it 'should return nil if the test targets a device' do
-        expect(@launcher).to receive(:device_target?).and_return(true)
-        expect(@launcher.sdk_version_for_simulator_target({})).to be nil
+        expect(launcher).to receive(:device_target?).and_return(true)
+        expect(launcher.sdk_version_for_simulator_target({})).to be nil
       end
 
       it 'should return nil if :device_target is nil' do
-        expect(@launcher.sdk_version_for_simulator_target({})).to be nil
+        expect(launcher.sdk_version_for_simulator_target({})).to be nil
       end
 
       it 'should return nil if :device_target is not a simulator' do
         launch_args = {:device_target => UDID}
-        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be nil
+        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be nil
       end
 
       it "should return nil if :device_target is 'simulator'" do
         launch_args = {:device_target => 'simulator'}
-        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be nil
+        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be nil
       end
 
       it 'should return an SDK if :device_target is an Xcode 5.1+ simulator string' do
         launch_args = {:device_target => 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'}
-        expect(@launcher.sdk_version_for_simulator_target(launch_args)).to be == '7.0'
-      end
-    end
-  end
-
-  describe 'reset_simulator' do
-    it 'should raise an error if running on a device' do
-      ENV['DEVICE_TARGET'] = UDID
-      expect {  @launcher.reset_simulator  }.to raise_error(RuntimeError)
-    end
-
-    it 'should reset the simulator' do
-      @launcher.reset_simulator
-    end
-  end
-
-  describe 'default launch args should respect DEVICE_TARGET' do
-
-    it "should return 'simulator' if DEVICE_TARGET nil" do
-      args = @launcher.default_launch_args
-      expect(args[:device_target]).to be == 'simulator'
-    end
-
-    describe 'running with instruments' do
-
-      it 'should be running against instruments' do
-        args = @launcher.default_launch_args
-        expect(args[:launch_method]).to be == :instruments
-      end
-
-      describe 'running against devices' do
-
-        describe 'when DEVICE_TARGET = < udid >' do
-          before(:each) do
-            ENV['DEVICE_TARGET'] = UDID
-          end
-
-          it 'it should return udid if DEVICE_TARGET is a udid' do
-            args = @launcher.default_launch_args
-            expect(args[:device_target]).to be == UDID
-            expect(args[:udid]).to be == UDID
-          end
-        end
-
-        describe 'when DEVICE_TARGET = device' do
-          before(:each) do
-            ENV['DEVICE_TARGET'] = 'device'
-          end
-
-          describe 'detecting connected devices' do
-            describe "when DETECT_CONNECTED_DEVICE == '1'" do
-              it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                ENV['DETECT_CONNECTED_DEVICE'] = '1'
-                args = @launcher.default_launch_args
-                target = args[:device_target]
-                detected = RunLoop::Core.detect_connected_device
-
-                if detected
-                  expect(target).to be == detected
-                  expect(args[:udid]).to be == detected
-                else
-                  #pending('this behavior is needs verification')
-                  expect(target).to be == 'simulator'
-                end
-              end
-
-              describe "when DETECT_CONNECTED_DEVICE != '1'" do
-                it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                  args = @launcher.default_launch_args
-                  target = args[:device_target]
-                  expect(target).to be == 'device'
-                  expect(args[:udid]).to be == 'device'
-                end
-              end
-            end
-          end
-        end
-      end
-
-      describe 'running against simulators' do
-
-        describe 'DEVICE_TARGET is an iphone in Xcode 5.1 format' do
-          before(:each) do
-            ENV['DEVICE_TARGET'] =  IPHONE_4IN_R_64
-          end
-
-          it 'should return the correct simulator' do
-            args = @launcher.default_launch_args
-            expect(args[:device_target]).to be == IPHONE_4IN_R_64
-          end
-
-        end
-
+        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be == '7.0'
       end
     end
   end
 
   describe 'checking server/gem compatibility' do
-    let (:launcher) { Calabash::Cucumber::Launcher.new }
 
-    before(:each) do
+    before(:example) do
       Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
     end
 
-    after(:each) do
+    after(:example) do
       Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
     end
 
@@ -296,20 +177,20 @@ describe 'Calabash Launcher' do
 
       describe 'returns calabash version an app bundle when' do
         it 'strings can find the version' do
-          abp = Resources.shared.app_bundle_path :lp_simple_example
+          abp = Resources.shared.app_bundle_path :server_gem_compatibility
           actual = launcher.server_version_from_bundle abp
           expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.3'
+          expect(RunLoop::Version.new(actual).to_s).to be == '11.11.11'
         end
 
         it 'and when there is a space is the path' do
-          abp = Resources.shared.app_bundle_path :lp_simple_example
+          abp = Resources.shared.app_bundle_path :server_gem_compatibility
           dir = Dir.mktmpdir('path with space')
           FileUtils.cp_r abp, dir
-          abp = File.expand_path(File.join(dir, 'LPSimpleExample-cal.app'))
+          abp = File.expand_path(File.join(dir, 'server-gem-compatibility.app'))
           actual = launcher.server_version_from_bundle abp
           expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '0.11.3'
+          expect(RunLoop::Version.new(actual).to_s).to be == '11.11.11'
         end
       end
 
@@ -405,6 +286,90 @@ describe 'Calabash Launcher' do
             end
             expect(out.string).not_to be == nil
             expect(out.string.length).not_to be == 0
+          end
+        end
+      end
+    end
+  end
+
+  describe 'default launch args should respect DEVICE_TARGET' do
+
+    let(:fake_udid) { 'FAKE-UDID' }
+
+    it "should return 'simulator' if DEVICE_TARGET nil" do
+      args = launcher.default_launch_args
+      expect(args[:device_target]).to be == 'simulator'
+    end
+
+    describe 'running with instruments' do
+
+      it 'should be running against instruments' do
+        args = launcher.default_launch_args
+        expect(args[:launch_method]).to be == :instruments
+      end
+
+      describe 'running against devices' do
+
+        describe 'when DEVICE_TARGET = < udid >' do
+          before(:example) do
+            ENV['DEVICE_TARGET'] = fake_udid
+          end
+
+          it 'it should return udid if DEVICE_TARGET is a udid' do
+            args = launcher.default_launch_args
+            expect(args[:device_target]).to be == fake_udid
+            expect(args[:udid]).to be == fake_udid
+          end
+        end
+
+        describe 'when DEVICE_TARGET = device' do
+          before(:example) do
+            ENV['DEVICE_TARGET'] = 'device'
+          end
+
+          describe 'detecting connected devices' do
+            describe "when DETECT_CONNECTED_DEVICE == '1'" do
+              it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
+                ENV['DETECT_CONNECTED_DEVICE'] = '1'
+                args = launcher.default_launch_args
+                target = args[:device_target]
+                detected = RunLoop::Core.detect_connected_device
+
+                if detected
+                  expect(target).to be == detected
+                  expect(args[:udid]).to be == detected
+                else
+                  #pending('this behavior is needs verification')
+                  expect(target).to be == 'simulator'
+                end
+              end
+
+              context "when DETECT_CONNECTED_DEVICE != '1'" do
+                before { ENV.delete('DETECT_CONNECTED_DEVICE') }
+                it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
+                  args = launcher.default_launch_args
+                  target = args[:device_target]
+                  expect(target).to be == 'device'
+                  expect(args[:udid]).to be == 'device'
+                end
+              end
+            end
+          end
+        end
+      end
+
+      describe 'running against simulators' do
+        describe 'DEVICE_TARGET is an iphone in Xcode 5.1 format' do
+
+          let(:device_target) { 'FAKE DEVICE TARGET' }
+
+          before(:example) do
+            ENV['DEVICE_TARGET'] = device_target
+          end
+
+          it 'should return the correct simulator' do
+            args = launcher.default_launch_args
+            expect(args[:device_target]).to be == device_target
           end
         end
       end

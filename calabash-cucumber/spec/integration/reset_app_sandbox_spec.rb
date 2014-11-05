@@ -18,12 +18,16 @@ module Calabash
           SIM_SDK_DIR_REGEX
         end
 
-        def populate_app_sandbox(path=args_for_reset_app_sandbox[:path])
+        def populate_xcode5_app_sandbox(args=args_for_reset_app_sandbox)
+          path= args[:path]
           app_udid_dir = File.expand_path(File.join(path, '..'))
           SANDBOX_DIRS.each do |dir|
             dir_path = File.expand_path(File.join(app_udid_dir, dir))
             FileUtils.mkdir_p(dir_path)
           end
+          # Add the app.
+          dir_path = File.expand_path(File.join(app_udid_dir, args[:app_name]))
+          FileUtils.mkdir_p(dir_path)
           app_udid_dir
         end
 
@@ -34,7 +38,8 @@ module Calabash
           joined = File.join(__FILE__, '..', sub_dir, sdk, 'Applications', dir_udid, app_name)
           {
                 :path => File.expand_path(joined),
-                :sdk => sdk
+                :sdk => sdk,
+                :app_name => app_name
           }
         end
 
@@ -123,14 +128,14 @@ end
 
 describe Calabash::Cucumber::Launcher do
 
-  before(:each) {
+  before(:example) {
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_TARGET')
     RunLoop::SimControl.terminate_all_sims
   }
 
-  after(:each) {
+  after(:example) {
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')
@@ -167,7 +172,7 @@ describe Calabash::Cucumber::Launcher do
             args = helper.args_for_reset_app_sandbox '7.1'
 
             # make the expected directories and expect they are there
-            app_udid_path = helper.populate_app_sandbox(args[:path])
+            app_udid_path = helper.populate_xcode5_app_sandbox(args)
             directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
             expected = ['LPSimpleExample-cal.app'].concat(helper.sandbox_dirs)
             expect(directories.map { |dir| File.basename(dir) }).to match_array(expected)
@@ -189,7 +194,7 @@ describe Calabash::Cucumber::Launcher do
             app_udid_paths = []
             sdks.each do |sdk|
               args = helper.args_for_reset_app_sandbox sdk
-              app_udid_path = helper.populate_app_sandbox(args[:path])
+              app_udid_path = helper.populate_xcode5_app_sandbox(args)
               app_udid_paths << app_udid_path
               directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
               expected = ['LPSimpleExample-cal.app'].concat(helper.sandbox_dirs)
