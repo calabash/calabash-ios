@@ -100,4 +100,36 @@ describe 'Calabash Launcher' do
     end
   end
 
+  describe '#attach' do
+    it 'can attach to a running instruments instance' do
+      ENV.delete('DEVICE_TARGET')
+      sim_control = RunLoop::SimControl.new
+      options =
+            {
+                  :app => Resources.shared.app_bundle_path(:lp_simple_example),
+                  :device_target => 'simulator',
+                  :no_stop => true,
+                  :sim_control => sim_control,
+                  :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+            }
+      launcher.relaunch(options)
+      expect(launcher.run_loop).not_to be == nil
+
+      other_launcher = Calabash::Cucumber::Launcher.new
+      other_launcher.attach
+
+      expect(other_launcher.run_loop).not_to be nil
+      expect(other_launcher.run_loop[:uia_strategy]).to be == :preferences
+
+      Open3.popen3('sh') do |stdin, stdout, stderr, _|
+        stdin.puts 'bundle exec calabash-ios console <<EOF'
+        stdin.puts 'console_attach'
+        stdin.puts "touch 'textField'"
+        stdin.puts 'EOF'
+        stdin.close
+        expect(stdout.read.strip[/Error/,0]).to be == nil
+        expect(stderr.read.strip).to be == ''
+      end
+    end
+  end
 end
