@@ -102,6 +102,7 @@ describe 'Calabash Launcher' do
 
   describe '#attach' do
     it 'can attach to a running instruments instance' do
+      ENV.delete('DEVICE_TARGET')
       sim_control = RunLoop::SimControl.new
       options =
             {
