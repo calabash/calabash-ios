@@ -295,4 +295,90 @@ describe 'Calabash Launcher' do
       end
     end
   end
+
+  describe 'default launch args should respect DEVICE_TARGET' do
+
+    let(:launcher) { Calabash::Cucumber::Launcher.new }
+    let(:fake_udid) { 'FAKE-UDID' }
+
+    it "should return 'simulator' if DEVICE_TARGET nil" do
+      args = launcher.default_launch_args
+      expect(args[:device_target]).to be == 'simulator'
+    end
+
+    describe 'running with instruments' do
+
+      it 'should be running against instruments' do
+        args = launcher.default_launch_args
+        expect(args[:launch_method]).to be == :instruments
+      end
+
+      describe 'running against devices' do
+
+        describe 'when DEVICE_TARGET = < udid >' do
+          before(:each) do
+            ENV['DEVICE_TARGET'] = fake_udid
+          end
+
+          it 'it should return udid if DEVICE_TARGET is a udid' do
+            args = launcher.default_launch_args
+            expect(args[:device_target]).to be == fake_udid
+            expect(args[:udid]).to be == fake_udid
+          end
+        end
+
+        describe 'when DEVICE_TARGET = device' do
+          before(:each) do
+            ENV['DEVICE_TARGET'] = 'device'
+          end
+
+          describe 'detecting connected devices' do
+            describe "when DETECT_CONNECTED_DEVICE == '1'" do
+              it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
+                ENV['DETECT_CONNECTED_DEVICE'] = '1'
+                args = launcher.default_launch_args
+                target = args[:device_target]
+                detected = RunLoop::Core.detect_connected_device
+
+                if detected
+                  expect(target).to be == detected
+                  expect(args[:udid]).to be == detected
+                else
+                  #pending('this behavior is needs verification')
+                  expect(target).to be == 'simulator'
+                end
+              end
+
+              context "when DETECT_CONNECTED_DEVICE != '1'" do
+                before { ENV.delete('DETECT_CONNECTED_DEVICE') }
+                it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
+                  args = launcher.default_launch_args
+                  target = args[:device_target]
+                  expect(target).to be == 'device'
+                  expect(args[:udid]).to be == 'device'
+                end
+              end
+            end
+          end
+        end
+      end
+
+      describe 'running against simulators' do
+
+        describe 'DEVICE_TARGET is an iphone in Xcode 5.1 format' do
+          let(:device_target) { 'FAKE DEVICE TARGET' }
+          before(:each) do
+            ENV['DEVICE_TARGET'] = device_target
+          end
+
+          it 'should return the correct simulator' do
+            args = launcher.default_launch_args
+            expect(args[:device_target]).to be == device_target
+          end
+
+        end
+
+      end
+    end
+  end
 end
