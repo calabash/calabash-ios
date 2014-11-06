@@ -3,15 +3,15 @@ describe 'Calabash Launcher' do
   let(:fake_udid) { 'FAKE-UDID' }
   describe 'reset_simulator' do
     context 'when running on a device' do
-      before { ENV['DEVICE_TARGET'] = fake_udid }
       it 'raises an error' do
+        stub_env('DEVICE_TARGET', fake_udid)
         expect {  launcher.reset_simulator  }.to raise_error(RuntimeError)
       end
     end
 
     context 'when running on the simulator' do
-      before { ENV.delete('DEVICE_TARGET') }
       it 'successfully resets the simulator' do
+        stub_env('DEVICE_TARGET', nil)
         launcher.reset_simulator
       end
     end
