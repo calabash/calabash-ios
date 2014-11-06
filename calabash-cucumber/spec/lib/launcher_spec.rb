@@ -3,7 +3,6 @@ require 'calabash-cucumber/utils/simulator_accessibility'
 
 describe 'Calabash Launcher' do
 
-  SIM_SDK_DIR_REGEX = /(\d)\.(\d)\.?(\d)?(-64)?/
   UDID = '66h3hfgc466836ehcg72738eh8f322842855d2fd'
   IPHONE_4IN_R_64 = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
 
