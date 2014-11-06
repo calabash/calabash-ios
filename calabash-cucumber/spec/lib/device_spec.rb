@@ -1,5 +1,5 @@
 describe Calabash::Cucumber::Device do
-  # noinspection RubyStringKeysInHashInspection
+
   let(:simulator_data) { Resources.shared.server_version :simulator }
   let(:endpoint) { 'http://localhost:37265' }
 

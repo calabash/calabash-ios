@@ -8,7 +8,6 @@ describe Calabash::Cucumber::Core do
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')
-    ENV.delete('DEVICE_TARGET')
     RunLoop::SimControl.terminate_all_sims
   }
 
@@ -16,7 +15,6 @@ describe Calabash::Cucumber::Core do
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')
-    ENV.delete('DEVICE_TARGET')
   }
 
   describe '#calabash_exit' do
@@ -24,17 +22,11 @@ describe Calabash::Cucumber::Core do
       let(:launcher) { Calabash::Cucumber::Launcher.new }
       let(:core_instance) { CoreIncluded.new }
       it "Xcode #{Resources.shared.current_xcode_version}" do
-        device_target = 'simulator'
-        if Resources.shared.travis_ci?
-          if Resources.shared.current_xcode_version >= RunLoop::Version.new('6.0')
-            device_target = 'iPad Air (8.0 Simulator)'
-          end
-        end
         sim_control = RunLoop::SimControl.new
         options =
               {
                     :app => Resources.shared.app_bundle_path(:lp_simple_example),
-                    :device_target =>  device_target,
+                    :device_target =>  'simulator',
                     :sim_control => sim_control,
                     :launch_retries => Resources.shared.travis_ci? ? 5 : 2
               }

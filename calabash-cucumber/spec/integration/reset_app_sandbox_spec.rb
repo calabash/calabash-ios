@@ -131,7 +131,6 @@ describe Calabash::Cucumber::Launcher do
   before(:example) {
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
-    ENV.delete('DEVICE_TARGET')
     RunLoop::SimControl.terminate_all_sims
   }
 
@@ -139,7 +138,6 @@ describe Calabash::Cucumber::Launcher do
     ENV.delete('DEVELOPER_DIR')
     ENV.delete('DEBUG')
     ENV.delete('DEVICE_ENDPOINT')
-    ENV.delete('DEVICE_TARGET')
   }
 
   let(:launcher) { Calabash::Cucumber::Launcher.new }
@@ -283,7 +281,7 @@ describe Calabash::Cucumber::Launcher do
               udid = target_simulator.udid
               it "#{instruments_launch_name} [#{udid}]" do
                 ENV['DEVELOPER_DIR'] = xcode6[:path]
-                ENV['DEVICE_TARGET'] = instruments_launch_name
+                stub_env('DEVICE_TARGET', instruments_launch_name)
                 sim_control = RunLoop::SimControl.new
                 helper.launch_and_stop_simulator(launcher, sim_control, instruments_launch_name)
 

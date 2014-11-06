@@ -4,6 +4,7 @@ require 'awesome_print'
 require 'fileutils'
 require 'tmpdir'
 require 'resources'
+require 'stub_env'
 
 include Calabash::Cucumber::Logging
 
@@ -119,5 +120,8 @@ RSpec.configure do |config|
     # a real object. This is generally recommended.
     mocks.verify_partial_doubles = true
   end
+
+  # stub_env('key', 'value')
+  config.include StubEnv::Helpers
 end
 
