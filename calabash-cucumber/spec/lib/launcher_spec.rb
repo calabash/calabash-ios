@@ -10,14 +10,7 @@ describe 'Calabash Launcher' do
   let (:launcher) { Calabash::Cucumber::Launcher.new }
 
   before(:example) {
-    ENV.delete('DEVICE_TARGET')
-    ENV.delete('DETECT_CONNECTED_DEVICE')
     RunLoop::SimControl.terminate_all_sims
-  }
-
-  after(:example) {
-    ENV.delete('DEVICE_TARGET')
-    ENV.delete('DETECT_CONNECTED_DEVICE')
   }
 
   describe '.default_uia_strategy' do
@@ -53,10 +46,6 @@ describe 'Calabash Launcher' do
     end
   end
 
-  def set_device_target(val)
-    ENV['DEVICE_TARGET'] = val
-  end
-
   describe 'simulator_target? should respond correctly to DEVICE_TARGET' do
 
     it 'should return true if DEVICE_TARGET is nil' do
@@ -64,36 +53,35 @@ describe 'Calabash Launcher' do
     end
 
     it 'should return true if DEVICE_TARGET is simulator' do
-      set_device_target('simulator')
+      stub_env('DEVICE_TARGET', 'simulator')
       expect(launcher.simulator_target?).to be == true
     end
 
     it 'should return false if DEVICE_TARGET is device' do
-      set_device_target('device')
+      stub_env('DEVICE_TARGET', 'device')
       expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return false if DEVICE_TARGET is udid' do
       # noinspection SpellCheckingInspection
-      set_device_target(UDID)
+      stub_env('DEVICE_TARGET', UDID)
       expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return true for Xcode 5.1 style simulator names' do
-      set_device_target('iPhone Retina (4-inch) - Simulator - iOS 7.1')
+      stub_env('DEVICE_TARGET', 'iPhone Retina (4-inch) - Simulator - iOS 7.1')
       expect(launcher.simulator_target?).to be == true
 
-      set_device_target('iPhone - Simulator - iOS 6.1')
+      stub_env('DEVICE_TARGET', 'iPhone - Simulator - iOS 6.1')
       expect(launcher.simulator_target?).to be == true
 
-      set_device_target('iPad Retina (64-bit) - Simulator - iOS 7.0')
+      stub_env('DEVICE_TARGET', 'iPad Retina (64-bit) - Simulator - iOS 7.0')
       expect(launcher.simulator_target?).to be == true
     end
 
     it 'should return true when passed a hash with :device_target => a simulator' do
       hash = {:device_target => 'simulator'}
       expect(launcher.simulator_target?(hash)).to be == true
-
       hash = {:device_target => 'iPhone Retina (4-inch) - Simulator - iOS 7.1'}
       expect(launcher.simulator_target?(hash)).to be == true
     end
@@ -309,13 +297,9 @@ describe 'Calabash Launcher' do
       end
 
       describe 'running against devices' do
-
         describe 'when DEVICE_TARGET = < udid >' do
-          before(:example) do
-            ENV['DEVICE_TARGET'] = fake_udid
-          end
-
           it 'it should return udid if DEVICE_TARGET is a udid' do
+            stub_env('DEVICE_TARGET', fake_udid)
             args = launcher.default_launch_args
             expect(args[:device_target]).to be == fake_udid
             expect(args[:udid]).to be == fake_udid
@@ -323,14 +307,15 @@ describe 'Calabash Launcher' do
         end
 
         describe 'when DEVICE_TARGET = device' do
+
           before(:example) do
-            ENV['DEVICE_TARGET'] = 'device'
+            stub_env('DEVICE_TARGET', 'device')
           end
 
           describe 'detecting connected devices' do
             describe "when DETECT_CONNECTED_DEVICE == '1'" do
               it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                ENV['DETECT_CONNECTED_DEVICE'] = '1'
+                stub_env('DETECT_CONNECTED_DEVICE', '1')
                 args = launcher.default_launch_args
                 target = args[:device_target]
                 detected = RunLoop::Core.detect_connected_device
@@ -345,7 +330,6 @@ describe 'Calabash Launcher' do
               end
 
               context "when DETECT_CONNECTED_DEVICE != '1'" do
-                before { ENV.delete('DETECT_CONNECTED_DEVICE') }
                 it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
                   args = launcher.default_launch_args
                   target = args[:device_target]
@@ -354,22 +338,6 @@ describe 'Calabash Launcher' do
                 end
               end
             end
-          end
-        end
-      end
-
-      describe 'running against simulators' do
-        describe 'DEVICE_TARGET is an iphone in Xcode 5.1 format' do
-
-          let(:device_target) { 'FAKE DEVICE TARGET' }
-
-          before(:example) do
-            ENV['DEVICE_TARGET'] = device_target
-          end
-
-          it 'should return the correct simulator' do
-            args = launcher.default_launch_args
-            expect(args[:device_target]).to be == device_target
           end
         end
       end
