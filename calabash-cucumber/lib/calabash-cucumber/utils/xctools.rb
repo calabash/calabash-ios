@@ -1,13 +1,14 @@
-require 'open3'
 require 'run_loop'
 
 module Calabash
   module Cucumber
 
+    # @deprecated 0.11.4 Replaced with RunLoop::XCTools.
     # @!visibility private
     # Methods for interacting with the xcode tools.
     module XcodeTools
 
+      # @deprecated 0.11.4 Replaced with RunLoop::XCTools.
       # Returns the path to the current developer directory.
       #
       # From the man pages:
@@ -22,6 +23,7 @@ module Calabash
       #
       # @return [String] path to current developer directory
       def xcode_developer_dir
+        _deprecated('0.11.4', 'Use RunLoop::XCTools', :warn)
         RunLoop::XCTools.new.xcode_developer_dir
       end
 
@@ -33,6 +35,7 @@ module Calabash
         File.expand_path("#{xcode_developer_dir}/usr/bin")
       end
 
+      # @deprecated 0.11.4 Replaced with RunLoop::XCTools.
       # Method for interacting with instruments.
       #
       # @example Getting the path to instruments.
@@ -54,8 +57,10 @@ module Calabash
         return instruments if cmd == nil
         case cmd
           when :version
+            _deprecated('0.11.4', 'Use RunLoop::XCTools', :warn)
             RunLoop::XCTools.new.instruments(cmd).to_s
           when :sims
+            _deprecated('0.11.4', 'Use RunLoop::XCTools', :warn)
             RunLoop::XCTools.new.instruments(cmd)
           else
             candidates = [:version, :sims]
@@ -63,6 +68,7 @@ module Calabash
         end
       end
 
+      # @deprecated 0.11.4 Replaced with RunLoop::XCTools.
       # Does the instruments `version` accept the -s flag?
       #
       # @example
@@ -75,9 +81,11 @@ module Calabash
       #
       # @return [Boolean] true if the version is >= 5.*
       def instruments_supports_hyphen_s?(version)
+        _deprecated('0.11.4', 'Use RunLoop::XCTools', :warn)
         RunLoop::XCTools.new.instruments_supports_hyphen_s?(version)
       end
 
+      # @deprecated 0.11.4 Replaced with RunLoop::XCTools.
       # Returns a list of installed simulators by calling `$ instruments -s devices`.
       # and parsing the output
       # @return [Array<String>] an array of simulator names suitable for passing
@@ -85,6 +93,7 @@ module Calabash
       # @raise [RuntimeError] if the currently active instruments version does
       #   not support the -s flag
       def installed_simulators
+        _deprecated('0.11.4', 'Use RunLoop::XCTools', :warn)
         instruments(:sims)
       end
     end
