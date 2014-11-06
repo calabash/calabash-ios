@@ -10,12 +10,7 @@ describe 'Calabash Launcher' do
   let (:launcher) { Calabash::Cucumber::Launcher.new }
 
   before(:example) {
-    ENV.delete('DETECT_CONNECTED_DEVICE')
     RunLoop::SimControl.terminate_all_sims
-  }
-
-  after(:example) {
-    ENV.delete('DETECT_CONNECTED_DEVICE')
   }
 
   describe '.default_uia_strategy' do
@@ -320,7 +315,7 @@ describe 'Calabash Launcher' do
           describe 'detecting connected devices' do
             describe "when DETECT_CONNECTED_DEVICE == '1'" do
               it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                ENV['DETECT_CONNECTED_DEVICE'] = '1'
+                stub_env('DETECT_CONNECTED_DEVICE', '1')
                 args = launcher.default_launch_args
                 target = args[:device_target]
                 detected = RunLoop::Core.detect_connected_device
@@ -335,7 +330,6 @@ describe 'Calabash Launcher' do
               end
 
               context "when DETECT_CONNECTED_DEVICE != '1'" do
-                before { ENV.delete('DETECT_CONNECTED_DEVICE') }
                 it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
                   args = launcher.default_launch_args
                   target = args[:device_target]
