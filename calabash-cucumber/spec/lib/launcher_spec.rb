@@ -51,10 +51,6 @@ describe 'Calabash Launcher' do
     end
   end
 
-  def set_device_target(val)
-    ENV['DEVICE_TARGET'] = val
-  end
-
   describe 'simulator_target? should respond correctly to DEVICE_TARGET' do
 
     it 'should return true if DEVICE_TARGET is nil' do
@@ -62,37 +58,35 @@ describe 'Calabash Launcher' do
     end
 
     it 'should return true if DEVICE_TARGET is simulator' do
-
-      set_device_target('simulator')
+      stub_env('DEVICE_TARGET', 'simulator')
       expect(launcher.simulator_target?).to be == true
     end
 
     it 'should return false if DEVICE_TARGET is device' do
-      set_device_target('device')
+      stub_env('DEVICE_TARGET', 'device')
       expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return false if DEVICE_TARGET is udid' do
       # noinspection SpellCheckingInspection
-      set_device_target(UDID)
+      stub_env('DEVICE_TARGET', UDID)
       expect(launcher.simulator_target?).to be == false
     end
 
     it 'should return true for Xcode 5.1 style simulator names' do
-      set_device_target('iPhone Retina (4-inch) - Simulator - iOS 7.1')
+      stub_env('DEVICE_TARGET', 'iPhone Retina (4-inch) - Simulator - iOS 7.1')
       expect(launcher.simulator_target?).to be == true
 
-      set_device_target('iPhone - Simulator - iOS 6.1')
+      stub_env('DEVICE_TARGET', 'iPhone - Simulator - iOS 6.1')
       expect(launcher.simulator_target?).to be == true
 
-      set_device_target('iPad Retina (64-bit) - Simulator - iOS 7.0')
+      stub_env('DEVICE_TARGET', 'iPad Retina (64-bit) - Simulator - iOS 7.0')
       expect(launcher.simulator_target?).to be == true
     end
 
     it 'should return true when passed a hash with :device_target => a simulator' do
       hash = {:device_target => 'simulator'}
       expect(launcher.simulator_target?(hash)).to be == true
-
       hash = {:device_target => 'iPhone Retina (4-inch) - Simulator - iOS 7.1'}
       expect(launcher.simulator_target?(hash)).to be == true
     end
