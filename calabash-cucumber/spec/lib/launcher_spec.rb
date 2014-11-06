@@ -302,13 +302,9 @@ describe 'Calabash Launcher' do
       end
 
       describe 'running against devices' do
-
         describe 'when DEVICE_TARGET = < udid >' do
-          before(:example) do
-            ENV['DEVICE_TARGET'] = fake_udid
-          end
-
           it 'it should return udid if DEVICE_TARGET is a udid' do
+            stub_env('DEVICE_TARGET', fake_udid)
             args = launcher.default_launch_args
             expect(args[:device_target]).to be == fake_udid
             expect(args[:udid]).to be == fake_udid
@@ -316,8 +312,9 @@ describe 'Calabash Launcher' do
         end
 
         describe 'when DEVICE_TARGET = device' do
+
           before(:example) do
-            ENV['DEVICE_TARGET'] = 'device'
+            stub_env('DEVICE_TARGET', 'device')
           end
 
           describe 'detecting connected devices' do
