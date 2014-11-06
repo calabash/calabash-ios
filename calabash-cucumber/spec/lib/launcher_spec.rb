@@ -10,13 +10,11 @@ describe 'Calabash Launcher' do
   let (:launcher) { Calabash::Cucumber::Launcher.new }
 
   before(:example) {
-    ENV.delete('DEVICE_TARGET')
     ENV.delete('DETECT_CONNECTED_DEVICE')
     RunLoop::SimControl.terminate_all_sims
   }
 
   after(:example) {
-    ENV.delete('DEVICE_TARGET')
     ENV.delete('DETECT_CONNECTED_DEVICE')
   }
 
