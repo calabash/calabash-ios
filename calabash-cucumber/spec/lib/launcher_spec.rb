@@ -64,6 +64,7 @@ describe 'Calabash Launcher' do
     end
 
     it 'should return true if DEVICE_TARGET is simulator' do
+
       set_device_target('simulator')
       expect(launcher.simulator_target?).to be == true
     end
