@@ -27,6 +27,11 @@ describe Calabash::Cucumber::UIA do
     launcher = Calabash::Cucumber::Launcher.new
     launcher.relaunch(options)
     uia.wait_for_element_exists('textField', :timeout => 8)
+    # Set the keyboard to the default - must be set _before_ keyboard is
+    # presented.  Required by timeout examples; default keyboard does not have
+    # a backquote ` key.
+    uia.map('textField', :query, [{:setKeyboardType => 0}])
+    uia.map('textField', :query, [{:setAutocorrectionType => 1}])
     uia.uia("uia.tapOffset('{:x 152, :y 101.5}')")
     uia.wait_for_keyboard
   }
