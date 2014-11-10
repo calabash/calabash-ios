@@ -1,6 +1,7 @@
 require 'edn'
 require 'json'
 require 'calabash-cucumber/utils/logging'
+require 'timeout'
 
 module Calabash
   module Cucumber
@@ -247,7 +248,14 @@ module Calabash
           indexes.reverse.each { |idx| string = string_to_type.insert(idx, '\\') }
         end
 
-        result = uia_handle_command(:typeString, string_to_type, existing_text)
+        result = {'status' => 'Timed out; does the keyboard have all the characters you are trying to type?'}
+        begin
+           Timeout.timeout(15) do
+            result = uia_handle_command(:typeString, string_to_type, existing_text)
+           end
+        rescue Timeout::Error => _
+          raise Timeout::Error, "Timed out typing '#{string}'; #{result['status']}"
+        end
 
         # When 'status' == 'success', we get back result['value'].  Sometimes,
         # the 'value' key is not present in the result - in which case we assume
