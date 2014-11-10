@@ -49,17 +49,17 @@ describe Calabash::Cucumber::UIA do
 
       describe 'escaping backslashes' do
         it 'will escape backslashes if :escape_backslashes is truthy' do
-          string = 'String with \ a backslash'
+          string = 'String with \ an escaped backslash.'
           uia.uia_type_string(string, {:escape_backslashes => true})
           actual = uia.send(:_text_from_first_responder)
           expect(actual).to be == string
         end
 
         it 'will not escape backslashes if :escape_backslashes is not truthy' do
-          string = 'String with \ a backslash'
+          string = 'String with \ an unescaped backslash'
           uia.uia_type_string(string, {:escape_backslashes => false})
           actual = uia.send(:_text_from_first_responder)
-          expect(actual).to be == 'String with. a backslash'
+          expect(actual).to be == 'String with. an unescaped backslash'
         end
       end
     end
