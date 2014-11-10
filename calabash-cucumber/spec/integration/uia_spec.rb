@@ -1,3 +1,5 @@
+require 'timeout'
+
 module Calabash
   module RspecIntegrationTests
     module UIA
@@ -62,6 +64,11 @@ describe Calabash::Cucumber::UIA do
           expect(actual).to be == 'String with. an unescaped backslash'
         end
       end
+    end
+
+    it 'will timeout if string cannot be typed' do
+      string = 'There is no ` backquote.'
+      expect { uia.uia_type_string(string) }.to raise_error(TimeoutError)
     end
   end
 end
