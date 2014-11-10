@@ -238,13 +238,16 @@ module Calabash
                         :escape => true}
         merged_opts = default_opts.merge(options)
 
+        escape_backslashes = merged_opts[:escape]
+        existing_text = merged_opts[:opt_text_before]
+
         string_to_type = string.dup
-        if escape && string_to_type.index(/\\/)
+        if escape_backslashes && string_to_type.index(/\\/)
           indexes = string_to_type.enum_for(:scan, /\\/).map { Regexp.last_match.begin(0) }
           indexes.reverse.each { |idx| string = string_to_type.insert(idx, '\\') }
         end
 
-        result = uia_handle_command(:typeString, string_to_type, opt_text_before)
+        result = uia_handle_command(:typeString, string_to_type, existing_text)
 
         # When 'status' == 'success', we get back result['value'].  Sometimes,
         # the 'value' key is not present in the result - in which case we assume
