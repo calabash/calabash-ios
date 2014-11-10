@@ -233,7 +233,11 @@ module Calabash
       end
 
       # @!visibility private
-      def uia_type_string(string, opt_text_before='', escape=true)
+      def uia_type_string(string, options = {})
+        default_opts = {:opt_text_before => '',
+                        :escape => true}
+        merged_opts = default_opts.merge(options)
+
         string_to_type = string.dup
         if escape && string_to_type.index(/\\/)
           indexes = string_to_type.enum_for(:scan, /\\/).map { Regexp.last_match.begin(0) }
