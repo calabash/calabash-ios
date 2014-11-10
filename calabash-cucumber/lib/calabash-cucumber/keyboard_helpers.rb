@@ -318,7 +318,7 @@ module Calabash
             elsif code.eql?(UIA_SUPPORTED_CHARS['Return'])
               tap_keyboard_action_key
             else
-              uia_type_string(code, '')
+              uia_type_string(code)
             end
           end
           # noinspection RubyStringKeysInHashInspection
@@ -357,7 +357,7 @@ module Calabash
         if uia_available?
           text_before = _text_from_first_responder()
           text_before = text_before.gsub("\n","\\n") if text_before
-          uia_type_string(text, text_before)
+          uia_type_string(text, {:existing_text => text_before})
         else
           text.each_char do |ch|
             begin
@@ -388,9 +388,9 @@ module Calabash
         if uia_available?
           run_loop = Calabash::Cucumber::Launcher.launcher.run_loop
           if run_loop[:uia_strategy] == :host
-            uia_type_string "\\\\n", '', false
+            uia_type_string "\\\\n", {:escape_backslashes => false}
           else
-            uia_type_string '\n', '', false
+            uia_type_string '\n', {:escape_backslashes => false}
           end
         else
           keyboard_enter_char 'Return'
