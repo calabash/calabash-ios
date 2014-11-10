@@ -17,6 +17,7 @@ describe Calabash::Cucumber::UIA do
   let(:uia) { Calabash::RspecIntegrationTests::UIA::TestObject.new }
 
   before(:example) {
+    RunLoop::SimControl.terminate_all_sims
     options = {
           :app => Resources.shared.app_bundle_path(:lp_simple_example),
           :device_target =>  'simulator',
