@@ -234,12 +234,12 @@ module Calabash
 
       # @!visibility private
       def uia_type_string(string, options = {})
-        default_opts = {:opt_text_before => '',
-                        :escape => true}
+        default_opts = {:existing_text => '',
+                        :escape_backslashes => true}
         merged_opts = default_opts.merge(options)
 
-        escape_backslashes = merged_opts[:escape]
-        existing_text = merged_opts[:opt_text_before]
+        escape_backslashes = merged_opts[:escape_backslashes]
+        existing_text = merged_opts[:existing_text]
 
         string_to_type = string.dup
         if escape_backslashes && string_to_type.index(/\\/)
