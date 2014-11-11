@@ -236,11 +236,13 @@ module Calabash
       # @!visibility private
       def uia_type_string(string, options = {})
         default_opts = {:existing_text => '',
-                        :escape_backslashes => true}
+                        :escape_backslashes => true,
+                        :timeout => 20}
         merged_opts = default_opts.merge(options)
 
         escape_backslashes = merged_opts[:escape_backslashes]
         existing_text = merged_opts[:existing_text]
+        timeout = merged_opts[:timeout]
 
         string_to_type = string.dup
         if escape_backslashes && string_to_type.index(/\\/)
@@ -248,13 +250,14 @@ module Calabash
           indexes.reverse.each { |idx| string = string_to_type.insert(idx, '\\') }
         end
 
-        result = {'status' => 'Timed out; does the keyboard have all the characters you are trying to type?'}
+        result = {'status' => 'error',
+                  'value' => 'Does the keyboard have all the characters you are trying to type?'}
         begin
-           Timeout.timeout(15) do
+           Timeout.timeout(timeout) do
             result = uia_handle_command(:typeString, string_to_type, existing_text)
            end
         rescue Timeout::Error => _
-          raise Timeout::Error, "Timed out typing '#{string}'; #{result['status']}"
+          raise Timeout::Error, "Timed out typing '#{string}' after #{timeout}s; #{result['value']}"
         end
 
         # When 'status' == 'success', we get back result['value'].  Sometimes,
