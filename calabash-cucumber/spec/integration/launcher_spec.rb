@@ -27,7 +27,7 @@ describe 'Calabash Launcher' do
                   :device_target => 'simulator',
                   :no_stop => true,
                   :sim_control => sim_control,
-                  :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+                  :launch_retries => Resources.shared.launch_retries
             }
       launcher.relaunch(options)
       expect(launcher.run_loop).not_to be == nil

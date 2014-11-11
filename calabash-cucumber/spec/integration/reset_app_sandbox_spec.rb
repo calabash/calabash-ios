@@ -76,7 +76,7 @@ module Calabash
                 :app => Resources.shared.app_bundle_path(:lp_simple_example),
                 :device_target => target,
                 :sim_control => sim_control,
-                :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+                :launch_retries => Resources.shared.launch_retries
           }
         end
 
