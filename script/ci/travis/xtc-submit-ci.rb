@@ -73,6 +73,6 @@ Dir.chdir xtc_test_dir do
 
   do_system(cmd, {:pass_msg => 'XTC job completed',
                   :fail_msg => 'XTC job failed',
-                  :obscure_fields => [token, device_set]})
+                  :obscure_fields => [token]})
 end
 
