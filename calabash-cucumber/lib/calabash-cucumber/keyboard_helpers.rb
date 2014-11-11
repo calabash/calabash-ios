@@ -365,7 +365,7 @@ module Calabash
           text_before = _text_from_first_responder()
           text_before = text_before.gsub("\n","\\n") if text_before
           uia_type_string(text, {:existing_text => text_before,
-                                 :timeout => options.fetch(:timeout, 20)})
+                                 :timeout => options.fetch(:timeout, 10)})
         else
           text.each_char do |ch|
             begin

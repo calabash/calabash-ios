@@ -237,7 +237,7 @@ module Calabash
       def uia_type_string(string, options = {})
         default_opts = {:existing_text => '',
                         :escape_backslashes => true,
-                        :timeout => 20}
+                        :timeout => 10}
         merged_opts = default_opts.merge(options)
 
         escape_backslashes = merged_opts[:escape_backslashes]
