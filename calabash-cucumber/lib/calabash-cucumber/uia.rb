@@ -1,7 +1,5 @@
 require 'edn'
 require 'json'
-# required for ruby 1.8
-require 'enumerator'
 require 'calabash-cucumber/utils/logging'
 
 module Calabash
