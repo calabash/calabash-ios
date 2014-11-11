@@ -359,12 +359,13 @@ module Calabash
       #  current keyboard. **Note: this option is only used when using the
       #  application is launched with instruments.
       # @raise [RuntimeError] if the text cannot be typed.
-      def keyboard_enter_text(text)
+      def keyboard_enter_text(text, options={})
         _ensure_can_enter_text
         if uia_available?
           text_before = _text_from_first_responder()
           text_before = text_before.gsub("\n","\\n") if text_before
-          uia_type_string(text, {:existing_text => text_before})
+          uia_type_string(text, {:existing_text => text_before,
+                                 :timeout => options.fetch(:timeout, 20)})
         else
           text.each_char do |ch|
             begin
