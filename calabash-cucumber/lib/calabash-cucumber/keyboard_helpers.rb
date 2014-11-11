@@ -351,6 +351,13 @@ module Calabash
       # Uses the keyboard to enter text.
       #
       # @param [String] text the text to type.
+      # @param [Hash] options Options for controlling the typing.
+      # @option options :timeout (20) How long to try typing before giving up.
+      #  Only change this value if you have an especially long string to type;
+      #  like a paragraph of text.  Otherwise, use the default value.  Timeouts
+      #  occur when the text contains characters that cannot be found on the
+      #  current keyboard. **Note: this option is only used when using the
+      #  application is launched with instruments.
       # @raise [RuntimeError] if the text cannot be typed.
       def keyboard_enter_text(text)
         _ensure_can_enter_text
