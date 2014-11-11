@@ -1,14 +1,15 @@
 require 'timeout'
 
 module Calabash
-  module RspecIntegrationTests
-    module UIA
-      class TestObject
-        include Calabash::Cucumber::UIA
-        include Calabash::Cucumber::HTTPHelpers
-        include Calabash::Cucumber::KeyboardHelpers
-        include Calabash::Cucumber::WaitHelpers
-        include Calabash::Cucumber::Map
+  module Rspec
+    module IntegrationTests
+      module UIA
+        class TestObject
+          include Calabash::Cucumber::UIA
+          include Calabash::Cucumber::KeyboardHelpers
+          include Calabash::Cucumber::WaitHelpers
+          include Calabash::Cucumber::Map
+        end
       end
     end
   end
@@ -16,7 +17,7 @@ end
 
 describe Calabash::Cucumber::UIA do
 
-  let(:uia) { Calabash::RspecIntegrationTests::UIA::TestObject.new }
+  let(:uia) { Calabash::Rspec::IntegrationTests::UIA::TestObject.new }
 
   before(:example) {
     RunLoop::SimControl.terminate_all_sims
