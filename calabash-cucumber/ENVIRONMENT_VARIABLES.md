@@ -285,7 +285,7 @@ Device UDIDs should be private.  When posting debug output on the web, do not po
 
 ***It is almost always incorrect to set NO_LAUNCH=1.***
 
-Use this control whether or not calabash launches your app.
+Use this to control whether or not calabash launches your app.
 
 If you are testing against iOS >= 7, **you must not set this to 1**; calabash must be allowed to launch your app with instruments to have access to the UIAutomation API.
       
