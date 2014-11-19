@@ -101,18 +101,33 @@ describe Calabash::Cucumber::UIA do
           expect { test_obj.uia('command') }.to raise_error
         end
 
-        it 'when response status is error' do
-          launcher = Calabash::Cucumber::Launcher.new
-          launcher.run_loop = {:uia_strategy => :host}
-          expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
-          run_loop_response =
-                {
-                      'status' => 'error',
-                      'value' => 'Some value',
-                      'index' => 1
-                }
-          expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
-          expect { test_obj.uia('command') }.to raise_error
+        describe 'when response status is error' do
+          it 'and response contains a value' do
+            launcher = Calabash::Cucumber::Launcher.new
+            launcher.run_loop = {:uia_strategy => :host}
+            expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+            run_loop_response =
+                  {
+                        'status' => 'error',
+                        'value' => 'Some value',
+                        'index' => 1
+                  }
+            expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
+            expect { test_obj.uia('command') }.to raise_error
+          end
+
+          it 'and response does not contain a value' do
+            launcher = Calabash::Cucumber::Launcher.new
+            launcher.run_loop = {:uia_strategy => :host}
+            expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+            run_loop_response =
+                  {
+                        'status' => 'error',
+                        'index' => 1
+                  }
+            expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
+            expect { test_obj.uia('command') }.to raise_error('uia action failed for an unknown reason')
+          end
         end
       end
     end
