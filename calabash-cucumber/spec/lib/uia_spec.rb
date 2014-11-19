@@ -73,25 +73,29 @@ describe Calabash::Cucumber::UIA do
   end
 
   describe 'uia' do
-    describe 'raises an error' do
-      it 'when http returns nil - simulates an app crash' do
-        launcher = Calabash::Cucumber::Launcher.new
-        launcher.run_loop = {:uia_strategy => :preferences}
-        expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
-        expect(test_obj).to receive(:http).and_return('')
-        expect { test_obj.uia('command') }.to raise_error
+    describe ':preferences strategy' do
+      describe 'raises an error' do
+        it 'when http returns nil - simulates an app crash' do
+          launcher = Calabash::Cucumber::Launcher.new
+          launcher.run_loop = {:uia_strategy => :preferences}
+          expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+          expect(test_obj).to receive(:http).and_return('')
+          expect { test_obj.uia('command') }.to raise_error
+        end
       end
+    end
 
-      describe 'host strategy' do
+    describe 'host strategy' do
+      describe 'raises an error' do
         it 'when response status is not expected' do
           launcher = Calabash::Cucumber::Launcher.new
           launcher.run_loop = {:uia_strategy => :host}
           expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
           run_loop_response =
                 {
-                 'status' => 'unknown status',
-                 'value' => 'Some value',
-                 'index' => 1
+                      'status' => 'unknown status',
+                      'value' => 'Some value',
+                      'index' => 1
                 }
           expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
           expect { test_obj.uia('command') }.to raise_error
