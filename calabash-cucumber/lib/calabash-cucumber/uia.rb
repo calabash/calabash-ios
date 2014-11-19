@@ -36,7 +36,23 @@ module Calabash
             end
             res['results'].first
           when :host
-            RunLoop.send_command(run_loop, command)
+            res = RunLoop.send_command(run_loop, command)
+            status = res['status']
+            case status
+              when 'success'
+                res
+              when 'error'
+                value = res['value']
+                if value
+                  msg = "uia action failed because: #{res['value']}"
+                else
+                  msg = 'uia action failed for an unknown reason'
+                end
+                raise msg
+              else
+                candidates = ['success', 'error']
+                raise RuntimeError, "expected '#{status}' to be one of #{candidates}"
+            end
           else
             candidates = [:preferences, :host]
             raise ArgumentError, "expected '#{run_loop[:uia_strategy]}' to be one of #{candidates}"
