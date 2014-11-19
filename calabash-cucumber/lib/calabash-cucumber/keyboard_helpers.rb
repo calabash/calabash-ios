@@ -84,22 +84,32 @@ module Calabash
 
         return true if device_family_iphone?
 
-        # ipad
         rect = res['rect']
         o = status_bar_orientation.to_sym
         case o
-          when :left then
-            rect['center_x'] == 592 and rect['center_y'] == 512
-          when :right then
-            rect['center_x'] == 176 and rect['center_y'] == 512
-          when :up then
-            rect['center_x'] == 384 and rect['center_y'] == 132
-          when :down then
-            rect['center_x'] == 384 and rect['center_y'] == 892
+          when :left
+            if ios8?
+              rect['center_x'] == 512 and rect['center_y'] == 592
+            else
+              rect['center_x'] == 592 and rect['center_y'] == 512
+            end
+          when :right
+            if ios8?
+              rect['center_x'] == 512 and rect['center_y'] == 592
+            else
+              rect['center_x'] == 176 and rect['center_y'] == 512
+            end
+          when :up
+            if ios8?
+              rect['center_x'] == 384 and rect['center_y'] == 892
+            else
+              rect['center_x'] == 384 and rect['center_y'] == 132
+            end
+          when :down
+              rect['center_x'] == 384 and rect['center_y'] == 892
           else
             false
         end
-
       end
 
       # Returns true if an undocked keyboard is visible.
