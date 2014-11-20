@@ -2,6 +2,7 @@ language: objective-c
 
 before_script:
   - script/ci/travis/instruments-auth.sh
+  - script/ci/travis/install-dot-gemrc.rb
   - gem install json --no-document
   - gem uninstall -Vax --force --no-abort-on-dependent calabash-cucumber
   - gem uninstall -Vax --force --no-abort-on-dependent run_loop
