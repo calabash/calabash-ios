@@ -31,7 +31,7 @@ Before do |_|
   launcher = Calabash::LaunchControl.instance.launcher
   launch_options =
         {
-
+              :launch_retries => ENV['TRAVIS'] ? 7 : 2
         }
 
   launcher.relaunch(launch_options)
