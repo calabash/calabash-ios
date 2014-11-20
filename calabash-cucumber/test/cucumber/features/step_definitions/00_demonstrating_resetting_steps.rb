@@ -59,7 +59,7 @@ module Calabash
           res = query(qstr, :isOn).first
           not res.nil?
         end
-        res == '1'
+        res == 1
       end
 
       def add_file_to_sandbox_dir(filename, directory)
