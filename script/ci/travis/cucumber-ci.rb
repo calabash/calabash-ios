@@ -103,12 +103,6 @@ Dir.chdir(working_directory) do
           }
   end
 
-  # Travis CI on Xcode 5.1.1 has a hard time with 64 bit simulators.
-  if travis_ci? and not xcode_version_gte_6?
-    profiles[:air] = simulator_profiles[:air_mid]
-    profiles[:iphone5s] = simulator_profiles[:iphone5s_mid]
-  end
-
   # noinspection RubyStringKeysInHashInspection
   env_vars =
         {
