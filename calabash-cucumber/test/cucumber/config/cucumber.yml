@@ -4,7 +4,34 @@ require 'run_loop'
 
 xcode_tools = RunLoop::XCTools.new
 sims = {}
-if xcode_tools.xcode_version_gte_6?
+if xcode_tools.xcode_version_gte_61?
+  sims[:ipad2]     = 'iPad 2 (8.1 Simulator)'
+  sims[:ipad2_mid] = 'iPad 2 (7.1 Simulator)'
+  sims[:ipad2_min] = 'iPad 2 (7.0.3 Simulator)'
+
+  sims[:air] =     'iPad Air (8.1 Simulator)'
+  sims[:air_mid] = 'iPad Air (7.1 Simulator)'
+  sims[:air_min] = 'iPad Air (7.0.3 Simulator)'
+
+  sims[:ipad]     = 'iPad Retina (8.1 Simulator)'
+  sims[:ipad_mid] = 'iPad Retina (7.1 Simulator)'
+  sims[:ipad_min] = 'iPad Retina (7.0.3 Simulator)'
+
+  sims[:iphone4s]     = 'iPhone 4s (8.1 Simulator)'
+  sims[:iphone4s_mid] = 'iPhone 4s (7.1 Simulator)'
+  sims[:iphone4s_min] = 'iPhone 4s (7.0.3 Simulator)'
+
+  sims[:iphone5s]     = 'iPhone 5s (8.1 Simulator)'
+  sims[:iphone5s_mid] = 'iPhone 5s (7.1 Simulator)'
+  sims[:iphone5s_min] = 'iPhone 5s (7.0.3 Simulator)'
+
+  sims[:iphone5]     = 'iPhone 5 (8.1 Simulator)'
+  sims[:iphone5_mid] = 'iPhone 5 (7.1 Simulator)'
+  sims[:iphone5_min] = 'iPhone 5 (7.0.3 Simulator)'
+  sims[:default]     = 'iPhone 5 (8.1 Simulator)'
+
+elsif xcode_tools.xcode_version_gte_6?
+
   sims[:ipad2]     = 'iPad 2 (8.0 Simulator)'
   sims[:ipad2_mid] = 'iPad 2 (7.1 Simulator)'
   sims[:ipad2_min] = 'iPad 2 (7.0.3 Simulator)'
