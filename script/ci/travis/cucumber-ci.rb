@@ -12,10 +12,7 @@ working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 # on-simulator tests of features in test/cucumber
 Dir.chdir(working_directory) do
 
-  do_system 'rm -rf Gemfile'
-  do_system 'rm -rf Gemfile.lock'
-  do_system 'rm -rf .bundle'
-  do_system 'rm -rf vendor'
+  do_system('rm -rf .bundle')
 
   do_system('bundle install --without=development',
             {:pass_msg => 'bundled',
