@@ -128,8 +128,8 @@ Dir.chdir(working_directory) do
   # the travis ci environment is not stable enough to have all tests passing
   exit failed unless travis_ci?
 
-  # we'll take 75% passing as good indicator of health
-  expected = 75
+  # we'll take 50% passing as good indicator of health
+  expected = 50
   actual = ((passed.to_f/sims.to_f) * 100).to_i
 
   if actual >= expected
