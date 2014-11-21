@@ -84,7 +84,7 @@ else
 end
 
 if ENV["USER"] == "jenkins" or ENV['TRAVIS']
-  formatter = "progress"
+  formatter = "pretty"
   keep_sim_open_after = "0"
 else
   formatter = "Slowhandcuke::Formatter"
