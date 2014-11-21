@@ -17,7 +17,7 @@ Dir.chdir(working_directory) do
   do_system 'rm -rf .bundle'
   do_system 'rm -rf vendor'
 
-  do_system('bundle install',
+  do_system('bundle install --without=development',
             {:pass_msg => 'bundled',
              :fail_msg => 'could not bundle'})
 
