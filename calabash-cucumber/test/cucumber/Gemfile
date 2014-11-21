@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+if ENV['TRAVIS']
+  gem 'run_loop', :path => '../../../run_loop'
+end
+gem 'calabash-cucumber', :path => '../../../'

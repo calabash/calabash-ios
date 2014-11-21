@@ -2,7 +2,8 @@ language: objective-c
 
 before_script:
   - script/ci/travis/instruments-auth.sh
-  - gem install json
+  - script/ci/travis/install-dot-gemrc.rb
+  - gem install json --no-document
   - gem uninstall -Vax --force --no-abort-on-dependent calabash-cucumber
   - gem uninstall -Vax --force --no-abort-on-dependent run_loop
   - script/ci/travis/clone-and-install-run-loop.rb
@@ -15,7 +16,7 @@ script:
   - if [[ ( ! -z $XTC_API_TOKEN && `ruby -e 'print RUBY_VERSION'` == '2.1.2' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
   - script/ci/travis/install-gem-ci.rb
   - script/ci/travis/rspec-ci.rb
-  - script/ci/travis/cucumber-ci.rb --tags ~@no_ci
+  - script/ci/travis/cucumber-ci.rb
   - script/ci/travis/rake-build-server-ci.rb
 
 rvm:
