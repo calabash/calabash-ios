@@ -90,7 +90,6 @@ module Calabash
         if res.include?(filename)
           raise "expected not to see '#{filename}' in '#{res}'"
         end
-
       end
     end
   end
