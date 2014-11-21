@@ -7,80 +7,51 @@ sims = {}
 if xcode_tools.xcode_version_gte_61?
   sims[:ipad2]     = 'iPad 2 (8.1 Simulator)'
   sims[:ipad2_mid] = 'iPad 2 (7.1 Simulator)'
-  sims[:ipad2_min] = 'iPad 2 (7.0.3 Simulator)'
 
   sims[:air] =     'iPad Air (8.1 Simulator)'
   sims[:air_mid] = 'iPad Air (7.1 Simulator)'
-  sims[:air_min] = 'iPad Air (7.0.3 Simulator)'
 
   sims[:ipad]     = 'iPad Retina (8.1 Simulator)'
   sims[:ipad_mid] = 'iPad Retina (7.1 Simulator)'
-  sims[:ipad_min] = 'iPad Retina (7.0.3 Simulator)'
 
   sims[:iphone4s]     = 'iPhone 4s (8.1 Simulator)'
   sims[:iphone4s_mid] = 'iPhone 4s (7.1 Simulator)'
-  sims[:iphone4s_min] = 'iPhone 4s (7.0.3 Simulator)'
 
   sims[:iphone5s]     = 'iPhone 5s (8.1 Simulator)'
   sims[:iphone5s_mid] = 'iPhone 5s (7.1 Simulator)'
-  sims[:iphone5s_min] = 'iPhone 5s (7.0.3 Simulator)'
 
   sims[:iphone5]     = 'iPhone 5 (8.1 Simulator)'
   sims[:iphone5_mid] = 'iPhone 5 (7.1 Simulator)'
-  sims[:iphone5_min] = 'iPhone 5 (7.0.3 Simulator)'
+
+  sims[:iphone6]     = 'iPhone 6 (8.1 Simulator)'
+  sims[:iphone6plus] = 'iPhone 6 Plus (8.1 Simulator)'
+
   sims[:default]     = 'iPhone 5 (8.1 Simulator)'
 
-elsif xcode_tools.xcode_version_gte_6?
+else
 
   sims[:ipad2]     = 'iPad 2 (8.0 Simulator)'
   sims[:ipad2_mid] = 'iPad 2 (7.1 Simulator)'
-  sims[:ipad2_min] = 'iPad 2 (7.0.3 Simulator)'
 
   sims[:air] =     'iPad Air (8.0 Simulator)'
   sims[:air_mid] = 'iPad Air (7.1 Simulator)'
-  sims[:air_min] = 'iPad Air (7.0.3 Simulator)'
 
   sims[:ipad]     = 'iPad Retina (8.0 Simulator)'
   sims[:ipad_mid] = 'iPad Retina (7.1 Simulator)'
-  sims[:ipad_min] = 'iPad Retina (7.0.3 Simulator)'
 
   sims[:iphone4s]     = 'iPhone 4s (8.0 Simulator)'
   sims[:iphone4s_mid] = 'iPhone 4s (7.1 Simulator)'
-  sims[:iphone4s_min] = 'iPhone 4s (7.0.3 Simulator)'
 
   sims[:iphone5s]     = 'iPhone 5s (8.0 Simulator)'
   sims[:iphone5s_mid] = 'iPhone 5s (7.1 Simulator)'
-  sims[:iphone5s_min] = 'iPhone 5s (7.0.3 Simulator)'
 
   sims[:iphone5]     = 'iPhone 5 (8.0 Simulator)'
   sims[:iphone5_mid] = 'iPhone 5 (7.1 Simulator)'
-  sims[:iphone5_min] = 'iPhone 5 (7.0.3 Simulator)'
+
+  sims[:iphone6]     = 'iPhone 6 (8.0 Simulator)'
+  sims[:iphone6plus] = 'iPhone 6 Plus (8.0 Simulator)'
+
   sims[:default]     = 'iPhone 5 (8.0 Simulator)'
-else
-  sims[:ipad2]     = 'iPad - Simulator - iOS 7.1'
-  sims[:ipad2_mid] = 'iPad - Simulator - iOS 7.0'
-  sims[:ipad2_min] = 'iPad - Simulator - iOS 6.1'
-
-  sims[:air] =     'iPad Retina (64-bit) - Simulator - iOS 7.1'
-  sims[:air_mid] = 'iPad Retina (64-bit) - Simulator - iOS 7.0'
-  sims[:air_min] = 'iPad Retina (64-bit) - Simulator - iOS 7.0'
-
-  sims[:ipad]     = 'iPad Retina - Simulator - iOS 7.1'
-  sims[:ipad_mid] = 'iPad Retina - Simulator - iOS 7.0'
-  sims[:ipad_min] = 'iPad Retina - Simulator - iOS 6.1'
-
-  sims[:iphone4s]     = 'iPhone Retina (3.5-inch) - Simulator - iOS 7.1'
-  sims[:iphone4s_mid] = 'iPhone Retina (3.5-inch) - Simulator - iOS 7.0'
-  sims[:iphone4s_min] = 'iPhone Retina (3.5-inch) - Simulator - iOS 6.1'
-
-  sims[:iphone5s]     = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
-  sims[:iphone5s_mid] = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'
-  sims[:iphone5s_min] = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'
-
-  sims[:iphone5]     = 'iPhone Retina (4-inch) - Simulator - iOS 7.1'
-  sims[:iphone5_mid] = 'iPhone Retina (4-inch) - Simulator - iOS 7.0'
-  sims[:iphone5_min] = 'iPhone Retina (4-inch) - Simulator - iOS 6.1'
-  sims[:default]     = 'iPhone Retina (4-inch) - Simulator - iOS 7.1'
 end
 
 if ENV["USER"] == "jenkins" or ENV['TRAVIS']
@@ -107,26 +78,23 @@ sim61_sl:      -p simulator LAUNCH_VIA=sim_launcher DEVICE_TARGET='iPhone (3.5-i
 simulators:         SIMULATORS="<%= sims %>"
 ipad2:              -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad2] %>"
 ipad2_mid:          -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad2_mid] %>"
-ipad2_min:          -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad2_min] %>"
 
 air:                -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:air] %>"
 air_mid:            -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:air_mid] %>"
-air_min:            -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:air_min] %>"
 
 ipad:               -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad] %>"
 ipad_mid:           -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad_mid] %>"
-ipad_min:           -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad_min] %>"
 
 iphone4s:           -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone4s] %>"
 iphone4s_mid:       -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone4s_mid] %>"
-iphone4s_min:       -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone4s_min] %>"
 
 iphone5:            -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5] %>"
 iphone5_mid:        -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5_mid] %>"
-iphone5_min:        -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5_min] %>"
 
 iphone5s:           -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5s] %>"
 iphone5s_mid:       -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5s_mid] %>"
-iphone5s_min:       -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5s_min] %>"
+
+iphone6:         -p simulator DEVICE_TARGET="<%= sims[:iphone6] %>"
+iphone6plus:     -p simulator DEVICE_TARGET="<%= sims[:iphone6plus] %>"
 
 default:            -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:default] %>"
