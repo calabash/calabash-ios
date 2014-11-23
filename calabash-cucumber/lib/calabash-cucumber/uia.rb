@@ -21,9 +21,11 @@ module Calabash
         raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
         raise ArgumentError, 'please supply :command' unless command
 
-        case run_loop[:uia_strategy]
-          when :preferences
-            res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
+        strategy = run_loop[:uia_strategy]
+        case strategy
+          when :preferences, :shared_element
+            path = strategy == :preferences ? 'uia' : 'uia-shared'
+            res = http({:method => :post, :path => path}, {:command => command}.merge(options))
 
             begin
               res = JSON.parse(res)
@@ -54,7 +56,7 @@ module Calabash
                 raise RuntimeError, "expected '#{status}' to be one of #{candidates}"
             end
           else
-            candidates = [:preferences, :host]
+            candidates = [:preferences, :shared_element, :host]
             raise ArgumentError, "expected '#{run_loop[:uia_strategy]}' to be one of #{candidates}"
         end
       end
