@@ -64,7 +64,15 @@ module Calabash
 
       # @!visibility private
       def uia_wait_tap(query, options={})
-        res = http({:method => :post, :path => 'uia-tap'}, {:query => query}.merge(options))
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        run_loop = launcher && launcher.active? && launcher.run_loop
+        raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
+        raise ArgumentError, 'please supply :command' unless command
+
+        strategy = run_loop[:uia_strategy]
+        path = (strategy == :preferences ? 'uia-tap' : 'uia-tap-shared')
+
+        res = http({:method => :post, :path => path}, {:query => query}.merge(options))
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
           raise "uia-tap action failed because: #{res['reason']}\n#{res['details']}"
