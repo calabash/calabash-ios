@@ -1090,6 +1090,27 @@ module Calabash
       end
 
       # @!visibility private
+      def tail_run_loop_log
+        l = run_loop
+        unless l
+          raise 'Unable to tail run_loop since there is not active run_loop...'
+        end
+        cmd = %Q[osascript -e 'tell application "Terminal" to do script "tail -n 10000 -f #{l[:log_file]} | grep -v \\"Default: \\\\*\\""']
+        raise "Unable to " unless system(cmd)
+      end
+
+      # @!visibility private
+      def dump_run_loop_log
+        l = run_loop
+        unless l
+          raise 'Unable to dump run_loop since there is not active run_loop...'
+        end
+        cmd = %Q[cat "#{l[:log_file]}" | grep -v "Default: \\*\\*\\*"]
+        puts `#{cmd}`
+      end
+
+
+      # @!visibility private
       def query_action_with_options(action, uiquery, options)
         uiquery, options = extract_query_and_options(uiquery, options)
         views_touched = launcher.actions.send(action, options)
