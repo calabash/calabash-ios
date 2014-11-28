@@ -389,8 +389,7 @@ module Calabash
 
       # @!visibility private
       def escape_uia_string(string)
-        #TODO escape '\n in query
-        escape_quotes string
+        escape_string string
       end
 
       # <b>DEPRECATED:</b> Use <tt>uia("...javascript..", options)</tt> instead.
