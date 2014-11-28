@@ -1,6 +1,7 @@
 require 'edn'
 require 'json'
 require 'calabash-cucumber/utils/logging'
+require 'timeout'
 
 module Calabash
   module Cucumber
@@ -259,12 +260,31 @@ module Calabash
       end
 
       # @!visibility private
-      def uia_type_string(string, opt_text_before='', escape=true)
-        if escape && string.index(/\\/)
-          indexes = string.enum_for(:scan, /\\/).map { Regexp.last_match.begin(0) }
-          indexes.reverse.each { |idx| string = string.insert(idx, '\\') }
+      def uia_type_string(string, options = {})
+        default_opts = {:existing_text => '',
+                        :escape_backslashes => true,
+                        :timeout => 10}
+        merged_opts = default_opts.merge(options)
+
+        escape_backslashes = merged_opts[:escape_backslashes]
+        existing_text = merged_opts[:existing_text]
+        timeout = merged_opts[:timeout]
+
+        string_to_type = string.dup
+        if escape_backslashes && string_to_type.index(/\\/)
+          indexes = string_to_type.enum_for(:scan, /\\/).map { Regexp.last_match.begin(0) }
+          indexes.reverse.each { |idx| string = string_to_type.insert(idx, '\\') }
         end
-        result = uia_handle_command(:typeString, string, opt_text_before)
+
+        result = {'status' => 'error',
+                  'value' => 'Does the keyboard have all the characters you are trying to type?'}
+        begin
+           Timeout.timeout(timeout) do
+            result = uia_handle_command(:typeString, string_to_type, existing_text)
+           end
+        rescue Timeout::Error => _
+          raise Timeout::Error, "Timed out typing '#{string}' after #{timeout}s; #{result['value']}"
+        end
 
         # When 'status' == 'success', we get back result['value'].  Sometimes,
         # the 'value' key is not present in the result - in which case we assume

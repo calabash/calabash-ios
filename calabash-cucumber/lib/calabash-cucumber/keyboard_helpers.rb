@@ -328,7 +328,7 @@ module Calabash
             elsif code.eql?(UIA_SUPPORTED_CHARS['Return'])
               tap_keyboard_action_key
             else
-              uia_type_string(code, '')
+              uia_type_string(code)
             end
           end
           # noinspection RubyStringKeysInHashInspection
@@ -360,14 +360,22 @@ module Calabash
 
       # Uses the keyboard to enter text.
       #
-      # @param [String] text the text to type.
-      # @raise [RuntimeError] if the text cannot be typed.
-      def keyboard_enter_text(text)
+      # @param [String] text The text to type.
+      # @param [Hash] options Options for controlling the typing.
+      # @option options :timeout (20) How long to try typing before giving up.
+      #  Only change this value if you have an especially long string to type;
+      #  like a paragraph of text.  Otherwise, use the default value.  Timeouts
+      #  occur when the text contains characters that cannot be found on the
+      #  current keyboard. **Note: this option is only used when using the
+      #  application is launched with instruments.
+      # @raise [RuntimeError] If the text cannot be typed.
+      def keyboard_enter_text(text, options={})
         _ensure_can_enter_text
         if uia_available?
           text_before = _text_from_first_responder()
           text_before = text_before.gsub("\n","\\n") if text_before
-          uia_type_string(text, text_before)
+          uia_type_string(text, {:existing_text => text_before,
+                                 :timeout => options.fetch(:timeout, 10)})
         else
           text.each_char do |ch|
             begin
@@ -398,9 +406,9 @@ module Calabash
         if uia_available?
           run_loop = Calabash::Cucumber::Launcher.launcher.run_loop
           if run_loop[:uia_strategy] == :host
-            uia_type_string "\\\\n", '', false
+            uia_type_string "\\\\n", {:escape_backslashes => false}
           else
-            uia_type_string '\n', '', false
+            uia_type_string '\n', {:escape_backslashes => false}
           end
         else
           keyboard_enter_char 'Return'
