@@ -21,9 +21,11 @@ module Calabash
         raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
         raise ArgumentError, 'please supply :command' unless command
 
-        case run_loop[:uia_strategy]
-          when :preferences
-            res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
+        strategy = run_loop[:uia_strategy]
+        case strategy
+          when :preferences, :shared_element
+            path = strategy == :preferences ? 'uia' : 'uia-shared'
+            res = http({:method => :post, :path => path}, {:command => command}.merge(options))
 
             begin
               res = JSON.parse(res)
@@ -54,7 +56,7 @@ module Calabash
                 raise RuntimeError, "expected '#{status}' to be one of #{candidates}"
             end
           else
-            candidates = [:preferences, :host]
+            candidates = [:preferences, :shared_element, :host]
             raise ArgumentError, "expected '#{run_loop[:uia_strategy]}' to be one of #{candidates}"
         end
       end
@@ -62,7 +64,15 @@ module Calabash
 
       # @!visibility private
       def uia_wait_tap(query, options={})
-        res = http({:method => :post, :path => 'uia-tap'}, {:query => query}.merge(options))
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        run_loop = launcher && launcher.active? && launcher.run_loop
+        raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
+        raise ArgumentError, 'please supply :command' unless command
+
+        strategy = run_loop[:uia_strategy]
+        path = (strategy == :preferences ? 'uia-tap' : 'uia-tap-shared')
+
+        res = http({:method => :post, :path => path}, {:query => query}.merge(options))
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
           raise "uia-tap action failed because: #{res['reason']}\n#{res['details']}"
