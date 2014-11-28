@@ -4,6 +4,39 @@ module Calabash
     # A module of methods that can help you construct queries.
     module QueryHelpers
 
+      # call this method to properly escape strings with single quotes and
+      # black slashes in methods (queries and uia actions)
+      # Calabash iOS has some annoying rules for text containing single quotes,
+      # and even moreso for backslash (\).
+      # This helper frees you from manual escaping.
+      # @example
+      #   quoted = escape_string("Karl's \\ annoying problem")
+      #   # => "Karl\\'s \\\\ annoying problem"
+      # @param {String} str string to escape
+      # @return {String} escaped version of `str`
+      def escape_string(str)
+        escape_quotes(escape_backslashes(str))
+      end
+
+      # call this method to properly escape blackslashes (\) in Calabash methods
+      # (queries and uia actions).
+      # Calabash iOS has some annoying rules for text containing single quotes,
+      # and even moreso for backslash (\).
+      # This helper frees you from manual escaping.
+      # @note
+      #  In ruby it is important to remember that "\\" is a *single character* string containing
+      #  a backslash: \
+      #
+      # @example
+      #   quoted = escape_backslashes("Karl's \\ annoying problem")
+      #   # => "Karl's \\\\ annoying problem"
+      # @param {String} str string to escape
+      # @return {String} escaped version of `str`
+      def escape_backslashes(str)
+        backslash = "\\"
+        str.gsub(backslash, backslash*4)
+      end
+
       # call this method to properly escape single quotes in Calabash queries
       # Calabash iOS has some annoying rules for text containing single quotes.
       # This helper frees you from manual escaping.
