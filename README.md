@@ -36,7 +36,7 @@ For Xamarin users, we recommend the free Xamarin [Calabash component](https://co
 
 For setup with CocoaPods, please follow the excellent [guide from Angel G. Olloqui](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods) and see [example project](https://github.com/calabash/calabash-ios-example).
 
-For using a custom configuration instead of a separate target, please follow the [guide from Jian Fang and David Siegel](http://intuit-engineering.com/?p=44).
+For using a custom configuration instead of a separate target, please follow the [guide from Jian Fang and David Siegel](http://fangmobile.com/2014/05/08/do-you-love-calabash-ios-but-hate-that-cal-second-target/).
 
 The rest of this guide was writting using XCode 5, but should also work for XCode versions >= 4.3.
 
