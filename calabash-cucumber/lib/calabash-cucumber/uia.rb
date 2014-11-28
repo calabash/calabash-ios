@@ -260,10 +260,6 @@ module Calabash
 
       # @!visibility private
       def uia_type_string(string, opt_text_before='', escape=true)
-        if escape && string.index(/\\/)
-          indexes = string.enum_for(:scan, /\\/).map { Regexp.last_match.begin(0) }
-          indexes.reverse.each { |idx| string = string.insert(idx, '\\') }
-        end
         result = uia_handle_command(:typeString, string, opt_text_before)
 
         # When 'status' == 'success', we get back result['value'].  Sometimes,
