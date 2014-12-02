@@ -664,6 +664,10 @@ class Calabash::Cucumber::Launcher
           break
         end
       end
+
+      # -1 for manipulating the launch_args in this method!
+      # This work should not be done here!
+      # @todo Do not modify launch_args in default_uia_strategy method
       if target_device.nil?
         target_device = devices_connected.first
         if target_device
