@@ -14,34 +14,143 @@ describe 'Calabash Launcher' do
 
   describe '.default_uia_strategy' do
     let (:sim_control) { RunLoop::SimControl.new }
-    describe 'returns :preferences when target is' do
-      it 'a simulator' do
-        launch_args = { :device_target => 'simulator' }
-        actual = launcher.default_uia_strategy(launch_args, sim_control)
-        expect(actual).to be == :preferences
+
+    describe 'raises an error when' do
+      it 'DEVICE_TARGET is a simulator, but no such simulator can be found' do
+        expect(sim_control).to receive(:xcode_version_gte_6?).and_return(true)
+        device = RunLoop::Device.new('iPad 2', '7.1.2', '12EE4E79-D561-46D2-9F80-BB7278E4A883')
+        expect(sim_control).to receive(:simulators).and_return([device])
+        launch_args = { :device_target => 'iPhone 4s (7.1.2 Simulator)' }
+        expect { launcher.default_uia_strategy(launch_args, sim_control) }.to raise_error
       end
 
-      it 'an iOS device running iOS < 8.0' do
-        devices = [RunLoop::Device.new('name', '7.1', UDID)]
-        launch_args = { :device_target => UDID }
-        expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return(devices)
-        actual = launcher.default_uia_strategy(launch_args, sim_control)
-        expect(actual).to be == :preferences
-      end
-
-      it 'not found' do
-        launch_args = { :device_target => 'a udid of a device that does not exist' }
-        expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return([])
-        expect {launcher.default_uia_strategy(launch_args, sim_control)}.to raise_error(RuntimeError)
+      it 'DEVICE_TARGET is a device, but no such device can be found' do
+        expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+        #device = RunLoop::Device.new('hat', '7.1.2', 'c272271d6efd8ab3d611d52e5511afe75958f90d')
+        xcode_tools = sim_control.xctools
+        expect(xcode_tools).to receive(:instruments).with(:devices).and_return([])
+        launch_args = { :device_target => 'device' }
+        expect { launcher.default_uia_strategy(launch_args, sim_control) }.to raise_error
       end
     end
 
-    it 'returns :host when target is an iOS device running iOS >= 8.0' do
-      devices = [RunLoop::Device.new('name', '8.0', UDID)]
-      launch_args = { :device_target => UDID }
-      expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return(devices)
-      actual = launcher.default_uia_strategy(launch_args, sim_control)
-      expect(actual).to be == :host
+    describe 'returns :preferences when' do
+      it 'Xcode < 6.0 - not a CoreSimulator environment' do
+        expect(sim_control).to receive(:xcode_version_gte_6?).and_return(false)
+        actual = launcher.default_uia_strategy({}, sim_control)
+        expect(actual).to be == :preferences
+      end
+
+      describe 'Xcode >= 6.0 - DEVICE_TARGET is an iOS < 8 simulator' do
+        it "and DEVICE_TARGET is instruments identifier e.g. 'iPad 2 (7.1 Simulator)'" do
+          expect(sim_control).to receive(:xcode_version_gte_6?).and_return(true)
+          device = RunLoop::Device.new('iPad 2', '7.1.2', '12EE4E79-D561-46D2-9F80-BB7278E4A883')
+          expect(sim_control).to receive(:simulators).and_return([device])
+          launch_args = { :device_target => device.instruments_identifier }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :preferences
+        end
+
+        it "and DEVICE_TARGET is simulator UDID e.g. '12EE4E79-D561-46D2-9F80-BB7278E4A883'" do
+          expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+          device = RunLoop::Device.new('iPhone 4s', '7.1.2', '12EE4E79-D561-46D2-9F80-BB7278E4A883')
+          expect(sim_control).to receive(:simulators).and_return([device])
+          launch_args = { :device_target => device.udid }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :preferences
+        end
+
+        it "and DEVICE_TARGET is a simulator with a custom name e.g. 'my simulator'" do
+          expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+          device = RunLoop::Device.new('my simulator', '7.1.2', '12EE4E79-D561-46D2-9F80-BB7278E4A883')
+          expect(sim_control).to receive(:simulators).and_return([device])
+          launch_args = { :device_target => device.name }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :preferences
+        end
+      end
+
+      describe 'Xcode >= 6.0 - DEVICE_TARGET is an iOS < 8 device' do
+        it 'and DEVICE_TARGET is a device UDID' do
+          expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+          device = RunLoop::Device.new('hat', '7.1.2', 'c272271d6efd8ab3d611d52e5511afe75958f90d')
+          xcode_tools = sim_control.xctools
+          expect(xcode_tools).to receive(:instruments).with(:devices).and_return([device])
+          launch_args = { :device_target => device.udid }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :preferences
+        end
+
+        it "and DEVICE_TARGET == 'device'" do
+          expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+          device = RunLoop::Device.new('hat', '7.1.2', 'c272271d6efd8ab3d611d52e5511afe75958f90d')
+          xcode_tools = sim_control.xctools
+          expect(xcode_tools).to receive(:instruments).with(:devices).and_return([device])
+          launch_args = { :device_target => 'device' }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :preferences
+        end
+      end
+    end
+
+    describe 'returns :shared_element when' do
+      it "Xcode >= 6.0 - DEVICE_TARGET == 'simulator'" do
+        expect(sim_control).to receive(:xcode_version_gte_6?).and_return(true)
+        launch_args = { :device_target => 'simulator' }
+        actual = launcher.default_uia_strategy(launch_args, sim_control)
+        expect(actual).to be == :shared_element
+      end
+
+      describe 'Xcode >= 6.0 - DEVICE_TARGET is an iOS >= 8 simulator' do
+        it "and DEVICE_TARGET is instruments identifier e.g. 'iPad 2 (8.1 Simulator)'" do
+          expect(sim_control).to receive(:xcode_version_gte_6?).and_return(true)
+          device = RunLoop::Device.new('iPad 2', '8.1.2', '12EE4E79-D561-46D2-9F80-BB7278E4A883')
+          expect(sim_control).to receive(:simulators).and_return([device])
+          launch_args = { :device_target => device.instruments_identifier }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :shared_element
+        end
+
+        it "and DEVICE_TARGET is simulator UDID e.g. '12EE4E79-D561-46D2-9F80-BB7278E4A883'" do
+          expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+          device = RunLoop::Device.new('iPhone 4s', '8.1.2', '12EE4E79-D561-46D2-9F80-BB7278E4A883')
+          expect(sim_control).to receive(:simulators).and_return([device])
+          launch_args = { :device_target => device.udid }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :shared_element
+        end
+
+        it "and DEVICE_TARGET is a simulator with a custom name e.g. 'my simulator'" do
+          expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+          device = RunLoop::Device.new('my simulator', '8.1.2', '12EE4E79-D561-46D2-9F80-BB7278E4A883')
+          expect(sim_control).to receive(:simulators).and_return([device])
+          launch_args = { :device_target => device.name }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :shared_element
+        end
+      end
+
+      describe 'Xcode >= 6.0 - DEVICE_TARGET is an iOS >= 8 device' do
+        it 'and DEVICE_TARGET is a device UDID' do
+          expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+          device = RunLoop::Device.new('hat', '8.1.2', 'c272271d6efd8ab3d611d52e5511afe75958f90d')
+          xcode_tools = sim_control.xctools
+          expect(xcode_tools).to receive(:instruments).with(:devices).and_return([device])
+          launch_args = { :device_target => device.udid }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :shared_element
+        end
+
+        it "and DEVICE_TARGET == 'device'" do
+          expect(sim_control).to receive(:xcode_version_gte_6?).at_least(:once).and_return(true)
+          device = RunLoop::Device.new('hat', '8.1.2', 'c272271d6efd8ab3d611d52e5511afe75958f90d')
+          xcode_tools = sim_control.xctools
+          expect(xcode_tools).to receive(:instruments).with(:devices).and_return([device])
+          launch_args = { :device_target => 'device' }
+          actual = launcher.default_uia_strategy(launch_args, sim_control)
+          expect(actual).to be == :shared_element
+        end
+      end
     end
   end
 

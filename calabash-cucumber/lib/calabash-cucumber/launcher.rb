@@ -624,18 +624,38 @@ class Calabash::Cucumber::Launcher
   # @!visibility private
   #
   # Choose the appropriate default UIA strategy based on the test target.
-  #
-  # This is a temporary (I hope) fix for a UIAApplication bug in
-  # setPreferencesValueForKey on iOS 8 devices in Xcode 6 GM.
-  #
-  # rdar://18296714
-  # http://openradar.appspot.com/radar?id=5891145586442240
   def default_uia_strategy(launch_args, sim_control)
-    # Preferences strategy works on Xcode iOS Simulators.
+
+    # For Xcode < 6, use :preferences
+    unless sim_control.xcode_version_gte_6?
+      return :preferences
+    end
+
+    target_udid = launch_args[:device_target]
+
     if RunLoop::Core.simulator_target?(launch_args, sim_control)
-      :preferences
+      # If Xcode >= 6 and simulator, then the default simulator will be iOS 8
+      return :shared_element if target_udid == 'simulator'
+
+      target_simulator = nil
+      sim_control.simulators.each do |device|
+        if [device.instruments_identifier, device.udid, device.name].include? target_udid
+          target_simulator = device
+          break
+        end
+      end
+
+      unless target_simulator
+        raise "Could not find simulator target using the device target: '#{target_udid}'"
+      end
+
+      if target_simulator.version < RunLoop::Version.new('8.0')
+        :preferences
+      else
+        :shared_element
+      end
+
     else
-      target_udid = launch_args[:device_target]
       target_device = nil
       devices_connected = sim_control.xctools.instruments(:devices)
       devices_connected.each do |device|
@@ -653,11 +673,11 @@ class Calabash::Cucumber::Launcher
       unless target_device
         raise 'No device_target was specified and did not detect a connected device. Set a device_target option in the relaunch method.'
       end
-      # Preferences strategy works for iOS < 8.0, but not for iOS >= 8.0.
+
       if target_device.version < RunLoop::Version.new('8.0')
         :preferences
       else
-        :host
+        :shared_element
       end
     end
   end
