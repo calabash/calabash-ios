@@ -144,13 +144,22 @@ module Calabash
       # @param {Array} args_arr array describing the query, e.g., `[:button, {marked:'foo'}]`
       # @param {Array} opts optional arguments specifying a chained sequence of method calls (see example)
       def uia_call(args_arr, *opts)
-        uia_call_method(:queryEl, args_arr, *opts)
+        uia_call_method(:queryEl, [args_arr], *opts)
       end
 
       # Similar to `uia_call` but searches all windows
       # @see #uia_call
       def uia_call_windows(args_arr, *opts)
-        uia_call_method(:queryElWindows, args_arr, *opts)
+        uia_call_method(:queryElWindows, [args_arr], *opts)
+      end
+
+      # Advanced method used for fast keyboard entry by calling the setValue method
+      # on the input with current keyboard focus.
+      # This is an alternative to calling `keyboard_enter_text`
+      #
+      # @param {String} value the value to set
+      def uia_set_responder_value(value)
+        uia_call_method(:elementWithKeyboardFocus, [], setValue: value)
       end
 
       # @!visibility private
@@ -226,6 +235,16 @@ module Calabash
       # @!visibility private
       def uia_swipe_offset(offset, options)
         uia_handle_command(:swipeOffset, offset, options)
+      end
+
+      # @!visibility private
+      def uia_drag_inside(dir, queryparts, options={})
+        uia_call_method(:swipe, [dir, queryparts, options])
+      end
+
+      # @!visibility private
+      def uia_drag_inside_mark(dir, mark, options={})
+        uia_call_method(:swipeMark, [dir, "\"#{mark}\"", options])
       end
 
       # @!visibility private
@@ -323,9 +342,9 @@ module Calabash
       # @!visibility private
       def uia_call_method(cmd, args_arr, *opts)
         if opts.empty?
-          return uia_handle_command(cmd, args_arr)
+          return uia_handle_command(cmd, *args_arr)
         end
-        js_cmd = uia_serialize_command(cmd, args_arr)
+        js_cmd = uia_serialize_command(cmd, *args_arr)
 
         js_args = []
         opts.each do |invocation|
