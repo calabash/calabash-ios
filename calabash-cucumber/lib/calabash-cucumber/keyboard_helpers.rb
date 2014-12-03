@@ -311,7 +311,7 @@ module Calabash
 
         if uia_available?
           if chr.length == 1
-            uia_type_string chr
+            uia_type_string_raw chr
           else
             code = UIA_SUPPORTED_CHARS[chr]
 
@@ -325,10 +325,8 @@ module Calabash
             #           keyboard and not a key
             if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
               uia("uia.keyboard().elements().firstWithName('Delete').tap()")
-            elsif code.eql?(UIA_SUPPORTED_CHARS['Return'])
-              tap_keyboard_action_key
             else
-              uia_type_string(code, '')
+              uia_type_string_raw(code)
             end
           end
           # noinspection RubyStringKeysInHashInspection
@@ -395,16 +393,7 @@ module Calabash
       #
       # @raise [RuntimeError] if the text cannot be typed.
       def tap_keyboard_action_key
-        if uia_available?
-          run_loop = Calabash::Cucumber::Launcher.launcher.run_loop
-          if run_loop[:uia_strategy] == :host
-            uia_type_string "\\\\n", '', false
-          else
-            uia_type_string '\n', '', false
-          end
-        else
-          keyboard_enter_char 'Return'
-        end
+        keyboard_enter_char 'Return'
       end
 
       # @deprecated 0.10.0 replaced with `tap_keyboard_action_key`
