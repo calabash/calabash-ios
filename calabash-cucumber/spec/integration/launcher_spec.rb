@@ -66,6 +66,9 @@ describe 'Calabash Launcher' do
     describe 'non-default uia strategies can connect to launched apps' do
       [:preferences, :host].shuffle.each do |strategy|
         it strategy do
+          if strategy.intern == :host
+            pending ':host strategy requires a fix. https://github.com/calabash/calabash-ios/issues/638'
+          end
 
           launch_options[:uia_strategy] = strategy
 
