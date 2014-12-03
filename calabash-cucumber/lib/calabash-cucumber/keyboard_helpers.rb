@@ -311,7 +311,7 @@ module Calabash
 
         if uia_available?
           if chr.length == 1
-            uia_type_string chr
+            uia_type_string_raw chr
           else
             code = UIA_SUPPORTED_CHARS[chr]
 
