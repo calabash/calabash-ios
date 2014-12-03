@@ -1070,11 +1070,16 @@ module Calabash
       #
       #  to connect to the current launcher
       #
+      # @param [Symbol] uia_strategy Optionally specify the uia strategy, which
+      #   can be one of :shared_element, :preferences, :host.  If you don't
+      #   know which to choose, don't specify one and calabash will try deduce
+      #   the correct strategy to use based on the environment variables used
+      #   when starting the console.
       # @return [Calabash::Cucumber::Launcher,nil] the currently active
       #  calabash launcher
-      def console_attach
+      def console_attach(uia_strategy = nil)
         # setting the @calabash_launcher here for backward compatibility
-        @calabash_launcher = launcher.attach
+        @calabash_launcher = launcher.attach({:uia_strategy => uia_strategy})
       end
 
       # @!visibility private
