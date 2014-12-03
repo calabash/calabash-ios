@@ -288,6 +288,10 @@ module Calabash
         end
       end
 
+      def uia_type_string_raw(str)
+        uia("uia.keyboard().typeString('#{str}')")
+      end
+
       # @!visibility private
       def uia_enter
         uia_handle_command(:enter)
