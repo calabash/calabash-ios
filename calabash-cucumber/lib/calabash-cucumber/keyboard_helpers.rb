@@ -377,6 +377,56 @@ module Calabash
         end
       end
 
+      # @!visibility private
+      #
+      # Enters text into view identified by a query
+      #
+      # @note
+      # *IMPORTANT* enter_text defaults to calling 'setValue' in UIAutomation
+      # on the text field. This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # To force use of `keyboard_enter_text` in `enter_text` use
+      # option :use_keyboard
+      #
+      # @param [String] uiquery the element to enter text into
+      # @param [String] text the text to enter
+      # @param [Hash] options controls details of text entry
+      # @option options [Boolean] :use_keyboard (false) use the iOS keyboard
+      #   to enter each character separately
+      # @option options [Boolean] :wait (true) call wait_for_element_exists with uiquery
+      # @option options [Hash] :wait_options ({}) if :wait pass this as options to wait_for_element_exists
+      def enter_text(uiquery, text, options = {})
+        default_opts = {:use_keyboard => false, :wait => true, :wait_options => {}}
+        options = default_opts.merge(options)
+        wait_for_element_exists(uiquery, options[:wait_options]) if options[:wait]
+        touch(uiquery, options)
+        wait_for_keyboard
+        if options[:use_keyboard]
+          keyboard_enter_text(text)
+        else
+          fast_enter_text(text)
+        end
+      end
+
+      # @!visibility private
+      #
+      # Enters text into current text input field
+      #
+      # @note
+      # *IMPORTANT* fast_enter_text defaults to calling 'setValue' in UIAutomation
+      # on the text field. This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # @param [String] text the text to enter
+      def fast_enter_text(text)
+        _ensure_can_enter_text
+        if uia_available?
+          uia_set_responder_value(text)
+        else
+          keyboard_enter_text(text)
+        end
+      end
+
+
       # Touches the keyboard action key.
       #
       # The action key depends on the keyboard.  Some examples include:
