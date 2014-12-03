@@ -125,9 +125,9 @@ class Calabash::Cucumber::Launcher
       run_loop[:uia_strategy] = merged_options[:uia_strategy]
     else
       if self.device.ios_major_version < '8'
-        run_loop[:uia_strategy] = :preferences
+          run_loop[:uia_strategy] = :preferences
       else
-        run_loop[:uia_strategy] = :host
+        run_loop[:uia_strategy] = :shared_element
       end
     end
 
