@@ -96,7 +96,12 @@ class Calabash::Cucumber::Launcher
   end
 
   # @see Calabash::Cucumber::Core#console_attach
-  def attach(max_retry=1, timeout=10)
+  def attach(options={})
+    default_options = {:max_retry => 1,
+                       :timeout => 10,
+                       :uia_strategy => nil}
+    merged_options = default_options.merge(options)
+
     if calabash_no_launch?
       self.actions= Calabash::Cucumber::PlaybackActions.new
       return
@@ -114,10 +119,10 @@ class Calabash::Cucumber::Launcher
     end
 
     # Sets the device attribute.
-    ensure_connectivity(max_retry, timeout)
+    ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
 
-    if self.device.simulator?
-      run_loop[:uia_strategy] = :preferences
+    if merged_options[:uia_strategy]
+      run_loop[:uia_strategy] = merged_options[:uia_strategy]
     else
       if self.device.ios_major_version < '8'
         run_loop[:uia_strategy] = :preferences
