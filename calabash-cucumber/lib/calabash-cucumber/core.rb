@@ -266,6 +266,14 @@ module Calabash
       #
       # @example
       #   flick("MKMapView", {x:100,y:50})
+      # @note Due to a bug in the iOS Simulator (or UIAutomation on the simulator)
+      #   swiping and other 'advanced' gestures are not supported in certain
+      #   scroll views (e.g. UITableView or UIScrollView). It does work when running
+      #   on physical devices, though, Here is a link to a relevant Stack Overflow post
+      #  http://stackoverflow.com/questions/18792965/uiautomations-draginsidewithoptions-has-no-effect-on-ios7-simulator
+      #   It is not a bug in Calabash itself but rather in UIAutomation and hence we can't just
+      #   fix it. The work around is typically to use the scroll_to_* functions.
+      #
       # @param {String} uiquery query describing view to touch.
       # @param {Hash} delta coordinate describing the direction to flick
       # @param {Hash} options option for modifying the details of the touch.
