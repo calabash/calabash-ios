@@ -163,7 +163,9 @@ module Calabash
             puts "Could not rotate device in direction '#{dir}' with orientation '#{current_orientation} - will do nothing"
           end
         else
-          playback("rotate_#{rotate_cmd}")
+          result = playback("rotate_#{rotate_cmd}")
+          touch(nil,offset:{x:1,y:1})
+          result
         end
       end
 
