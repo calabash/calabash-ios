@@ -90,6 +90,7 @@ module Calabash
           playback(candidate)
           # need a longer sleep for cloud testing
           sleep(0.4)
+          touch(nil,offset:{x:1,y:1})
 
           res = status_bar_orientation
           if res.nil?
