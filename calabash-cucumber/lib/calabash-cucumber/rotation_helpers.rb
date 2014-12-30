@@ -171,7 +171,8 @@ module Calabash
       end
 
       def recalibrate_after_rotation
-        uia_tap_offset(x:0,y:0)
+        #uia_tap_offset(x:0,y:0)
+        uia_query :window
       end
 
 
