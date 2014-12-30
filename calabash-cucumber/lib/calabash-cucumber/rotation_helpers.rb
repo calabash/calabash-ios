@@ -90,7 +90,7 @@ module Calabash
           playback(candidate)
           # need a longer sleep for cloud testing
           sleep(0.4)
-          touch(nil,offset:{x:1,y:1})
+          recalibrate_after_rotation()
 
           res = status_bar_orientation
           if res.nil?
@@ -165,10 +165,15 @@ module Calabash
           end
         else
           result = playback("rotate_#{rotate_cmd}")
-          touch(nil,offset:{x:1,y:1})
+          recalibrate_after_rotation
           result
         end
       end
+
+      def recalibrate_after_rotation
+        uia_tap_offset(x:0,y:0)
+      end
+
 
     end
   end
