@@ -277,6 +277,44 @@ module Calabash
         uia_handle_command(:screenshot, name)
       end
 
+      # Simulates Rotation of the device
+      # @param [String|Symbol] dir The position of the home button after the rotation.
+      #  Can be one of `{'clockwise' | 'counter-clockwise'| :left | :right}`.
+      #
+      def uia_rotate(dir)
+        uia_handle_command(:rotate, dir)
+      end
+
+      # Gets the current orientation of the device
+      # @return {String} the current orientation of the device
+      #   one of `{'portrait', 'portrait-upside-down', 'landscape-left', 'landscape-right', 'faceup', 'facedown' }`
+      def uia_orientation
+        o = uia_handle_command(:orientation).to_s
+        o[1..o.length]
+      end
+
+      # Rotates the home button position to the position indicated by `dir`.
+      # @note Refer to Apple's documentation for clarification about left vs.
+      #  right landscape orientations.
+      # @param [Symbol|String] dir The position of the home button after the rotation.
+      #  Can be one of `{:down, :left, :right, :up }`.
+      def uia_rotate_home_button_to(dir)
+        dir = dir.to_sym
+        uia_orientation = case dir
+                           when :left then
+                             'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT'
+                           when :right then
+                             'UIA_DEVICE_ORIENTATION_LANDSCAPELEFT'
+                           when :up then
+                             'UIA_DEVICE_ORIENTATION_PORTRAIT'
+                           when :down then
+                             'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN'
+                           else
+                             raise "Unexpected direction #{dir}"
+                          end
+        uia("target.setDeviceOrientation(#{uia_orientation})")
+      end
+
       # @!visibility private
       def uia_type_string(string, opt_text_before='', escape=true)
         result = uia_handle_command(:typeString, string, opt_text_before)
