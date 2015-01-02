@@ -300,6 +300,11 @@ module Calabash
       #  Can be one of `{:down, :left, :right, :up }`.
       def uia_rotate_home_button_to(dir)
         dir = dir.to_sym
+        if dir == :top
+          dir = :up
+        elsif dir == :bottom
+          dir = :down
+        end
         uia_orientation = case dir
                            when :left then
                              'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT'
