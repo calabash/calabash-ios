@@ -52,11 +52,6 @@ module Calabash
       #  `:down` regardless of the actual home button position.
       #
       def rotate_home_button_to(dir)
-        if uia_available?
-          uia_rotate_home_button_to(dir)
-          return dir
-        end
-
         dir_sym = dir.to_sym
         if dir_sym.eql?(:top)
           if full_console_logging?
@@ -133,10 +128,6 @@ module Calabash
       # @param [Symbol] dir The position of the home button after the rotation.
       #  Can be one of `{:down | :left | :right | :up }`.
       def rotate(dir)
-        if uia_available?
-          uia_rotate(dir)
-          return dir
-        end
         dir = dir.to_sym
         current_orientation = status_bar_orientation().to_sym
         rotate_cmd = nil
@@ -175,7 +166,6 @@ module Calabash
       end
 
       def recalibrate_after_rotation
-        #uia_tap_offset(x:0,y:0)
         uia_query :window
       end
 
