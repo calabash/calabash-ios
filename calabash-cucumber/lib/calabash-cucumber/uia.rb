@@ -306,9 +306,9 @@ module Calabash
                            when :right then
                              'UIA_DEVICE_ORIENTATION_LANDSCAPELEFT'
                            when :up then
-                             'UIA_DEVICE_ORIENTATION_PORTRAIT'
-                           when :down then
                              'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN'
+                           when :down then
+                             'UIA_DEVICE_ORIENTATION_PORTRAIT'
                            else
                              raise "Unexpected direction #{dir}"
                           end
