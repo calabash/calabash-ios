@@ -11,7 +11,7 @@ module Calabash
     # * The version of the embedded Calabash server.
     # * Whether or not the app is an iPhone-only app that is being emulated on
     #   an iPad.
-    class Device
+    class Device < Calabash::Device
 
       include Calabash::Cucumber::Logging
 
