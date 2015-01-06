@@ -526,6 +526,11 @@ class Calabash::Cucumber::Launcher
     # @todo Use SimControl in Launcher in place of methods like simulator_target?
     args[:sim_control] = RunLoop::SimControl.new
 
+    if args[:app]
+      if !File.exist?(args[:app])
+        raise "Unable to find app bundle at #{args[:app]}. It should be an iOS Simulator build (typically a *.app directory)."
+      end
+    end
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
 

@@ -51,8 +51,6 @@ module Calabash
       #  been completed.  If there is problem rotating, this method will return
       #  `:down` regardless of the actual home button position.
       #
-      # @todo When running under UIAutomation, we should use that API to rotate
-      #  instead of relying on playbacks.
       def rotate_home_button_to(dir)
         dir_sym = dir.to_sym
         if dir_sym.eql?(:top)
@@ -90,6 +88,7 @@ module Calabash
           playback(candidate)
           # need a longer sleep for cloud testing
           sleep(0.4)
+          recalibrate_after_rotation()
 
           res = status_bar_orientation
           if res.nil?
@@ -128,9 +127,6 @@ module Calabash
       #
       # @param [Symbol] dir The position of the home button after the rotation.
       #  Can be one of `{:down | :left | :right | :up }`.
-      #
-      # @todo When running under UIAutomation, we should use that API to rotate
-      #  instead of relying on playbacks.
       def rotate(dir)
         dir = dir.to_sym
         current_orientation = status_bar_orientation().to_sym
@@ -163,9 +159,16 @@ module Calabash
             puts "Could not rotate device in direction '#{dir}' with orientation '#{current_orientation} - will do nothing"
           end
         else
-          playback("rotate_#{rotate_cmd}")
+          result = playback("rotate_#{rotate_cmd}")
+          recalibrate_after_rotation
+          result
         end
       end
+
+      def recalibrate_after_rotation
+        uia_query :window
+      end
+
 
     end
   end

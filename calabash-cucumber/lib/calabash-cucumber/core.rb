@@ -171,6 +171,9 @@ module Calabash
       #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @return {Array<Hash>} array containing the serialized version of the tapped view.
       def touch(uiquery, options={})
+        if uiquery.nil? && options[:offset].nil?
+          raise "called touch(nil) without specifying an offset in options (#{options})"
+        end
         query_action_with_options(:touch, uiquery, options)
       end
 
