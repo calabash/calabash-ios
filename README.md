@@ -18,12 +18,6 @@ This document explains how to install Calabash iOS. For introductory informatio
 
 [Change log](https://github.com/calabash/calabash-ios/tree/master/changelog)
 
-### Failing Travis CI builds
-
-**RESOLVED** ~~Travis updated to Xcode 6 and since then our CI has been failing because the instruments process is popping a Finder dialog requesting permission to 'analyze other processes'.  We are working with the Travis team to resolve this issue.~~
-
-The build queues for Travis are incredibly long at the moment:  6 - 8 hours at times.  This is too long for us to wait for feedback on changes so we are often canceling jobs or merging without waiting for Travis to respond with results.  We have been compensating by doing a lot more local testing and submitting more Jenkins jobs.
-
 # This guide explains how to setup and use Calabash for iOS
 
 Running Calabash requires Mac OSX.  After completing this guide you will be able to run tests locally
@@ -36,7 +30,7 @@ For Xamarin users, we recommend the free Xamarin [Calabash component](https://co
 
 For setup with CocoaPods, please follow the excellent [guide from Angel G. Olloqui](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods) and see [example project](https://github.com/calabash/calabash-ios-example).
 
-For using a custom configuration instead of a separate target, please follow the [guide from Jian Fang and David Siegel](http://intuit-engineering.com/?p=44).
+For using a custom configuration instead of a separate target, please follow the [guide from Jian Fang and David Siegel](http://fangmobile.com/2014/05/08/do-you-love-calabash-ios-but-hate-that-cal-second-target/).
 
 The rest of this guide was writting using XCode 5, but should also work for XCode versions >= 4.3.
 

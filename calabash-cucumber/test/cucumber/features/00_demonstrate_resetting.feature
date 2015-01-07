@@ -63,4 +63,3 @@ Feature:  can persist a keychain item over app restart
   Scenario: 22 The switch should be off because I did reset the app before this Scenario
     Then I should not see the files I put in the sandbox
     Then I should see the switch is off
-

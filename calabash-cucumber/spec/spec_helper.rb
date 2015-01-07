@@ -5,6 +5,7 @@ require 'fileutils'
 require 'tmpdir'
 require 'resources'
 require 'stub_env'
+require 'pry'
 
 include Calabash::Cucumber::Logging
 

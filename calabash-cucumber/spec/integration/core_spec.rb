@@ -28,7 +28,7 @@ describe Calabash::Cucumber::Core do
                     :app => Resources.shared.app_bundle_path(:lp_simple_example),
                     :device_target =>  'simulator',
                     :sim_control => sim_control,
-                    :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+                    :launch_retries => Resources.shared.launch_retries
               }
         launcher.relaunch(options)
         expect(launcher.run_loop).not_to be == nil
@@ -53,7 +53,7 @@ describe Calabash::Cucumber::Core do
                           :app => Resources.shared.app_bundle_path(:lp_simple_example),
                           :device_target => 'simulator',
                           :sim_control => sim_control,
-                          :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+                          :launch_retries => Resources.shared.launch_retries
                     }
               launcher.relaunch(options)
               expect(launcher.run_loop).not_to be == nil
@@ -97,7 +97,7 @@ describe Calabash::Cucumber::Core do
                               :udid => device.udid,
                               :device_target => device.udid,
                               :sim_control => RunLoop::SimControl.new,
-                              :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+                              :launch_retries => Resources.shared.launch_retries
                         }
                   expect { Resources.shared.ideviceinstaller(device.udid, :install) }.to_not raise_error
 
@@ -137,7 +137,7 @@ describe Calabash::Cucumber::Core do
                               :udid => device.udid,
                               :device_target => device.udid,
                               :sim_control => RunLoop::SimControl.new,
-                              :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+                              :launch_retries => Resources.shared.launch_retries
                         }
                   expect { Resources.shared.ideviceinstaller(device.udid, :install) }.to_not raise_error
 

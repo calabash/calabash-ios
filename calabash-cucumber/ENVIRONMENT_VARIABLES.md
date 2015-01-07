@@ -285,13 +285,46 @@ Device UDIDs should be private.  When posting debug output on the web, do not po
 
 ***It is almost always incorrect to set NO_LAUNCH=1.***
 
-Use this control whether or not calabash launches your app.
+Use this to control whether or not calabash launches your app.
 
 If you are testing against iOS >= 7, **you must not set this to 1**; calabash must be allowed to launch your app with instruments to have access to the UIAutomation API.
       
 As of Xcode >= 5.1 there is almost never a good reason to use this variable.  It is only _necessary_ for testing against iOS 5.1.1 which cannot be targeted by instruments.
 
 Once iOS 5.1.1 support is dropped, this variable _will be deprecated._
+
+### `NO_STOP`
+
+Use this to control whether or not calabash will exit your application after the cucumber tests have completed.
+
+Here is an example Cucumber After hook.
+
+```
+After do |scenario|
+  launcher = Calabash::Cucumber::Launcher.new
+  unless launcher.calabash_no_stop?
+    calabash_exit
+    launcher.stop
+  end
+end
+```
+
+If `NO_STOP=1`, then `calabash_exit` and `launcher.stop` will _not_ be called and your application will remain running after Cucumber finishes.  This variable is commonly used with {Calabash::Cucumber::Core#console_attach} to debug failing Scenarios.
+
+#### Pro Tip:  Use NO_STOP=1, console_attach, and the @wip tag to debug failing Scenarios.
+
+When debugging a failing Scenario, use `NO_STOP=1` to prohibit calabash from exiting your application, open a console, call `console_attach`, and explore your application from the command line.
+
+```
+1. Tag your failing Scenario with @wip (Work in Progress).
+2. Run just that Scenario.
+   $ NO_STOP=1 bundle exec cucumber -t @wip
+3. When it fails, the application will remain open.
+4. Open a console and call console_attach
+   $ bundle exec calabash-ios console
+   > console_attach
+5. Perform queries and gestures in the console to figure out why the Scenario failed.
+```
 
 ### `PLAYBACK_DIR`
 
