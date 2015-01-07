@@ -1,31 +1,14 @@
-########################################
-#                                      #
-#       Important Note                 #
-#                                      #
-#   When running calabash-ios tests at #
-#   www.xamarin.com/test-cloud         #
-#   this file will be overwritten by   #
-#   a file which automates             #
-#   app launch on devices.             #
-#                                      #
-#   Don't rely on this file being      #
-#   present when running at            #
-#   Xamarin Test Cloud                 #
-#                                      #
-########################################
-
 require 'calabash-cucumber/launcher'
+require 'singleton'
 
-# noinspection ALL
-module LaunchControl
-  @@launcher = nil
+module Calabash
+  class LaunchControl
+    include Singleton
+    attr_reader :launcher
 
-  def self.launcher
-    @@launcher ||= Calabash::Cucumber::Launcher.new
-  end
-
-  def self.launcher=(launcher)
-    @@launcher = launcher
+    def launcher
+      @launcher ||= Calabash::Cucumber::Launcher.new
+    end
   end
 end
 
@@ -34,7 +17,7 @@ Before('@reset_app_before_hook') do
 end
 
 Before('@reset_simulator_before_hook') do
-  launcher = LaunchControl.launcher
+  launcher = Calabash::LaunchControl.instance.launcher
   if launcher.simulator_target?
     launcher.reset_simulator
   elsif xamarin_test_cloud?
@@ -44,17 +27,21 @@ Before('@reset_simulator_before_hook') do
   end
 end
 
-Before do |scenario|
-  launcher = LaunchControl.launcher
-  unless launcher.calabash_no_launch?
-    launcher.relaunch
-    launcher.calabash_notify(self)
-  end
+Before do |_|
+  launcher = Calabash::LaunchControl.instance.launcher
+  launch_options =
+        {
+              :launch_retries => ENV['TRAVIS'] ? 7 : 2
+        }
+
+  launcher.relaunch(launch_options)
+  launcher.calabash_notify(self)
+
   ENV['RESET_BETWEEN_SCENARIOS'] = '0'
 end
 
-After do |scenario|
-  launcher = LaunchControl.launcher
+After do |_|
+  launcher = Calabash::LaunchControl.instance.launcher
   unless launcher.calabash_no_stop?
     calabash_exit
     if launcher.active?
@@ -64,8 +51,12 @@ After do |scenario|
 end
 
 at_exit do
-  launcher = LaunchControl.launcher
+  launcher = Calabash::LaunchControl.instance.launcher
   if launcher.simulator_target?
-    launcher.simulator_launcher.stop unless launcher.calabash_no_stop?
+    if launcher.calabash_no_stop?
+
+    else
+      launcher.simulator_launcher.stop
+    end
   end
 end

@@ -1,7 +1,5 @@
 require 'edn'
 require 'json'
-# required for ruby 1.8
-require 'enumerator'
 require 'calabash-cucumber/utils/logging'
 
 module Calabash
@@ -23,9 +21,11 @@ module Calabash
         raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
         raise ArgumentError, 'please supply :command' unless command
 
-        case run_loop[:uia_strategy]
-          when :preferences
-            res = http({:method => :post, :path => 'uia'}, {:command => command}.merge(options))
+        strategy = run_loop[:uia_strategy]
+        case strategy
+          when :preferences, :shared_element
+            path = strategy == :preferences ? 'uia' : 'uia-shared'
+            res = http({:method => :post, :path => path}, {:command => command}.merge(options))
 
             begin
               res = JSON.parse(res)
@@ -38,9 +38,25 @@ module Calabash
             end
             res['results'].first
           when :host
-            RunLoop.send_command(run_loop, command)
+            res = RunLoop.send_command(run_loop, command)
+            status = res['status']
+            case status
+              when 'success'
+                res
+              when 'error'
+                value = res['value']
+                if value
+                  msg = "uia action failed because: #{res['value']}"
+                else
+                  msg = 'uia action failed for an unknown reason'
+                end
+                raise msg
+              else
+                candidates = ['success', 'error']
+                raise RuntimeError, "expected '#{status}' to be one of #{candidates}"
+            end
           else
-            candidates = [:preferences, :host]
+            candidates = [:preferences, :shared_element, :host]
             raise ArgumentError, "expected '#{run_loop[:uia_strategy]}' to be one of #{candidates}"
         end
       end
@@ -48,7 +64,15 @@ module Calabash
 
       # @!visibility private
       def uia_wait_tap(query, options={})
-        res = http({:method => :post, :path => 'uia-tap'}, {:query => query}.merge(options))
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        run_loop = launcher && launcher.active? && launcher.run_loop
+        raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
+        raise ArgumentError, 'please supply :command' unless command
+
+        strategy = run_loop[:uia_strategy]
+        path = (strategy == :preferences ? 'uia-tap' : 'uia-tap-shared')
+
+        res = http({:method => :post, :path => path}, {:query => query}.merge(options))
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
           raise "uia-tap action failed because: #{res['reason']}\n#{res['details']}"
@@ -120,13 +144,22 @@ module Calabash
       # @param {Array} args_arr array describing the query, e.g., `[:button, {marked:'foo'}]`
       # @param {Array} opts optional arguments specifying a chained sequence of method calls (see example)
       def uia_call(args_arr, *opts)
-        uia_call_method(:queryEl, args_arr, *opts)
+        uia_call_method(:queryEl, [args_arr], *opts)
       end
 
       # Similar to `uia_call` but searches all windows
       # @see #uia_call
       def uia_call_windows(args_arr, *opts)
-        uia_call_method(:queryElWindows, args_arr, *opts)
+        uia_call_method(:queryElWindows, [args_arr], *opts)
+      end
+
+      # Advanced method used for fast keyboard entry by calling the setValue method
+      # on the input with current keyboard focus.
+      # This is an alternative to calling `keyboard_enter_text`
+      #
+      # @param {String} value the value to set
+      def uia_set_responder_value(value)
+        uia_call_method(:elementWithKeyboardFocus, [], setValue: value)
       end
 
       # @!visibility private
@@ -205,6 +238,16 @@ module Calabash
       end
 
       # @!visibility private
+      def uia_drag_inside(dir, queryparts, options={})
+        uia_call_method(:swipe, [dir, queryparts, options])
+      end
+
+      # @!visibility private
+      def uia_drag_inside_mark(dir, mark, options={})
+        uia_call_method(:swipeMark, [dir, "\"#{mark}\"", options])
+      end
+
+      # @!visibility private
       def uia_pinch(*queryparts)
         uia_handle_command(:pinch, queryparts)
       end
@@ -234,12 +277,51 @@ module Calabash
         uia_handle_command(:screenshot, name)
       end
 
+      # Simulates Rotation of the device
+      # @param [String|Symbol] dir The position of the home button after the rotation.
+      #  Can be one of `{'clockwise' | 'counter-clockwise'| :left | :right}`.
+      #
+      def uia_rotate(dir)
+        uia_handle_command(:rotate, dir)
+      end
+
+      # Gets the current orientation of the device
+      # @return {String} the current orientation of the device
+      #   one of `{'portrait', 'portrait-upside-down', 'landscape-left', 'landscape-right', 'faceup', 'facedown' }`
+      def uia_orientation
+        o = uia_handle_command(:orientation).to_s
+        o[1..o.length]
+      end
+
+      # Rotates the home button position to the position indicated by `dir`.
+      # @note Refer to Apple's documentation for clarification about left vs.
+      #  right landscape orientations.
+      # @param [Symbol|String] dir The position of the home button after the rotation.
+      #  Can be one of `{:down, :left, :right, :up }`.
+      def uia_rotate_home_button_to(dir)
+        dir = dir.to_sym
+        if dir == :top
+          dir = :up
+        elsif dir == :bottom
+          dir = :down
+        end
+        uia_orientation = case dir
+                           when :left then
+                             'UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT'
+                           when :right then
+                             'UIA_DEVICE_ORIENTATION_LANDSCAPELEFT'
+                           when :up then
+                             'UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN'
+                           when :down then
+                             'UIA_DEVICE_ORIENTATION_PORTRAIT'
+                           else
+                             raise "Unexpected direction #{dir}"
+                          end
+        uia("target.setDeviceOrientation(#{uia_orientation})")
+      end
+
       # @!visibility private
       def uia_type_string(string, opt_text_before='', escape=true)
-        if escape && string.index(/\\/)
-          indexes = string.enum_for(:scan, /\\/).map { Regexp.last_match.begin(0) }
-          indexes.reverse.each { |idx| string = string.insert(idx, '\\') }
-        end
         result = uia_handle_command(:typeString, string, opt_text_before)
 
         # When 'status' == 'success', we get back result['value'].  Sometimes,
@@ -266,6 +348,10 @@ module Calabash
         else
           raise "Could not type '#{string}' - UIAutomation returned '#{result}'"
         end
+      end
+
+      def uia_type_string_raw(str)
+        uia("uia.keyboard().typeString('#{str}')")
       end
 
       # @!visibility private
@@ -299,9 +385,9 @@ module Calabash
       # @!visibility private
       def uia_call_method(cmd, args_arr, *opts)
         if opts.empty?
-          return uia_handle_command(cmd, args_arr)
+          return uia_handle_command(cmd, *args_arr)
         end
-        js_cmd = uia_serialize_command(cmd, args_arr)
+        js_cmd = uia_serialize_command(cmd, *args_arr)
 
         js_args = []
         opts.each do |invocation|
@@ -369,8 +455,7 @@ module Calabash
 
       # @!visibility private
       def escape_uia_string(string)
-        #TODO escape '\n in query
-        escape_quotes string
+        escape_string string
       end
 
       # <b>DEPRECATED:</b> Use <tt>uia("...javascript..", options)</tt> instead.

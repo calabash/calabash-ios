@@ -171,6 +171,9 @@ module Calabash
       #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @return {Array<Hash>} array containing the serialized version of the tapped view.
       def touch(uiquery, options={})
+        if uiquery.nil? && options[:offset].nil?
+          raise "called touch(nil) without specifying an offset in options (#{options})"
+        end
         query_action_with_options(:touch, uiquery, options)
       end
 
@@ -266,6 +269,14 @@ module Calabash
       #
       # @example
       #   flick("MKMapView", {x:100,y:50})
+      # @note Due to a bug in the iOS Simulator (or UIAutomation on the simulator)
+      #   swiping and other 'advanced' gestures are not supported in certain
+      #   scroll views (e.g. UITableView or UIScrollView). It does work when running
+      #   on physical devices, though, Here is a link to a relevant Stack Overflow post
+      #  http://stackoverflow.com/questions/18792965/uiautomations-draginsidewithoptions-has-no-effect-on-ios7-simulator
+      #   It is not a bug in Calabash itself but rather in UIAutomation and hence we can't just
+      #   fix it. The work around is typically to use the scroll_to_* functions.
+      #
       # @param {String} uiquery query describing view to touch.
       # @param {Hash} delta coordinate describing the direction to flick
       # @param {Hash} options option for modifying the details of the touch.
@@ -1088,6 +1099,27 @@ module Calabash
         l = Calabash::Cucumber::Launcher.launcher_if_used
         l && l.run_loop
       end
+
+      # @!visibility private
+      def tail_run_loop_log
+        l = run_loop
+        unless l
+          raise 'Unable to tail run_loop since there is not active run_loop...'
+        end
+        cmd = %Q[osascript -e 'tell application "Terminal" to do script "tail -n 10000 -f #{l[:log_file]} | grep -v \\"Default: \\\\*\\""']
+        raise "Unable to " unless system(cmd)
+      end
+
+      # @!visibility private
+      def dump_run_loop_log
+        l = run_loop
+        unless l
+          raise 'Unable to dump run_loop since there is not active run_loop...'
+        end
+        cmd = %Q[cat "#{l[:log_file]}" | grep -v "Default: \\*\\*\\*"]
+        puts `#{cmd}`
+      end
+
 
       # @!visibility private
       def query_action_with_options(action, uiquery, options)

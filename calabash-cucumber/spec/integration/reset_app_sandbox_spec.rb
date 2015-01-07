@@ -45,24 +45,11 @@ module Calabash
 
         # Xcode 6
 
-        # Apple bug.  Cannot launch 7.0.3 simulators.
-        # http://openradar.appspot.com/radar?id=5221532267708416
-        #
-        # Travis CI CoreSimulator environment is not stable. :(
         def random_core_simulator(sim_control)
-          if Resources.shared.travis_ci?
-            ios8 = RunLoop::Version.new('8.0')
-            target_simulator = nil
-            sim_control.simulators.each do |device|
-              if device.name == 'iPad Air' and device.version == ios8
-                target_simulator = device
-              end
-            end
-            target_simulator
-          else
-            min_ios_version = RunLoop::Version.new('7.1')
-            sim_control.simulators.delete_if { |device| device.version < min_ios_version }.sample
-          end
+          min_ios_version = RunLoop::Version.new('7.1')
+          sim_control.simulators.select do |device|
+            device.version >= min_ios_version
+          end.sample
         end
 
         # Should be part of run-loop.
@@ -76,7 +63,7 @@ module Calabash
                 :app => Resources.shared.app_bundle_path(:lp_simple_example),
                 :device_target => target,
                 :sim_control => sim_control,
-                :launch_retries => Resources.shared.travis_ci? ? 5 : 2
+                :launch_retries => Resources.shared.launch_retries
           }
         end
 

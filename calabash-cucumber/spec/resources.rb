@@ -12,6 +12,10 @@ class Resources
     @travis_ci ||= ENV['TRAVIS']
   end
 
+  def launch_retries
+    travis_ci? ? 8 : 2
+  end
+
   def current_xcode_version
     @current_xcode_version ||= lambda {
       ENV.delete('DEVELOPER_DIR')
