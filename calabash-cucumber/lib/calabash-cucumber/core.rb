@@ -832,7 +832,7 @@ module Calabash
       #  calabash console. Call `Calabash::Cucumber::Launcher#relaunch instead.
       # @see Calabash::Cucumber::Launcher#relaunch
       # @return {Calabash::Cucumber::Launcher} the launcher object in use
-      def start_test_server_in_background(args={})
+      def calabash_start_app(args={})
         stop_test_server
         @calabash_launcher = Calabash::Cucumber::Launcher.new()
         @calabash_launcher.relaunch(args)
@@ -1054,7 +1054,7 @@ module Calabash
 
       # @!visibility private
       # @todo broken currently
-      def shutdown_test_server
+      def calabash_stop_app
         # Compat with Calabash Android
         stop_test_server
       end
