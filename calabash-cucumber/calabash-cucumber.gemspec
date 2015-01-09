@@ -65,7 +65,7 @@ Gem::Specification.new do |s|
   s.add_dependency('httpclient', '~> 2.3.3')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
-  s.add_dependency('awesome_print', '~> 1.2.0')
+  s.add_dependency('awesome_print', '~> 1.6')
   s.add_dependency('run_loop', '~> 1.2.1')
 
   s.add_development_dependency 'rake', '~> 10.3'
