@@ -107,6 +107,22 @@ class Calabash::Cucumber::Launcher
       return
     end
 
+    # :host is is a special case and requires reading information from a cache.
+    strategy_from_options = merged_options[:uia_strategy]
+    if strategy_from_options == :host
+      self.run_loop = RunLoop::HostCache.default.read
+      return self
+    end
+
+    # Sets the device attribute.
+    ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
+
+    # The default strategy for iOS 8 devices is :host.
+    if strategy_from_options.nil? && self.device.ios_major_version > '8'
+      self.run_loop = RunLoop::HostCache.default.read
+      return self
+    end
+
     pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
     pids = pids_str.split(',').map { |pid| pid.to_i }
     pid = pids.first
@@ -118,17 +134,10 @@ class Calabash::Cucumber::Launcher
       self.actions= Calabash::Cucumber::PlaybackActions.new
     end
 
-    # Sets the device attribute.
-    ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
-
-    if merged_options[:uia_strategy]
+    if strategy_from_options
       run_loop[:uia_strategy] = merged_options[:uia_strategy]
     else
-      if self.device.ios_major_version < '8'
-        run_loop[:uia_strategy] = :preferences
-      else
-        run_loop[:uia_strategy] = :host
-      end
+      run_loop[:uia_strategy] = :preferences
     end
 
     self.run_loop = run_loop
