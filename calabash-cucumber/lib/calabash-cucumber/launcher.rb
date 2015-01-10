@@ -131,8 +131,8 @@ class Calabash::Cucumber::Launcher
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
       puts "\n\n WARNING \n\n"
       puts 'Warning Trying to connect to simulator that was not launched by Calabash/instruments.'
-      puts 'To fix this you must let Calabash or instruments launch the app'
-      puts 'Continuing... query et al will work.'
+      puts 'To fix this you must let Calabash or instruments launch the app.'
+      puts 'Query will work, but gestures will not.'
       puts "\n\n WARNING \n\n"
       puts 'Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems'
     end
