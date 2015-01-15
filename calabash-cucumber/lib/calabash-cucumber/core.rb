@@ -827,18 +827,6 @@ module Calabash
         res['results'].first
       end
 
-      # Starts the app and Calabash test server in the console.
-      # @note It is not recommended to call this method outside of the
-      #  calabash console. Call `Calabash::Cucumber::Launcher#relaunch instead.
-      # @see Calabash::Cucumber::Launcher#relaunch
-      # @return {Calabash::Cucumber::Launcher} the launcher object in use
-      def calabash_start_app(args={})
-        stop_test_server
-        @calabash_launcher = Calabash::Cucumber::Launcher.new()
-        @calabash_launcher.relaunch(args)
-        @calabash_launcher
-      end
-
       # Helper method to easily create page object instances from a cucumber execution context.
       # The advantage of using `page` to instantiate a page object class is that it
       # will automatically store a reference to the current Cucumber world
