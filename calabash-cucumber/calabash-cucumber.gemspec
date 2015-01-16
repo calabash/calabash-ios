@@ -55,18 +55,15 @@ Gem::Specification.new do |s|
 
   s.add_dependency('cucumber', '~> 1.3.17')
   s.add_dependency('calabash-common', '~> 0.0.1')
-  s.add_dependency('json', '1.8.1')
-  s.add_dependency('edn', '~> 1.0.6')
-  s.add_dependency('CFPropertyList','~> 2.2.8')
+  # Avoid 1.0.5 release; has an errant 'binding.pry'
+  s.add_dependency('edn', '>= 1.0.6', '< 2.0')
   # Avoid 0.5 release because it does not contain ios-sim binary.
   s.add_dependency('sim_launcher', '~> 0.4.13')
   s.add_dependency('slowhandcuke', '~> 0.0.3')
-  s.add_dependency('geocoder', '~>1.1.8')
+  s.add_dependency('geocoder', '>= 1.1.8', '< 2.0')
   # Match the Calabash Android gem.
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
-  s.add_dependency('bundler', '~> 1.3')
-  s.add_dependency('awesome_print', '~> 1.6')
   s.add_dependency('run_loop', '~> 1.2.2')
 
   s.add_development_dependency 'rake', '~> 10.3'
