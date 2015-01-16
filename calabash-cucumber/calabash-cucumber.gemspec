@@ -62,11 +62,12 @@ Gem::Specification.new do |s|
   s.add_dependency('sim_launcher', '~> 0.4.13')
   s.add_dependency('slowhandcuke', '~> 0.0.3')
   s.add_dependency('geocoder', '~>1.1.8')
-  s.add_dependency('httpclient', '~> 2.3.3')
+  # Match the Calabash Android gem.
+  s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
-  s.add_dependency('awesome_print', '~> 1.2.0')
-  s.add_dependency('run_loop', '~> 1.2.0')
+  s.add_dependency('awesome_print', '~> 1.6')
+  s.add_dependency('run_loop', '~> 1.2.3')
 
   s.add_development_dependency 'rake', '~> 10.3'
   s.add_development_dependency 'rspec', '~> 3.0'

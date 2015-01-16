@@ -18,34 +18,58 @@ describe 'Calabash Launcher' do
   end
 
   describe '#attach' do
-    it 'can attach to a running instruments instance' do
-      stub_env('DEVICE_TARGET', nil)
-      sim_control = RunLoop::SimControl.new
-      options =
-            {
-                  :app => Resources.shared.app_bundle_path(:lp_simple_example),
-                  :device_target => 'simulator',
-                  :no_stop => true,
-                  :sim_control => sim_control,
-                  :launch_retries => Resources.shared.launch_retries
-            }
-      launcher.relaunch(options)
-      expect(launcher.run_loop).not_to be == nil
+    before(:each) {   stub_env('DEVICE_TARGET', nil) }
+    let(:launch_options) {
+      {
+            :app => Resources.shared.app_bundle_path(:lp_simple_example),
+            :device_target => 'simulator',
+            :no_stop => true,
+            :sim_control => RunLoop::SimControl.new,
+            :launch_retries => Resources.shared.launch_retries
+      }
+    }
 
-      other_launcher = Calabash::Cucumber::Launcher.new
-      other_launcher.attach
+    let(:other_launcher) { Calabash::Cucumber::Launcher.new }
 
-      expect(other_launcher.run_loop).not_to be nil
-      expect(other_launcher.run_loop[:uia_strategy]).to be == :preferences
-
+    def calabash_console_with_strategy(strategy=nil)
+      if strategy.nil?
+        attach_cmd = 'console_attach'
+      else
+        # Super weird, but we need to force the : here.
+        attach_cmd = "console_attach(:#{strategy})"
+      end
       Open3.popen3('sh') do |stdin, stdout, stderr, _|
         stdin.puts 'bundle exec calabash-ios console <<EOF'
-        stdin.puts 'console_attach'
+        stdin.puts attach_cmd
         stdin.puts "touch 'textField'"
         stdin.puts 'EOF'
         stdin.close
-        expect(stdout.read.strip[/Error/,0]).to be == nil
-        expect(stderr.read.strip).to be == ''
+        yield stdout, stderr
+      end
+    end
+
+    describe 'can connect to launched apps' do
+
+      before(:each) { FileUtils.rm_rf(RunLoop::HostCache.default_directory) }
+
+      [:preferences, :host, :shared_element].shuffle.each do |strategy|
+        it strategy do
+
+          launch_options[:uia_strategy] = strategy
+
+          launcher.relaunch(launch_options)
+          expect(launcher.run_loop).not_to be == nil
+
+          other_launcher.attach({:uia_strategy => strategy})
+
+          expect(other_launcher.run_loop).not_to be nil
+          expect(other_launcher.run_loop[:uia_strategy]).to be == strategy
+
+          calabash_console_with_strategy(strategy) do |stdout, stderr|
+            expect(stdout.read.strip[/Error/,0]).to be == nil
+            expect(stderr.read.strip).to be == ''
+          end
+        end
       end
     end
   end

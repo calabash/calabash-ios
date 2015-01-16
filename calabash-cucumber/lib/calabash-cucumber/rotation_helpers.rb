@@ -15,7 +15,7 @@ module Calabash
            rotate_right_home_down rotate_right_home_left rotate_right_home_right rotate_right_home_up)
       end
 
-      # Rotates the home button position to the position indicated by `dir`.
+      # Rotates the home button to a position relative to the status bar.
       #
       # @example portrait
       #  rotate_home_button_to :down
@@ -47,10 +47,11 @@ module Calabash
       # @param [Symbol] dir The position of the home button after the rotation.
       #  Can be one of `{:down | :left | :right | :up }`.
       #
-      # @return [Symbol] The orientation of the button when all rotations have
-      #  been completed.  If there is problem rotating, this method will return
-      #  `:down` regardless of the actual home button position.
+      # @note A rotation will only occur if your view controller and application
+      #  support the target orientation.
       #
+      # @return [Symbol] The position of the home button relative to the status
+      #  bar when all rotations have been completed.
       def rotate_home_button_to(dir)
         dir_sym = dir.to_sym
         if dir_sym.eql?(:top)
