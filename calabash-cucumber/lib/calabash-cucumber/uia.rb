@@ -72,7 +72,7 @@ module Calabash
         end
 
         unless query
-          raise ArgumentError, "Expected a query argument but found '#{query}'"
+          raise ArgumentError, "Expected a query argument but got '#{query}'"
         end
 
         strategy = run_loop[:uia_strategy]
