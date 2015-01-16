@@ -68,7 +68,7 @@ module Calabash
         run_loop = launcher && launcher.active? && launcher.run_loop
 
         unless run_loop
-          raise ArgumentError, 'The current launcher must be active and be attached to a run_loop'
+          raise 'The current launcher must be active and be attached to a run_loop'
         end
 
         unless query
