@@ -49,6 +49,9 @@ describe 'Calabash Launcher' do
     end
 
     describe 'can connect to launched apps' do
+
+      before(:each) { FileUtils.rm_rf(RunLoop::HostCache.default_directory) }
+
       [:preferences, :host, :shared_element].shuffle.each do |strategy|
         it strategy do
 
