@@ -67,7 +67,7 @@ module Calabash
         launcher = Calabash::Cucumber::Launcher.launcher_if_used
         run_loop = launcher && launcher.active? && launcher.run_loop
         raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
-        raise ArgumentError, 'please supply :command' unless command
+        raise ArgumentError, 'please supply :query' unless query
 
         strategy = run_loop[:uia_strategy]
         path = (strategy == :preferences ? 'uia-tap' : 'uia-tap-shared')
