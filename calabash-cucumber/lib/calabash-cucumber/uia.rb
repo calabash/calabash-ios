@@ -76,7 +76,25 @@ module Calabash
         end
 
         strategy = run_loop[:uia_strategy]
-        path = (strategy == :preferences ? 'uia-tap' : 'uia-tap-shared')
+
+        case strategy
+          when :preferences
+            path = 'uia-tap'
+          when :shared_element
+            path = 'uia-tap-shared'
+          when :host
+            lines = ['wait_tap is not supported when using the :host strategy',
+                     'Please see:',
+                     '',
+                     'https://github.com/calabash/calabash-ios/issues/675',
+                     '',
+                     'for details and workarounds'
+            ]
+
+            raise lines.join("\n")
+          else
+            raise "Unknown UIA strategy '#{strategy}'; expected {:host | :preferences | :shared_element}"
+        end
 
         res = http({:method => :post, :path => path}, {:query => query}.merge(options))
         res = JSON.parse(res)
