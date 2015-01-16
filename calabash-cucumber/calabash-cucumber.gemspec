@@ -64,7 +64,6 @@ Gem::Specification.new do |s|
   # Match the Calabash Android gem.
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
-  s.add_dependency('bundler', '~> 1.3')
   s.add_dependency('run_loop', '~> 1.2.2')
 
   s.add_development_dependency 'rake', '~> 10.3'
