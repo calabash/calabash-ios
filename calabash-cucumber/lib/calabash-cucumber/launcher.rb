@@ -96,10 +96,31 @@ class Calabash::Cucumber::Launcher
   end
 
   # @see Calabash::Cucumber::Core#console_attach
-  def attach(max_retry=1, timeout=10)
+  def attach(options={})
+    default_options = {:max_retry => 1,
+                       :timeout => 10,
+                       :uia_strategy => nil}
+    merged_options = default_options.merge(options)
+
     if calabash_no_launch?
       self.actions= Calabash::Cucumber::PlaybackActions.new
       return
+    end
+
+    # :host is is a special case and requires reading information from a cache.
+    strategy_from_options = merged_options[:uia_strategy]
+    if strategy_from_options == :host
+      self.run_loop = RunLoop::HostCache.default.read
+      return self
+    end
+
+    # Sets the device attribute.
+    ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
+
+    # The default strategy for iOS 8 devices is :host.
+    if strategy_from_options.nil? && self.device.ios_major_version > '8'
+      self.run_loop = RunLoop::HostCache.default.read
+      return self
     end
 
     pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
@@ -113,17 +134,10 @@ class Calabash::Cucumber::Launcher
       self.actions= Calabash::Cucumber::PlaybackActions.new
     end
 
-    # Sets the device attribute.
-    ensure_connectivity(max_retry, timeout)
-
-    if self.device.simulator?
-      run_loop[:uia_strategy] = :preferences
+    if strategy_from_options
+      run_loop[:uia_strategy] = merged_options[:uia_strategy]
     else
-      if self.device.ios_major_version < '8'
-        run_loop[:uia_strategy] = :preferences
-      else
-        run_loop[:uia_strategy] = :host
-      end
+      run_loop[:uia_strategy] = :preferences
     end
 
     self.run_loop = run_loop
