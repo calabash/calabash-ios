@@ -151,6 +151,10 @@ def setup_project(project_name, project_path, path)
     puts "Saved as #{proj_file}.bak"
   end
 
+  # path_to_setup = File.join(File.dirname(__FILE__), 'CalabashSetup')
+  # setup_cmd = %Q[#{path_to_setup} "#{path}" "#{project_name}"]
+  # system(setup_cmd)
+
   initalizer = Calabash::Setup::CBInitializer.new(path)
   initalizer.setup(project_name)
 end

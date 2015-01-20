@@ -92,6 +92,11 @@ module Calabash
 				#Search for existing target
 				target = find_target(defaultProjectName)
 
+				if target.nil?
+					puts "No target was selected. Aborting."
+					return
+				end
+
 				dup_target = Xcodeproj::Project::ProjectHelper.new_target(target.project, :application, "#{target.name}-cal",:ios,
 					target.deployment_target, target.project.products_group)
 
