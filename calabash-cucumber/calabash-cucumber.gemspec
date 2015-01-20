@@ -69,7 +69,7 @@ Gem::Specification.new do |s|
   s.add_dependency('bundler', '~> 1.3')
   # Let run-loop and calabash-android control the version.
   s.add_dependency('awesome_print')
-  s.add_dependency('run_loop', '~> 1.2.5')
+  s.add_dependency('run_loop', '~> 1.2.6')
 
   s.add_development_dependency 'rake', '~> 10.3'
   s.add_development_dependency 'rspec', '~> 3.0'
