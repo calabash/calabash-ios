@@ -55,8 +55,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency('cucumber', '~> 1.3.17')
   s.add_dependency('calabash-common', '~> 0.0.1')
-  s.add_dependency('json', '~> 1.8')
-  s.add_dependency('CFPropertyList','~> 2.2.8')
   # Avoid 1.0.5 release; has an errant 'binding.pry'.
   s.add_dependency('edn', '>= 1.0.6', '< 2.0')
   # Avoid 0.5 release because it does not contain ios-sim binary.
@@ -67,12 +65,15 @@ Gem::Specification.new do |s|
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
-  # Let run-loop and calabash-android control the version.
-  s.add_dependency('awesome_print')
   s.add_dependency('run_loop', '~> 1.2.6')
 
   s.add_development_dependency 'rake', '~> 10.3'
   s.add_development_dependency 'rspec', '~> 3.0'
+  # Shared with run-loop.
+  s.add_dependency('json')
+  s.add_dependency('CFPropertyList')
+  s.add_dependency('awesome_print')
+
   s.add_development_dependency 'yard', '~> 0.8'
   s.add_development_dependency 'redcarpet', '3.2.0'
   s.add_development_dependency 'pry', '~> 0.9'
