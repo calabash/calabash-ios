@@ -62,7 +62,7 @@ Gem::Specification.new do |s|
   # Avoid 0.5 release because it does not contain ios-sim binary.
   s.add_dependency('sim_launcher', '~> 0.4.13')
   s.add_dependency('slowhandcuke', '~> 0.0.3')
-  s.add_dependency('geocoder', '~>1.1.8')
+  s.add_dependency('geocoder', '>= 1.1.8', '< 2.0')
   # Match the Calabash Android gem.
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
