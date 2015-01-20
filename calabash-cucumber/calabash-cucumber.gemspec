@@ -69,6 +69,8 @@ Gem::Specification.new do |s|
   s.add_dependency('bundler', '~> 1.3')
   s.add_dependency('awesome_print', '~> 1.6')
   s.add_dependency('run_loop', '~> 1.2.3')
+  #To manage project
+  s.add_dependency('xcodeproj', '~> 0.21.0')
 
   s.add_development_dependency 'rake', '~> 10.3'
   s.add_development_dependency 'rspec', '~> 3.0'
