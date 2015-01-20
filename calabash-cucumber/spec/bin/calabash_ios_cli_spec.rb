@@ -23,4 +23,20 @@ describe 'Command Line Interface' do
       expect(err).to be == ''
     end
   end
+
+  it 'awesome-print monkey-patch in run-loop is applied' do
+    # Make sure run-loop has the patch applied.
+    Open3.popen3('sh') do |stdin, stdout, stderr, _|
+      stdin.puts 'IRBRC=../scripts/.irbrc bundle exec irb <<EOF'
+      stdin.puts "require 'run_loop'"
+      stdin.puts "foo = RunLoop::Version.new('9.9.9')"
+      stdin.puts 'EOF'
+      stdin.close
+      out = stdout.read.strip
+      err = stderr.read.strip
+      expect(out[/Error: undefined method `major' for/,0]).to be == nil
+      expect(out[/Error:/,0]).to be == nil
+      expect(err).to be == ''
+    end
+  end
 end
