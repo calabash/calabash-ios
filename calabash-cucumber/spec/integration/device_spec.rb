@@ -31,7 +31,7 @@ describe Calabash::Cucumber::Device do
       launcher.device
     end
 
-    describe 'regression' do
+    describe 'regression on simulators' do
       xcode_installs = Resources.shared.supported_xcode_version_paths
       if xcode_installs.empty?
         it 'no alternative versions of Xcode found' do
