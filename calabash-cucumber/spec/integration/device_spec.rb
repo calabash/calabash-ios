@@ -48,7 +48,9 @@ describe Calabash::Cucumber::Device do
             context 'device is an 4in iphone' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
-                if xcode_tools.xcode_version_gte_61?
+                if xcode_tools.xcode_version_gte_62?
+                  'iPhone 5 (8.2 Simulator)'
+                elsif xcode_tools.xcode_version_gte_61?
                   'iPhone 5 (8.1 Simulator)'
                 elsif xcode_tools.xcode_version_gte_6?
                   'iPhone 5 (8.0 Simulator)'
@@ -61,7 +63,9 @@ describe Calabash::Cucumber::Device do
             context 'device is a 3.5" iphone' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
-                if xcode_tools.xcode_version_gte_61?
+                if xcode_tools.xcode_version_gte_62?
+                  'iPhone 4s (8.2 Simulator)'
+                elsif xcode_tools.xcode_version_gte_61?
                   'iPhone 4s (8.1 Simulator)'
                 elsif xcode_tools.xcode_version_gte_6?
                   'iPhone 4s (8.0 Simulator)'
@@ -74,7 +78,9 @@ describe Calabash::Cucumber::Device do
             context 'device is an iphone 6' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
-                if xcode_tools.xcode_version_gte_61?
+                if xcode_tools.xcode_version_gte_62?
+                  'iPhone 6 (8.2 Simulator)'
+                elsif xcode_tools.xcode_version_gte_61?
                   'iPhone 6 (8.1 Simulator)'
                 elsif xcode_tools.xcode_version_gte_6?
                   'iPhone 6 (8.0 Simulator)'
@@ -88,7 +94,9 @@ describe Calabash::Cucumber::Device do
             context 'device is an iphone 6+' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
-                if xcode_tools.xcode_version_gte_61?
+                if xcode_tools.xcode_version_gte_62?
+                  'iPhone 6 Plus (8.2 Simulator)'
+                elsif xcode_tools.xcode_version_gte_61?
                   'iPhone 6 Plus (8.1 Simulator)'
                 elsif xcode_tools.xcode_version_gte_6?
                   'iPhone 6 Plus (8.0 Simulator)'
