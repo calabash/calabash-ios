@@ -85,7 +85,7 @@ describe Calabash::Cucumber::Core do
           else
             physical_devices.each do |device|
               if Resources.shared.incompatible_xcode_ios_version(device.version, xctools.xcode_version)
-                it "Skipping #{device.name} iOS #{device.version} with Xcode #{version} - combination not supported" do
+                it "Skipping #{device.name} iOS #{device.version} with Xcode #{xctools.xcode_version} - combination not supported" do
                   expect(true).to be == true
                 end
               else
