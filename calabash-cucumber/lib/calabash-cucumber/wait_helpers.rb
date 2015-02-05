@@ -48,6 +48,32 @@ module Calabash
             :screenshot_on_error => true
       }
 
+      # Performs the `tap` gesture on the (first) view that matches query `uiquery`.
+      #
+      # As opposed to `touch`, `wait_tap` is a high-level method that combines:
+      #
+      # 1. waiting for the view to appear,
+      # 2. waiting for animations to complete on the view (and it's parents) and
+      # 3. actually tapping the view.
+      #
+      # This removes the common boiler-plate trio: `wait_for_element_exists`,
+      # `wait_for_none_animating`, `touch`.
+      #
+      # By default, taps the center of the view.
+      # @see #touch
+      # @see #tap_point
+      # @param {String} uiquery query describing view to tap. Note `nil` is not allowed.
+      # @param {Hash} options option for modifying the details of the touch
+      # @option options {Hash} :offset (nil) optional offset to tap point. Offset has an `:x` and `:y` key
+      #   the tap will be performed on the center of the view plus the offset.
+      # @option options {Hash} :timeout (30) maximum number of seconds to wait for the view to appear
+      # @option options {Hash} :frequency (0.2) polling frequency to for checking if the view is present (>= 0.1)
+      # @return {Array<Hash>} serialized version of the tapped view
+      def wait_tap(uiquery, options={})
+        wait_for_element_exists(uiquery, options)
+        touch(uiquery, options)
+      end
+
       # Waits for a condition to be true. The condition is specified by a given block that is called repeatedly.
       # If the block returns a 'trueish' value the condition is considered true and
       # `wait_for` immediately returns.
