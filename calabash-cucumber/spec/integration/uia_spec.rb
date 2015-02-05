@@ -27,12 +27,14 @@ describe Calabash::Cucumber::UIA do
       core_instance.wait_for_keyboard
     end
 
-    it "Xcode #{Resources.shared.current_xcode_version} strategy :shared_element" do
-      options[:uia_strategy] = :shared_element
-      launcher.relaunch(options)
-      expect(launcher.run_loop).not_to be == nil
-      core_instance.wait_tap('textField')
-      core_instance.wait_for_keyboard
+    20.times do
+      it "Xcode #{Resources.shared.current_xcode_version} strategy :shared_element" do
+        options[:uia_strategy] = :shared_element
+        launcher.relaunch(options)
+        expect(launcher.run_loop).not_to be == nil
+        core_instance.wait_tap('textField')
+        core_instance.wait_for_keyboard
+      end
     end
 
     it "Xcode #{Resources.shared.current_xcode_version} strategy :host" do
