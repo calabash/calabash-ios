@@ -16,11 +16,6 @@ class Calabash::Cucumber::InstrumentsActions
   end
 
   # @!visibility private
-  def wait_tap(options)
-    uia_wait_tap(options[:query], options)
-  end
-
-  # @!visibility private
   def double_tap(options)
     query_action(options, :uia_double_tap_offset)
   end
