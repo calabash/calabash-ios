@@ -904,7 +904,7 @@ module Calabash
       # The first responder will be the UITextField or UITextView instance
       # that is associated with the visible keyboard.
       #
-      # Teturns empty string if no textField or textView elements are found to be
+      # Returns empty string if no textField or textView elements are found to be
       # the first responder.
       #
       # @raise [RuntimeError] if there is no visible keyboard
