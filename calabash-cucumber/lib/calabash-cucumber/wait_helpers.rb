@@ -56,12 +56,16 @@ module Calabash
       # 2. waiting for animations to complete on the view (and it's parents) and
       # 3. actually tapping the view.
       #
-      # This removes the common boiler-plate trio: `wait_for_element_exists`,
-      # `wait_for_none_animating`, `touch`.
+      # This removes the common boiler-plate duo:
+      #
+      # ```
+      # wait_for_element_exists
+      # wait_for_none_animating
+      # ```
       #
       # By default, taps the center of the view.
-      # @see #touch
-      # @see #tap_point
+      # @see Calabash::Cucumber::Core#touch
+      # @see Calabash::Cucumber::Core#touch_point
       # @param {String} uiquery query describing view to tap. Note `nil` is not allowed.
       # @param {Hash} options option for modifying the details of the touch
       # @option options {Hash} :offset (nil) optional offset to tap point. Offset has an `:x` and `:y` key
