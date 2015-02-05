@@ -44,7 +44,8 @@ describe Calabash::Cucumber::UIA do
       options[:uia_strategy] = :host
       launcher.relaunch(options)
       expect(launcher.run_loop).not_to be == nil
-      expect { core_instance.wait_tap('textField') }.to raise_error RuntimeError
+      core_instance.wait_tap('textField')
+      core_instance.wait_for_keyboard
     end
   end
 end

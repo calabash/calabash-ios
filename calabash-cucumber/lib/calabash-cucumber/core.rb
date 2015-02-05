@@ -210,9 +210,8 @@ module Calabash
       # @option options {Hash} :frequency (0.2) polling frequency to for checking if the view is present (>= 0.1)
       # @return {Array<Hash>} serialized version of the tapped view
       def wait_tap(uiquery, options={})
-        # noinspection RubyUnusedLocalVariable
-        _uiquery, options = extract_query_and_options(uiquery, options)
-        launcher.actions.wait_tap(options)
+        wait_for_element_exists(uiquery, options)
+        touch(uiquery, options)
       end
 
       # Performs the "double tap" gesture on the (first) view that matches query `uiquery`.
