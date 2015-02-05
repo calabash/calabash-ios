@@ -161,7 +161,7 @@ module Calabash
       # If the view is not visible `touch` will fail. If the view is animating
       # `touch` will *silently* fail.
       # By default, taps the center of the view.
-      # @see #wait_tap
+      # @see Calabash::Cucumber::WaitHelpers#wait_tap
       # @see Calabash::Cucumber::Operations#tap_mark
       # @see #tap_point
       # @param {String} uiquery query describing view to tap. Note `nil` is allowed and is interpreted as
@@ -178,7 +178,7 @@ module Calabash
       end
 
       # Performs the `tap` gesture on an absolute coordinate.
-      # @see #wait_tap
+      # @see Calabash::Cucumber::WaitHelpers#wait_tap
       # @see Calabash::Cucumber::Operations#tap_mark
       # @see #touch
       # @param {Numeric} x x-coordinate to tap
