@@ -71,7 +71,7 @@ Use this variable to tell calabash where it can find the the application bundle 
 
 This is only used for simulator testing.  It is ignored when testing on devices.
 
-Calabash can usually automatically set this variable if an Xcode project is located in the directory where you call `calabash-ios console` or `cucumber` from.  If calabash cannot find your 
+Calabash can usually automatically set this variable if an Xcode project is located in the directory where you call `calabash-ios console` or `cucumber` from.
 
 #### Example
 
@@ -82,10 +82,10 @@ APP=./build/calabash/Briar-cal.app cucumber
 ### `BUNDLE_ID`
 
 ***Device testing only***
- 
+
 The bundle identifier of the app you are testing.
 
-When testing against a device this is a _required_ variable.  
+When testing against a device this is a _required_ variable.
 
 Do not set this variable when testing against simulators.
 
@@ -104,7 +104,7 @@ If you are testing iOS >= 7, you cannot use the record/playback API; it is no lo
 **NOTE:** The record/playback API is slated for deprecation.
 
 #### Special
-      
+
 If your app is a iPhone app that is emulated on an iPad, you should use `DEVICE=iphone`.
 
 
@@ -120,13 +120,13 @@ DEVICE=ipad
 Use this variable to enable more verbose logging.
 
 This variable will be deprecated in Xcode 6.0 / Calabash 0.11.0.
-      
+
 ### `CALABASH_IRBRC`
 
 Use this variable to load a custom .irbrc when opening calabash-ios console.  This is useful if you have multiple calabash projects and want to share an .irbrc across all of them.
 
 #### .irbrc load order rules
-     
+
 1. If `CALABASH_IRBRC` is defined, then that .irbrc is loaded.
 2. If there is a .irbrc in the directory where `console` is called, then that file is loaded.
 3. Otherwise, the defaults scripts/.irbrc is loaded.
@@ -144,13 +144,13 @@ $ CALABASH_IRBRC="~/.irbrc-calabash" calabash-ios console
 ### `CALABASH_NO_DEPRECATION`
 
 Calabash deprecation warnings getting you down?  Use this variable to turn off deprecation warnings.
-    
+
 It is not recommended that you turn off deprecation warnings. One morning you will wake up and find that everything is broken; it will make you grumpy.
-     
+
 #### Example
 
 ```
-CALABASH_NO_DEPRECATION=1 cucumber 
+CALABASH_NO_DEPRECATION=1 cucumber
 ```
 
 #### Pro Tip: Read the deprecation warnings.
@@ -165,7 +165,7 @@ Set this variable to `1` to enable verbose logging.
 #### Example
 
 ```
-DEBUG=1 cucumber 
+DEBUG=1 cucumber
 ```
 
 #### Pro Tip: Reduce console spam from third-party gems.
@@ -184,7 +184,7 @@ If you find yourself in the unfortunate position of needing to see more details 
 #### Example
 
 ```
-DEBUG_HTTP=1 cucumber 
+DEBUG_HTTP=1 cucumber
 ```
 
 ### `DEVICE_ENDPOINT`
@@ -226,7 +226,7 @@ A device UDID, simulator name, or CoreSimulator UDID.
 
 When testing against a device this is a _required_ variable.
 
-When testing against simulators on Xcode >= 5.1, use this variable to indicate which simulator to launch. 
+When testing against simulators on Xcode >= 5.1, use this variable to indicate which simulator to launch.
 
 If the `DEVICE_TARGET` is not set, calabash will attempt to discover whether or not you are trying to target a device or a simulator.
 
@@ -242,7 +242,7 @@ If `APP_BUNDLE_PATH` is set, the target is assumed to be a simulator.  These are
 
 #### Defaults: Devices
 
-If `BUNDLE_ID` is set, the target is assumed to be a device.  Calabash will try to discover a connected device.  If you have more than one device connected, you _must_ use the `DEVICE_TARGET` to tell calabash which device to target. 
+If `BUNDLE_ID` is set, the target is assumed to be a device.  Calabash will try to discover a connected device.  If you have more than one device connected, you _must_ use the `DEVICE_TARGET` to tell calabash which device to target.
 
 **Note:** Even if you only have one device connected, we recommend that you _always_ set this variable when targeting a device.
 
@@ -256,7 +256,7 @@ On Xcode < 5.1, this variable was only used when testing against physical device
 DEVICE_TARGET=6c3ed5431b5dfc29758f8a35644b35bd435bdfe2 cucumber
 ```
 
-#### Example: Targeting a simulator.  
+#### Example: Targeting a simulator.
 
 ```
 # Xcode > 6.0 - using a simulator name
@@ -266,7 +266,7 @@ DEVICE_TARGET='iPhone 5s (8.0 Simulator)' cucumber
 DEVICE_TARGET='D619B029-17F3-476C-8ADE-507DD356A27F' cucumber
 
 # 5.1 <= Xcode < 6.0
-DEVICE_TARGET='iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1' cucumber  
+DEVICE_TARGET='iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1' cucumber
 ```
 
 #### Pro Tip: Available devices.
@@ -280,7 +280,7 @@ instruments -s devices
 #### Pro Tip: Device UDIDs should be private.
 
 Device UDIDs should be private.  When posting debug output on the web, do not post un-obscured device UDIDs.
- 
+
 ### `NO_LAUNCH`
 
 ***It is almost always incorrect to set NO_LAUNCH=1.***
@@ -288,7 +288,7 @@ Device UDIDs should be private.  When posting debug output on the web, do not po
 Use this to control whether or not calabash launches your app.
 
 If you are testing against iOS >= 7, **you must not set this to 1**; calabash must be allowed to launch your app with instruments to have access to the UIAutomation API.
-      
+
 As of Xcode >= 5.1 there is almost never a good reason to use this variable.  It is only _necessary_ for testing against iOS 5.1.1 which cannot be targeted by instruments.
 
 Once iOS 5.1.1 support is dropped, this variable _will be deprecated._
@@ -338,9 +338,9 @@ The directory where your recordings can be found.
 2. then features/
 3. then features/playback
 4. finally fall back to the recordings provided by the gem.
-     
+
 **NOTE:** The record/playback API is slated for deprecation.
-    
+
 #### Special
 
 If you are testing iOS >= 7, you cannot use the record/playback API; it is no longer supported by Apple.
@@ -361,7 +361,7 @@ PROJECT_DIR='/path/to/your/app.xcodeproj directory'
 ***The behavior of this variable differs depending on test platform.  Read this carefully.***
 
 Use this variable to reset your app's sandbox between cucumber Scenarios.
-      
+
 Outside of the Xamarin Test Cloud, it is not possible to reset an app's sandbox on physical devices.  The app must be deleted and re-installed.  Calabash cannot delete .ipas from or deploy .ipas to physical devices.
 
 When testing locally on physical devices, this variable is ignored.
@@ -376,7 +376,7 @@ To recap:
 
 Use a `Before` hook + a `tag` to control when calabash will reset the app sandbox.
 
-See this Stack Overflow post: http://stackoverflow.com/questions/24493634/reset-ios-app-in-calabash-ios 
+See this Stack Overflow post: http://stackoverflow.com/questions/24493634/reset-ios-app-in-calabash-ios
 
 ### `SCREENSHOT_PATH`
 
@@ -426,7 +426,7 @@ SDK_VERSION=6.1 cucumber
 
 Using the predefined steps is not recommended; they are provided as a way of introducing BDD concepts, cucumber, gherkin, and calabash.  Every project should cultivate its own vernacular - a shared language
 between developers, clients, and users.
-      
+
 There is an internal debate about whether or not deprecate  the predefined steps.
 
 Outside of the predefined steps, these variable have no effect.
@@ -481,17 +481,17 @@ $ tree -d -L 1 ../../calabash-ios-server
 
 ### `CALABASH_VERSION_PATH`
 
-This variable should be deprecated.  
-  
+This variable should be deprecated.
+
 The http 'version' route.
-         
+
 Unless you are gem or server dev, don't set this.
 
 ### `CONNECT_TIMEOUT` and `MAX_CONNECT_RETRY`
 
 How long to wait for giving up connecting to the embedded calabash server.
 
-Increasing these values will probably not fix the problem you are having. :(      
+Increasing these values will probably not fix the problem you are having. :(
 
 `MAX_CONNECT_RETRY` and `CONNECT_TIMEOUT` are tightly coupled.  The default is try to reconnect once every 3 seconds 10 times for a total of 30 seconds.
 
