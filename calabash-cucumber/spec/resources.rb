@@ -27,6 +27,10 @@ class Resources
     @resources_dir ||= File.expand_path(File.join(File.dirname(__FILE__), 'resources'))
   end
 
+  def irbrc_path
+    @irbrc_path ||= File.expand_path(File.join(File.dirname(__FILE__), '..', 'scripts', '.irbrc'))
+  end
+
   def app_bundle_path(bundle_name)
     case bundle_name
       when :lp_simple_example
