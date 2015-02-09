@@ -24,7 +24,7 @@ class Resources
   end
 
   def resources_dir
-    @resources_dir = File.expand_path(File.join(File.dirname(__FILE__),  'resources'))
+    @resources_dir ||= File.expand_path(File.join(File.dirname(__FILE__), 'resources'))
   end
 
   def app_bundle_path(bundle_name)
