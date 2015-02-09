@@ -1,7 +1,26 @@
 require 'rubygems'
 require 'irb/completion'
 require 'irb/ext/save-history'
-require 'awesome_print'
+
+begin
+  require 'awesome_print'
+rescue LoadError => e
+  msg = ["Caught a LoadError: could not load 'awesome_print'",
+         "#{e}",
+         '',
+         'Use bundler (recommended) or uninstall awesome_print.',
+         '',
+         '# Use bundler (recommended)',
+         '$ bundle update',
+         '$ bundle exec calabash-ios console',
+         '',
+         '# Uninstall',
+         '$ gem update --system',
+         '$ gem uninstall -Vax --force --no-abort-on-dependent awesome_print']
+  puts msg
+  exit(1)
+end
+
 AwesomePrint.irb!
 
 ARGV.concat [ '--readline',
