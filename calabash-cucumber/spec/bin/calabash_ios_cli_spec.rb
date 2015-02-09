@@ -25,7 +25,6 @@ describe 'Command Line Interface' do
   end
 
   it 'awesome-print monkey-patch in run-loop is applied' do
-    # Make sure run-loop has the patch applied.
     Open3.popen3('sh') do |stdin, stdout, stderr, _|
       stdin.puts 'IRBRC=../scripts/.irbrc bundle exec irb <<EOF'
       stdin.puts "require 'run_loop'"
