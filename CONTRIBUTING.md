@@ -7,7 +7,6 @@ If you have question please ask it on one of these channels:
 * [Calabash iOS Google Group](https://groups.google.com/forum/?fromgroups#!forum/calabash-ios)
 * [Stack Overflow with the `#calabash`](http://stackoverflow.com/questions/tagged/calabash).
 
-
 **Please don't cross post.**  The same people are monitoring the forum and Stack Overflow.  Duplicate posts won't get your question answered faster.
 
 When asking a question or filing a bug report, [please follow the guidelines on the Calabash iOS wiki home page](https://github.com/calabash/calabash-ios/wiki#reporting-problems).
@@ -24,6 +23,10 @@ Xamarin has a two additional support channels for you.  If your question or bug 
 
 1. [Post your question on the Xamarin Forums](http://forums.xamarin.com/categories/xamarin-test-cloud).
 2. [mailto:support@example.org](Send and email to support@xamarin.com)
+
+### CI Environments (Travis, Jenkins, Bamboo, Team City)
+
+Questions or problems with Calabash in CI environments cannot be handled in the GitHub Issues.  Please ask CI related questions on the forums or in Stack Overflow.
 
 ## Contributing
 
