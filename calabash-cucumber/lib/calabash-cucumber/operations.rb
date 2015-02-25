@@ -27,6 +27,17 @@ module Calabash
       include Calabash::Cucumber::DatePicker
       include Calabash::Cucumber::IPad
 
+      def self.extended(base)
+        if (class << base; included_modules.map(&:to_s).include?('Cucumber::RbSupport::RbWorld'); end)
+          unless instance_methods.include?(:embed)
+            original_embed = base.method(:embed)
+            define_method(:embed) do |*args|
+              original_embed.call(*args)
+            end
+          end
+        end
+      end
+
     end
   end
 end
