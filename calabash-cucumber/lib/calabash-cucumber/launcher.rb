@@ -604,13 +604,19 @@ class Calabash::Cucumber::Launcher
       end
     end
 
-    # The public API is true/false, but we need to pass a path to a dylib to
-    # run-loop.
-    if args.fetch(:inject_dylib, false)
-      if simulator_target?(args)
-        args[:inject_dylib] = Calabash::Dylibs.path_to_sim_dylib
+    use_dylib = args[:inject_dylib]
+    if use_dylib
+      # User passed a Boolean, not a file.
+      if use_dylib.is_a?(TrueClass)
+        if simulator_target?(args)
+          args[:inject_dylib] = Calabash::Dylibs.path_to_sim_dylib
+        else
+          args[:inject_dylib] = Cucumber::Dylibs.path_to_device_dylib
+        end
       else
-        args[:inject_dylib] = Cucumber::Dylibs.path_to_device_dylib
+        unless File.exist? use_dylib
+          raise "Dylib does not exist at path: '#{use_dylib}'"
+        end
       end
     end
 
