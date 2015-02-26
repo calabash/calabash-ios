@@ -65,7 +65,7 @@ Gem::Specification.new do |s|
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
-  s.add_dependency('run_loop', '~> 1.2.6')
+  s.add_dependency('run_loop', '~> 1.2.7')
 
   # Shared with run-loop.
   s.add_dependency('json')
