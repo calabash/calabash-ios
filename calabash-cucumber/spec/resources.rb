@@ -24,7 +24,11 @@ class Resources
   end
 
   def resources_dir
-    @resources_dir = File.expand_path(File.join(File.dirname(__FILE__),  'resources'))
+    @resources_dir ||= File.expand_path(File.join(File.dirname(__FILE__), 'resources'))
+  end
+
+  def irbrc_path
+    @irbrc_path ||= File.expand_path(File.join(File.dirname(__FILE__), '..', 'scripts', '.irbrc'))
   end
 
   def app_bundle_path(bundle_name)

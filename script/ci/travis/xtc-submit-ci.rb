@@ -26,15 +26,16 @@ Dir.chdir xtc_test_dir do
 
   log_pass("wrote new Gemfile with calabash-version '#{calabash_version}'")
 
-  # On Travis, the XTC api token is _private_ and is available to gem
-  # maintainers.  Pull requests and commits that do not originate from a
+  # On Travis, the XTC api token and user are _private_ and are available to gem
+  # maintainers only.  Pull requests and commits that do not originate from a
   # maintainer skip the XTC step.
   #
-  # Locally, the XTC_API_TOKEN and XTC_DEVICE_SET can be set in a .env file and
-  # accessed with with the dotenv gem, passed on the command line, or exported
-  # to the shell.
+  # Locally, the XTC_API_TOKEN, XTC_DEVICE_SET, and XTC_USER can be set in a
+  # .env file and accessed with with the dotenv gem, passed on the command line,
+  # or exported to the shell.
   #
   # The XCT_API_TOKEN is _private_. The .env should never be committed to git.
+  # There is an example .env file provided.
   #
   # Dotenv is _not_ calabash-cucumber gem dependency - it is installed and used
   # only during testing.
@@ -43,6 +44,7 @@ Dir.chdir xtc_test_dir do
   Dotenv.load if File.exist?('.env')
   token = ENV['XTC_API_TOKEN']
   device_set = ENV['XTC_DEVICE_SET']
+
   unless device_set
     # A collection of device sets that have one iOS 7* device.
     device_set =
@@ -55,6 +57,8 @@ Dir.chdir xtc_test_dir do
           ].sample
   end
 
+  user = ENV['XTC_USER']
+
   if ENV['XTC_WAIT_FOR_RESULTS'] == '0'
     wait_for_results = '--async'
   else
@@ -65,7 +69,8 @@ Dir.chdir xtc_test_dir do
           '-p', 'ci',
           '--series', 'travis-ci-calabash-ios-gem',
           '-d', device_set,
-          wait_for_results]
+          wait_for_results,
+          '--user', user]
 
   ipa = 'chou-cal.ipa'
 
@@ -73,6 +78,6 @@ Dir.chdir xtc_test_dir do
 
   do_system(cmd, {:pass_msg => 'XTC job completed',
                   :fail_msg => 'XTC job failed',
-                  :obscure_fields => [token]})
+                  :obscure_fields => [token, user]})
 end
 
