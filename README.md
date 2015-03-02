@@ -86,7 +86,7 @@ Proceed by reading details about installation below, or moving on to the
 
 We plan on supporting Cocoapods.
 
-Until then, please se this nice article [http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods)
+Until then, please see this nice article [http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods](http://angelolloqui.com/blog/25-Acceptance-testing-with-Calabash-and-CocoaPods)
 by [@angelolloqui](https://twitter.com/angelolloqui).
 
 Manual setup with Xcode
