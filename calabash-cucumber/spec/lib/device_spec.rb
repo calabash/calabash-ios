@@ -16,16 +16,64 @@ describe Calabash::Cucumber::Device do
     end
   end
 
-  describe '#iphone_4in?' do
-    let(:device) { Calabash::Cucumber::Device.new(double('end_point'), version_data) }
-    subject { device.iphone_4in? }
-    context 'when server says it is 4"' do
-      let(:version_data) { Resources.shared.server_version(:simulator).merge({'4inch' => true}) }
-      it { is_expected.to be_truthy }
+  it '#form_factor' do
+    version_data = Resources.shared.server_version(:simulator)
+    device = Calabash::Cucumber::Device.new(double('end_point'), version_data)
+    expect(device.form_factor).to be == 'iphone 4in'
+  end
+
+  describe 'form_factor query methods' do
+    let(:device) {
+      version_data = Resources.shared.server_version(:simulator)
+      Calabash::Cucumber::Device.new(double('end_point'), version_data)
+    }
+
+    describe '#iphone_6?' do
+      it "is true when form factor is 'iphone 6'" do
+        expect(device).to receive(:form_factor).and_return('iphone 6')
+        expect(device.iphone_6?).to be == true
+      end
+
+      it 'is false otherwise' do
+        expect(device).to receive(:form_factor).and_return('any other value')
+        expect(device.iphone_6?).to be == false
+      end
     end
-    context 'when server says it is not 4"' do
-      let(:version_data) { Resources.shared.server_version(:simulator).merge({'4inch' => false}) }
-      it { is_expected.not_to be_truthy }
+
+    describe '#iphone_6_plus?' do
+      it "is true when form factor is 'iphone 6+'" do
+        expect(device).to receive(:form_factor).and_return('iphone 6+')
+        expect(device.iphone_6_plus?).to be == true
+      end
+
+      it 'is false otherwise' do
+        expect(device).to receive(:form_factor).and_return('any other value')
+        expect(device.iphone_6_plus?).to be == false
+      end
+    end
+
+    describe '#iphone_35in?' do
+      it "is true when form factor is 'iphone 3.5in'" do
+        expect(device).to receive(:form_factor).and_return('iphone 3.5in')
+        expect(device.iphone_35in?).to be == true
+      end
+
+      it 'is false otherwise' do
+        expect(device).to receive(:form_factor).and_return('any other value')
+        expect(device.iphone_35in?).to be == false
+      end
+    end
+
+    describe '#iphone_4in?' do
+      it "is true when form factor is 'iphone 4in'" do
+        expect(device).to receive(:form_factor).and_return('iphone 4in')
+        expect(device.iphone_4in?).to be == true
+      end
+
+      it 'is false otherwise' do
+        expect(device).to receive(:form_factor).and_return('any other value')
+        expect(device.iphone_4in?).to be == false
+      end
     end
   end
 end

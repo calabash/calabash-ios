@@ -108,15 +108,17 @@ module Calabash
       # @return [Boolean] `true` if the app under test is emulated
       attr_reader :iphone_app_emulated_on_ipad
 
-      # Indicates whether or not this device has a 4in screen.
-      # @attribute [r] iphone_4in
-      # @return [Boolean] `true` if this device has a 4in screen.
-      attr_reader :iphone_4in
-
-      # @deprecated 0.10.0 no replacement
-      # @!attribute [rw] udid
-      # @return [String] The udid of this device.
-      attr_accessor :udid
+      # The form factor of this device.
+      # @attribute [r] form_factor
+      #
+      # Will be one of:
+      #   * ipad
+      #   * iphone 4in
+      #   * iphone 3.5in
+      #   * iphone 6
+      #   * iphone 6+
+      #   * "" # if no information can be found.
+      attr_reader :form_factor
 
       # For Calabash server version > 0.10.2 provides
       # device specific screen information.
@@ -134,6 +136,17 @@ module Calabash
       # @return [Hash] screen dimensions, scale and down/up sampling fraction.
       attr_reader :screen_dimensions
 
+      # @deprecated 0.13.1 no replacement
+      # Indicates whether or not this device has a 4in screen.
+      # @attribute [r] iphone_4in
+      # @return [Boolean] `true` if this device has a 4in screen.
+      attr_reader :iphone_4in
+
+      # @deprecated 0.10.0 no replacement
+      # @!attribute [rw] udid
+      # @return [String] The udid of this device.
+      attr_accessor :udid
+
       # Creates a new instance of Device.
       #
       # @see Calabash::Cucumber::Core#server_version
@@ -150,7 +163,6 @@ module Calabash
         @ios_version = version_data['iOS_version']
         @server_version = version_data['version']
         @iphone_app_emulated_on_ipad = version_data['iphone_app_emulated_on_ipad']
-        @iphone_4in = version_data['4inch']
         screen_dimensions = version_data['screen_dimensions']
         if screen_dimensions
           @screen_dimensions = {}
@@ -158,6 +170,10 @@ module Calabash
             @screen_dimensions[key.to_sym] = val
           end
         end
+        @form_factor = version_data['form_factor']
+
+        # Deprecated 0.13.0
+        @iphone_4in = version_data['4inch']
       end
 
       # Is this device a simulator or physical device?
@@ -193,17 +209,25 @@ module Calabash
       # Is this device a 4in iPhone?
       # @return [Boolean] true if this device is a 4in iphone
       def iphone_4in?
-        @iphone_4in
+        form_factor == 'iphone 4in'
       end
 
-      # @deprecated 0.9.168 replaced with iphone_4in?
-      # @see #iphone_4in?
-      # Is this device an iPhone 5?
-      # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
-      # @return [Boolean] true if this device is an iPhone 5
-      def iphone_5?
-        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
-        iphone_4in?
+      # Is this device an iPhone 6?
+      # @return [Boolean] true if this device is an iPhone 6
+      def iphone_6?
+        form_factor == 'iphone 6'
+      end
+
+      # Is this device an iPhone 6+?
+      # @return [Boolean] true if this device is an iPhone 6+
+      def iphone_6_plus?
+        form_factor == 'iphone 6+'
+      end
+
+      # Is this device an iPhone 3.5in?
+      # @return [Boolean] true if this device is an iPhone 3.5in?
+      def iphone_35in?
+        form_factor == 'iphone 3.5in'
       end
 
       # @!visibility private
@@ -288,6 +312,25 @@ module Calabash
       def udid=(value)
         _deprecated('0.10.0', 'no replacement', :warn)
         @udid = value
+      end
+
+      # @deprecated 0.9.168 replaced with iphone_4in?
+      # @see #iphone_4in?
+      # Is this device an iPhone 5?
+      # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
+      # @return [Boolean] true if this device is an iPhone 5
+      def iphone_5?
+        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
+        iphone_4in?
+      end
+
+      # @deprecated 0.13.1 - Call `iphone_4in?` instead.
+      # @see #iphone_4in?
+      # @note Deprecated after introducing new `form_factor` behavior.
+      # @return [Boolean] true if this device is an iPhone 5 or 5s
+      def iphone_4in
+        _deprecated('0.13.1', "use 'iphone_4in?' instead", :warn)
+        @iphone_4in
       end
     end
   end
