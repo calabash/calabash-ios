@@ -102,6 +102,27 @@ module Calabash
         _default_device_or_create().iphone_4in?
       end
 
+      # Is this device an iPhone 6?
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if this device is an iPhone 6
+      def iphone_6?
+        _default_device_or_create.iphone_6?
+      end
+
+      # Is this device an iPhone 6+?
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if this device is an iPhone 6+
+      def iphone_6_plus?
+        _default_device_or_create.iphone_6_plus?
+      end
+
+      # Is this device an iPhone 3.5in?
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if this device is an iPhone 3.5in?
+      def iphone_35in?
+        _default_device_or_create.iphone_35in?
+      end
+
       # Is the device under test running iOS 5?
       #
       # @note
