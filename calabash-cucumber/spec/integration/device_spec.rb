@@ -62,6 +62,7 @@ describe Calabash::Cucumber::Device do
               }
               it { is_expected.to be == 'iphone 4in' }
             end
+
             context 'device is a 3.5" iphone' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
@@ -74,6 +75,7 @@ describe Calabash::Cucumber::Device do
               }
               it { is_expected.to be == 'iphone 3.5in' }
             end
+
             context 'device is an iphone 6' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
@@ -87,6 +89,7 @@ describe Calabash::Cucumber::Device do
               }
               it { is_expected.to be == 'iphone 6' if device_target }
             end
+
             context 'device is an iphone 6+' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
