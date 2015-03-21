@@ -209,6 +209,24 @@ module Calabash
         @iphone_4in
       end
 
+      # Is this device an iPhone 6?
+      # @return [Boolean] true if this device is an iPhone 6
+      def iphone_6?
+        form_factor == 'iphone 6'
+      end
+
+      # Is this device an iPhone 6+?
+      # @return [Boolean] true if this device is an iPhone 6+
+      def iphone_6_plus?
+        form_factor == 'iphone 6+'
+      end
+
+      # Is this device an iPhone 3.5in?
+      # @return [Boolean] true if this device is an iPhone 3.5in?
+      def iphone_35in?
+        form_factor == 'iphone 3.5in'
+      end
+
       # @deprecated 0.9.168 replaced with iphone_4in?
       # @see #iphone_4in?
       # Is this device an iPhone 5?
