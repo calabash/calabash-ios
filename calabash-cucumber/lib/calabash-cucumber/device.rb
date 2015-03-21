@@ -209,7 +209,7 @@ module Calabash
       # Is this device a 4in iPhone?
       # @return [Boolean] true if this device is a 4in iphone
       def iphone_4in?
-        @iphone_4in
+        form_factor == 'iphone 4in'
       end
 
       # Is this device an iPhone 6?
