@@ -28,4 +28,11 @@ describe Calabash::Cucumber::Device do
       it { is_expected.not_to be_truthy }
     end
   end
+
+  it '#form_factor' do
+    version_data = Resources.shared.server_version(:simulator)
+    device = Calabash::Cucumber::Device.new(double('end_point'), version_data)
+    expect(device.form_factor).to be == 'iphone 4in'
+  end
+
 end

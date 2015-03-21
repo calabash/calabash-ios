@@ -110,7 +110,8 @@ class Resources
               },
               'iOS_version' => '7.1',
               'system' => 'x86_64',
-              'simulator' => 'CoreSimulator 110.2 - Device: iPhone 5 - Runtime: iOS 7.1 (11D167) - DeviceType: iPhone 5'
+              'simulator' => 'CoreSimulator 110.2 - Device: iPhone 5 - Runtime: iOS 7.1 (11D167) - DeviceType: iPhone 5',
+              'form_factor' => 'iphone 4in'
         }
       else
         raise "expected '#{device_or_simulator}' to be one of #{[:simulator, :device]}"

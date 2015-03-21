@@ -118,6 +118,18 @@ module Calabash
       # @return [String] The udid of this device.
       attr_accessor :udid
 
+      # The form factor of this device.
+      # @attribute [r] form_factor
+      #
+      # Will be one of:
+      #   * ipad
+      #   * iphone 4in
+      #   * iphone 3.5in
+      #   * iphone 6
+      #   * iphone 6+
+      #   * "" # if no information can be found.
+      attr_reader :form_factor
+
       # For Calabash server version > 0.10.2 provides
       # device specific screen information.
       #
@@ -158,6 +170,7 @@ module Calabash
             @screen_dimensions[key.to_sym] = val
           end
         end
+        @form_factor = version_data['form_factor']
       end
 
       # Is this device a simulator or physical device?
