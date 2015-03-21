@@ -230,16 +230,6 @@ module Calabash
         form_factor == 'iphone 3.5in'
       end
 
-      # @deprecated 0.9.168 replaced with iphone_4in?
-      # @see #iphone_4in?
-      # Is this device an iPhone 5?
-      # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
-      # @return [Boolean] true if this device is an iPhone 5
-      def iphone_5?
-        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
-        iphone_4in?
-      end
-
       # @!visibility private
       def version_hash (version_str)
         tokens = version_str.split(/[,.]/)
@@ -322,6 +312,16 @@ module Calabash
       def udid=(value)
         _deprecated('0.10.0', 'no replacement', :warn)
         @udid = value
+      end
+
+      # @deprecated 0.9.168 replaced with iphone_4in?
+      # @see #iphone_4in?
+      # Is this device an iPhone 5?
+      # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
+      # @return [Boolean] true if this device is an iPhone 5
+      def iphone_5?
+        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
+        iphone_4in?
       end
     end
   end
