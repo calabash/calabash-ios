@@ -37,6 +37,19 @@ describe Calabash::Cucumber::Device do
               stub_env('DEVELOPER_DIR', developer_dir)
             end
 
+            context 'device is an ipad' do
+              let(:device_target) {
+                xcode_tools = RunLoop::XCTools.new
+                version = xcode_tools.xcode_version
+                if xcode_tools.xcode_version_gte_6?
+                  Resources.shared.core_simulator_for_xcode_version('iPad', 'Retina', version)
+                else
+                  'iPad Retina (64-bit) - Simulator - iOS 7.1'
+                end
+              }
+              it { is_expected.to be == 'ipad' }
+            end
+
             context 'device is an 4in iphone' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
