@@ -136,7 +136,7 @@ module Calabash
       # @return [Hash] screen dimensions, scale and down/up sampling fraction.
       attr_reader :screen_dimensions
 
-      # @deprecated 0.13.0 no replacement
+      # @deprecated 0.13.1 no replacement
       # Indicates whether or not this device has a 4in screen.
       # @attribute [r] iphone_4in
       # @return [Boolean] `true` if this device has a 4in screen.
@@ -322,6 +322,15 @@ module Calabash
       def iphone_5?
         _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
         iphone_4in?
+      end
+
+      # @deprecated 0.13.1 - Call `iphone_4in?` instead.
+      # @see #iphone_4in?
+      # @note Deprecated after introducing new `form_factor` behavior.
+      # @return [Boolean] true if this device is an iPhone 5 or 5s
+      def iphone_4in
+        _deprecated('0.13.1', "use 'iphone_4in?' instead", :warn)
+        @iphone_4in
       end
     end
   end
