@@ -56,68 +56,68 @@ module Calabash
 
       # Is the device under test an iPad?
       #
-      # @raise [RuntimeError] if the server cannot be reached
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if device under test is an iPad.
       def ipad?
-        _default_device_or_create().ipad?
+        _default_device_or_create.ipad?
       end
 
       # Is the device under test an iPhone?
       #
-      # @raise [RuntimeError] if the server cannot be reached
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if device under test is an iPhone.
       def iphone?
-        _default_device_or_create().iphone?
+        _default_device_or_create.iphone?
       end
 
       # Is the device under test an iPod?
       #
-      # @raise [RuntimeError] if the server cannot be reached
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if device under test is an iPod.
       def ipod?
-        _default_device_or_create().ipod?
+        _default_device_or_create.ipod?
       end
 
       # Is the device under test an iPhone or iPod?
       #
-      # @raise [RuntimeError] if the server cannot be reached
-      # @return [Boolean] true if device under test is an iPhone or iPod.
+      # @raise [RuntimeError] If the server cannot be reached.
+      # @return [Boolean] true If device under test is an iPhone or iPod.
       def device_family_iphone?
         iphone? or ipod?
       end
 
       # Is the device under test a simulator?
       #
-      # @raise [RuntimeError] if the server cannot be reached
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if device under test is a simulator.
       def simulator?
-        _default_device_or_create().simulator?
+        _default_device_or_create.simulator?
       end
 
-      # Does the device under test have 4in screen?
+      # Is the device under test have a 4 inch screen?
       #
-      # @raise [RuntimeError] if the server cannot be reached
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if device under test has a 4in screen.
       def iphone_4in?
-        _default_device_or_create().iphone_4in?
+        _default_device_or_create.iphone_4in?
       end
 
-      # Is this device an iPhone 6?
-      # @raise [RuntimeError] if the server cannot be reached
+      # Is the device under test an iPhone 6.
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if this device is an iPhone 6
       def iphone_6?
         _default_device_or_create.iphone_6?
       end
 
-      # Is this device an iPhone 6+?
-      # @raise [RuntimeError] if the server cannot be reached
+      # Is the device under test an iPhone 6+?
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if this device is an iPhone 6+
       def iphone_6_plus?
         _default_device_or_create.iphone_6_plus?
       end
 
-      # Is this device an iPhone 3.5in?
-      # @raise [RuntimeError] if the server cannot be reached
+      # Is the device under test an iPhone 3.5in?
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if this device is an iPhone 3.5in?
       def iphone_35in?
         _default_device_or_create.iphone_35in?
@@ -184,10 +184,10 @@ module Calabash
       #
       # @see Calabash::Cucumber::IPad
       #
-      # @raise [RuntimeError] if the server cannot be reached
+      # @raise [RuntimeError] If the server cannot be reached.
       # @return [Boolean] true if app is being emulated on an iPad.
       def iphone_app_emulated_on_ipad?
-        _default_device_or_create().iphone_app_emulated_on_ipad?
+        _default_device_or_create.iphone_app_emulated_on_ipad?
       end
 
       # @deprecated 0.9.168 replaced with `iphone_4in?`
