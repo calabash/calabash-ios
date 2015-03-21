@@ -10,7 +10,7 @@ describe Calabash::Cucumber::Device do
 
   let(:endpoint) { 'http://localhost:37265' }
 
-  describe '#iphone_4in?' do
+  describe '#form_factor' do
     let(:device)  do
       options = {
             :app => Resources.shared.app_bundle_path(:lp_simple_example),
@@ -30,7 +30,7 @@ describe Calabash::Cucumber::Device do
           expect(true).to be == true
         end
       else
-        subject { device.iphone_4in? }
+        subject { device.form_factor }
         xcode_installs.each do |developer_dir|
           context "#{developer_dir}" do
             before do
@@ -47,7 +47,7 @@ describe Calabash::Cucumber::Device do
                   'iPhone Retina (4-inch) - Simulator - iOS 7.1'
                 end
               }
-              it { should be == true }
+              it { is_expected.to be == 'iphone 4in' }
             end
             context 'device is a 3.5" iphone' do
               let(:device_target) {
@@ -59,7 +59,7 @@ describe Calabash::Cucumber::Device do
                   'iPhone Retina (3.5-inch) - Simulator - iOS 7.1'
                 end
               }
-              it { should be == false }
+              it { is_expected.to be == 'iphone 3.5in' }
             end
             context 'device is an iphone 6' do
               let(:device_target) {
@@ -72,7 +72,7 @@ describe Calabash::Cucumber::Device do
                   nil
                 end
               }
-              it { should be == false if device_target }
+              it { is_expected.to be == 'iphone 6' if device_target }
             end
             context 'device is an iphone 6+' do
               let(:device_target) {
@@ -85,7 +85,7 @@ describe Calabash::Cucumber::Device do
                   nil
                 end
               }
-              it { should be == false if device_target }
+              it { is_expected.to be == 'iphone 6+' if device_target }
             end
           end
         end
