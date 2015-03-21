@@ -13,7 +13,7 @@ describe Calabash::Cucumber::EnvironmentHelpers do
   let(:endpoint) { 'http://localhost:37265' }
   let(:test_obj) { Calabash::RspecTests::EnvironmentHelpers::TestObject.new }
 
-  describe 'ios8?' do
+  describe '.ios8?' do
     let(:simulator_data) { Resources.shared.server_version :simulator }
 
     it 'returns true when device under test is iOS 8' do
