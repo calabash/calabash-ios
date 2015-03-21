@@ -108,11 +108,6 @@ module Calabash
       # @return [Boolean] `true` if the app under test is emulated
       attr_reader :iphone_app_emulated_on_ipad
 
-      # Indicates whether or not this device has a 4in screen.
-      # @attribute [r] iphone_4in
-      # @return [Boolean] `true` if this device has a 4in screen.
-      attr_reader :iphone_4in
-
       # @deprecated 0.10.0 no replacement
       # @!attribute [rw] udid
       # @return [String] The udid of this device.
@@ -146,6 +141,12 @@ module Calabash
       # @return [Hash] screen dimensions, scale and down/up sampling fraction.
       attr_reader :screen_dimensions
 
+      # @deprecated 0.13.0 no replacement
+      # Indicates whether or not this device has a 4in screen.
+      # @attribute [r] iphone_4in
+      # @return [Boolean] `true` if this device has a 4in screen.
+      attr_reader :iphone_4in
+
       # Creates a new instance of Device.
       #
       # @see Calabash::Cucumber::Core#server_version
@@ -162,7 +163,6 @@ module Calabash
         @ios_version = version_data['iOS_version']
         @server_version = version_data['version']
         @iphone_app_emulated_on_ipad = version_data['iphone_app_emulated_on_ipad']
-        @iphone_4in = version_data['4inch']
         screen_dimensions = version_data['screen_dimensions']
         if screen_dimensions
           @screen_dimensions = {}
@@ -171,6 +171,9 @@ module Calabash
           end
         end
         @form_factor = version_data['form_factor']
+
+        # Deprecated 0.13.0
+        @iphone_4in = version_data['4inch']
       end
 
       # Is this device a simulator or physical device?
