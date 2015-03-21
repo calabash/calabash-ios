@@ -1,21 +1,13 @@
 describe Calabash::Cucumber::Device do
 
   before(:example) do
-    ENV.delete('DEVELOPER_DIR')
-    ENV.delete('DEBUG')
-    ENV.delete('DEBUG_UNIX_CALLS')
     RunLoop::SimControl.terminate_all_sims
   end
 
   after(:example) {
-    ENV.delete('DEVELOPER_DIR')
-    ENV.delete('DEBUG')
-    ENV.delete('DEBUG_UNIX_CALLS')
     RunLoop::SimControl.terminate_all_sims
   }
 
-  # noinspection RubyStringKeysInHashInspection
-  let(:simulator_data) { Resources.shared.server_version :simulator }
   let(:endpoint) { 'http://localhost:37265' }
 
   describe '#iphone_4in?' do
@@ -42,18 +34,15 @@ describe Calabash::Cucumber::Device do
         xcode_installs.each do |developer_dir|
           context "#{developer_dir}" do
             before do
-              ENV['DEVELOPER_DIR'] = developer_dir
+              stub_env('DEVELOPER_DIR', developer_dir)
             end
 
             context 'device is an 4in iphone' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
-                if xcode_tools.xcode_version_gte_62?
-                  'iPhone 5 (8.2 Simulator)'
-                elsif xcode_tools.xcode_version_gte_61?
-                  'iPhone 5 (8.1 Simulator)'
-                elsif xcode_tools.xcode_version_gte_6?
-                  'iPhone 5 (8.0 Simulator)'
+                version = xcode_tools.xcode_version
+                if xcode_tools.xcode_version_gte_6?
+                  Resources.shared.core_simulator_for_xcode_version('iPhone', '5', version)
                 else
                   'iPhone Retina (4-inch) - Simulator - iOS 7.1'
                 end
@@ -63,12 +52,9 @@ describe Calabash::Cucumber::Device do
             context 'device is a 3.5" iphone' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
-                if xcode_tools.xcode_version_gte_62?
-                  'iPhone 4s (8.2 Simulator)'
-                elsif xcode_tools.xcode_version_gte_61?
-                  'iPhone 4s (8.1 Simulator)'
-                elsif xcode_tools.xcode_version_gte_6?
-                  'iPhone 4s (8.0 Simulator)'
+                version = xcode_tools.xcode_version
+                if xcode_tools.xcode_version_gte_6?
+                  Resources.shared.core_simulator_for_xcode_version('iPhone', '4s', version)
                 else
                   'iPhone Retina (3.5-inch) - Simulator - iOS 7.1'
                 end
@@ -78,12 +64,9 @@ describe Calabash::Cucumber::Device do
             context 'device is an iphone 6' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
-                if xcode_tools.xcode_version_gte_62?
-                  'iPhone 6 (8.2 Simulator)'
-                elsif xcode_tools.xcode_version_gte_61?
-                  'iPhone 6 (8.1 Simulator)'
-                elsif xcode_tools.xcode_version_gte_6?
-                  'iPhone 6 (8.0 Simulator)'
+                version = xcode_tools.xcode_version
+                if xcode_tools.xcode_version_gte_6?
+                  Resources.shared.core_simulator_for_xcode_version('iPhone', '6', version)
                 else
                   # iPhone 6 does not exist on Xcode < 6
                   nil
@@ -94,12 +77,9 @@ describe Calabash::Cucumber::Device do
             context 'device is an iphone 6+' do
               let(:device_target) {
                 xcode_tools = RunLoop::XCTools.new
-                if xcode_tools.xcode_version_gte_62?
-                  'iPhone 6 Plus (8.2 Simulator)'
-                elsif xcode_tools.xcode_version_gte_61?
-                  'iPhone 6 Plus (8.1 Simulator)'
-                elsif xcode_tools.xcode_version_gte_6?
-                  'iPhone 6 Plus (8.0 Simulator)'
+                version = xcode_tools.xcode_version
+                if xcode_tools.xcode_version_gte_6?
+                  Resources.shared.core_simulator_for_xcode_version('iPhone', '6 Plus', version)
                 else
                   # iPhone 6 does not exist on Xcode < 6
                   nil

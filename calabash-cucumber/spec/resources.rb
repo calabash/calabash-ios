@@ -23,6 +23,21 @@ class Resources
     }.call
   end
 
+  def core_simulator_for_xcode_version(idiom, form_factor, xcode_version)
+    if xcode_version < RunLoop::Version.new('6.1')
+      ios_version = '8.0'
+    elsif xcode_version < RunLoop::Version.new('6.2')
+      ios_version = '8.1'
+    elsif xcode_version < RunLoop::Version.new('6.3')
+      ios_version = '8.2'
+    elsif xcode_version >= RunLoop::Version.new('6.3')
+      ios_version = '8.3'
+    else
+      raise "Unsupported Xcode version: #{xcode_version}"
+    end
+    "#{idiom} #{form_factor} (#{ios_version} Simulator)"
+  end
+
   def resources_dir
     @resources_dir ||= File.expand_path(File.join(File.dirname(__FILE__), 'resources'))
   end
