@@ -108,11 +108,6 @@ module Calabash
       # @return [Boolean] `true` if the app under test is emulated
       attr_reader :iphone_app_emulated_on_ipad
 
-      # @deprecated 0.10.0 no replacement
-      # @!attribute [rw] udid
-      # @return [String] The udid of this device.
-      attr_accessor :udid
-
       # The form factor of this device.
       # @attribute [r] form_factor
       #
@@ -146,6 +141,11 @@ module Calabash
       # @attribute [r] iphone_4in
       # @return [Boolean] `true` if this device has a 4in screen.
       attr_reader :iphone_4in
+
+      # @deprecated 0.10.0 no replacement
+      # @!attribute [rw] udid
+      # @return [String] The udid of this device.
+      attr_accessor :udid
 
       # Creates a new instance of Device.
       #
