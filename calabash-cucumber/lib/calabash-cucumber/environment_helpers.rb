@@ -94,13 +94,6 @@ module Calabash
         _default_device_or_create().simulator?
       end
 
-      # @deprecated 0.9.168 replaced with `iphone_4in?`
-      # @see #iphone_4in?
-      def iphone_5?
-        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
-        iphone_4in?
-      end
-
       # Does the device under test have 4in screen?
       #
       # @raise [RuntimeError] if the server cannot be reached
@@ -139,7 +132,6 @@ module Calabash
         _OS_ENV.eql?(_canonical_os_version(:ios6)) || _default_device_or_create().ios6?
       end
 
-
       # Is the device under test running iOS 7?
       #
       # @note
@@ -175,6 +167,13 @@ module Calabash
       # @return [Boolean] true if app is being emulated on an iPad.
       def iphone_app_emulated_on_ipad?
         _default_device_or_create().iphone_app_emulated_on_ipad?
+      end
+
+      # @deprecated 0.9.168 replaced with `iphone_4in?`
+      # @see #iphone_4in?
+      def iphone_5?
+        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
+        iphone_4in?
       end
 
       private
