@@ -52,8 +52,8 @@ Paths or values with spaces need double or single quotes.
 #### Example: Quoting values with spaces.
 
 ```
-APP_BUNDLE_PATH="~/path with/a spaces/in it"   # Correct!
-APP_BUNDLE_PATH=~/path with/a spaces/in it     # Incorrect.
+APP_BUNDLE_PATH="Users/adamant/path with/a spaces/in it"   # Correct!
+APP_BUNDLE_PATH=Users/adam ant/path with/a spaces/in it     # Incorrect.
 
 DEVICE_TARGET='iPhone Retina (3.5-inch) - Simulator - iOS 7.1'  # Correct!
 DEVICE_TARGET=iPhone Retina (3.5-inch) - Simulator - iOS 7.1    # Incorrect.
