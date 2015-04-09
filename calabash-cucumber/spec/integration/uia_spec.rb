@@ -7,6 +7,11 @@ end
 describe Calabash::Cucumber::UIA do
 
   describe 'targeting simulators' do
+    let(:sim_control) {
+      obj = RunLoop::SimControl.new
+      obj.reset_sim_content_and_settings
+      obj
+    }
     let(:launcher) { Calabash::Cucumber::Launcher.new }
     let(:core_instance) { CoreIncluded.new }
     let(:options) {
@@ -14,7 +19,7 @@ describe Calabash::Cucumber::UIA do
             {
                   :app => Resources.shared.app_bundle_path(:lp_simple_example),
                   :device_target =>  'simulator',
-                  :sim_control => RunLoop::SimControl.new,
+                  :sim_control => sim_control,
                   :launch_retries => Resources.shared.launch_retries
             }
     }
