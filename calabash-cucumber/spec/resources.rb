@@ -50,8 +50,10 @@ class Resources
     case bundle_name
       when :lp_simple_example
         return @lp_cal_app_bundle_path ||= File.join(self.resources_dir, 'LPSimpleExample-cal.app')
-      when :chou
-        return @chou_app_bundle_path ||= File.join(self.resources_dir, 'chou.app')
+      when :smoke
+        return @smoke_app_bundle_path ||= File.join(self.resources_dir, 'CalSmoke.app')
+      when :calabash_not_linked
+        return @calabash_not_linked ||= File.join(self.resources_dir, 'CalNotLinked.app')
       when :server_gem_compatibility
         return @server_gem_compatibility_app_bundle_path ||= File.join(self.resources_dir, 'server-gem-compatibility.app')
       else

@@ -182,7 +182,7 @@ describe 'Calabash Launcher' do
       end
 
       it "returns '0.0.0' when strings cannot extract a version" do
-        abp = Resources.shared.app_bundle_path :chou
+        abp = Resources.shared.app_bundle_path :calabash_not_linked
         actual = nil
         capture_stderr do
           actual = launcher.server_version_from_bundle abp
@@ -202,7 +202,7 @@ describe 'Calabash Launcher' do
     describe '#check_server_gem_compatibility' do
 
       describe 'when targeting an .app' do
-        let (:app) { Resources.shared.app_bundle_path :chou }
+        let (:app) { Resources.shared.app_bundle_path :smoke }
 
         describe 'prints a message if server' do
           it 'and gem are compatible' do
