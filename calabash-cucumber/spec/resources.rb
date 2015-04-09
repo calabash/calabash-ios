@@ -108,10 +108,10 @@ class Resources
         {
               'app_version' => '1.0',
               'outcome' => 'SUCCESS',
-              'app_id' => 'com.xamarin.chou-cal',
+              'app_id' => 'com.xamarin.CalSmoke-cal',
               'simulator_device' => 'iPhone',
               'version' => '0.11.0',
-              'app_name' => 'chou-cal',
+              'app_name' => 'CalSmoke-cal',
               'iphone_app_emulated_on_ipad' => false,
               '4inch' => true,
               'git' => {
