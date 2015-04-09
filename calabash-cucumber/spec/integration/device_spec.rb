@@ -1,12 +1,9 @@
 describe Calabash::Cucumber::Device do
 
-  before(:example) do
+  before do
     RunLoop::SimControl.terminate_all_sims
+    RunLoop::SimControl.new.reset_sim_content_and_settings
   end
-
-  after(:example) {
-    RunLoop::SimControl.terminate_all_sims
-  }
 
   let(:endpoint) { 'http://localhost:37265' }
 
