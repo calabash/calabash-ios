@@ -6,6 +6,7 @@ require 'tmpdir'
 require 'resources'
 require 'stub_env'
 require 'pry'
+require 'luffa'
 
 include Calabash::Cucumber::Logging
 
