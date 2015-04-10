@@ -72,7 +72,7 @@ Dir.chdir xtc_test_dir do
           wait_for_results,
           '--user', user]
 
-  ipa = 'chou-cal.ipa'
+  ipa = 'CalSmoke-cal.ipa'
 
   cmd = "test-cloud submit #{ipa} #{token} #{args.join(' ')}"
 
