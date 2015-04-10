@@ -1,26 +1,9 @@
-describe 'Calabash Launcher' do
-  let(:launcher) { Calabash::Cucumber::Launcher.new }
-  let(:fake_udid) { 'FAKE-UDID' }
-  describe 'reset_simulator' do
-    context 'when running on a device' do
-      it 'raises an error' do
-        stub_env('DEVICE_TARGET', fake_udid)
-        expect {  launcher.reset_simulator  }.to raise_error(RuntimeError)
-      end
-    end
-
-    context 'when running on the simulator' do
-      it 'successfully resets the simulator' do
-        stub_env('DEVICE_TARGET', nil)
-        launcher.reset_simulator
-      end
-    end
-  end
+describe 'Launcher:  #console_attach' do
 
   describe '#attach' do
-    before(:each) {
-      stub_env('DEVICE_TARGET', nil)
-    }
+
+    let(:launcher) { Calabash::Cucumber::Launcher.new }
+    let(:other_launcher) { Calabash::Cucumber::Launcher.new }
 
     let(:sim_control) {
       obj = RunLoop::SimControl.new
@@ -36,8 +19,6 @@ describe 'Calabash Launcher' do
             :launch_retries => Resources.shared.launch_retries
       }
     }
-
-    let(:other_launcher) { Calabash::Cucumber::Launcher.new }
 
     def calabash_console_with_strategy(strategy=nil)
       if strategy.nil?
