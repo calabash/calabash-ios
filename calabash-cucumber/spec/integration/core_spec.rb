@@ -21,7 +21,7 @@ describe Calabash::Cucumber::Core do
     describe 'targeting simulators' do
       let(:launcher) { Calabash::Cucumber::Launcher.new }
       let(:core_instance) { CoreIncluded.new }
-      it "Xcode #{Resources.shared.current_xcode_version}" do
+      it "Xcode #{ Resources.shared.active_xcode_version}" do
         sim_control = RunLoop::SimControl.new
         options =
               {
@@ -66,7 +66,7 @@ describe Calabash::Cucumber::Core do
 
     unless Resources.shared.travis_ci?
       describe 'targeting physical devices' do
-        describe "Xcode #{Resources.shared.current_xcode_version}" do
+        describe "Xcode #{Resources.shared.active_xcode_version}" do
 
           let(:launcher) { Calabash::Cucumber::Launcher.new }
           let(:core_instance) { CoreIncluded.new }

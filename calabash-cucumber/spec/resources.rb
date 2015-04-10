@@ -16,11 +16,8 @@ class Resources
     travis_ci? ? 8 : 2
   end
 
-  def current_xcode_version
-    @current_xcode_version ||= lambda {
-      ENV.delete('DEVELOPER_DIR')
-      RunLoop::XCTools.new.xcode_version
-    }.call
+  def active_xcode_version
+    @active_xcode_version ||= RunLoop::XCTools.new.xcode_version
   end
 
   def core_simulator_for_xcode_version(idiom, form_factor, xcode_version)
