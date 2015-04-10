@@ -4,62 +4,29 @@ end
 
 describe Calabash::Cucumber::Core do
 
-  before(:example) {
-    ENV.delete('DEVELOPER_DIR')
-    ENV.delete('DEBUG')
-    ENV.delete('DEVICE_ENDPOINT')
+  before {
     RunLoop::SimControl.terminate_all_sims
-  }
-
-  after(:example) {
-    ENV.delete('DEVELOPER_DIR')
-    ENV.delete('DEBUG')
-    ENV.delete('DEVICE_ENDPOINT')
   }
 
   describe '#calabash_exit' do
     describe 'targeting simulators' do
       let(:launcher) { Calabash::Cucumber::Launcher.new }
       let(:core_instance) { CoreIncluded.new }
-      it "Xcode #{ Resources.shared.active_xcode_version}" do
-        sim_control = RunLoop::SimControl.new
-        options =
-              {
-                    :app => Resources.shared.app_bundle_path(:lp_simple_example),
-                    :device_target =>  'simulator',
-                    :sim_control => sim_control,
-                    :launch_retries => Resources.shared.launch_retries
-              }
-        launcher.relaunch(options)
-        expect(launcher.run_loop).not_to be == nil
-        expect { core_instance.calabash_exit }.not_to raise_error
-      end
 
-      describe 'Xcode regression' do
-        xcode_installs = Resources.shared.alt_xcode_details_hash
-        if xcode_installs.empty?
-          it 'no alternative Xcode installs' do
-            expect(true).to be == true
-          end
-        else
-          xcode_installs.each do |install_hash|
-            version = install_hash[:version]
-            path = install_hash[:path]
-            it "Xcode #{version} @ #{path}" do
-              ENV['DEVELOPER_DIR'] = path
-              sim_control = RunLoop::SimControl.new
-              options =
-                    {
-                          :app => Resources.shared.app_bundle_path(:lp_simple_example),
-                          :device_target => 'simulator',
-                          :sim_control => sim_control,
-                          :launch_retries => Resources.shared.launch_retries
-                    }
-              launcher.relaunch(options)
-              expect(launcher.run_loop).not_to be == nil
-              expect { core_instance.calabash_exit }.not_to raise_error
-            end
-          end
+      Resources.shared.xcode_installs.each do |xcode_install|
+        it "Xcode #{xcode_install.version_string}: #{xcode_install.path}" do
+          sim_control = RunLoop::SimControl.new
+          sim_control.reset_sim_content_and_settings
+          options =
+                {
+                      :app => Resources.shared.app_bundle_path(:lp_simple_example),
+                      :device_target =>  'simulator',
+                      :sim_control => sim_control,
+                      :launch_retries => Resources.shared.launch_retries
+                }
+          launcher.relaunch(options)
+          expect(launcher.run_loop).not_to be == nil
+          expect { core_instance.calabash_exit }.not_to raise_error
         end
       end
     end
