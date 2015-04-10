@@ -209,66 +209,6 @@ class Resources
     Luffa::IDeviceInstaller.new(ipa_path, bundle_id)
   end
 
-  def bundle_installed?(udid, bundle_id, installer)
-    cmd = "#{installer} -u #{udid} -l"
-    if ENV['DEBUG_UNIX_CALLS'] == '1'
-      puts "\033[36mEXEC: #{cmd}\033[0m"
-    end
-    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
-      out = stdout.read.strip
-      err = stderr.read.strip
-      if ENV['DEBUG_UNIX_CALLS'] == '1'
-        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
-      end
-      out.strip.split(/\s/).include? bundle_id
-    end
-  end
-
-  def install(udid, ipa, bundle_id, installer)
-    if bundle_installed? udid, bundle_id, installer
-      if ENV['DEBUG_UNIX_CALLS'] == '1'
-        puts "\033[32mINFO: bundle '#{bundle_id}' is already installed\033[0m"
-      end
-      return true
-    end
-    cmd = "#{installer} -u #{udid} --install #{ipa}"
-    if ENV['DEBUG_UNIX_CALLS'] == '1'
-      puts "\033[36mEXEC: #{cmd}\033[0m"
-    end
-    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
-      out = stdout.read.strip
-      err = stderr.read.strip
-      if ENV['DEBUG_UNIX_CALLS'] == '1'
-        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
-      end
-    end
-    unless bundle_installed?(udid, bundle_id, installer)
-      raise "could not install '#{ipa}' on '#{udid}' with '#{bundle_id}'"
-    end
-    true
-  end
-
-  def uninstall(udid, bundle_id, installer)
-    unless bundle_installed? udid, bundle_id, installer
-      return true
-    end
-    cmd = "#{installer} -u #{udid} --uninstall #{bundle_id}"
-    if ENV['DEBUG_UNIX_CALLS'] == '1'
-      puts "\033[36mEXEC: #{cmd}\033[0m"
-    end
-    Open3.popen3(cmd) do  |_, stdout,  stderr, _|
-      out = stdout.read.strip
-      err = stderr.read.strip
-      if ENV['DEBUG_UNIX_CALLS'] == '1'
-        puts "#{cmd} => stdout: '#{out}' | stderr: '#{err}'"
-      end
-    end
-    if bundle_installed?(udid, bundle_id, installer)
-      raise "could not uninstall '#{bundle_id}' on '#{udid}'"
-    end
-    true
-  end
-
   def idevice_id_bin_path
     @idevice_id_bin_path ||= `which idevice_id`.chomp!
   end
