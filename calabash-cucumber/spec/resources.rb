@@ -187,20 +187,12 @@ class Resources
   end
 
   def physical_devices_for_testing(xcode_tools)
-    # Xcode 6 + iOS 8 - devices on the same network, whether development or not,
-    # appear when calling $ xcrun instruments -s devices. For the purposes of
-    # testing, we will only try to connect to devices that are connected via
-    # udid.
-    @physical_devices_for_testing ||= lambda {
-      devices = xcode_tools.instruments(:devices)
-      if idevice_id_available?
-        white_list = `#{idevice_id_bin_path} -l`.strip.split("\n")
-        devices.select do | device |
-          white_list.include?(device.udid) && white_list.count(device.udid) == 1
-        end
-      else
-        devices
-      end
-    }.call
+    version = xcode_tools.xcode_version.to_s
+    @physical_devices ||= {}
+
+    unless @physical_devices[version]
+      @physical_devices[version] = Luffa::IDeviceInstaller.physical_devices_for_testing(xcode_tools)
+    end
+    @physical_devices[version]
   end
 end
