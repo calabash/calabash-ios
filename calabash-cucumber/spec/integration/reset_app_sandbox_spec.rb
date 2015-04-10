@@ -1,5 +1,3 @@
-
-
 module Calabash
   module Rspec
     module ResetAppSandbox
@@ -116,15 +114,7 @@ end
 describe Calabash::Cucumber::Launcher do
 
   before(:example) {
-    ENV.delete('DEVELOPER_DIR')
-    ENV.delete('DEBUG')
     RunLoop::SimControl.terminate_all_sims
-  }
-
-  after(:example) {
-    ENV.delete('DEVELOPER_DIR')
-    ENV.delete('DEBUG')
-    ENV.delete('DEVICE_ENDPOINT')
   }
 
   let(:launcher) { Calabash::Cucumber::Launcher.new }
@@ -139,61 +129,63 @@ describe Calabash::Cucumber::Launcher do
     end
 
     describe 'Xcode < 6' do
-      xcode_selected = Resources.shared.xcode_select_xcode_hash
-      xcode_installs = Resources.shared.alt_xcode_details_hash + [xcode_selected]
       max_version = RunLoop::Version.new('5.1.1')
-      xcode5 = xcode_installs.delete_if { |hash| hash[:version] > max_version }.sample
-      if xcode5.nil?
+      xcode_5_install = Resources.shared.xcode_installs.select { |install| install.version <= max_version }.sample
+      if xcode_5_install.nil?
         it 'no Xcode < 6 was found' do
           expect(true).to be == true
         end
       else
-        describe "Xcode #{xcode5[:version]}" do
+        describe "Xcode #{xcode_5_install.version_string}" do
 
           let(:helper) { Calabash::Rspec::ResetAppSandbox::Helper.new }
 
           it 'should remove the correct items from the sandbox' do
-            ENV['DEVELOPER_DIR'] = xcode5[:path]
-            args = helper.args_for_reset_app_sandbox '7.1'
+            Luffa::Xcode.with_xcode_install(xcode_5_install) do
+              ENV['DEVELOPER_DIR'] = xcode_5_install.path
+              args = helper.args_for_reset_app_sandbox '7.1'
 
-            # make the expected directories and expect they are there
-            app_udid_path = helper.populate_xcode5_app_sandbox(args)
-            directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
-            expected = ['LPSimpleExample-cal.app'].concat(helper.sandbox_dirs)
-            expect(directories.map { |dir| File.basename(dir) }).to match_array(expected)
-
-            # need to mock the output of directories_for_sdk_prefix method by mocking
-            # the simulator_app_support_dir method
-            mocked_support_dir = File.expand_path(File.join(__FILE__, '..', 'resources/launcher'))
-            expect(launcher).to receive(:simulator_app_support_dir).and_return(mocked_support_dir)
-
-            launcher.reset_app_sandbox(args)
-            directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
-            expect(directories.map { |dir| File.basename(dir) }).to contain_exactly('LPSimpleExample-cal.app')
-          end
-
-          it 'should remove the correct items from _all_ sandboxes when pass :all' do
-            ENV['DEVELOPER_DIR'] = xcode5[:path]
-            support_dir = File.expand_path(File.join(__FILE__, '..', 'resources/launcher'))
-            sdks = Dir["#{support_dir}/*"].select { |x| x =~ helper.sim_sdk_dir_regex }.map { |x| File.basename(x) }
-            app_udid_paths = []
-            sdks.each do |sdk|
-              args = helper.args_for_reset_app_sandbox sdk
+              # make the expected directories and expect they are there
               app_udid_path = helper.populate_xcode5_app_sandbox(args)
-              app_udid_paths << app_udid_path
               directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
               expected = ['LPSimpleExample-cal.app'].concat(helper.sandbox_dirs)
               expect(directories.map { |dir| File.basename(dir) }).to match_array(expected)
-            end
 
-            expect(launcher).to receive(:simulator_app_support_dir).and_return(support_dir)
-            # we need the :path to be set correctly and then we can change to :all
-            args = helper.args_for_reset_app_sandbox('7.1')
-            args[:sdk ] = :all
-            launcher.reset_app_sandbox(args)
-            app_udid_paths.each do |app_udid_path|
+              # need to mock the output of directories_for_sdk_prefix method by mocking
+              # the simulator_app_support_dir method
+              mocked_support_dir = File.expand_path(File.join(__FILE__, '..', 'resources/launcher'))
+              expect(launcher).to receive(:simulator_app_support_dir).and_return(mocked_support_dir)
+
+              launcher.reset_app_sandbox(args)
               directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
               expect(directories.map { |dir| File.basename(dir) }).to contain_exactly('LPSimpleExample-cal.app')
+            end
+          end
+
+          it 'should remove the correct items from _all_ sandboxes when pass :all' do
+            Luffa::Xcode.with_xcode_install(xcode_5_install) do
+              ENV['DEVELOPER_DIR'] = xcode_5_install.path
+              support_dir = File.expand_path(File.join(__FILE__, '..', 'resources/launcher'))
+              sdks = Dir["#{support_dir}/*"].select { |x| x =~ helper.sim_sdk_dir_regex }.map { |x| File.basename(x) }
+              app_udid_paths = []
+              sdks.each do |sdk|
+                args = helper.args_for_reset_app_sandbox sdk
+                app_udid_path = helper.populate_xcode5_app_sandbox(args)
+                app_udid_paths << app_udid_path
+                directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
+                expected = ['LPSimpleExample-cal.app'].concat(helper.sandbox_dirs)
+                expect(directories.map { |dir| File.basename(dir) }).to match_array(expected)
+              end
+
+              expect(launcher).to receive(:simulator_app_support_dir).and_return(support_dir)
+              # we need the :path to be set correctly and then we can change to :all
+              args = helper.args_for_reset_app_sandbox('7.1')
+              args[:sdk ] = :all
+              launcher.reset_app_sandbox(args)
+              app_udid_paths.each do |app_udid_path|
+                directories = Dir.glob("#{app_udid_path}/*").select {|f| File.directory? f }
+                expect(directories.map { |dir| File.basename(dir) }).to contain_exactly('LPSimpleExample-cal.app')
+              end
             end
           end
         end
@@ -201,91 +193,65 @@ describe Calabash::Cucumber::Launcher do
     end
 
     describe 'Xcode >= 6.0' do
-      xcode_selected = Resources.shared.xcode_select_xcode_hash
-      xcode_installs = Resources.shared.alt_xcode_details_hash + [xcode_selected]
-      min_version = RunLoop::Version.new('6.0')
-      xcode_versions = xcode_installs.delete_if { |hash| hash[:version] < min_version }
-      if xcode_versions.empty?
-        it 'no Xcode >= 6.0 was found' do
-          expect(true).to be == true
-        end
-      else
-        xcode_versions.each do |xcode6|
-          describe "Xcode #{xcode6[:version]}" do
-            let(:helper) { Calabash::Rspec::ResetAppSandbox::Helper.new }
+      let(:sim_control) {
+        obj = RunLoop::SimControl.new
+        obj.reset_sim_content_and_settings
+        obj
+      }
 
-            it 'can reset the default simulator' do
-              ENV['DEVELOPER_DIR'] = xcode6[:path]
-              sim_control = RunLoop::SimControl.new
-              helper.launch_and_stop_simulator(launcher, sim_control, 'simulator')
+      let(:helper) { Calabash::Rspec::ResetAppSandbox::Helper.new }
+      let(:helper) { Calabash::Rspec::ResetAppSandbox::Helper.new }
+      let(:target_simulator) { helper.random_core_simulator(sim_control)}
+      let(:instruments_launch_name) { helper.instruments_launch_name(target_simulator) }
+      let(:udid) { target_simulator.udid }
 
-              target_simulator = helper.default_simulator_as_device(sim_control)
-              udid = target_simulator.udid
+      it 'can reset the default simulator' do
+        helper.launch_and_stop_simulator(launcher, sim_control, 'simulator')
 
-              app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
-              expect(File).to exist(app_bundles)
+        target_simulator = helper.default_simulator_as_device(sim_control)
+        udid = target_simulator.udid
 
-              installed_apps = helper.installed_apps(udid, target_simulator)
-              expect(installed_apps).to include('LPSimpleExample-cal.app')
+        app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
+        expect(File).to exist(app_bundles)
 
-              launcher.reset_app_sandbox
+        installed_apps = helper.installed_apps(udid, target_simulator)
+        expect(installed_apps).to include('LPSimpleExample-cal.app')
 
-              containers = helper.path_to_containers(udid, target_simulator)
-              expect(File).not_to exist(containers)
-            end
+        launcher.reset_app_sandbox
 
-            describe 'can reset a simulator if :udid option is passed' do
-              helper = Calabash::Rspec::ResetAppSandbox::Helper.new
-              ENV['DEVELOPER_DIR'] = xcode6[:path]
-              sim_control = RunLoop::SimControl.new
-              target_simulator = helper.random_core_simulator(sim_control)
-              instruments_launch_name = helper.instruments_launch_name(target_simulator)
-              udid = target_simulator.udid
-              it "#{instruments_launch_name} [#{udid}]" do
-                ENV['DEVELOPER_DIR'] = xcode6[:path]
-                sim_control = RunLoop::SimControl.new
-                helper.launch_and_stop_simulator(launcher, sim_control, instruments_launch_name)
+        containers = helper.path_to_containers(udid, target_simulator)
+        expect(File).not_to exist(containers)
+      end
 
-                app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
-                expect(File).to exist(app_bundles)
+      it 'can reset a simulator if :udid option is passed' do
+        helper.launch_and_stop_simulator(launcher, sim_control, instruments_launch_name)
 
-                installed_apps = helper.installed_apps(udid, target_simulator)
-                expect(installed_apps).to include('LPSimpleExample-cal.app')
+        app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
+        expect(File).to exist(app_bundles)
 
-                launcher.reset_app_sandbox({:udid => udid})
+        installed_apps = helper.installed_apps(udid, target_simulator)
+        expect(installed_apps).to include('LPSimpleExample-cal.app')
 
-                containers = helper.path_to_containers(udid, target_simulator)
-                expect(File).not_to exist(containers)
-              end
-            end
+        launcher.reset_app_sandbox({:udid => udid})
 
-            describe 'respects the DEVICE_TARGET env var' do
-              helper = Calabash::Rspec::ResetAppSandbox::Helper.new
-              ENV['DEVELOPER_DIR'] = xcode6[:path]
-              sim_control = RunLoop::SimControl.new
-              target_simulator = helper.random_core_simulator(sim_control)
-              instruments_launch_name = helper.instruments_launch_name(target_simulator)
-              udid = target_simulator.udid
-              it "#{instruments_launch_name} [#{udid}]" do
-                ENV['DEVELOPER_DIR'] = xcode6[:path]
-                stub_env('DEVICE_TARGET', instruments_launch_name)
-                sim_control = RunLoop::SimControl.new
-                helper.launch_and_stop_simulator(launcher, sim_control, instruments_launch_name)
+        containers = helper.path_to_containers(udid, target_simulator)
+        expect(File).not_to exist(containers)
+      end
 
-                app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
-                expect(File).to exist(app_bundles)
+      it 'respects the DEVICE_TARGET env var' do
+        stub_env('DEVICE_TARGET', instruments_launch_name)
+        helper.launch_and_stop_simulator(launcher, sim_control, instruments_launch_name)
 
-                installed_apps = helper.installed_apps(udid, target_simulator)
-                expect(installed_apps).to include('LPSimpleExample-cal.app')
+        app_bundles = helper.path_to_sim_app_bundles(udid, target_simulator)
+        expect(File).to exist(app_bundles)
 
-                launcher.reset_app_sandbox
+        installed_apps = helper.installed_apps(udid, target_simulator)
+        expect(installed_apps).to include('LPSimpleExample-cal.app')
 
-                containers = helper.path_to_containers(udid, target_simulator)
-                expect(File).not_to exist(containers)
-              end
-            end
-          end
-        end
+        launcher.reset_app_sandbox
+
+        containers = helper.path_to_containers(udid, target_simulator)
+        expect(File).not_to exist(containers)
       end
     end
   end
