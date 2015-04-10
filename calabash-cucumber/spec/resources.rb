@@ -312,7 +312,9 @@ class Resources
       devices = xcode_tools.instruments(:devices)
       if idevice_id_available?
         white_list = `#{idevice_id_bin_path} -l`.strip.split("\n")
-        devices.select { | device | white_list.include?(device.udid) }
+        devices.select do | device |
+          white_list.include?(device.udid) && white_list.count(device.udid) == 1
+        end
       else
         devices
       end
