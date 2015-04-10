@@ -39,7 +39,7 @@ describe Calabash::Cucumber::Device do
                 xcode_tools = RunLoop::XCTools.new
                 version = xcode_tools.xcode_version
                 if xcode_tools.xcode_version_gte_6?
-                  Resources.shared.core_simulator_for_xcode_version('iPad', 'Retina', version)
+                  Luffa::Simulator.instance.core_simulator_for_xcode_version('iPad', 'Retina', version)
                 else
                   'iPad Retina (64-bit) - Simulator - iOS 7.1'
                 end
@@ -52,7 +52,7 @@ describe Calabash::Cucumber::Device do
                 xcode_tools = RunLoop::XCTools.new
                 version = xcode_tools.xcode_version
                 if xcode_tools.xcode_version_gte_6?
-                  Resources.shared.core_simulator_for_xcode_version('iPhone', '5', version)
+                  Luffa::Simulator.instance.core_simulator_for_xcode_version('iPhone', '5', version)
                 else
                   'iPhone Retina (4-inch) - Simulator - iOS 7.1'
                 end
@@ -65,7 +65,7 @@ describe Calabash::Cucumber::Device do
                 xcode_tools = RunLoop::XCTools.new
                 version = xcode_tools.xcode_version
                 if xcode_tools.xcode_version_gte_6?
-                  Resources.shared.core_simulator_for_xcode_version('iPhone', '4s', version)
+                  Luffa::Simulator.instance.core_simulator_for_xcode_version('iPhone', '4s', version)
                 else
                   'iPhone Retina (3.5-inch) - Simulator - iOS 7.1'
                 end
@@ -78,7 +78,7 @@ describe Calabash::Cucumber::Device do
                 xcode_tools = RunLoop::XCTools.new
                 version = xcode_tools.xcode_version
                 if xcode_tools.xcode_version_gte_6?
-                  Resources.shared.core_simulator_for_xcode_version('iPhone', '6', version)
+                  Luffa::Simulator.instance.core_simulator_for_xcode_version('iPhone', '6', version)
                 else
                   # iPhone 6 does not exist on Xcode < 6
                   nil
@@ -92,7 +92,7 @@ describe Calabash::Cucumber::Device do
                 xcode_tools = RunLoop::XCTools.new
                 version = xcode_tools.xcode_version
                 if xcode_tools.xcode_version_gte_6?
-                  Resources.shared.core_simulator_for_xcode_version('iPhone', '6 Plus', version)
+                  Luffa::Simulator.instance.core_simulator_for_xcode_version('iPhone', '6 Plus', version)
                 else
                   # iPhone 6 does not exist on Xcode < 6
                   nil
