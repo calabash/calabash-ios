@@ -18,13 +18,21 @@ describe 'Calabash Launcher' do
   end
 
   describe '#attach' do
-    before(:each) {   stub_env('DEVICE_TARGET', nil) }
+    before(:each) {
+      stub_env('DEVICE_TARGET', nil)
+    }
+
+    let(:sim_control) {
+      obj = RunLoop::SimControl.new
+      obj.reset_sim_content_and_settings
+      obj
+    }
     let(:launch_options) {
       {
             :app => Resources.shared.app_bundle_path(:lp_simple_example),
             :device_target => 'simulator',
             :no_stop => true,
-            :sim_control => RunLoop::SimControl.new,
+            :sim_control => sim_control,
             :launch_retries => Resources.shared.launch_retries
       }
     }
@@ -35,14 +43,38 @@ describe 'Calabash Launcher' do
       if strategy.nil?
         attach_cmd = 'console_attach'
       else
-        # Super weird, but we need to force the : here.
         attach_cmd = "console_attach(:#{strategy})"
       end
-      Open3.popen3('sh') do |stdin, stdout, stderr, _|
-        stdin.puts 'bundle exec calabash-ios console <<EOF'
-        stdin.puts attach_cmd
-        stdin.puts "touch 'textField'"
-        stdin.puts 'EOF'
+
+      # :host strategy is hard to automate.
+      #
+      # The touch causes the app to go into an infinite loop trying to touch
+      # the text field.  Manual testing works fine.  Thinking this was race
+      # condition on the RunLoop::HostCache, I tried sleeping before the
+      # console attach and before the touch; same results - indefinite hanging.
+      #
+      # Opening a console in a Terminal against the app allows the touch after:
+      #
+      # > console_attach(:host)
+      #
+      # I also tried a Timeout.timeout(10), but the timeout was never reached;
+      # the popen3 is blocking.
+      #
+      # The best we can do is to check that the HostCache was read correctly.
+      #
+      # My best guess is that this has something to do with either:
+      # 1. NSLog output crippling UIAutomation.
+      # 2. The run_loop repl pipe is somehow blocking.
+      Open3.popen3('bundle', *['exec', 'calabash-ios', 'console']) do |stdin, stdout, stderr, _|
+        stdin.puts "launcher = #{attach_cmd}"
+        if strategy == :host
+          stdin.puts "raise 'Launcher is nil' if launcher.nil?"
+          stdin.puts "raise 'Launcher run_loop is nil' if launcher.run_loop.nil?"
+          stdin.puts "raise 'Launcher pid is nil' if launcher.run_loop[:pid].nil?"
+          stdin.puts "raise 'Launcher index is not 1' if launcher.run_loop[:index] != 1"
+        else
+          stdin.puts "touch 'textField'"
+        end
         stdin.close
         yield stdout, stderr
       end
