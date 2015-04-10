@@ -51,6 +51,10 @@ class Resources
     @bundle_id = 'com.lesspainful.example.LPSimpleExample-cal'
   end
 
+  def xcode_installs
+    @alternative_xcode_installs ||= Luffa::Xcode.new.xcode_installs
+  end
+
   def device_for_mocking
     endpoint = 'http://localhost:37265/'
     # noinspection RubyStringKeysInHashInspection
