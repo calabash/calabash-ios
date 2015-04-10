@@ -99,7 +99,10 @@ describe Calabash::Cucumber::Core do
                               :sim_control => RunLoop::SimControl.new,
                               :launch_retries => Resources.shared.launch_retries
                         }
-                  expect { Resources.shared.ideviceinstaller(device.udid, :install) }.to_not raise_error
+
+                  expect {
+                    Resources.shared.ideviceinstaller.install(device.udid)
+                  }.to_not raise_error
 
                   launcher.relaunch(options)
                   expect(launcher.run_loop).not_to be == nil
@@ -139,7 +142,10 @@ describe Calabash::Cucumber::Core do
                               :sim_control => RunLoop::SimControl.new,
                               :launch_retries => Resources.shared.launch_retries
                         }
-                  expect { Resources.shared.ideviceinstaller(device.udid, :install) }.to_not raise_error
+
+                  expect {
+                    Resources.shared.ideviceinstaller.install(device.udid)
+                  }.to_not raise_error
 
                   launcher.relaunch(options)
                   expect(launcher.run_loop).not_to be == nil

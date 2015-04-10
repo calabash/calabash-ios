@@ -205,33 +205,8 @@ class Resources
     path and File.exist? ideviceinstaller_bin_path
   end
 
-  def ideviceinstaller(device_udid, cmd, opts={})
-    default_opts = {:ipa => ipa_path,
-                    :bundle_id => bundle_id}
-
-    merged = default_opts.merge(opts)
-
-
-    bin_path = ideviceinstaller_bin_path
-    bundle_id = merged[:bundle_id]
-
-    case cmd
-      when :install
-        ipa = merged[:ipa]
-        Retriable.retriable do
-          uninstall device_udid, bundle_id, bin_path
-        end
-        Retriable.retriable do
-          install device_udid, ipa, bundle_id, bin_path
-        end
-      when :uninstall
-        Retriable.retriable do
-          uninstall device_udid, bundle_id, bin_path
-        end
-      else
-        cmds = [:install, :uninstall]
-        raise ArgumentError, "expected '#{cmd}' to be one of '#{cmds}'"
-    end
+  def ideviceinstaller
+    Luffa::IDeviceInstaller.new(ipa_path, bundle_id)
   end
 
   def bundle_installed?(udid, bundle_id, installer)
