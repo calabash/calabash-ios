@@ -12,10 +12,6 @@ class Resources
     @travis_ci ||= ENV['TRAVIS']
   end
 
-  def launch_retries
-    travis_ci? ? 8 : 2
-  end
-
   def active_xcode_version
     @active_xcode_version ||= RunLoop::XCTools.new.xcode_version
   end

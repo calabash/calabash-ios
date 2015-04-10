@@ -13,7 +13,7 @@ describe Calabash::Cucumber::Device do
             :app => Resources.shared.app_bundle_path(:lp_simple_example),
             :device_target =>  device_target,
             :sim_control => RunLoop::SimControl.new,
-            :launch_retries => Resources.shared.launch_retries
+            :launch_retries => Luffa::Retry.instance.launch_retries
       }
       launcher = Calabash::Cucumber::Launcher.new
       launcher.relaunch(options)

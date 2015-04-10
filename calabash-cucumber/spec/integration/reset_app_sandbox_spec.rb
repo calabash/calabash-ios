@@ -61,7 +61,7 @@ module Calabash
                 :app => Resources.shared.app_bundle_path(:lp_simple_example),
                 :device_target => target,
                 :sim_control => sim_control,
-                :launch_retries => Resources.shared.launch_retries
+                :launch_retries => Luffa::Retry.instance.launch_retries
           }
         end
 
