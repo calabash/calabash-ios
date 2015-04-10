@@ -32,13 +32,13 @@ We recommend that you the most recent released version of Xcode, MacOS, and Ruby
 * Xcode 5.1.1 - Xcode 6.3
 * ruby 1.9.3 - 2.2.+
 
-We also recommend that you use a managed ruby like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/).  If you prefer to stick with the pre-installed ruby on MacOS, please avoid installing gems with `sudo`.  Simply put, it is dangerous.  Follow these [excellent instructions](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/installing-gems/) for a ruby setup that avoids `sudo`.
+We recommend that you use a managed ruby like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/).  If you prefer to stick with the pre-installed ruby on MacOS, please avoid installing gems with `sudo`.  Simply put, using `sudoe` is dangerous.  Follow these [excellent instructions](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/installing-gems/) for a ruby setup that avoids `sudo`.
 
 The [best practice](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/maintaining-gems-with-bundler/) is to always use a Gemfile and bundler.
 
 ### Alternative Setups
 
-The traditional setup creates a separate Xcode target application that mirrors your original application except that it link to the Calabash server library.  We call this new target the -cal target.
+The traditional setup creates a separate Xcode target application that mirrors your original application except that it link to the Calabash server library.  We call this new target the _-cal target._
 
 Why a separate target?  The Calabash server contains symbols and methods that will cause any application that links to it to _be rejected from the AppStore_.  A separate target with a different bundle identifier will ensure that you never accidently submit an application that has the Calabash server linked.
 
@@ -52,11 +52,11 @@ If you are not already using CocoaPods, we don't recommend adopt CocoaPods just 
 
 ## Setup: Fast Track
 
-These fast-track instructions are EXPERIMENTAL, but in our experience it works for most iOS projects.  But there *are* some project setups where it does not.
+The fast-track instructions are EXPERIMENTAL, but in our experience they work for most iOS projects.
 
-If it doesn't work in your project, you should read the section "Manual setup with Xcode" below.
+If it doesn't work in your project, see the "Manual setup with Xcode" section below.
 
-Starting in Xcode 6, we've had trouble maintaining the setup tools.  If you run into a problem see [calabash-ios setup fails on fresh Xcode 6 project](https://github.com/calabash/calabash-ios/issues/533).
+Starting in Xcode 6, we've had trouble maintaining the setup tools.  If you have a problem see [calabash-ios setup fails on fresh Xcode 6 project](https://github.com/calabash/calabash-ios/issues/533).
 
 For automatic setup:
 
@@ -83,7 +83,7 @@ If all goes well, you are now ready to write your first test. Start by editing t
 Proceed by reading details about installation below, or moving on to the
 [Getting started guide](https://github.com/calabash/calabash-ios/wiki/00-Calabash-iOS-documentation).
 
-## Manual setup with Xcode
+## Setup: Manually Create a -cal target
 
 ### Background
 
