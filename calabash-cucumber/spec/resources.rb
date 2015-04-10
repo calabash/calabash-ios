@@ -182,26 +182,8 @@ class Resources
     }.call
   end
 
-  def ideviceinstaller_bin_path
-    @ideviceinstaller_bin_path ||= `which ideviceinstaller`.chomp!
-  end
-
-  def ideviceinstaller_available?
-    path = ideviceinstaller_bin_path
-    path and File.exist? ideviceinstaller_bin_path
-  end
-
   def ideviceinstaller
     Luffa::IDeviceInstaller.new(ipa_path, bundle_id)
-  end
-
-  def idevice_id_bin_path
-    @idevice_id_bin_path ||= `which idevice_id`.chomp!
-  end
-
-  def idevice_id_available?
-    path = idevice_id_bin_path
-    path and File.exist? path
   end
 
   def physical_devices_for_testing(xcode_tools)
