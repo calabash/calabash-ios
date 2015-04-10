@@ -8,7 +8,7 @@
 
 Calabash is an automated testing technology for Android and iOS native and hybrid applications.
 
-Calabash is a free open source project, developed and maintained by [Xamarin](http://xamarin.com).
+Calabash is a free-to-use open source project that is developed and maintained by [Xamarin](http://xamarin.com).
 
 While Calabash is completely free, Xamarin provides a number of commercial services centered around Calabash and quality assurance for mobile, namely Xamarin Test Cloud consisting of hosted test-execution environments which let you execute Calabash tests on a large number of Android and iOS devices.  For more information about the Xamarin Test Cloud visit [http://xamarin.com/test-cloud](http://xamarin.com/test-cloud).
 
