@@ -84,7 +84,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'guard-rspec'
   s.add_development_dependency 'guard-bundler'
   s.add_development_dependency 'growl'
-  # stub_env 1.0.0 is buggy.
-  s.add_development_dependency 'stub_env', '0.2.0'
+  s.add_development_dependency 'stub_env'
 
 end
