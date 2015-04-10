@@ -40,7 +40,9 @@ The [best practice](http://developer.xamarin.com/guides/testcloud/calabash/confi
 
 The traditional setup creates a separate Xcode target application that mirrors your original application except that it link to the Calabash server library.  We call this new target the _-cal target._
 
-Why a separate target?  The Calabash server contains symbols and methods that will cause any application that links to it to _be rejected from the AppStore_.  A separate target with a different bundle identifier will ensure that you never accidently submit an application that has the Calabash server linked.
+_Why a separate target?_
+
+>The Calabash server contains symbols and methods that will cause any application that links to it to _be rejected from the AppStore_.  A separate target with a different bundle identifier will ensure that you never accidently submit an application that has the Calabash server linked.
 
 The community has collected these alternative methods for integrating Calabash into your Xcode project.
 
