@@ -57,12 +57,12 @@ Start your work on a feature branch based off develop.
 ```
 # If you don't already have the develop branch
 $ git fetch origin
-$ git co -t origin/develop
+$ git checkout -t origin/develop
 
 # If you already have the develop branch
-$ git co develop
+$ git checkout develop
 $ git pull origin develop
-$ git co -b feature/my-new-feature
+$ git checkout -b feature/my-new-feature
 
 # Publish your branch and make a pull-request on `develop`
 $ git push -u origin feature/my-new-feature
