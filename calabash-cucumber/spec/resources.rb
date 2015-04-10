@@ -8,10 +8,6 @@ class Resources
     Resources.instance
   end
 
-  def travis_ci?
-    @travis_ci ||= ENV['TRAVIS']
-  end
-
   def active_xcode_version
     @active_xcode_version ||= RunLoop::XCTools.new.xcode_version
   end
