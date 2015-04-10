@@ -12,26 +12,19 @@ describe Calabash::Cucumber::Core do
   }
 
   describe '#calabash_exit' do
-    describe 'targeting simulators' do
-      Resources.shared.xcode_installs.each do |xcode_install|
-        Luffa::Xcode.with_xcode_install(xcode_install) do
-          it "Xcode #{xcode_install.version_string}: #{xcode_install.path}" do
-            ENV['DEVELOPER_DIR'] = xcode_install.path
-            sim_control = RunLoop::SimControl.new
-            sim_control.reset_sim_content_and_settings
-            options =
-                  {
-                        :app => Resources.shared.app_bundle_path(:lp_simple_example),
-                        :device_target =>  'simulator',
-                        :sim_control => sim_control,
-                        :launch_retries => Resources.shared.launch_retries
-                  }
-            launcher.relaunch(options)
-            expect(launcher.run_loop).not_to be == nil
-            expect { core_instance.calabash_exit }.not_to raise_error
-          end
-        end
-      end
+    it 'targeting simulators' do
+      sim_control = RunLoop::SimControl.new
+      sim_control.reset_sim_content_and_settings
+      options =
+            {
+                  :app => Resources.shared.app_bundle_path(:lp_simple_example),
+                  :device_target =>  'simulator',
+                  :sim_control => sim_control,
+                  :launch_retries => Resources.shared.launch_retries
+            }
+      launcher.relaunch(options)
+      expect(launcher.run_loop).not_to be == nil
+      expect { core_instance.calabash_exit }.not_to raise_error
     end
   end
 
@@ -42,27 +35,24 @@ describe Calabash::Cucumber::Core do
           expect(true).to be == true
         end
       else
-        Resources.shared.xcode_installs.each do |xcode_install|
-          Luffa::Xcode.with_xcode_install(xcode_install) do
-            sim_control = RunLoop::SimControl.new
-            xcode_tools = sim_control.xctools
-            xcode_version = xcode_tools.xcode_version
+        sim_control = RunLoop::SimControl.new
+        xcode_tools = sim_control.xctools
+        xcode_version = xcode_tools.xcode_version
 
-            physical_devices = Resources.shared.physical_devices_for_testing(xcode_tools)
-            if physical_devices.empty?
-              it 'no physical devices available' do expect(true).to be_truthy end
+        physical_devices = Resources.shared.physical_devices_for_testing(xcode_tools)
+        if physical_devices.empty?
+          it 'no physical devices available' do expect(true).to be_truthy end
+        else
+          physical_devices.each do |device|
+            if Luffa::Xcode::ios_version_incompatible_with_xcode_version?(device.version, xcode_version)
+              it "Skipping #{device.name} iOS #{device.version} with Xcode #{xcode_version} - combination not supported" do
+                expect(true).to be == true
+              end
             else
-              physical_devices.each do |device|
-                if Luffa::Xcode::ios_version_incompatible_with_xcode_version?(device.version, xcode_version)
-                  it "Skipping #{device.name} iOS #{device.version} with Xcode #{xcode_version} - combination not supported" do
-                    expect(true).to be == true
-                  end
-                else
-                  it "on #{device.name} iOS #{device.version} Xcode #{xcode_version}" do
-                    ENV['DEVELOPER_DIR'] = xcode_install.path
-                    stub_env('DEVICE_ENDPOINT', "http://#{device.name}.local:37265")
+              it "on #{device.name} iOS #{device.version} Xcode #{xcode_version}" do
+                stub_env('DEVICE_ENDPOINT', "http://#{device.name}.local:37265")
 
-                    options =
+                options =
                           {
                                 :bundle_id => Resources.shared.bundle_id,
                                 :udid => device.udid,
@@ -71,15 +61,13 @@ describe Calabash::Cucumber::Core do
                                 :launch_retries => Resources.shared.launch_retries
                           }
 
-                    expect {
-                      Resources.shared.ideviceinstaller.install(device.udid)
-                    }.to_not raise_error
+                expect {
+                  Resources.shared.ideviceinstaller.install(device.udid)
+                }.to_not raise_error
 
-                    launcher.relaunch(options)
-                    expect(launcher.run_loop).not_to be == nil
-                    expect { core_instance.calabash_exit }.not_to raise_error
-                  end
-                end
+                launcher.relaunch(options)
+                expect(launcher.run_loop).not_to be == nil
+                expect { core_instance.calabash_exit }.not_to raise_error
               end
             end
           end
