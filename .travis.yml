@@ -1,11 +1,10 @@
 language: objective-c
 
 before_script:
-  - script/ci/travis/instruments-auth.sh
+  - gem install luffa --no-document --env-shebang --no-prerelease
+  - luffa authorize
   - script/ci/travis/install-dot-gemrc.rb
   - gem install json --no-document
-  - gem uninstall -Vax --force --no-abort-on-dependent calabash-cucumber
-  - gem uninstall -Vax --force --no-abort-on-dependent run_loop
   - script/ci/travis/clone-and-install-run-loop.rb
   - script/ci/travis/install-gem-libs.rb
   - script/ci/travis/bundle-install.rb
@@ -25,9 +24,9 @@ rvm:
   - 2.1.2
 
 notifications:
-  email:
+  email: false
     recipients:
-      - joshuajmoody@gmail.com
+      - joshua.moody@xamarin.com
       - karl.krukow@xamarin.com
     on_success: change
     on_failure: always
