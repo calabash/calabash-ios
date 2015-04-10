@@ -121,67 +121,6 @@ class Resources
     end
   end
 
-  def alt_xcode_install_paths
-    @alt_xcode_install_paths ||= lambda {
-      min_xcode_version = RunLoop::Version.new('5.1.1')
-      Dir.glob('/Xcode/*/*.app/Contents/Developer').map do |path|
-        xcode_version = path[/(\d\.\d(\.\d)?)/, 0]
-        if RunLoop::Version.new(xcode_version) >= min_xcode_version
-          path
-        else
-          nil
-        end
-      end
-    }.call.compact
-  end
-
-  def xcode_select_xcode_hash
-    @xcode_select_xcode_hash ||= lambda {
-      ENV.delete('DEVELOPER_DIR')
-      xcode_tools = RunLoop::XCTools.new
-      {:path => xcode_tools.xcode_developer_dir,
-       :version => xcode_tools.xcode_version}
-    }.call
-  end
-
-  def alt_xcode_details_hash(skip_versions=[RunLoop::Version.new('6.0')])
-    @alt_xcodes_gte_xc51_hash ||= lambda {
-      ENV.delete('DEVELOPER_DIR')
-      xcode_select_path = RunLoop::XCTools.new.xcode_developer_dir
-      paths =  alt_xcode_install_paths
-      paths.map do |path|
-        begin
-          ENV['DEVELOPER_DIR'] = path
-          version = RunLoop::XCTools.new.xcode_version
-          if path == xcode_select_path
-            nil
-          elsif skip_versions.include?(version)
-            nil
-          elsif version >= RunLoop::Version.new('5.1.1')
-            {
-                  :version => RunLoop::XCTools.new.xcode_version,
-                  :path => path
-            }
-          else
-            nil
-          end
-        ensure
-          ENV.delete('DEVELOPER_DIR')
-        end
-      end
-    }.call.compact
-  end
-
-  def supported_xcode_version_paths(skip_versions=[RunLoop::Version.new('6.0')])
-    @supported_xcode_version_paths ||= lambda {
-      developer_dir = ENV.delete('DEVELOPER_DIR')
-      ret = [ RunLoop::XCTools.new.xcode_developer_dir ] +
-            alt_xcode_details_hash(skip_versions).map { |elm| elm[:path] }
-      ENV['DEVELOPER_DIR'] = developer_dir
-      ret
-    }.call
-  end
-
   def ideviceinstaller
     Luffa::IDeviceInstaller.new(ipa_path, bundle_id)
   end
