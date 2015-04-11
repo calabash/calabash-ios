@@ -424,6 +424,7 @@ class Calabash::Cucumber::Launcher
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
         :sdk_version => sdk_version,
+        :relaunch_simulator => true,
         # Do not advertise this to users!
         # For example, don't include documentation about this option.
         # This is used to instrument internal testing (failing fast).
