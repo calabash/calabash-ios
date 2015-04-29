@@ -424,6 +424,7 @@ class Calabash::Cucumber::Launcher
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
         :sdk_version => sdk_version,
+        :relaunch_simulator => true,
         # Do not advertise this to users!
         # For example, don't include documentation about this option.
         # This is used to instrument internal testing (failing fast).
@@ -744,13 +745,6 @@ class Calabash::Cucumber::Launcher
 
   # @!visibility private
   def new_run_loop(args)
-
-    # for stability, quit the simulator if Xcode version is > 5.1 and the
-    # target device is the simulator
-    target_is_sim = simulator_target?(args)
-    if target_is_sim and RunLoop::XCTools.new.xcode_version_gte_51?
-      self.simulator_launcher.stop
-    end
 
     last_err = nil
 
