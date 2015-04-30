@@ -739,6 +739,40 @@ module Calabash
         texts
       end
 
+      # Set the sliders indicated by `uiquery` to `value`.
+      #
+      # @example
+      #  slider_set_value "UISlider marked:'office slider'", 2
+      #  slider_set_value "slider marked:'weather slider'", -1
+      #  slider_set_value "* marked:'science slider'", 3
+      #  slider_set_value "UISlider", 11
+      #
+      # @param [String] uiquery A query.
+      # @param [Number] value The value to set the slider to.  value.to_s should
+      #  produce a String representation of a Number.
+      # @param [options] options Options to control the behavior of the gesture.
+      # @option options [Boolean] :animate (true) Animate the change.
+      # @option options [Boolean] :notify_targets (true) Simulate a UIEvent by
+      #  calling every target/action pair defined on the UISliders matching
+      #  `uiquery`.
+      # @raise [RuntimeError] When setting the value of the sliders match by
+      #  `uiquery` is not successful.
+      # @return [Array<String>] An array of query results.
+      def slider_set_value(uiquery, value,  options={})
+        default_options =  {:animate => true,
+                            :notify_targets => true}
+        merged_options = default_options.merge(options)
+
+        value_str = value.to_s
+
+        args = [merged_options[:animate], merged_options[:notify_targets]]
+        views_touched = map(uiquery, :changeSlider, value_str, *args)
+
+        msg = "Could not set value of slider to '#{value}' using query '#{uiquery}'"
+        assert_map_results(views_touched, msg)
+        views_touched
+      end
+
       # Calls a method on the app's AppDelegate object.
       #
       # This is an escape hatch for calling an arbitrary hook inside
