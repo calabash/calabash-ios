@@ -217,6 +217,9 @@ module Calabash
         wait_for(options) { element_does_not_exist(element_query) }
       end
 
+      alias_method :wait_for_element_does_not_exist, :wait_for_element_does_not_exists
+      # added alias for backward compatibility
+
       # Waits for one or more Calabash queries to all return empty results (typically a UI elements to disappear).
       # Uses `wait_for`.
       # @see #wait_for
