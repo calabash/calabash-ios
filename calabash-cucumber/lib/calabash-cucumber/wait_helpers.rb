@@ -212,16 +212,17 @@ module Calabash
       #   The same options as {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS} apply.
       # @return [nil] when the condition is satisfied
       # @raise [Calabash::Cucumber::WaitHelpers::WaitError] when the timeout is exceeded
-      def wait_for_element_does_not_exists(element_query, options={})
+      def wait_for_element_does_not_exist(element_query, options={})
         options[:timeout_message] = options[:timeout_message] || "Timeout waiting for element to not exist: #{element_query}"
         wait_for(options) { element_does_not_exist(element_query) }
       end
 
+      alias_method :wait_for_element_does_not_exists, :wait_for_element_does_not_exist
       # Waits for one or more Calabash queries to all return empty results (typically a UI elements to disappear).
       # Uses `wait_for`.
       # @see #wait_for
       # @see #wait_for_element_exists
-      # @see #wait_for_element_does_not_exists
+      # @see #wait_for_element_does_not_exist
       # @see Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS
       #
       # @param [Array<String>] elements_arr an Array of Calabash queries to be empty (i.e. `element_does_not_exist(element_query)`)
