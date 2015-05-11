@@ -66,4 +66,14 @@ describe Calabash::Cucumber::WaitHelpers do
       end
     end
   end
+
+  describe '.wait_for_condition' do
+    include Calabash::Cucumber::HTTPHelpers
+    it 'rescues StandardError' do
+      expect(self).to receive(:http).and_raise(StandardError, 'I got raised!')
+      expect {
+        wait_for_condition({screenshot_on_error: false})
+      }.to raise_error(StandardError, 'I got raised!')
+    end
+  end
 end

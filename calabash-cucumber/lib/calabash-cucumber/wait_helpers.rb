@@ -289,8 +289,8 @@ module Calabash
           else
             raise wait_error(msg)
           end
-        rescue Exception => e
-          handle_error_with_options(e,nil, screenshot_on_error)
+        rescue => e
+          handle_error_with_options(e, nil, screenshot_on_error)
         end
       end
 
