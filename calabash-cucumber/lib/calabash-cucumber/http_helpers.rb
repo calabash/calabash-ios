@@ -48,7 +48,6 @@ module Calabash
       def make_http_request(options)
         retryable_errors = options[:retryable_errors] || RETRYABLE_ERRORS
         CAL_HTTP_RETRY_COUNT.times do |count|
-          previous_debug_dev = nil
           begin
             if not @http
               @http = init_request(options)
