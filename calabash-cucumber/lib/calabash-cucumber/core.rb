@@ -538,10 +538,10 @@ module Calabash
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
-      # @raise [RuntimeException] if the scroll cannot be performed
-      # @raise [RuntimeException] :query finds no collection view
-      # @raise [RuntimeException] the collection view does not contain a cell at item/section
-      # @raise [RuntimeException] :scroll_position is invalid
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] :query finds no collection view
+      # @raise [RuntimeError] the collection view does not contain a cell at item/section
+      # @raise [RuntimeError] :scroll_position is invalid
       def scroll_to_collection_view_item(item, section, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -596,12 +596,12 @@ module Calabash
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
-      # @raise [RuntimeException] if the scroll cannot be performed
-      # @raise [RuntimeException] if the mark is nil
-      # @raise [RuntimeException] :query finds no collection view
-      # @raise [RuntimeException] the collection view does not contain a cell
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] if the mark is nil
+      # @raise [RuntimeError] :query finds no collection view
+      # @raise [RuntimeError] the collection view does not contain a cell
       #  with the mark
-      # @raise [RuntimeException] :scroll_position is invalid
+      # @raise [RuntimeError] :scroll_position is invalid
       def scroll_to_collection_view_item_with_mark(mark, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
