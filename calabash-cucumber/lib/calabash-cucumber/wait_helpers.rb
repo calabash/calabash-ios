@@ -112,7 +112,7 @@ module Calabash
           else
             raise wait_error(msg)
           end
-        rescue Exception => e
+        rescue => e
           handle_error_with_options(e, nil, screenshot_on_error)
         end
       end
@@ -407,23 +407,26 @@ module Calabash
       end
 
       # @!visibility private
-      # raises an error by raising a exception and conditionally takes a
-      # screenshot based on the value of +screenshot_on_error+.
-      # @param [Exception,nil] ex an exception to raise
+      # Raises an error by raising a error and conditionally takes a screenshot
+      # based on the value of +screenshot_on_error+.
+      # @param [RuntimeError,nil] error an error to raise
       # @param [String,nil] timeout_message the message of the raise
       # @param [Boolean] screenshot_on_error if true takes a screenshot before
       #  raising an error
       # @return [nil]
-      # @raise RuntimeError based on +ex+ and +timeout_message+
-      def handle_error_with_options(ex, timeout_message, screenshot_on_error)
-        msg = (timeout_message || ex)
-        if ex
-          msg = "#{msg} (#{ex.class})"
+      # @raise [StandardError] If `error`, then that kind of error is raised.
+      #  Otherwise raise a RuntimeError.
+      def handle_error_with_options(error, timeout_message, screenshot_on_error)
+        msg = (timeout_message || error)
+        if error
+          error_class = error.class
+        else
+          error_class = RuntimeError
         end
         if screenshot_on_error
           screenshot_and_raise msg
         else
-          raise msg
+          raise error_class, msg
         end
       end
 
