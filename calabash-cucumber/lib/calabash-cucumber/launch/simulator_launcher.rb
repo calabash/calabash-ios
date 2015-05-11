@@ -459,8 +459,6 @@ module Calabash
                   begin
                     connected = (ping_app == '200')
                     break if connected
-                  rescue Exception => e
-                    # nop
                   ensure
                     sleep 1 unless connected
                   end
