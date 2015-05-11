@@ -24,14 +24,14 @@ describe Calabash::Cucumber::WaitHelpers do
       end
 
       it 'uses error message if timeout_message is nil' do
-        error = RuntimeError.new('Some other exception')
+        error = RuntimeError.new('Some other error')
         expect {
           handle_error_with_options(error, nil, false)
-        }.to raise_error(RuntimeError, 'Some other exception')
+        }.to raise_error(RuntimeError, 'Some other error')
       end
     end
 
-    describe 'getting the exception class right' do
+    describe 'getting the error class right' do
       it 'uses error class if available' do
         error = ArgumentError.new('An argument error.')
         expect {

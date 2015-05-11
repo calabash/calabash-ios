@@ -26,7 +26,7 @@ module Calabash
 
       # Custom error indicating a timeout in launching and connecting to the
       # embedded calabash server.
-      # @todo This is duplicated in Launcher class - consider exceptions.rb module.
+      # @todo This is duplicated in Launcher class - consider errors.rb module.
       class TimeoutErr < RuntimeError
       end
 
