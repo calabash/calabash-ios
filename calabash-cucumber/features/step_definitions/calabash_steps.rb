@@ -62,7 +62,7 @@ end
 
 Then /^I (?:press|touch) list item "([^\"]*)"$/ do |cell_name|
   if query("tableViewCell marked: '#{cell_name}'").empty?
-    touch("tableViewCell text:' #{cell_name}'")
+    touch("tableViewCell text: '#{cell_name}'")
   else
     touch("tableViewCell marked: '#{cell_name}'")
   end
