@@ -29,8 +29,14 @@ module Calabash
       # @param [Hash] options
       # @raise [RuntimeError] if http request does not report success
       def _keychain_get(options={})
-        res = http({:method => :get, :raw => true, :path => 'keychain'}, options)
-        res = JSON.parse(res)
+        raw = http({:method => :get, :raw => true, :path => 'keychain'}, options)
+
+        begin
+          res = JSON.parse(raw)
+        rescue TypeError, JSON::ParserError => _
+          raise "Could not parse response '#{res}'; the app might have crashed or the server responded with invalid JSON."
+        end
+
         if res['outcome'] != 'SUCCESS'
           raise "get keychain with options '#{options}' failed because: '#{res['reason']}'\n'#{res['details']}'"
         end
