@@ -119,7 +119,7 @@ module Calabash
         if res['outcome'] != 'SUCCESS'
           raise "post keychain with options '#{options}' failed because: #{res['reason']}\n#{res['details']}"
         end
-        nil
+        res['results']
       end
 
       # On the iOS Simulator this clears *all* keychain entries for *all*
