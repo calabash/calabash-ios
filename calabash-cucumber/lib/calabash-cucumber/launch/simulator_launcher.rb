@@ -26,7 +26,7 @@ module Calabash
 
       # Custom error indicating a timeout in launching and connecting to the
       # embedded calabash server.
-      # @todo This is duplicated in Launcher class - consider exceptions.rb module.
+      # @todo This is duplicated in Launcher class - consider errors.rb module.
       class TimeoutErr < RuntimeError
       end
 
@@ -459,8 +459,6 @@ module Calabash
                   begin
                     connected = (ping_app == '200')
                     break if connected
-                  rescue Exception => e
-                    # nop
                   ensure
                     sleep 1 unless connected
                   end

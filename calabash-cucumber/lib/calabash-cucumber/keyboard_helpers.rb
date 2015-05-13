@@ -155,7 +155,7 @@ module Calabash
       #
       # @param [Hash] opts controls the `wait_for` behavior
       # @option opts [String] :timeout_message ('keyboard did not appear')
-      #  Controls the message that appears in the exception.
+      #  Controls the message that appears in the error.
       # @option opts [Number] :post_timeout (0.3) Controls how long to wait
       #  _after_ the keyboard has appeared.
       #

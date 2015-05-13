@@ -62,7 +62,7 @@ module Calabash
             raise Errno::ECONNREFUSED if response.status_code == 502
 
             return response.body
-          rescue Exception => e
+          rescue => e
 
             if retryable_errors.include?(e) || retryable_errors.any? { |c| e.is_a?(c) }
 

@@ -787,9 +787,6 @@ class Calabash::Cucumber::Launcher
               begin
                 connected = (ping_app == '200')
                 break if connected
-              rescue Exception => e
-                #p e
-                #retry
               ensure
                 sleep 1 unless connected
               end
@@ -819,11 +816,8 @@ class Calabash::Cucumber::Launcher
       sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || "version")
     end
     status = res.code
-    begin
-      http.finish if http and http.started?
-    rescue Exception => e
 
-    end
+    http.finish if http and http.started?
 
     if status == '200'
       version_body = JSON.parse(res.body)
