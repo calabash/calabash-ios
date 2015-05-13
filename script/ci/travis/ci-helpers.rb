@@ -111,7 +111,7 @@ def read_device_sets(path='~/.xamarin/test-cloud/ios-sets.csv')
       end
     end
     ht
-  rescue Exception => _
+  rescue
     log_fail 'cannot read device set information'
     return nil
   end
@@ -128,7 +128,7 @@ def read_api_token(account_name)
 
   begin
     IO.readlines(path).first.strip
-  rescue Exception => e
+  rescue => e
     log_fail "cannot read account information for '#{account_name}'"
     log_fail e
     return nil

@@ -538,10 +538,10 @@ module Calabash
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
-      # @raise [RuntimeException] if the scroll cannot be performed
-      # @raise [RuntimeException] :query finds no collection view
-      # @raise [RuntimeException] the collection view does not contain a cell at item/section
-      # @raise [RuntimeException] :scroll_position is invalid
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] :query finds no collection view
+      # @raise [RuntimeError] the collection view does not contain a cell at item/section
+      # @raise [RuntimeError] :scroll_position is invalid
       def scroll_to_collection_view_item(item, section, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -596,12 +596,12 @@ module Calabash
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
-      # @raise [RuntimeException] if the scroll cannot be performed
-      # @raise [RuntimeException] if the mark is nil
-      # @raise [RuntimeException] :query finds no collection view
-      # @raise [RuntimeException] the collection view does not contain a cell
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] if the mark is nil
+      # @raise [RuntimeError] :query finds no collection view
+      # @raise [RuntimeError] the collection view does not contain a cell
       #  with the mark
-      # @raise [RuntimeException] :scroll_position is invalid
+      # @raise [RuntimeError] :scroll_position is invalid
       def scroll_to_collection_view_item_with_mark(mark, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -737,6 +737,40 @@ module Calabash
           end
         end
         texts
+      end
+
+      # Set the sliders indicated by `uiquery` to `value`.
+      #
+      # @example
+      #  slider_set_value "UISlider marked:'office slider'", 2
+      #  slider_set_value "slider marked:'weather slider'", -1
+      #  slider_set_value "* marked:'science slider'", 3
+      #  slider_set_value "UISlider", 11
+      #
+      # @param [String] uiquery A query.
+      # @param [Number] value The value to set the slider to.  value.to_s should
+      #  produce a String representation of a Number.
+      # @param [options] options Options to control the behavior of the gesture.
+      # @option options [Boolean] :animate (true) Animate the change.
+      # @option options [Boolean] :notify_targets (true) Simulate a UIEvent by
+      #  calling every target/action pair defined on the UISliders matching
+      #  `uiquery`.
+      # @raise [RuntimeError] When setting the value of the sliders match by
+      #  `uiquery` is not successful.
+      # @return [Array<String>] An array of query results.
+      def slider_set_value(uiquery, value,  options={})
+        default_options =  {:animate => true,
+                            :notify_targets => true}
+        merged_options = default_options.merge(options)
+
+        value_str = value.to_s
+
+        args = [merged_options[:animate], merged_options[:notify_targets]]
+        views_touched = map(uiquery, :changeSlider, value_str, *args)
+
+        msg = "Could not set value of slider to '#{value}' using query '#{uiquery}'"
+        assert_map_results(views_touched, msg)
+        views_touched
       end
 
       # Calls a method on the app's AppDelegate object.
