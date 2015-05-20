@@ -158,11 +158,10 @@ Verify that you see console output like
     2012-01-19 LPSimpleExample[4318:13903] Bonjour Service Published: domain(local.) type(_http._tcp.) name(Calabash Server)
 
 
-## Calabash 1.0.0
+## Calabash 2.0
 
-Calabash iOS is moving towards what we will designate a 1.0.0 release. What we mean by '1.0.0', is that we consider Calabash a stable and reliable product with a decent feature set sufficient for testing most iOS applications. The label '1.0.0' will mean a much stronger adherence to backwards compatibility, quality and stability. Particularly, from version 1.0.0, Calabash will be adhering to the notion of Semantic Versioning: http://semver.org/, and we will use also continuous integration and automated testing on Calabash (iOS and Android) itself.
+Calabash 2.0 is a merge of the iOS and Android APIs.  Read the [Announcement: Calabash 2.0](https://github.com/calabash/calabash/issues/55) for details and to make comments.
 
-But 1.0.0 won't be the next line of releases. There will be a number of other lines first (0.10.x, 0.11.x, ...) which will incorporate significant changes.
 
 In the 0.10.x line, Calabash will optionally be supplied as a 'plugin' to the [Frank project](https://github.com/TestingWithFrank/Frank). The idea being to unify the communities more, although full unification will not be possible currently (as Calabash focuses on supporting on-device testing which is not currently a specific design-goal of Frank).
 
