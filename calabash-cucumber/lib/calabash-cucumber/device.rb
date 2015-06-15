@@ -313,6 +313,25 @@ module Calabash
       def has_fetched_device_info?
         @has_fetched_device_info
       end
+
+      # @deprecated 0.9.168 replaced with iphone_4in?
+      # @see #iphone_4in?
+      # Is this device an iPhone 5?
+      # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
+      # @return [Boolean] true if this device is an iPhone 5
+      def iphone_5?
+        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
+        iphone_4in?
+      end
+
+      # @deprecated 0.13.1 - Call `iphone_4in?` instead.
+      # @see #iphone_4in?
+      # @note Deprecated after introducing new `form_factor` behavior.
+      # @return [Boolean] true if this device is an iPhone 5 or 5s
+      def iphone_4in
+        _deprecated('0.13.1', "use 'iphone_4in?' instead", :warn)
+        @iphone_4in
+      end
     end
   end
 end

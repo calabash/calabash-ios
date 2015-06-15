@@ -48,7 +48,6 @@ module Calabash
       def make_http_request(options)
         retryable_errors = options[:retryable_errors] || RETRYABLE_ERRORS
         CAL_HTTP_RETRY_COUNT.times do |count|
-          previous_debug_dev = nil
           begin
             if not @http
               @http = init_request(options)
@@ -63,7 +62,7 @@ module Calabash
             raise Errno::ECONNREFUSED if response.status_code == 502
 
             return response.body
-          rescue Exception => e
+          rescue => e
 
             if retryable_errors.include?(e) || retryable_errors.any? { |c| e.is_a?(c) }
 

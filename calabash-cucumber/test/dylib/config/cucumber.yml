@@ -1,5 +1,0 @@
-verbose: CALABASH_FULL_CONSOLE_OUTPUT=1 DEBUG=1
-common: -f progress
-simulator:     -p common --tags ~@device_only --tags ~@device
-sim71_4in:     -p simulator DEVICE_TARGET='iPhone Retina (4-inch) - Simulator - iOS 7.1'
-default:       -p sim71_4in

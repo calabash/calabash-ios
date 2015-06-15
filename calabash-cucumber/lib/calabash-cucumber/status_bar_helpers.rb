@@ -15,11 +15,7 @@ module Calabash
       #  use `status_bar_orientation` whenever possible.
       #
       # @note Devices that are lying on a flat surface will report their
-      #  orientation as 'face up' or 'face down'.  In order to translate
-      #  gestures based on orientation, Calabash must have left, right, up, or
-      #  down orientation. To that end, if a device is lying flat, this method
-      #  will ***force*** a down orientation.  This will happen regardless of
-      #  the value of the `force_down` optional argument.
+      #  orientation as 'face up' or 'face down'.
       #
       # @see #status_bar_orientation
       # @see Calabash::Cucumber::RotationHelpers#rotate_home_button_to

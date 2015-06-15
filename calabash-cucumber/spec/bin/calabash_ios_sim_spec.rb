@@ -4,7 +4,7 @@ require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/wait_helpers'
 require 'run_loop'
 
-unless Resources.shared.travis_ci?
+unless Luffa::Environment.travis_ci?
   describe 'calabash ios sim cli' do
 
     let(:sim_control) { RunLoop::SimControl.new }

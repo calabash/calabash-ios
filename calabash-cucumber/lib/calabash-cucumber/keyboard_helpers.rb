@@ -84,22 +84,32 @@ module Calabash
 
         return true if device_family_iphone?
 
-        # ipad
         rect = res['rect']
         o = status_bar_orientation.to_sym
         case o
-          when :left then
-            rect['center_x'] == 592 and rect['center_y'] == 512
-          when :right then
-            rect['center_x'] == 176 and rect['center_y'] == 512
-          when :up then
-            rect['center_x'] == 384 and rect['center_y'] == 132
-          when :down then
-            rect['center_x'] == 384 and rect['center_y'] == 892
+          when :left
+            if ios8?
+              rect['center_x'] == 512 and rect['center_y'] == 592
+            else
+              rect['center_x'] == 592 and rect['center_y'] == 512
+            end
+          when :right
+            if ios8?
+              rect['center_x'] == 512 and rect['center_y'] == 592
+            else
+              rect['center_x'] == 176 and rect['center_y'] == 512
+            end
+          when :up
+            if ios8?
+              rect['center_x'] == 384 and rect['center_y'] == 892
+            else
+              rect['center_x'] == 384 and rect['center_y'] == 132
+            end
+          when :down
+              rect['center_x'] == 384 and rect['center_y'] == 892
           else
             false
         end
-
       end
 
       # Returns true if an undocked keyboard is visible.
@@ -145,7 +155,7 @@ module Calabash
       #
       # @param [Hash] opts controls the `wait_for` behavior
       # @option opts [String] :timeout_message ('keyboard did not appear')
-      #  Controls the message that appears in the exception.
+      #  Controls the message that appears in the error.
       # @option opts [Number] :post_timeout (0.3) Controls how long to wait
       #  _after_ the keyboard has appeared.
       #
@@ -301,7 +311,7 @@ module Calabash
 
         if uia_available?
           if chr.length == 1
-            uia_type_string chr
+            uia_type_string_raw chr
           else
             code = UIA_SUPPORTED_CHARS[chr]
 
@@ -315,10 +325,8 @@ module Calabash
             #           keyboard and not a key
             if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
               uia("uia.keyboard().elements().firstWithName('Delete').tap()")
-            elsif code.eql?(UIA_SUPPORTED_CHARS['Return'])
-              tap_keyboard_action_key
             else
-              uia_type_string(code, '')
+              uia_type_string_raw(code)
             end
           end
           # noinspection RubyStringKeysInHashInspection
@@ -369,6 +377,56 @@ module Calabash
         end
       end
 
+      # @!visibility private
+      #
+      # Enters text into view identified by a query
+      #
+      # @note
+      # *IMPORTANT* enter_text defaults to calling 'setValue' in UIAutomation
+      # on the text field. This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # To force use of `keyboard_enter_text` in `enter_text` use
+      # option :use_keyboard
+      #
+      # @param [String] uiquery the element to enter text into
+      # @param [String] text the text to enter
+      # @param [Hash] options controls details of text entry
+      # @option options [Boolean] :use_keyboard (false) use the iOS keyboard
+      #   to enter each character separately
+      # @option options [Boolean] :wait (true) call wait_for_element_exists with uiquery
+      # @option options [Hash] :wait_options ({}) if :wait pass this as options to wait_for_element_exists
+      def enter_text(uiquery, text, options = {})
+        default_opts = {:use_keyboard => false, :wait => true, :wait_options => {}}
+        options = default_opts.merge(options)
+        wait_for_element_exists(uiquery, options[:wait_options]) if options[:wait]
+        touch(uiquery, options)
+        wait_for_keyboard
+        if options[:use_keyboard]
+          keyboard_enter_text(text)
+        else
+          fast_enter_text(text)
+        end
+      end
+
+      # @!visibility private
+      #
+      # Enters text into current text input field
+      #
+      # @note
+      # *IMPORTANT* fast_enter_text defaults to calling 'setValue' in UIAutomation
+      # on the text field. This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # @param [String] text the text to enter
+      def fast_enter_text(text)
+        _ensure_can_enter_text
+        if uia_available?
+          uia_set_responder_value(text)
+        else
+          keyboard_enter_text(text)
+        end
+      end
+
+
       # Touches the keyboard action key.
       #
       # The action key depends on the keyboard.  Some examples include:
@@ -385,16 +443,7 @@ module Calabash
       #
       # @raise [RuntimeError] if the text cannot be typed.
       def tap_keyboard_action_key
-        if uia_available?
-          run_loop = Calabash::Cucumber::Launcher.launcher.run_loop
-          if run_loop[:uia_strategy] == :host
-            uia_type_string "\\\\n", '', false
-          else
-            uia_type_string '\n', '', false
-          end
-        else
-          keyboard_enter_char 'Return'
-        end
+        keyboard_enter_char 'Return'
       end
 
       # @deprecated 0.10.0 replaced with `tap_keyboard_action_key`
@@ -855,7 +904,7 @@ module Calabash
       # The first responder will be the UITextField or UITextView instance
       # that is associated with the visible keyboard.
       #
-      # Teturns empty string if no textField or textView elements are found to be
+      # Returns empty string if no textField or textView elements are found to be
       # the first responder.
       #
       # @raise [RuntimeError] if there is no visible keyboard

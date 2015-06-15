@@ -17,7 +17,6 @@ run_loop_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '.
 
 Dir.chdir run_loop_dir do
 
-  # rake is not part of the gem until 1.0.0.pre1
   do_system('bundle install')
   do_system('rake install')
 
@@ -25,6 +24,7 @@ end
 
 calabash_gem_dir =  File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'calabash-cucumber'))
 
+# Force calabash to build with the run-loop on the develop branch.
 Dir.chdir calabash_gem_dir do
 
   FileUtils.mkdir_p('.bundle')
@@ -35,5 +35,3 @@ Dir.chdir calabash_gem_dir do
   end
 
 end
-
-

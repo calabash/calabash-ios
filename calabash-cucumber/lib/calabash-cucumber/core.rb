@@ -171,6 +171,9 @@ module Calabash
       #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @return {Array<Hash>} array containing the serialized version of the tapped view.
       def touch(uiquery, options={})
+        if uiquery.nil? && options[:offset].nil?
+          raise "called touch(nil) without specifying an offset in options (#{options})"
+        end
         query_action_with_options(:touch, uiquery, options)
       end
 
@@ -266,6 +269,14 @@ module Calabash
       #
       # @example
       #   flick("MKMapView", {x:100,y:50})
+      # @note Due to a bug in the iOS Simulator (or UIAutomation on the simulator)
+      #   swiping and other 'advanced' gestures are not supported in certain
+      #   scroll views (e.g. UITableView or UIScrollView). It does work when running
+      #   on physical devices, though, Here is a link to a relevant Stack Overflow post
+      #  http://stackoverflow.com/questions/18792965/uiautomations-draginsidewithoptions-has-no-effect-on-ios7-simulator
+      #   It is not a bug in Calabash itself but rather in UIAutomation and hence we can't just
+      #   fix it. The work around is typically to use the scroll_to_* functions.
+      #
       # @param {String} uiquery query describing view to touch.
       # @param {Hash} delta coordinate describing the direction to flick
       # @param {Hash} options option for modifying the details of the touch.
@@ -527,10 +538,10 @@ module Calabash
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
-      # @raise [RuntimeException] if the scroll cannot be performed
-      # @raise [RuntimeException] :query finds no collection view
-      # @raise [RuntimeException] the collection view does not contain a cell at item/section
-      # @raise [RuntimeException] :scroll_position is invalid
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] :query finds no collection view
+      # @raise [RuntimeError] the collection view does not contain a cell at item/section
+      # @raise [RuntimeError] :scroll_position is invalid
       def scroll_to_collection_view_item(item, section, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -585,12 +596,12 @@ module Calabash
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
-      # @raise [RuntimeException] if the scroll cannot be performed
-      # @raise [RuntimeException] if the mark is nil
-      # @raise [RuntimeException] :query finds no collection view
-      # @raise [RuntimeException] the collection view does not contain a cell
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] if the mark is nil
+      # @raise [RuntimeError] :query finds no collection view
+      # @raise [RuntimeError] the collection view does not contain a cell
       #  with the mark
-      # @raise [RuntimeException] :scroll_position is invalid
+      # @raise [RuntimeError] :scroll_position is invalid
       def scroll_to_collection_view_item_with_mark(mark, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -726,6 +737,40 @@ module Calabash
           end
         end
         texts
+      end
+
+      # Set the sliders indicated by `uiquery` to `value`.
+      #
+      # @example
+      #  slider_set_value "UISlider marked:'office slider'", 2
+      #  slider_set_value "slider marked:'weather slider'", -1
+      #  slider_set_value "* marked:'science slider'", 3
+      #  slider_set_value "UISlider", 11
+      #
+      # @param [String] uiquery A query.
+      # @param [Number] value The value to set the slider to.  value.to_s should
+      #  produce a String representation of a Number.
+      # @param [options] options Options to control the behavior of the gesture.
+      # @option options [Boolean] :animate (true) Animate the change.
+      # @option options [Boolean] :notify_targets (true) Simulate a UIEvent by
+      #  calling every target/action pair defined on the UISliders matching
+      #  `uiquery`.
+      # @raise [RuntimeError] When setting the value of the sliders match by
+      #  `uiquery` is not successful.
+      # @return [Array<String>] An array of query results.
+      def slider_set_value(uiquery, value,  options={})
+        default_options =  {:animate => true,
+                            :notify_targets => true}
+        merged_options = default_options.merge(options)
+
+        value_str = value.to_s
+
+        args = [merged_options[:animate], merged_options[:notify_targets]]
+        views_touched = map(uiquery, :changeSlider, value_str, *args)
+
+        msg = "Could not set value of slider to '#{value}' using query '#{uiquery}'"
+        assert_map_results(views_touched, msg)
+        views_touched
       end
 
       # Calls a method on the app's AppDelegate object.
@@ -1058,11 +1103,16 @@ module Calabash
       #
       #  to connect to the current launcher
       #
+      # @param [Symbol] uia_strategy Optionally specify the uia strategy, which
+      #   can be one of :shared_element, :preferences, :host.  If you don't
+      #   know which to choose, don't specify one and calabash will try deduce
+      #   the correct strategy to use based on the environment variables used
+      #   when starting the console.
       # @return [Calabash::Cucumber::Launcher,nil] the currently active
       #  calabash launcher
-      def console_attach
+      def console_attach(uia_strategy = nil)
         # setting the @calabash_launcher here for backward compatibility
-        @calabash_launcher = launcher.attach
+        @calabash_launcher = launcher.attach({:uia_strategy => uia_strategy})
       end
 
       # @!visibility private
@@ -1076,6 +1126,27 @@ module Calabash
         l = Calabash::Cucumber::Launcher.launcher_if_used
         l && l.run_loop
       end
+
+      # @!visibility private
+      def tail_run_loop_log
+        l = run_loop
+        unless l
+          raise 'Unable to tail run_loop since there is not active run_loop...'
+        end
+        cmd = %Q[osascript -e 'tell application "Terminal" to do script "tail -n 10000 -f #{l[:log_file]} | grep -v \\"Default: \\\\*\\""']
+        raise "Unable to " unless system(cmd)
+      end
+
+      # @!visibility private
+      def dump_run_loop_log
+        l = run_loop
+        unless l
+          raise 'Unable to dump run_loop since there is not active run_loop...'
+        end
+        cmd = %Q[cat "#{l[:log_file]}" | grep -v "Default: \\*\\*\\*"]
+        puts `#{cmd}`
+      end
+
 
       # @!visibility private
       def query_action_with_options(action, uiquery, options)

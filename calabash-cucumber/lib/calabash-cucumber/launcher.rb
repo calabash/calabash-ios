@@ -96,10 +96,31 @@ class Calabash::Cucumber::Launcher
   end
 
   # @see Calabash::Cucumber::Core#console_attach
-  def attach(max_retry=1, timeout=10)
+  def attach(options={})
+    default_options = {:max_retry => 1,
+                       :timeout => 10,
+                       :uia_strategy => nil}
+    merged_options = default_options.merge(options)
+
     if calabash_no_launch?
       self.actions= Calabash::Cucumber::PlaybackActions.new
       return
+    end
+
+    # :host is is a special case and requires reading information from a cache.
+    strategy_from_options = merged_options[:uia_strategy]
+    if strategy_from_options == :host
+      self.run_loop = RunLoop::HostCache.default.read
+      return self
+    end
+
+    # Sets the device attribute.
+    ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
+
+    # The default strategy for iOS 8 devices is :host.
+    if strategy_from_options.nil? && self.device.ios_major_version > '8'
+      self.run_loop = RunLoop::HostCache.default.read
+      return self
     end
 
     pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
@@ -113,17 +134,10 @@ class Calabash::Cucumber::Launcher
       self.actions= Calabash::Cucumber::PlaybackActions.new
     end
 
-    # Sets the device attribute.
-    ensure_connectivity(max_retry, timeout)
-
-    if self.device.simulator?
-      run_loop[:uia_strategy] = :preferences
+    if strategy_from_options
+      run_loop[:uia_strategy] = merged_options[:uia_strategy]
     else
-      if self.device.ios_major_version < '8'
-        run_loop[:uia_strategy] = :preferences
-      else
-        run_loop[:uia_strategy] = :host
-      end
+      run_loop[:uia_strategy] = :preferences
     end
 
     self.run_loop = run_loop
@@ -131,8 +145,8 @@ class Calabash::Cucumber::Launcher
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
       puts "\n\n WARNING \n\n"
       puts 'Warning Trying to connect to simulator that was not launched by Calabash/instruments.'
-      puts 'To fix this you must let Calabash or instruments launch the app'
-      puts 'Continuing... query et al will work.'
+      puts 'To fix this you must let Calabash or instruments launch the app.'
+      puts 'Query will work, but gestures will not.'
       puts "\n\n WARNING \n\n"
       puts 'Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems'
     end
@@ -410,6 +424,7 @@ class Calabash::Cucumber::Launcher
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
         :sdk_version => sdk_version,
+        :relaunch_simulator => true,
         # Do not advertise this to users!
         # For example, don't include documentation about this option.
         # This is used to instrument internal testing (failing fast).
@@ -526,6 +541,11 @@ class Calabash::Cucumber::Launcher
     # @todo Use SimControl in Launcher in place of methods like simulator_target?
     args[:sim_control] = RunLoop::SimControl.new
 
+    if args[:app]
+      if !File.exist?(args[:app])
+        raise "Unable to find app bundle at #{args[:app]}. It should be an iOS Simulator build (typically a *.app directory)."
+      end
+    end
     args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
 
@@ -585,13 +605,19 @@ class Calabash::Cucumber::Launcher
       end
     end
 
-    # The public API is true/false, but we need to pass a path to a dylib to
-    # run-loop.
-    if args.fetch(:inject_dylib, false)
-      if simulator_target?(args)
-        args[:inject_dylib] = Calabash::Dylibs.path_to_sim_dylib
+    use_dylib = args[:inject_dylib]
+    if use_dylib
+      # User passed a Boolean, not a file.
+      if use_dylib.is_a?(TrueClass)
+        if simulator_target?(args)
+          args[:inject_dylib] = Calabash::Dylibs.path_to_sim_dylib
+        else
+          args[:inject_dylib] = Cucumber::Dylibs.path_to_device_dylib
+        end
       else
-        args[:inject_dylib] = Cucumber::Dylibs.path_to_device_dylib
+        unless File.exist? use_dylib
+          raise "Dylib does not exist at path: '#{use_dylib}'"
+        end
       end
     end
 
@@ -644,6 +670,10 @@ class Calabash::Cucumber::Launcher
           break
         end
       end
+
+      # -1 for manipulating the launch_args in this method!
+      # This work should not be done here!
+      # @todo Do not modify launch_args in default_uia_strategy method
       if target_device.nil?
         target_device = devices_connected.first
         if target_device
@@ -716,13 +746,6 @@ class Calabash::Cucumber::Launcher
   # @!visibility private
   def new_run_loop(args)
 
-    # for stability, quit the simulator if Xcode version is > 5.1 and the
-    # target device is the simulator
-    target_is_sim = simulator_target?(args)
-    if target_is_sim and RunLoop::XCTools.new.xcode_version_gte_51?
-      self.simulator_launcher.stop
-    end
-
     last_err = nil
 
     num_retries = args[:launch_retries] || 5
@@ -764,9 +787,6 @@ class Calabash::Cucumber::Launcher
               begin
                 connected = (ping_app == '200')
                 break if connected
-              rescue Exception => e
-                #p e
-                #retry
               ensure
                 sleep 1 unless connected
               end
@@ -796,11 +816,8 @@ class Calabash::Cucumber::Launcher
       sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || "version")
     end
     status = res.code
-    begin
-      http.finish if http and http.started?
-    rescue Exception => e
 
-    end
+    http.finish if http and http.started?
 
     if status == '200'
       version_body = JSON.parse(res.body)
