@@ -794,6 +794,21 @@ module Calabash
       # @param {Object} argument the argument to pass to the selector
       # @return {Object} the result of performing the selector with the argument (serialized)
       def backdoor(selector, argument)
+
+        unless selector.end_with?(':')
+          messages =
+                [
+                     "Selector '#{selector}' is missing a trailing ':'",
+                     'Valid backdoor selectors must take one argument.',
+                     "Before 0.15.0, the server will append a trailing ':'.",
+                     ' After 0.15.0, this behavior is scheduled to change.',
+                     '',
+                     'http://developer.xamarin.com/guides/testcloud/calabash/working-with/backdoors/#backdoor_in_iOS',
+                     ''
+                ]
+          _deprecated('0.15.0', messages.join("\n"), :warn)
+        end
+
         json = {
               :selector => selector,
               :arg => argument
