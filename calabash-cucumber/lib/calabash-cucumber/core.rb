@@ -790,18 +790,18 @@ module Calabash
       #   backdoor("calabashBackdoor:", '')
       # @example
       #   backdoor("calabashBackdoor:", {example:'param'})
-      # @param {String} sel the selector to perform on the app delegate
-      # @param {Object} arg the argument to pass to the selector
+      # @param {String} selector the selector to perform on the app delegate
+      # @param {Object} argument the argument to pass to the selector
       # @return {Object} the result of performing the selector with the argument (serialized)
-      def backdoor(sel, arg)
+      def backdoor(selector, argument)
         json = {
-              :selector => sel,
-              :arg => arg
+              :selector => selector,
+              :arg => argument
         }
         res = http({:method => :post, :path => 'backdoor'}, json)
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "backdoor #{json} failed because: #{res['reason']}\n#{res['details']}"
+          screenshot_and_raise "backdoor #{json} failed because:\n\n#{res['reason']}\n#{res['details']}"
         end
         res['result']
       end
