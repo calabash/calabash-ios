@@ -92,7 +92,7 @@ module Calabash
             stack = Kernel.caller(0, 6)[1..-1].join("\n")
           end
 
-          msg = "deprecated '#{version}' - '#{msg}'\n#{stack}"
+          msg = "deprecated '#{version}' - #{msg}\n#{stack}"
 
           if type.eql?(:pending)
             pending(msg)
