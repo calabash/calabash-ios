@@ -27,7 +27,7 @@ describe 'calabash logging' do
       _deprecated(version, dep_msg, :warn)
     end
     tokens = out.string.split("\n")
-    expect("#{tokens[0]}\n#{tokens[1]}").to be == "\e[34m\nWARN: deprecated '#{version}' - '#{dep_msg}'"
+    expect("#{tokens[0]}\n#{tokens[1]}").to be == "\e[34m\nWARN: deprecated '#{version}' - #{dep_msg}"
     expect(tokens.count).to be > 5
     expect(tokens.count).to be < 9
   end
