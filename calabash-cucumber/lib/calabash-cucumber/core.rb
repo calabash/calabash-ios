@@ -393,9 +393,17 @@ module Calabash
       # @note this is implemented by calling the Obj-C `setContentOffset:animated:` method and can do things users cant.
       #
       # @param {String} uiquery query describing view scroll (should be  UIScrollView or a web view).
+      # @param [Symbol] direction The direction to scroll. Valid directions are:
+      #   :up, :down, :left, and :right
       def scroll(uiquery, direction)
-        views_touched=map(uiquery, :scroll, direction)
-        msg = "could not find view to scroll: '#{uiquery}', args: #{direction}"
+        allowed_directions = [:up, :down, :left, :right]
+        dir_symbol = direction.to_sym
+        unless allowed_directions.include?(dir_symbol)
+          raise ArgumentError, "Expected '#{direction} to be one of #{allowed_directions}"
+        end
+
+        views_touched=map(uiquery, :scroll, dir_symbol)
+        msg = "could not find view to scroll: '#{uiquery}', args: #{dir_symbol}"
         assert_map_results(views_touched, msg)
         views_touched
       end
