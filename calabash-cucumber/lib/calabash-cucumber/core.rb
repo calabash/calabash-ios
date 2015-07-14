@@ -336,6 +336,9 @@ module Calabash
       # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
       #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @option options {String} :query (nil) if specified, the swipe will be made relative to this query.
+      # @option options [Symbol] :force (nil) Indicates the force of the swipe.
+      #  Valid values are :strong, :normal, :light.
+      #
       # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
       def swipe(dir, options={})
         unless uia_available?
