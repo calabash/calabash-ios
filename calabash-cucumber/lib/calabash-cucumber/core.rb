@@ -336,12 +336,27 @@ module Calabash
       # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
       #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @option options {String} :query (nil) if specified, the swipe will be made relative to this query.
+      # @option options [Symbol] :force (nil) Indicates the force of the swipe.
+      #  Valid values are :strong, :normal, :light.
+      #
       # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
       def swipe(dir, options={})
+        merged_options = options.dup
+
+        # I don't understand why the :status_bar_orientation value is being overwritten
         unless uia_available?
-          options = options.merge(:status_bar_orientation => status_bar_orientation)
+          merged_options[:status_bar_orientation] = status_bar_orientation
         end
-        launcher.actions.swipe(dir.to_sym, options)
+
+        force = merged_options[:force]
+        if force
+          unless [:light, :strong, :normal].include?(force)
+            raise ArgumentError,
+              "Expected :force option '#{force}' to be :light, :strong, or :normal"
+          end
+        end
+
+        launcher.actions.swipe(dir.to_sym, merged_options)
       end
 
 
