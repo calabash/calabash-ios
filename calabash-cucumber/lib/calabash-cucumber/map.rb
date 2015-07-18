@@ -45,11 +45,11 @@ module Calabash
       #   > map("textField", 'setAlpha:')
       #   => []
       #
+      #
       # Well behaved LPOperations should return the view as JSON objects.
       #
-      # Not all LPOperations are well behaved.
+      # @todo Calabash LPOperations should return 'views touched' in JSON format
       def map(query, method_name, *method_args)
-        #todo calabash operations should return 'views touched' in JSON format
         raw_map(query, method_name, *method_args)['results']
       end
 
