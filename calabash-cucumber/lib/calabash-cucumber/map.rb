@@ -6,18 +6,48 @@ module Calabash
     # @!visibility private
     module Map
 
-      # returns an array of views matched by the `query` or the result of
+      # Returns an array of views matched by the `query` or the result of
       # performing the Objective-C sequence defined by the `method_name` and
-      # `method_args` on all the views matched by the `query`
+      # `method_args` on all the views matched by the `query`.
       #
-      # the query language is documented here: https://github.com/calabash/calabash-ios/wiki
+      # This is not a method that users should be calling directly.
       #
-      # returns a JSON representation of each view that is matched
+      # The `method_name` is typically mapped to an LPOperation on the server.
+      # Some examples of LPOperations are:
       #
-      # when the `method_name` is a calabash operation, returns an array that
-      # contains the result of calling the objc selector `description` on each
-      # matched view.  these are examples of calabash operations: `:flash`,
-      # `:scrollToRowWithMark`, `:changeDatePickerDate`.
+      #   * :flash
+      #   * :scrollToRowWithMark
+      #   * :changeDatePickerDate
+      #
+      # If `method_name` maps to no LPOperation, then it is treated a selector
+      # and is performed on any view that matches `query`.
+      #
+      # @examples
+      #
+      #   # Calls 'text' on any visible UITextField, because :text is not a defined operation.
+      #   > map("textField", :text)
+      #   => [ "old text" ]
+      #
+      #   # Does not call 'setText:', because :setText is a defined operation.
+      #   > map("textField", :setText, 'new text')
+      #   => [ <UITextField ... > ]
+      #
+      #   # Calls 'setText:', because 'setText:' is not a defined operation.
+      #   > map("textField", 'setText:', 'newer text')
+      #   => [ "<VOID>" ]
+      #
+      #   # Will return [] because :unknownSelector is not defined on UITextField.
+      #   > map("textField", :unknownSelector)
+      #   => []
+      #
+      #   # Will return [] because 'setAlpha' requires 1 argument and none was provided.
+      #   # An error will be logged by the server in the device logs.
+      #   > map("textField", 'setAlpha:')
+      #   => []
+      #
+      # Well behaved LPOperations should return the view as JSON objects.
+      #
+      # Not all LPOperations are well behaved.
       def map(query, method_name, *method_args)
         #todo calabash operations should return 'views touched' in JSON format
         raw_map(query, method_name, *method_args)['results']
