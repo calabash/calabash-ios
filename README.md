@@ -32,7 +32,7 @@ We recommend that you the most recent released version of Xcode, MacOS, and Ruby
 * Xcode 5.1.1 - Xcode 6.3
 * ruby 1.9.3 - 2.2.+
 
-We recommend that you use a managed ruby like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/).  If you prefer to stick with the pre-installed ruby on MacOS, please avoid installing gems with `sudo`.  Simply put, using `sudoe` is dangerous.  Follow these [excellent instructions](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/installing-gems/) for a ruby setup that avoids `sudo`.
+We recommend that you use a managed ruby like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/).  If you prefer to stick with the pre-installed ruby on MacOS, please avoid installing gems with `sudo`.  Simply put, using `sudo` is dangerous.  Follow these [excellent instructions](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/installing-gems/) for a ruby setup that avoids `sudo`.
 
 The [best practice](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/maintaining-gems-with-bundler/) is to always use a Gemfile and bundler.
 
