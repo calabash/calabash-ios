@@ -898,6 +898,65 @@ module Calabash
         end
       end
 
+      def _key_name(path, key_code)
+        if(File.directory?(path))
+          keyboard_lookup_table = JSON.parse(`plutil -convert json #{File.join(path, 'Accessibility.strings')} -o -`)
+          return keyboard_lookup_table[key_code]
+        else
+          return nil
+        end
+      end
+
+      @@_full_name_lookup = {
+        'en' => 'English',
+        'nl' => 'Dutch',
+        'fr' => 'French',
+        'de' => 'German'
+      }
+
+      def _is_full_name?(two_letter_country_code)
+        @@_full_name_lookup.has_key?(two_letter_country_code)
+      end
+
+      def _l18n_uikit_bundle_path
+        (RunLoop::XCTools.new).uikit_bundle_l18n_path
+      end
+
+      def _key_name_lookup_table(lang_dir_name)
+        JSON.parse(`plutil -convert json #{File.join(_l18n_uikit_bundle_path, lang_dir_name, 'Accessibility.strings')} -o -`)
+      end
+
+
+      def lookup_key_name(key_code)
+
+        l18n_path = _l18n_uikit_bundle_path
+
+        localized_lang = JSON.parse(http(:path => 'keyboard-language'))['results']['input_mode']
+        lang_dir_name = "#{localized_lang}.lproj"
+        if(File.exists?(File.join(l18n_path, lang_dir_name)))
+          puts lang_dir_name
+          return _key_name_lookup_table(lang_dir_name)[key_code]
+        end
+
+        two_char_country_code = localized_lang.split('-')[0]
+        lang_dir_name = "#{two_char_country_code}.lproj"
+        if(File.exists?(File.join(l18n_path, lang_dir_name)))
+          puts lang_dir_name
+          return _key_name_lookup_table(lang_dir_name)[key_code]
+        end
+
+        if _is_full_name?(two_char_country_code)
+          puts two_char_country_code
+          return _key_name_lookup_table("#{@@_full_name_lookup[two_char_country_code]}.lproj")[key_code]
+        end
+
+        return _key_name_lookup_table(lang)[key_code]
+      end
+
+      def delete_key_name()
+        lookup_key_name('delete.key')
+      end
+
       # @!visibility private
       # Returns the the text in the first responder.
       #
