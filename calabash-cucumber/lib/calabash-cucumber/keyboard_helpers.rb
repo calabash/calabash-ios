@@ -898,6 +898,10 @@ module Calabash
         end
       end
 
+      # Waits for a keyboard to appear and returns the localized name of the
+      # `key_code` signifier
+      #
+      # @param [String] key_code Maps to a specific name in some localization
       def lookup_key_name(key_code)
         wait_for_keyboard
         localized_lang = JSON.parse(http(:path => 'keyboard-language'))['results']['input_mode']
