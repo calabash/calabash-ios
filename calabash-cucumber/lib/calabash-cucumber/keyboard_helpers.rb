@@ -904,7 +904,15 @@ module Calabash
       # @param [String] key_code Maps to a specific name in some localization
       def lookup_key_name(key_code)
         wait_for_keyboard
-        localized_lang = JSON.parse(http(:path => 'keyboard-language'))['results']['input_mode']
+        begin
+          response_json = JSON.parse(http(:path => 'keyboard-language'))
+        rescue JSON::ParserError
+          raise RuntimeError, "Could not parse output of keyboard-language route. Did the app crash?"
+        end
+        if response_json['outcome'] != 'SUCCESS'
+          screenshot_and_raise "failed to retrieve the keyboard localization"
+        end
+        localized_lang = response_json['results']['input_mode']
         (RunLoop::XCTools.new).lookup_localization_name(key_code, localized_lang)
       end
 
