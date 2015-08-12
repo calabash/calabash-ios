@@ -787,7 +787,7 @@ class Calabash::Cucumber::Launcher
               begin
                 connected = (ping_app == '200')
                 break if connected
-              rescue Exception => e
+              rescue StandardError => e
                 if full_console_logging?
                   puts "Could not connect. #{e.message}"
                   puts "Will retry ..."
