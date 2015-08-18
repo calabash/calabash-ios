@@ -87,7 +87,6 @@ module Calabash
             puts "try to rotate to '#{dir_sym}' using '#{candidate}'"
           end
           playback(candidate)
-          # need a longer sleep for cloud testing
           sleep(0.4)
           recalibrate_after_rotation()
 
