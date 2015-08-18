@@ -116,17 +116,10 @@ module Calabash
       # @example rotate right
       #  rotate :right
       #
-      # @example rotate down
-      #  rotate :down
+      # @param [Symbol] dir The direction to rotate.  Can be :left or :right.
       #
-      # @example rotate up
-      #  rotate :up
-      #
-      # @note For legacy support the `dir` argument can be a String or Symbol.
-      #  Please update your code to pass a Symbol.
-      #
-      # @param [Symbol] dir The position of the home button after the rotation.
-      #  Can be one of `{:down | :left | :right | :up }`.
+      # @return [Symbol] The position of the home button relative to the status
+      #   bar after the rotation.  Can be one of `{:down | :left | :right | :up }`.
       def rotate(dir)
         dir = dir.to_sym
         current_orientation = status_bar_orientation().to_sym
