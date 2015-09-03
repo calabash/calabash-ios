@@ -9,7 +9,7 @@ class Resources
   end
 
   def active_xcode_version
-    @active_xcode_version ||= RunLoop::XCTools.new.xcode_version
+    @active_xcode_version ||= RunLoop::Xcode.new.version
   end
 
   def resources_dir
