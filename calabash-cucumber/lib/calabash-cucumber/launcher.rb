@@ -540,6 +540,8 @@ class Calabash::Cucumber::Launcher
     # be called 1 time per launch.
     # @todo Use SimControl in Launcher in place of methods like simulator_target?
     args[:sim_control] = RunLoop::SimControl.new
+    args[:instruments] = RunLoop::Instruments.new
+    args[:xcode] = RunLoop::Xcode.new
 
     if args[:app]
       if !File.exist?(args[:app])
@@ -624,7 +626,7 @@ class Calabash::Cucumber::Launcher
     if run_with_instruments?(args)
       # Patch for bug in Xcode 6 GM + iOS 8 device testing.
       # http://openradar.appspot.com/radar?id=5891145586442240
-      uia_strategy = default_uia_strategy(args, args[:sim_control])
+      uia_strategy = default_uia_strategy(args, args[:sim_control], args[:instruments])
       args[:uia_strategy] ||= uia_strategy
       calabash_info "Using uia strategy: '#{args[:uia_strategy]}'" if debug_logging?
 
@@ -656,14 +658,18 @@ class Calabash::Cucumber::Launcher
   #
   # rdar://18296714
   # http://openradar.appspot.com/radar?id=5891145586442240
-  def default_uia_strategy(launch_args, sim_control)
+  #
+  # @param [Hash] launch_args The launch arguments.
+  # @param [RunLoop::SimControl] sim_control Used to find simulators.
+  # @param [RunLoop::Instruments] instruments Used to find physical devices.
+  def default_uia_strategy(launch_args, sim_control, instruments)
     # Preferences strategy works on Xcode iOS Simulators.
     if RunLoop::Core.simulator_target?(launch_args, sim_control)
       :preferences
     else
       target_udid = launch_args[:device_target]
       target_device = nil
-      devices_connected = sim_control.xctools.instruments(:devices)
+      devices_connected = instruments.physical_devices
       devices_connected.each do |device|
         if device.udid == target_udid
           target_device = device
