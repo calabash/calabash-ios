@@ -53,7 +53,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 1.9'
 
-  s.add_dependency('cucumber', '~> 1.3.17')
+  s.add_dependency('cucumber', '>= 1.3.17', '< 3.0')
   s.add_dependency('calabash-common', '~> 0.0.1')
   # Avoid 1.0.5 release; has an errant 'binding.pry'.
   s.add_dependency('edn', '>= 1.0.6', '< 2.0')
