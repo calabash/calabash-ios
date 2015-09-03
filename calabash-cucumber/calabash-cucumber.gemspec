@@ -76,7 +76,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'redcarpet', '3.2.0'
 
   # Shared with run-loop.
-  s.add_development_dependency 'luffa'
+  s.add_development_dependency 'luffa', '>= 1.1.0' # Remove ASAP.
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'pry'
