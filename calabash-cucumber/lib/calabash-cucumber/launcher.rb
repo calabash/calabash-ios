@@ -55,6 +55,7 @@ class Calabash::Cucumber::Launcher
   attr_accessor :actions
   attr_accessor :launch_args
   attr_accessor :simulator_launcher
+  attr_reader :xcode
 
   # @!visibility private
   # Generated when calabash cannot launch the app.
@@ -74,6 +75,10 @@ class Calabash::Cucumber::Launcher
   # @!visibility private
   # Generated when calabash cannot communicate with the app.
   class CalabashLauncherTimeoutErr < Timeout::Error
+  end
+
+  def xcode
+    @xcode ||= RunLoop::Xcode.new
   end
 
   # @!visibility private
@@ -274,7 +279,7 @@ class Calabash::Cucumber::Launcher
 
     sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
     if sim_control.xcode_version_gte_6?
-      default_sim = RunLoop::Core.default_simulator(sim_control.xctools)
+      default_sim = RunLoop::Core.default_simulator(xcode)
       name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
 
       target_simulator = nil
@@ -539,7 +544,7 @@ class Calabash::Cucumber::Launcher
     # @todo Use SimControl in Launcher in place of methods like simulator_target?
     args[:sim_control] = RunLoop::SimControl.new
     args[:instruments] = RunLoop::Instruments.new
-    args[:xcode] = RunLoop::Xcode.new
+    args[:xcode] = xcode
 
     if args[:app]
       if !File.exist?(args[:app])
