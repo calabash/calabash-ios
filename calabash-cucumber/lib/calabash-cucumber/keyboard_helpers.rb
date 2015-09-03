@@ -913,7 +913,7 @@ module Calabash
           screenshot_and_raise "failed to retrieve the keyboard localization"
         end
         localized_lang = response_json['results']['input_mode']
-        (RunLoop::XCTools.new).lookup_localization_name(key_code, localized_lang)
+        RunLoop::L10N.new.lookup_localization_name(key_code, localized_lang)
       end
 
       # @!visibility private

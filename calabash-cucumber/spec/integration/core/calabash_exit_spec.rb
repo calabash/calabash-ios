@@ -29,15 +29,16 @@ describe Calabash::Cucumber::Core do
 
     unless Luffa::Environment.travis_ci? &&
           Luffa::IDeviceInstaller.ideviceinstaller_available? &&
-          !Resources.shared.physical_devices_for_testing(RunLoop::XCTools.new).empty?
+          !Resources.shared.physical_devices_for_testing(RunLoop::Instruments.new).empty?
 
       describe 'targeting physical devices' do
         sim_control = RunLoop::SimControl.new
-        xcode_tools = sim_control.xctools
-        xcode_version = xcode_tools.xcode_version
-        Resources.shared.physical_devices_for_testing(xcode_tools).each do |device|
+        xcode = sim_control.xcode
+        xcode_version = xcode.version
+        instruments = RunLoop::Instruments.new
+        Resources.shared.physical_devices_for_testing(instruments).each do |device|
           if Luffa::Xcode::ios_version_incompatible_with_xcode_version?(device.version, xcode_version)
-            it "Skipping #{device.name} iOS #{device.version} with Xcode #{xcode_tools} - combination not supported" do
+            it "Skipping #{device.name} iOS #{device.version} with Xcode #{xcode} - combination not supported" do
               expect(true).to be == true
             end
           else

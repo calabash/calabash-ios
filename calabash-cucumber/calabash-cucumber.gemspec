@@ -65,7 +65,7 @@ Gem::Specification.new do |s|
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
-  s.add_dependency('run_loop', '>= 1.3.3', '< 2.0')
+  s.add_dependency('run_loop', '>= 1.5.0', '< 2.0')
 
   # Shared with run-loop.
   s.add_dependency('json')
@@ -76,7 +76,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'redcarpet', '3.2.0'
 
   # Shared with run-loop.
-  s.add_development_dependency 'luffa'
+  s.add_development_dependency 'luffa', '>= 1.1.0' # Remove ASAP.
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'pry'
