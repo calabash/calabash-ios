@@ -117,12 +117,12 @@ class Resources
     Luffa::IDeviceInstaller.new(ipa_path, bundle_id)
   end
 
-  def physical_devices_for_testing(xcode_tools)
-    version = xcode_tools.xcode_version.to_s
+  def physical_devices_for_testing(instruments)
+    version = instruments.xcode.version.to_s
     @physical_devices ||= {}
 
     unless @physical_devices[version]
-      @physical_devices[version] = Luffa::IDeviceInstaller.physical_devices_for_testing(xcode_tools)
+      @physical_devices[version] = Luffa::IDeviceInstaller.physical_devices_for_testing(instruments)
     end
     @physical_devices[version]
   end
