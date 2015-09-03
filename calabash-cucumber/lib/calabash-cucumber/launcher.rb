@@ -487,7 +487,7 @@ class Calabash::Cucumber::Launcher
     return :instruments if major && major >= 7 # Only instruments supported for iOS7+
     return :sim_launcher if major # and then we have <= 6
 
-    if RunLoop::XCTools.new.xcode_version_gte_51?
+    if RunLoop::Xcode.new.version_gte_51?
       return use_sim_launcher_env? ? :sim_launcher : :instruments
     end
 
@@ -535,9 +535,7 @@ class Calabash::Cucumber::Launcher
 
     # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
     # of the Xcode tool calls, like instruments -s templates, take a long time
-    # to execute.  The SimControl instance has XCTool attribute which caches
-    # the results of many of these time-consuming calls so they only need to
-    # be called 1 time per launch.
+    # to execute.
     # @todo Use SimControl in Launcher in place of methods like simulator_target?
     args[:sim_control] = RunLoop::SimControl.new
     args[:instruments] = RunLoop::Instruments.new
