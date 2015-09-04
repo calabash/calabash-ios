@@ -54,7 +54,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 1.9'
 
   s.add_dependency('cucumber', '>= 1.3.17', '< 3.0')
-  s.add_dependency('calabash-common', '~> 0.0.1')
+  s.add_dependency('calabash-common', '~> 0.0.2')
   # Avoid 1.0.5 release; has an errant 'binding.pry'.
   s.add_dependency('edn', '>= 1.0.6', '< 2.0')
   # Avoid 0.5 release because it does not contain ios-sim binary.
