@@ -25,9 +25,9 @@ unless Luffa::Environment.travis_ci?
 
       context 'device is an ipad' do
         let(:device_target) {
-          xcode_tools = RunLoop::XCTools.new
-          version = xcode_tools.xcode_version
-          if xcode_tools.xcode_version_gte_6?
+          xcode = RunLoop::Xcode.new
+          version = xcode.version
+          if xcode.version_gte_6?
             Luffa::Simulator.instance.core_simulator_for_xcode_version('iPad', 'Retina', version)
           else
             'iPad Retina (64-bit) - Simulator - iOS 7.1'
@@ -38,9 +38,9 @@ unless Luffa::Environment.travis_ci?
 
       context 'device is an 4in iphone' do
         let(:device_target) {
-          xcode_tools = RunLoop::XCTools.new
-          version = xcode_tools.xcode_version
-          if xcode_tools.xcode_version_gte_6?
+          xcode = RunLoop::Xcode.new
+          version = xcode.version
+          if xcode.version_gte_6?
             Luffa::Simulator.instance.core_simulator_for_xcode_version('iPhone', '5', version)
           else
             'iPhone Retina (4-inch) - Simulator - iOS 7.1'
@@ -51,9 +51,9 @@ unless Luffa::Environment.travis_ci?
 
       context 'device is a 3.5" iphone' do
         let(:device_target) {
-          xcode_tools = RunLoop::XCTools.new
-          version = xcode_tools.xcode_version
-          if xcode_tools.xcode_version_gte_6?
+          xcode = RunLoop::Xcode.new
+          version = xcode.version
+          if xcode.version_gte_6?
             Luffa::Simulator.instance.core_simulator_for_xcode_version('iPhone', '4s', version)
           else
             'iPhone Retina (3.5-inch) - Simulator - iOS 7.1'
@@ -64,9 +64,9 @@ unless Luffa::Environment.travis_ci?
 
       context 'device is an iphone 6' do
         let(:device_target) {
-          xcode_tools = RunLoop::XCTools.new
-          version = xcode_tools.xcode_version
-          if xcode_tools.xcode_version_gte_6?
+          xcode = RunLoop::Xcode.new
+          version = xcode.version
+          if xcode.version_gte_6?
             Luffa::Simulator.instance.core_simulator_for_xcode_version('iPhone', '6', version)
           else
             # iPhone 6 does not exist on Xcode < 6
@@ -78,9 +78,9 @@ unless Luffa::Environment.travis_ci?
 
       context 'device is an iphone 6+' do
         let(:device_target) {
-          xcode_tools = RunLoop::XCTools.new
-          version = xcode_tools.xcode_version
-          if xcode_tools.xcode_version_gte_6?
+          xcode = RunLoop::Xcode.new
+          version = xcode.version
+          if xcode.version_gte_6?
             Luffa::Simulator.instance.core_simulator_for_xcode_version('iPhone', '6 Plus', version)
           else
             # iPhone 6 does not exist on Xcode < 6

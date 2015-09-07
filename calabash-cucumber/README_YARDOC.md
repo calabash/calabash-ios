@@ -59,7 +59,6 @@ The following files have good examples of yard format:
 ```
 lib/calabash-cucumber/utils/plist_buddy.rb
 lib/calabash-cucumber/utils/simulator_accessibility.rb
-lib/calabash-cucumber/utils/xctools.rb
 
 ```
 

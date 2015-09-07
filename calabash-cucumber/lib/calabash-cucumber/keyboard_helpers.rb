@@ -898,6 +898,24 @@ module Calabash
         end
       end
 
+      # Waits for a keyboard to appear and returns the localized name of the
+      # `key_code` signifier
+      #
+      # @param [String] key_code Maps to a specific name in some localization
+      def lookup_key_name(key_code)
+        wait_for_keyboard
+        begin
+          response_json = JSON.parse(http(:path => 'keyboard-language'))
+        rescue JSON::ParserError
+          raise RuntimeError, "Could not parse output of keyboard-language route. Did the app crash?"
+        end
+        if response_json['outcome'] != 'SUCCESS'
+          screenshot_and_raise "failed to retrieve the keyboard localization"
+        end
+        localized_lang = response_json['results']['input_mode']
+        RunLoop::L10N.new.lookup_localization_name(key_code, localized_lang)
+      end
+
       # @!visibility private
       # Returns the the text in the first responder.
       #

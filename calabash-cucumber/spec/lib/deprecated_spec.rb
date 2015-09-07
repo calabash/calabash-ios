@@ -31,7 +31,7 @@ describe Calabash::Cucumber do
       end
       expect(out.string).not_to be == nil
       expect(out.string).not_to be == ''
-      expect(out.string =~ /WARN: deprecated '0.13.1' - 'use 'iphone_4in\?' instead/).not_to be == nil
+      expect(out.string =~ /WARN: deprecated '0.13.1' - use 'iphone_4in\?' instead/).not_to be == nil
     end
   end
 end

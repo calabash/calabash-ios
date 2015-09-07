@@ -5,7 +5,7 @@
 #   When running calabash-ios tests at #
 #   www.xamarin.com/test-cloud         #
 #   the  methods invoked by            #
-#   CalabashLauncher are overriden.    #
+#   CalabashLauncher are overridden.   #
 #   It will automatically ensure       #
 #   running on device, installing apps #
 #   etc.                               #

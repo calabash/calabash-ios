@@ -17,30 +17,39 @@ describe 'Calabash Launcher' do
     describe 'returns :preferences when target is' do
       it 'a simulator' do
         launch_args = { :device_target => 'simulator' }
-        actual = launcher.default_uia_strategy(launch_args, sim_control)
+        instruments = RunLoop::Instruments.new
+        actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
         expect(actual).to be == :preferences
       end
 
       it 'an iOS device running iOS < 8.0' do
         devices = [RunLoop::Device.new('name', '7.1', UDID)]
         launch_args = { :device_target => UDID }
-        expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return(devices)
-        actual = launcher.default_uia_strategy(launch_args, sim_control)
+        instruments = RunLoop::Instruments.new
+        expect(instruments).to receive(:physical_devices).and_return(devices)
+
+        actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
         expect(actual).to be == :preferences
       end
 
       it 'not found' do
         launch_args = { :device_target => 'a udid of a device that does not exist' }
-        expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return([])
-        expect {launcher.default_uia_strategy(launch_args, sim_control)}.to raise_error(RuntimeError)
+        instruments = RunLoop::Instruments.new
+        expect(instruments).to receive(:physical_devices).and_return([])
+
+        expect do
+          launcher.default_uia_strategy(launch_args, sim_control, instruments)
+        end.to raise_error RuntimeError
       end
     end
 
     it 'returns :host when target is an iOS device running iOS >= 8.0' do
       devices = [RunLoop::Device.new('name', '8.0', UDID)]
       launch_args = { :device_target => UDID }
-      expect(sim_control.xctools).to receive(:instruments).with(:devices).and_return(devices)
-      actual = launcher.default_uia_strategy(launch_args, sim_control)
+      instruments = RunLoop::Instruments.new
+      expect(instruments).to receive(:physical_devices).and_return(devices)
+
+      actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
       expect(actual).to be == :host
     end
   end

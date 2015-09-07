@@ -336,12 +336,27 @@ module Calabash
       # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
       #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @option options {String} :query (nil) if specified, the swipe will be made relative to this query.
+      # @option options [Symbol] :force (nil) Indicates the force of the swipe.
+      #  Valid values are :strong, :normal, :light.
+      #
       # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
       def swipe(dir, options={})
+        merged_options = options.dup
+
+        # I don't understand why the :status_bar_orientation value is being overwritten
         unless uia_available?
-          options = options.merge(:status_bar_orientation => status_bar_orientation)
+          merged_options[:status_bar_orientation] = status_bar_orientation
         end
-        launcher.actions.swipe(dir.to_sym, options)
+
+        force = merged_options[:force]
+        if force
+          unless [:light, :strong, :normal].include?(force)
+            raise ArgumentError,
+              "Expected :force option '#{force}' to be :light, :strong, or :normal"
+          end
+        end
+
+        launcher.actions.swipe(dir.to_sym, merged_options)
       end
 
 
@@ -393,9 +408,17 @@ module Calabash
       # @note this is implemented by calling the Obj-C `setContentOffset:animated:` method and can do things users cant.
       #
       # @param {String} uiquery query describing view scroll (should be  UIScrollView or a web view).
+      # @param [Symbol] direction The direction to scroll. Valid directions are:
+      #   :up, :down, :left, and :right
       def scroll(uiquery, direction)
-        views_touched=map(uiquery, :scroll, direction)
-        msg = "could not find view to scroll: '#{uiquery}', args: #{direction}"
+        allowed_directions = [:up, :down, :left, :right]
+        dir_symbol = direction.to_sym
+        unless allowed_directions.include?(dir_symbol)
+          raise ArgumentError, "Expected '#{direction} to be one of #{allowed_directions}"
+        end
+
+        views_touched=map(uiquery, :scroll, dir_symbol)
+        msg = "could not find view to scroll: '#{uiquery}', args: #{dir_symbol}"
         assert_map_results(views_touched, msg)
         views_touched
       end
@@ -790,18 +813,33 @@ module Calabash
       #   backdoor("calabashBackdoor:", '')
       # @example
       #   backdoor("calabashBackdoor:", {example:'param'})
-      # @param {String} sel the selector to perform on the app delegate
-      # @param {Object} arg the argument to pass to the selector
+      # @param {String} selector the selector to perform on the app delegate
+      # @param {Object} argument the argument to pass to the selector
       # @return {Object} the result of performing the selector with the argument (serialized)
-      def backdoor(sel, arg)
+      def backdoor(selector, argument)
+
+        unless selector.end_with?(':')
+          messages =
+                [
+                     "Selector '#{selector}' is missing a trailing ':'",
+                     'Valid backdoor selectors must take one argument.',
+                     "Before 0.15.0, the server will append a trailing ':'.",
+                     ' After 0.15.0, this behavior is scheduled to change.',
+                     '',
+                     'http://developer.xamarin.com/guides/testcloud/calabash/working-with/backdoors/#backdoor_in_iOS',
+                     ''
+                ]
+          _deprecated('0.15.0', messages.join("\n"), :warn)
+        end
+
         json = {
-              :selector => sel,
-              :arg => arg
+              :selector => selector,
+              :arg => argument
         }
         res = http({:method => :post, :path => 'backdoor'}, json)
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "backdoor #{json} failed because: #{res['reason']}\n#{res['details']}"
+          screenshot_and_raise "backdoor #{json} failed because:\n\n#{res['reason']}\n#{res['details']}"
         end
         res['result']
       end

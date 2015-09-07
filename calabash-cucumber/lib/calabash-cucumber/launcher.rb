@@ -55,6 +55,7 @@ class Calabash::Cucumber::Launcher
   attr_accessor :actions
   attr_accessor :launch_args
   attr_accessor :simulator_launcher
+  attr_reader :xcode
 
   # @!visibility private
   # Generated when calabash cannot launch the app.
@@ -74,6 +75,10 @@ class Calabash::Cucumber::Launcher
   # @!visibility private
   # Generated when calabash cannot communicate with the app.
   class CalabashLauncherTimeoutErr < Timeout::Error
+  end
+
+  def xcode
+    @xcode ||= RunLoop::Xcode.new
   end
 
   # @!visibility private
@@ -274,7 +279,7 @@ class Calabash::Cucumber::Launcher
 
     sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
     if sim_control.xcode_version_gte_6?
-      default_sim = RunLoop::Core.default_simulator(sim_control.xctools)
+      default_sim = RunLoop::Core.default_simulator(xcode)
       name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
 
       target_simulator = nil
@@ -487,7 +492,7 @@ class Calabash::Cucumber::Launcher
     return :instruments if major && major >= 7 # Only instruments supported for iOS7+
     return :sim_launcher if major # and then we have <= 6
 
-    if RunLoop::XCTools.new.xcode_version_gte_51?
+    if RunLoop::Xcode.new.version_gte_51?
       return use_sim_launcher_env? ? :sim_launcher : :instruments
     end
 
@@ -535,11 +540,11 @@ class Calabash::Cucumber::Launcher
 
     # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
     # of the Xcode tool calls, like instruments -s templates, take a long time
-    # to execute.  The SimControl instance has XCTool attribute which caches
-    # the results of many of these time-consuming calls so they only need to
-    # be called 1 time per launch.
+    # to execute.
     # @todo Use SimControl in Launcher in place of methods like simulator_target?
     args[:sim_control] = RunLoop::SimControl.new
+    args[:instruments] = RunLoop::Instruments.new
+    args[:xcode] = xcode
 
     if args[:app]
       if !File.exist?(args[:app])
@@ -624,7 +629,7 @@ class Calabash::Cucumber::Launcher
     if run_with_instruments?(args)
       # Patch for bug in Xcode 6 GM + iOS 8 device testing.
       # http://openradar.appspot.com/radar?id=5891145586442240
-      uia_strategy = default_uia_strategy(args, args[:sim_control])
+      uia_strategy = default_uia_strategy(args, args[:sim_control], args[:instruments])
       args[:uia_strategy] ||= uia_strategy
       calabash_info "Using uia strategy: '#{args[:uia_strategy]}'" if debug_logging?
 
@@ -656,14 +661,18 @@ class Calabash::Cucumber::Launcher
   #
   # rdar://18296714
   # http://openradar.appspot.com/radar?id=5891145586442240
-  def default_uia_strategy(launch_args, sim_control)
+  #
+  # @param [Hash] launch_args The launch arguments.
+  # @param [RunLoop::SimControl] sim_control Used to find simulators.
+  # @param [RunLoop::Instruments] instruments Used to find physical devices.
+  def default_uia_strategy(launch_args, sim_control, instruments)
     # Preferences strategy works on Xcode iOS Simulators.
     if RunLoop::Core.simulator_target?(launch_args, sim_control)
       :preferences
     else
       target_udid = launch_args[:device_target]
       target_device = nil
-      devices_connected = sim_control.xctools.instruments(:devices)
+      devices_connected = instruments.physical_devices
       devices_connected.each do |device|
         if device.udid == target_udid
           target_device = device
@@ -787,6 +796,11 @@ class Calabash::Cucumber::Launcher
               begin
                 connected = (ping_app == '200')
                 break if connected
+              rescue StandardError => e
+                if full_console_logging?
+                  puts "Could not connect. #{e.message}"
+                  puts "Will retry ..."
+                end
               ensure
                 sleep 1 unless connected
               end

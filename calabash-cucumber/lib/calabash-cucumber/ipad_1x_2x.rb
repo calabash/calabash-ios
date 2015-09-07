@@ -49,6 +49,9 @@ module Calabash
                       :emulated_2x => '1X'}
         }
 
+        # accessibility key = fullscreen.zoom => 2x => Switch to full screen mode
+        # accessibility key = normal.zoom => 1x => Switch to normal mode
+
         # @!visibility private
         # @!attribute [r] scale
         # The current 1X or 2X scale represented as a Symbol.

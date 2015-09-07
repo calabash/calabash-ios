@@ -2,9 +2,9 @@
 
 require 'run_loop'
 
-xcode_tools = RunLoop::XCTools.new
+xcode_tools = RunLoop::Xcode.new
 sims = {}
-if xcode_tools.xcode_version_gte_61?
+if xcode_tools.version_gte_61?
   sims[:ipad2]     = 'iPad 2 (8.1 Simulator)'
   sims[:ipad2_mid] = 'iPad 2 (7.1 Simulator)'
 
