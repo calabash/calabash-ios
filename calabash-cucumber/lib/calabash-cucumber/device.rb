@@ -244,6 +244,12 @@ module Calabash
         version_hash(ios_version)[:major_version]
       end
 
+      # Is this device running iOS 9?
+      # @return [Boolean] true if the major version of the OS is 9
+      def ios9?
+        ios_major_version == '9'
+      end
+
       # Is this device running iOS 8?
       # @return [Boolean] true if the major version of the OS is 8
       def ios8?
