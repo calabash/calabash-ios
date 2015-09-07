@@ -123,6 +123,18 @@ module Calabash
         _default_device_or_create.iphone_35in?
       end
 
+      # The iOS version on the device under test.
+      #
+      # @note
+      #  **WARNING:** The `OS` env variable has been deprecated and should
+      #  never be set.
+      #
+      # @raise [RuntimeError] If the server cannot be reached.
+      # @return [RunLoop::Version] The version of the iOS running on the device.
+      def ios_version
+        RunLoop::Version.new(_default_device_or_create.ios_version)
+      end
+
       # Is the device under test running iOS 5?
       #
       # @note

@@ -13,6 +13,16 @@ describe Calabash::Cucumber::EnvironmentHelpers do
   let(:endpoint) { 'http://localhost:37265' }
   let(:test_obj) { Calabash::RspecTests::EnvironmentHelpers::TestObject.new }
 
+  it '.ios_version' do
+    simulator_data = Resources.shared.server_version :simulator
+    device = Calabash::Cucumber::Device.new(endpoint, simulator_data)
+    expect(test_obj).to receive(:default_device).and_return(device)
+
+    version = test_obj.ios_version
+    expect(version).to be_a_kind_of RunLoop::Version
+    expect(version).to be == RunLoop::Version.new('7.1')
+  end
+
   describe '.ios8?' do
     let(:simulator_data) { Resources.shared.server_version :simulator }
 
