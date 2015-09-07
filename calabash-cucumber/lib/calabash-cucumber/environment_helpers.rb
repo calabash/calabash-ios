@@ -180,6 +180,18 @@ module Calabash
        _default_device_or_create.ios8?
       end
 
+      # Is the device under test running iOS 9?
+      #
+      # @note
+      #  **WARNING:** The `OS` env variable has been deprecated and should
+      #  never be set.
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 9
+      def ios9?
+       _default_device_or_create.ios9?
+      end
+
       # Is the app that is being tested an iPhone app emulated on an iPad?
       #
       # @see Calabash::Cucumber::IPad
