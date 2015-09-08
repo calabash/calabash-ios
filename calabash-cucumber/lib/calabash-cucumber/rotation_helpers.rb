@@ -44,7 +44,7 @@ module Calabash
       # @note This method generates verbose messages when full console logging
       #  is enabled.  See {Calabash::Cucumber::Logging#full_console_logging?}.
       #
-      # @param [Symbol] dir The position of the home button after the rotation.
+      # @param [Symbol] direction The position of the home button after the rotation.
       #  Can be one of `{:down | :left | :right | :up }`.
       #
       # @note A rotation will only occur if your view controller and application
@@ -52,25 +52,12 @@ module Calabash
       #
       # @return [Symbol] The position of the home button relative to the status
       #  bar when all rotations have been completed.
-      def rotate_home_button_to(dir)
-        dir_sym = dir.to_sym
-        if dir_sym.eql?(:top)
-          if full_console_logging?
-            calabash_warn "converting '#{dir}' to ':up' - please adjust your code"
-          end
-          dir_sym = :up
-        end
+      def rotate_home_button_to(direction)
 
-        if dir_sym.eql?(:bottom)
-          if full_console_logging?
-            calabash_warn "converting '#{dir}' to ':down' - please adjust your code"
-          end
-          dir_sym = :down
-        end
-
-        directions = [:down, :up, :left, :right]
-        unless directions.include?(dir_sym)
-          screenshot_and_raise "expected one of '#{directions}' as an arg to 'rotate_home_button_to but found '#{dir}'"
+        begin
+          as_symbol = ensure_valid_rotate_home_to_arg(direction)
+        rescue ArgumentError => e
+          raise ArgumentError, e.message
         end
 
         res = status_bar_orientation()
@@ -80,11 +67,11 @@ module Calabash
           res = res.to_sym
         end
 
-        return res if res.eql? dir_sym
+        return res if res.eql? as_symbol
 
         rotation_candidates.each { |candidate|
           if full_console_logging?
-            puts "try to rotate to '#{dir_sym}' using '#{candidate}'"
+            puts "try to rotate to '#{as_symbol}' using '#{candidate}'"
           end
           playback(candidate)
           sleep(0.4)
@@ -97,11 +84,11 @@ module Calabash
             res = res.to_sym
           end
 
-          return if res.eql? dir_sym
+          return if res.eql? as_symbol
         }
 
         if full_console_logging?
-          calabash_warn "Could not rotate home button to '#{dir}'."
+          calabash_warn "Could not rotate home button to '#{direction}'."
           calabash_warn 'Is rotation enabled for this controller?'
           calabash_warn "Will return 'down'"
         end

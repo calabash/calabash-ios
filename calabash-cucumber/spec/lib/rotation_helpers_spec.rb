@@ -12,6 +12,16 @@ describe Calabash::Cucumber::RotationHelpers do
     end.new
   end
 
+  describe '#rotate_home_button_to' do
+    it 're-raises ArgumentError' do
+      error = ArgumentError.new('Expect ArgumentError')
+      expect(helper).to receive(:ensure_valid_rotate_home_to_arg).and_raise error
+
+      expect do
+        helper.rotate_home_button_to(:invalid)
+      end.to raise_error ArgumentError, /Expect ArgumentError/
+    end
+  end
 
   describe '#rotate' do
     describe 'validates arguments' do
