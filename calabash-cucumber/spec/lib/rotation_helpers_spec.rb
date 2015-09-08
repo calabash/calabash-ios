@@ -21,6 +21,30 @@ describe Calabash::Cucumber::RotationHelpers do
         helper.rotate_home_button_to(:invalid)
       end.to raise_error ArgumentError, /Expect ArgumentError/
     end
+
+    it 'does nothing if device is already in the target orientation' do
+      expect(helper).to receive(:ensure_valid_rotate_home_to_arg).and_return :down
+      expect(helper).to receive(:status_bar_orientation).and_return 'down'
+
+      expect(helper.rotate_home_button_to('down')).to be == :down
+    end
+
+    it 'iOS >= 9' do
+      expect(helper).to receive(:ios_version).and_return RunLoop::Version.new('9.0')
+      expect(helper).to receive(:rotate_to_uia_orientation).with(:down).and_return :rotation_result
+      expect(helper).to receive(:recalibrate_after_rotation).and_call_original
+      expect(helper).to receive(:status_bar_orientation).and_return('before', 'after')
+
+      expect(helper.rotate_home_button_to('down')).to be == :after
+    end
+
+    it 'iOS < 9' do
+      expect(helper).to receive(:ios_version).and_return RunLoop::Version.new('8.0')
+      expect(helper).to receive(:status_bar_orientation).and_return('before')
+      expect(helper).to receive(:rotate_home_button_to_position_with_playback).with(:down).and_return :after
+
+      expect(helper.rotate_home_button_to('down')).to be == :after
+    end
   end
 
   describe '#rotate' do

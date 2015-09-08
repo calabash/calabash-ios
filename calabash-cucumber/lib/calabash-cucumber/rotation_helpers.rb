@@ -60,39 +60,17 @@ module Calabash
           raise ArgumentError, e.message
         end
 
-        res = status_bar_orientation()
-        if res.nil?
-          screenshot_and_raise "expected 'status_bar_orientation' to return a non-nil value"
+        current_orientation = status_bar_orientation.to_sym
+
+        return current_orientation if current_orientation == as_symbol
+
+        if ios_version >= RunLoop::Version.new('9.0')
+          rotate_to_uia_orientation(as_symbol)
+          recalibrate_after_rotation
+          status_bar_orientation.to_sym
         else
-          res = res.to_sym
+          rotate_home_button_to_position_with_playback(as_symbol)
         end
-
-        return res if res.eql? as_symbol
-
-        rotation_candidates.each { |candidate|
-          if full_console_logging?
-            puts "try to rotate to '#{as_symbol}' using '#{candidate}'"
-          end
-          playback(candidate)
-          sleep(0.4)
-          recalibrate_after_rotation()
-
-          res = status_bar_orientation
-          if res.nil?
-            screenshot_and_raise "expected 'status_bar_orientation' to return a non-nil value"
-          else
-            res = res.to_sym
-          end
-
-          return if res.eql? as_symbol
-        }
-
-        if full_console_logging?
-          calabash_warn "Could not rotate home button to '#{direction}'."
-          calabash_warn 'Is rotation enabled for this controller?'
-          calabash_warn "Will return 'down'"
-        end
-        :down
       end
 
       # Rotates the device in the direction indicated by `direction`.
