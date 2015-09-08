@@ -146,6 +146,23 @@ module Calabash
 
       private
 
+      def ensure_valid_rotate_home_to_arg(arg)
+        coerced = arg.to_sym
+
+        if coerced == :top
+          coerced = :up
+        elsif coerced == :bottom
+          coerced = :down
+        end
+
+        allowed = [:down, :up, :left, :right]
+        unless allowed.include?(coerced)
+          raise ArgumentError,
+                "Expected '#{arg}' to be :down, :up, :left, or :right"
+        end
+        coerced
+      end
+
       UIA_DEVICE_ORIENTATION = {
             :portrait => 1,
             :upside_down => 2,

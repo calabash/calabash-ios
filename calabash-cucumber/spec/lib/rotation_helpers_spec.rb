@@ -169,4 +169,30 @@ describe Calabash::Cucumber::RotationHelpers do
       end
     end
   end
+
+  describe '#ensure_valid_rotate_home_to_arg' do
+    it 'raises error when arg is invalid' do
+      expect do
+        helper.send(:ensure_valid_rotate_home_to_arg, :invalid)
+      end.to raise_error ArgumentError, /Expected/
+    end
+
+    describe 'valid arguments' do
+      it 'top' do
+        expect(helper.send(:ensure_valid_rotate_home_to_arg, 'top')).to be == :up
+      end
+
+      it ':top' do
+        expect(helper.send(:ensure_valid_rotate_home_to_arg, :top)).to be == :up
+      end
+
+      it 'bottom' do
+        expect(helper.send(:ensure_valid_rotate_home_to_arg, 'bottom')).to be == :down
+      end
+
+      it ':bottom' do
+        expect(helper.send(:ensure_valid_rotate_home_to_arg, :bottom)).to be == :down
+      end
+    end
+  end
 end
