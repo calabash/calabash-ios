@@ -111,6 +111,12 @@ module Calabash
 
       private
 
+      # @! visibility private
+      def recalibrate_after_rotation
+        uia_query :window
+      end
+
+      # @! visibility private
       def ensure_valid_rotate_home_to_arg(arg)
         coerced = arg.to_sym
 
@@ -128,6 +134,7 @@ module Calabash
         coerced
       end
 
+      # @! visibility private
       UIA_DEVICE_ORIENTATION = {
             :portrait => 1,
             :upside_down => 2,
@@ -135,6 +142,7 @@ module Calabash
             :landscape_right => 4
       }.freeze
 
+      # @! visibility private
       def rotate_home_button_to_position_with_playback(home_button_position)
 
         rotation_candidates.each do |candidate|
@@ -160,6 +168,7 @@ Is rotation enabled for this controller?}
         :down
       end
 
+      # @! visibility private
       def rotate_to_uia_orientation(orientation)
         case orientation
           when :down then key = :portrait
@@ -175,6 +184,7 @@ Is rotation enabled for this controller?}
         uia(cmd)
       end
 
+      # @! visibility private
       def rotate_with_uia(direction, current_orientation)
         key = uia_orientation_key(direction, current_orientation)
         value = UIA_DEVICE_ORIENTATION[key]
@@ -182,6 +192,7 @@ Is rotation enabled for this controller?}
         uia(cmd)
       end
 
+      # @! visibility private
       def uia_orientation_key(direction, current_orientation)
 
         key = nil
@@ -213,6 +224,7 @@ Is rotation enabled for this controller?}
         key
       end
 
+      # @! visibility private
       def recording_name(direction, current_orientation)
         recording_name = nil
         case direction
@@ -243,6 +255,7 @@ Is rotation enabled for this controller?}
         "rotate_#{recording_name}"
       end
 
+      # @! visibility private
       def rotate_with_playback(direction, current_orientation)
         name = recording_name(direction, current_orientation)
 
