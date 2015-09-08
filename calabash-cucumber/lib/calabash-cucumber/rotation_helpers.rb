@@ -195,46 +195,45 @@ module Calabash
         key
       end
 
-        rotate_cmd = nil
-        case dir
+      def recording_name(direction, current_orientation)
+        recording_name = nil
+        case direction
           when :left then
             if current_orientation == :down
-              rotate_cmd = 'left_home_down'
+              recording_name = 'left_home_down'
             elsif current_orientation == :right
-              rotate_cmd = 'left_home_right'
+              recording_name = 'left_home_right'
             elsif current_orientation == :left
-              rotate_cmd = 'left_home_left'
+              recording_name = 'left_home_left'
             elsif current_orientation == :up
-              rotate_cmd = 'left_home_up'
+              recording_name = 'left_home_up'
             end
           when :right then
             if current_orientation == :down
-              rotate_cmd = 'right_home_down'
+              recording_name = 'right_home_down'
             elsif current_orientation == :left
-              rotate_cmd = 'right_home_left'
+              recording_name = 'right_home_left'
             elsif current_orientation == :right
-              rotate_cmd = 'right_home_right'
+              recording_name = 'right_home_right'
             elsif current_orientation == :up
-              rotate_cmd = 'right_home_up'
+              recording_name = 'right_home_up'
             end
+          else
+            raise ArgumentError,
+                  "Expected '#{direction}' to be 'left' or 'right'"
         end
-
-        if rotate_cmd.nil?
-          if full_console_logging?
-            puts "Could not rotate device in direction '#{dir}' with orientation '#{current_orientation} - will do nothing"
-          end
-        else
-          result = playback("rotate_#{rotate_cmd}")
-          recalibrate_after_rotation
-          result
-        end
+        "rotate_#{recording_name}"
       end
 
-      def recalibrate_after_rotation
-        uia_query :window
+      def rotate_with_playback(direction, current_orientation)
+        name = recording_name(direction, current_orientation)
+
+        if debug_logging?
+          puts "Could not rotate device '#{direction}' given '#{current_orientation}'; nothing to do."
+        end
+
+        playback(name)
       end
-
-
     end
   end
 end

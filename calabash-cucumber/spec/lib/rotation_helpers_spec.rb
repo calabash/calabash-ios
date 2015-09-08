@@ -8,6 +8,7 @@ describe Calabash::Cucumber::RotationHelpers do
       def uia_query(_); ; end
       def status_bar_orientation; ; end
       def uia(_); ; end
+      def playback(_); ; end
     end.new
   end
 
@@ -64,12 +65,11 @@ describe Calabash::Cucumber::RotationHelpers do
     expect(helper.send(:rotate_with_uia, :left, :down)).to be == :result
   end
 
-  describe '#rotate_with_playback' do
-    it 'raises error' do
-      expect do
-        helper.send(:rotate_with_playback, :invalid, :orientation)
-      end.to raise_error ArgumentError
-    end
+  it '#rotate_with_playback' do
+    expect(helper).to receive(:recording_name).and_return 'recording name'
+    expect(helper).to receive(:playback).with('recording name').and_return :result
+
+    expect(helper.send(:rotate_with_playback, :left, :down)).to be == :result
   end
 
   describe '#uia_orientation_key' do
@@ -85,6 +85,44 @@ describe Calabash::Cucumber::RotationHelpers do
       it ':right' do helper.send(:uia_orientation_key, :right, :right) == :upside_down end
       it ':left' do helper.send(:uia_orientation_key, :right, :left) == :portrait end
       it ':up' do helper.send(:uia_orientation_key, :right, :up) == :landscape_right end
+    end
+  end
+
+  describe '#recording_name' do
+    describe ':left' do
+      it ':down' do
+        helper.send(:recording_name, :left, :down) == 'rotate_left_home_down'
+      end
+
+      it ':right' do
+        helper.send(:recording_name, :left, :right) == 'rotate_left_home_right'
+      end
+
+      it ':left' do
+        helper.send(:recording_name, :left, :left) == 'rotate_left_home_left'
+      end
+
+      it ':up' do
+        helper.send(:recording_name, :left, :up) == 'rotate_left_home_up'
+      end
+    end
+
+    describe ':right' do
+      it ':down' do
+        helper.send(:recording_name, :left, :down) == 'rotate_right_home_down'
+      end
+
+      it ':right' do
+        helper.send(:recording_name, :left, :right) == 'rotate_right_home_right'
+      end
+
+      it ':left' do
+        helper.send(:recording_name, :left, :left) == 'rotate_right_home_left'
+      end
+
+      it ':up' do
+        helper.send(:recording_name, :left, :up) == 'rotate_right_home_up'
+      end
     end
   end
 end
