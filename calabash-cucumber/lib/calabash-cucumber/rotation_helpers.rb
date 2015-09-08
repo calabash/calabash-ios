@@ -135,8 +135,28 @@ module Calabash
             :landscape_right => 4
       }.freeze
 
-      def recalibrate_after_rotation
-        uia_query :window
+      def rotate_home_button_to_position_with_playback(home_button_position)
+
+        rotation_candidates.each do |candidate|
+          if debug_logging?
+            calabash_info "Trying to rotate Home Button to '#{home_button_position}' using '#{candidate}'"
+          end
+
+          playback(candidate)
+          sleep(0.4)
+          recalibrate_after_rotation
+
+          current_orientation = status_bar_orientation.to_sym
+          if current_orientation == home_button_position
+            return current_orientation
+          end
+        end
+
+        if debug_logging?
+          calabash_warn "Could not rotate Home Button to '#{home_button_position}'."
+          calabash_warn 'Is rotation enabled for this controller?'
+        end
+        :down
       end
 
       def rotate_to_uia_orientation(orientation)

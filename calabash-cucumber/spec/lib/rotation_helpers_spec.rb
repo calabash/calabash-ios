@@ -229,4 +229,26 @@ describe Calabash::Cucumber::RotationHelpers do
       end
     end
   end
+
+  describe '#rotate_home_button_to_position_with_playback' do
+    let(:method_name) { :rotate_home_button_to_position_with_playback }
+
+    it 'returns :down if rotation cannot be performed' do
+      expect(helper).to receive(:rotation_candidates).and_return([])
+
+      expect(helper.send(method_name, :any_arg)).to be == :down
+    end
+
+    let(:candidates) { [:a, :b, :c, :left] }
+
+    it 'calls playback with candidates' do
+      expect(helper).to receive(:playback).exactly(4).times.and_return nil
+      expect(helper).to receive(:sleep).exactly(4).times.and_return nil
+      expect(helper).to receive(:recalibrate_after_rotation).exactly(4).times.and_call_original
+      expect(helper).to receive(:status_bar_orientation).and_return(*candidates)
+      expect(helper).to receive(:rotation_candidates).and_return candidates
+
+      expect(helper.send(method_name, :left)).to be == :left
+    end
+  end
 end
