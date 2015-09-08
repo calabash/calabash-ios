@@ -108,7 +108,7 @@ module Calabash
         :down
       end
 
-      # Rotates the device in the direction indicated by `dir`.
+      # Rotates the device in the direction indicated by `direction`.
       #
       # @example rotate left
       #  rotate :left
@@ -116,13 +116,31 @@ module Calabash
       # @example rotate right
       #  rotate :right
       #
-      # @param [Symbol] dir The direction to rotate.  Can be :left or :right.
+      # @param [Symbol] direction The direction to rotate. Can be :left or :right.
       #
       # @return [Symbol] The position of the home button relative to the status
       #   bar after the rotation.  Can be one of `{:down | :left | :right | :up }`.
-      def rotate(dir)
-        dir = dir.to_sym
-        current_orientation = status_bar_orientation().to_sym
+      # @raise [ArgumentError] If direction is not :left or :right.
+      def rotate(direction)
+
+        as_symbol = direction.to_sym
+
+        if as_symbol != :left && as_symbol != :right
+          raise ArgumentError,
+                "Expected '#{direction}' to be :left or :right"
+        end
+
+        current_orientation = status_bar_orientation.to_sym
+
+        if ios_version >= RunLoop::Version.new('9.0')
+          result = rotate_with_uia(as_symbol, current_orientation)
+        else
+          result = rotate_with_playback(as_symbol, current_orientation)
+        end
+        recalibrate_after_rotation
+        result
+      end
+
         rotate_cmd = nil
         case dir
           when :left then
