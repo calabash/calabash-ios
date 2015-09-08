@@ -153,8 +153,9 @@ module Calabash
         end
 
         if debug_logging?
-          calabash_warn "Could not rotate Home Button to '#{home_button_position}'."
-          calabash_warn 'Is rotation enabled for this controller?'
+          calabash_warn %Q{
+Could not rotate Home Button to '#{home_button_position}'."
+Is rotation enabled for this controller?}
         end
         :down
       end

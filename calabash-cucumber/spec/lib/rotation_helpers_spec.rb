@@ -12,6 +12,10 @@ describe Calabash::Cucumber::RotationHelpers do
     end.new
   end
 
+  before do
+    stub_env({'DEBUG' => '1'})
+  end
+
   describe '#rotate_home_button_to' do
     it 're-raises ArgumentError' do
       error = ArgumentError.new('Expect ArgumentError')
