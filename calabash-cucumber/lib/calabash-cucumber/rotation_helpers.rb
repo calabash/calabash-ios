@@ -157,6 +157,21 @@ module Calabash
         uia_query :window
       end
 
+      def rotate_to_uia_orientation(orientation)
+        case orientation
+          when :down then key = :portrait
+          when :up then key = :upside_down
+          when :left then key = :landscape_right
+          when :right then key = :landscape_left
+          else
+            raise ArgumentError,
+                  "Expected '#{orientation}' to be :left, :right, :up, or :down"
+        end
+        value = UIA_DEVICE_ORIENTATION[key]
+        cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
+        uia(cmd)
+      end
+
       def rotate_with_uia(direction, current_orientation)
         key = uia_orientation_key(direction, current_orientation)
         value = UIA_DEVICE_ORIENTATION[key]

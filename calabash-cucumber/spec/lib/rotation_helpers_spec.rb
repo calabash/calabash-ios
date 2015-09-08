@@ -125,4 +125,48 @@ describe Calabash::Cucumber::RotationHelpers do
       end
     end
   end
+
+  describe '#rotate_to_uia_orientation' do
+    it 'raises an error for invalid arguments' do
+      expect do
+        helper.send(:rotate_to_uia_orientation, :invalid)
+      end.to raise_error ArgumentError, /Expected/
+    end
+
+    describe 'valid arguments' do
+      it ':down' do
+        expected = 'UIATarget.localTarget().setDeviceOrientation(1)'
+        expect(helper).to receive(:uia).with(expected).and_return :result
+
+        actual = helper.send(:rotate_to_uia_orientation, :down)
+        expect(actual).to be == :result
+      end
+
+      it ':up' do
+        expected = 'UIATarget.localTarget().setDeviceOrientation(2)'
+        expect(helper).to receive(:uia).with(expected).and_return :result
+
+        actual = helper.send(:rotate_to_uia_orientation, :up)
+        expect(actual).to be == :result
+
+      end
+
+      it ':left' do
+        expected = 'UIATarget.localTarget().setDeviceOrientation(4)'
+        expect(helper).to receive(:uia).with(expected).and_return :result
+
+        actual = helper.send(:rotate_to_uia_orientation, :left)
+        expect(actual).to be == :result
+
+      end
+
+      it ':right' do
+        expected = 'UIATarget.localTarget().setDeviceOrientation(3)'
+        expect(helper).to receive(:uia).with(expected).and_return :result
+
+        actual = helper.send(:rotate_to_uia_orientation, :right)
+        expect(actual).to be == :result
+      end
+    end
+  end
 end
