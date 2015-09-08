@@ -666,36 +666,40 @@ class Calabash::Cucumber::Launcher
   # @param [RunLoop::SimControl] sim_control Used to find simulators.
   # @param [RunLoop::Instruments] instruments Used to find physical devices.
   def default_uia_strategy(launch_args, sim_control, instruments)
-    # Preferences strategy works on Xcode iOS Simulators.
-    if RunLoop::Core.simulator_target?(launch_args, sim_control)
-      :preferences
+
+    xcode = sim_control.xcode
+    if xcode.version_gte_7?
+      :host
     else
-      target_udid = launch_args[:device_target]
-      target_device = nil
-      devices_connected = instruments.physical_devices
-      devices_connected.each do |device|
-        if device.udid == target_udid
-          target_device = device
-          break
-        end
+      udid_or_name = launch_args[:device_target]
+
+      # Can't make a determination, so return :host because it works everywhere.
+      return :host if udid_or_name == nil || udid_or_name == ''
+
+      # The default.
+      # No DEVICE_TARGET is set and no option was passed to relaunch.
+      return :preferences if udid_or_name.downcase.include?('simulator')
+
+      simulator = sim_control.simulators.find do |sim|
+        sim.instruments_identifier(xcode) == udid_or_name ||
+              sim.udid == udid_or_name
       end
 
-      # -1 for manipulating the launch_args in this method!
-      # This work should not be done here!
-      # @todo Do not modify launch_args in default_uia_strategy method
-      if target_device.nil?
-        target_device = devices_connected.first
-        if target_device
-          launch_args[:device_target] = target_device.udid
+      return :preferences if simulator
+
+      physical_device = instruments.physical_devices.find do |device|
+        device.name == udid_or_name ||
+              device.udid == udid_or_name
+      end
+
+      if physical_device
+        if physical_device.version < RunLoop::Version.new('8.0')
+          :preferences
+        else
+          :host
         end
-      end
-      unless target_device
-        raise 'No device_target was specified and did not detect a connected device. Set a device_target option in the relaunch method.'
-      end
-      # Preferences strategy works for iOS < 8.0, but not for iOS >= 8.0.
-      if target_device.version < RunLoop::Version.new('8.0')
-        :preferences
       else
+        # Return host because it works everywhere.
         :host
       end
     end
