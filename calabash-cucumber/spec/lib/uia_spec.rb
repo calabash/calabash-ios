@@ -61,13 +61,13 @@ describe Calabash::Cucumber::UIA do
       it 'and result has a :value key' do
         mocked_value = {'status' => 'error', 'value' => 'error message', 'index' =>0}
         expect(test_obj).to receive(:uia_handle_command).and_return(mocked_value)
-        expect { test_obj.uia_type_string 'foo' }.to raise_error
+        expect { test_obj.uia_type_string 'foo' }.to raise_error RuntimeError
       end
 
       it 'and result does not have a :value key' do
         mocked_value = {'status' => 'error', 'index' =>0}
         expect(test_obj).to receive(:uia_handle_command).and_return(mocked_value)
-        expect { test_obj.uia_type_string 'foo' }.to raise_error
+        expect { test_obj.uia_type_string 'foo' }.to raise_error RuntimeError
       end
     end
   end
@@ -80,7 +80,7 @@ describe Calabash::Cucumber::UIA do
           launcher.run_loop = {:uia_strategy => :preferences}
           expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
           expect(test_obj).to receive(:http).and_return('')
-          expect { test_obj.uia('command') }.to raise_error
+          expect { test_obj.uia('command') }.to raise_error RuntimeError
         end
       end
     end
@@ -98,7 +98,7 @@ describe Calabash::Cucumber::UIA do
                       'index' => 1
                 }
           expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
-          expect { test_obj.uia('command') }.to raise_error
+          expect { test_obj.uia('command') }.to raise_error RuntimeError
         end
 
         describe 'when response status is error' do
@@ -113,7 +113,7 @@ describe Calabash::Cucumber::UIA do
                         'index' => 1
                   }
             expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
-            expect { test_obj.uia('command') }.to raise_error
+            expect { test_obj.uia('command') }.to raise_error RuntimeError
           end
 
           it 'and response does not contain a value' do
