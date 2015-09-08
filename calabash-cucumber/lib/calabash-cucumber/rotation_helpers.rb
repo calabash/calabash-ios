@@ -119,7 +119,7 @@ module Calabash
       # @param [Symbol] direction The direction to rotate. Can be :left or :right.
       #
       # @return [Symbol] The position of the home button relative to the status
-      #   bar after the rotation.  Can be one of `{:down | :left | :right | :up }`.
+      #   bar after the rotation.  Will be one of `{:down | :left | :right | :up }`.
       # @raise [ArgumentError] If direction is not :left or :right.
       def rotate(direction)
 
@@ -138,7 +138,61 @@ module Calabash
           result = rotate_with_playback(as_symbol, current_orientation)
         end
         recalibrate_after_rotation
-        result
+
+        ap result if debug_logging?
+
+        status_bar_orientation
+      end
+
+      private
+
+      UIA_DEVICE_ORIENTATION = {
+            :portrait => 1,
+            :upside_down => 2,
+            :landscape_left => 3,
+            :landscape_right => 4
+      }.freeze
+
+      def recalibrate_after_rotation
+        uia_query :window
+      end
+
+      def rotate_with_uia(direction, current_orientation)
+        key = uia_orientation_key(direction, current_orientation)
+        value = UIA_DEVICE_ORIENTATION[key]
+        cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
+        uia(cmd)
+      end
+
+      def uia_orientation_key(direction, current_orientation)
+
+        key = nil
+        case direction
+          when :left then
+            if current_orientation == :down
+              key = :landscape_right
+            elsif current_orientation == :right
+              key = :portrait
+            elsif current_orientation == :left
+              key = :upside_down
+            elsif current_orientation == :up
+              key = :landscape_left
+            end
+          when :right then
+            if current_orientation == :down
+              key = :landscape_left
+            elsif current_orientation == :right
+              key = :upside_down
+            elsif current_orientation == :left
+              key = :portrait
+            elsif current_orientation == :up
+              key = :landscape_right
+            end
+          else
+            raise ArgumentError,
+                  "Expected '#{direction}' to be :left or :right"
+        end
+        key
       end
 
         rotate_cmd = nil
