@@ -893,6 +893,11 @@ class Calabash::Cucumber::Launcher
   end
 
   # @!visibility private
+  def discover_device_target(launch_args)
+    ENV['DEVICE_TARGET'] || launch_args[:device_target]
+  end
+
+  # @!visibility private
   def simulator_target?(launch_args={})
     value = ENV['DEVICE_TARGET'] || launch_args[:device_target]
     return false if value.nil?

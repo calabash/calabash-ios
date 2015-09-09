@@ -13,6 +13,29 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  describe '#discover_device_target' do
+
+    let(:options) do { :device_target => 'OPTION!' } end
+
+    it 'respects the DEVICE_TARGET' do
+      stub_env('DEVICE_TARGET', 'TARGET!')
+
+      expect(launcher.discover_device_target(options)).to be == 'TARGET!'
+    end
+
+    it 'uses :device_target option' do
+      stub_env({'DEVICE_TARGET' => nil})
+
+      expect(launcher.discover_device_target(options)).to be == 'OPTION!'
+    end
+
+    it 'returns nil if neither is defined' do
+      stub_env({'DEVICE_TARGET' => nil})
+
+      expect(launcher.discover_device_target({})).to be == nil
+    end
+  end
+
   describe '.default_uia_strategy' do
     let(:sim_control) { RunLoop::SimControl.new }
     let(:xcode) { sim_control.xcode }
