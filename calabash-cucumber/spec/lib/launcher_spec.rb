@@ -3,7 +3,8 @@ require 'calabash-cucumber/utils/simulator_accessibility'
 
 describe 'Calabash Launcher' do
 
-  UDID = '66h3hfgc466836ehcg72738eh8f322842855d2fd'
+  UDID = '83b59716a3ac25e997770a91477ef4e6ad0ab7bb'
+
   IPHONE_4IN_R_64 = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
 
   let (:launcher) { Calabash::Cucumber::Launcher.new }
@@ -13,44 +14,122 @@ describe 'Calabash Launcher' do
   }
 
   describe '.default_uia_strategy' do
-    let (:sim_control) { RunLoop::SimControl.new }
-    describe 'returns :preferences when target is' do
-      it 'a simulator' do
-        launch_args = { :device_target => 'simulator' }
-        instruments = RunLoop::Instruments.new
-        actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
-        expect(actual).to be == :preferences
-      end
+    let(:sim_control) { RunLoop::SimControl.new }
+    let(:xcode) { sim_control.xcode }
+    let(:instruments) { RunLoop::Instruments.new }
 
-      it 'an iOS device running iOS < 8.0' do
-        devices = [RunLoop::Device.new('name', '7.1', UDID)]
-        launch_args = { :device_target => UDID }
-        instruments = RunLoop::Instruments.new
-        expect(instruments).to receive(:physical_devices).and_return(devices)
+    describe 'Xcode >= 7.0' do
+      it 'returns :host' do
+        expect(sim_control.xcode).to receive(:version_gte_7?).and_return true
 
-        actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
-        expect(actual).to be == :preferences
-      end
-
-      it 'not found' do
-        launch_args = { :device_target => 'a udid of a device that does not exist' }
-        instruments = RunLoop::Instruments.new
-        expect(instruments).to receive(:physical_devices).and_return([])
-
-        expect do
-          launcher.default_uia_strategy(launch_args, sim_control, instruments)
-        end.to raise_error RuntimeError
+        actual = launcher.default_uia_strategy({}, sim_control, instruments)
+        expect(actual).to be == :host
       end
     end
 
-    it 'returns :host when target is an iOS device running iOS >= 8.0' do
-      devices = [RunLoop::Device.new('name', '8.0', UDID)]
-      launch_args = { :device_target => UDID }
-      instruments = RunLoop::Instruments.new
-      expect(instruments).to receive(:physical_devices).and_return(devices)
+    describe 'Xcode < 7.0' do
+      let(:simulator) do
+        RunLoop::Device.new('iPhone 5s', '8.0', '8612A705-1FC6-4FD8-803D-4F6CB50E1559')
+      end
 
-      actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
-      expect(actual).to be == :host
+      let(:device) do
+        RunLoop::Device.new('pegasi', '8.4', UDID)
+      end
+
+      before do
+        expect(sim_control.xcode).to receive(:version_gte_7?).at_least(:once).and_return false
+      end
+
+      it ':device_target is nil' do
+        options = { :device_target => nil }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :host
+      end
+
+      it ':device_target is the empty string' do
+        options = { :device_target => '' }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :host
+      end
+
+      it ":device_target is 'simulator'" do
+        options = { :device_target => 'simulator' }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :preferences
+      end
+
+      it ':device_target is a simulator UDID' do
+        expect(sim_control).to receive(:simulators).and_return [simulator]
+        options = { :device_target =>  simulator.udid }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :preferences
+      end
+
+      it ':device_target is a simulator name' do
+        expect(sim_control).to receive(:simulators).and_return [simulator]
+        expect(simulator).to receive(:instruments_identifier).and_return 'name'
+        options = { :device_target => 'name' }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :preferences
+      end
+
+      describe 'physical devices' do
+
+        let(:v71) { RunLoop::Version.new('7.1') }
+
+        before do
+          expect(sim_control).to receive(:simulators).and_return []
+          expect(instruments).to receive(:physical_devices).and_return [device]
+        end
+
+        describe ':device_target is a device UDID' do
+          it 'iOS >= 8.0' do
+            options = { :device_target => device.udid }
+
+            actual = launcher.default_uia_strategy(options, sim_control, instruments)
+            expect(actual).to be == :host
+          end
+
+          it 'iOS < 7.0' do
+            expect(device).to receive(:version).at_least(:once).and_return v71
+            options = { :device_target => device.udid }
+
+            actual = launcher.default_uia_strategy(options, sim_control, instruments)
+            expect(actual).to be == :preferences
+          end
+        end
+
+        describe ':device_target is a device name' do
+          it 'iOS >= 8.0' do
+            options = { :device_target => device.name }
+
+            actual = launcher.default_uia_strategy(options, sim_control, instruments)
+            expect(actual).to be == :host
+          end
+
+          it 'iOS < 7.0' do
+            expect(device).to receive(:version).at_least(:once).and_return v71
+            options = { :device_target => device.name }
+
+            actual = launcher.default_uia_strategy(options, sim_control, instruments)
+            expect(actual).to be == :preferences
+          end
+        end
+      end
+
+      it 'returns :host when all else fails' do
+        expect(sim_control).to receive(:simulators).and_return []
+        expect(instruments).to receive(:physical_devices).and_return []
+        options = { :device_target => device.udid }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :host
+      end
     end
   end
 
