@@ -219,7 +219,9 @@ describe 'Calabash Launcher' do
         end
 
         it 'by instruments identifier' do
-          options[:device_target] = simulator.instruments_identifier(launcher.xcode)
+          # Xcode 7 CoreSimulator - does not contain 'Simulator' in the name.
+          expect(simulator).to receive(:instruments_identifier).and_return 'iPhone 5s (9.0)'
+          options[:device_target] = 'iPhone 5s (9.0)'
 
           expect(launcher.simulator_target?(options)).to be_truthy
         end
