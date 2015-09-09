@@ -122,8 +122,7 @@ class Calabash::Cucumber::Launcher
     # Sets the device attribute.
     ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
 
-    # The default strategy for iOS 8 devices is :host.
-    if strategy_from_options.nil? && self.device.ios_major_version > '8'
+    if strategy_from_options.nil? && xcode.version_gte_7?
       self.run_loop = RunLoop::HostCache.default.read
       return self
     end
