@@ -893,10 +893,31 @@ class Calabash::Cucumber::Launcher
   end
 
   # @!visibility private
+  def discover_device_target(launch_args)
+    ENV['DEVICE_TARGET'] || launch_args[:device_target]
+  end
+
+  # @!visibility private
   def simulator_target?(launch_args={})
-    value = ENV['DEVICE_TARGET'] || launch_args[:device_target]
-    return false if value.nil?
-    value.downcase.include?('simulator')
+    udid_or_name = discover_device_target(launch_args)
+
+    return false if udid_or_name.nil? || udid_or_name == ''
+
+    return true if udid_or_name.downcase.include?('simulator')
+
+    return false if udid_or_name[RunLoop::Regex::DEVICE_UDID_REGEX, 0] != nil
+
+    if xcode.version_gte_6?
+      sim_control = launch_args[:sim_control] || RunLoop::SimControl.new
+      simulator = sim_control.simulators.find do |sim|
+        sim.instruments_identifier(xcode) == udid_or_name ||
+              sim.udid == udid_or_name
+      end
+
+      !simulator.nil?
+    else
+      false
+    end
   end
 
   # @!visibility private
