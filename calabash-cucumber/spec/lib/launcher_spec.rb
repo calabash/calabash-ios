@@ -3,111 +3,243 @@ require 'calabash-cucumber/utils/simulator_accessibility'
 
 describe 'Calabash Launcher' do
 
-  UDID = '66h3hfgc466836ehcg72738eh8f322842855d2fd'
+  UDID = '83b59716a3ac25e997770a91477ef4e6ad0ab7bb'
+
   IPHONE_4IN_R_64 = 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1'
 
   let (:launcher) { Calabash::Cucumber::Launcher.new }
+
+  let(:simulator) do
+    RunLoop::Device.new('iPhone 5s', '8.0', '8612A705-1FC6-4FD8-803D-4F6CB50E1559')
+  end
+
+  let(:device) do
+    RunLoop::Device.new('pegasi', '8.4', UDID)
+  end
 
   before(:example) {
     RunLoop::SimControl.terminate_all_sims
   }
 
-  describe '.default_uia_strategy' do
-    let (:sim_control) { RunLoop::SimControl.new }
-    describe 'returns :preferences when target is' do
-      it 'a simulator' do
-        launch_args = { :device_target => 'simulator' }
-        instruments = RunLoop::Instruments.new
-        actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
-        expect(actual).to be == :preferences
-      end
+  describe '#discover_device_target' do
 
-      it 'an iOS device running iOS < 8.0' do
-        devices = [RunLoop::Device.new('name', '7.1', UDID)]
-        launch_args = { :device_target => UDID }
-        instruments = RunLoop::Instruments.new
-        expect(instruments).to receive(:physical_devices).and_return(devices)
+    let(:options) do { :device_target => 'OPTION!' } end
 
-        actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
-        expect(actual).to be == :preferences
-      end
+    it 'respects the DEVICE_TARGET' do
+      stub_env('DEVICE_TARGET', 'TARGET!')
 
-      it 'not found' do
-        launch_args = { :device_target => 'a udid of a device that does not exist' }
-        instruments = RunLoop::Instruments.new
-        expect(instruments).to receive(:physical_devices).and_return([])
-
-        expect do
-          launcher.default_uia_strategy(launch_args, sim_control, instruments)
-        end.to raise_error RuntimeError
-      end
+      expect(launcher.discover_device_target(options)).to be == 'TARGET!'
     end
 
-    it 'returns :host when target is an iOS device running iOS >= 8.0' do
-      devices = [RunLoop::Device.new('name', '8.0', UDID)]
-      launch_args = { :device_target => UDID }
-      instruments = RunLoop::Instruments.new
-      expect(instruments).to receive(:physical_devices).and_return(devices)
+    it 'uses :device_target option' do
+      stub_env({'DEVICE_TARGET' => nil})
 
-      actual = launcher.default_uia_strategy(launch_args, sim_control, instruments)
-      expect(actual).to be == :host
+      expect(launcher.discover_device_target(options)).to be == 'OPTION!'
+    end
+
+    it 'returns nil if neither is defined' do
+      stub_env({'DEVICE_TARGET' => nil})
+
+      expect(launcher.discover_device_target({})).to be == nil
     end
   end
 
-  describe 'simulator_target? should respond correctly to DEVICE_TARGET' do
+  describe '.default_uia_strategy' do
+    let(:sim_control) { RunLoop::SimControl.new }
+    let(:xcode) { sim_control.xcode }
+    let(:instruments) { RunLoop::Instruments.new }
 
-    it 'should return true if DEVICE_TARGET is nil' do
-      expect(launcher.simulator_target?).to be == false
+    describe 'Xcode >= 7.0' do
+      it 'returns :host' do
+        expect(sim_control.xcode).to receive(:version_gte_7?).and_return true
+
+        actual = launcher.default_uia_strategy({}, sim_control, instruments)
+        expect(actual).to be == :host
+      end
     end
 
-    it 'should return true if DEVICE_TARGET is simulator' do
-      stub_env('DEVICE_TARGET', 'simulator')
-      expect(launcher.simulator_target?).to be == true
+    describe 'Xcode < 7.0' do
+
+      before do
+        expect(sim_control.xcode).to receive(:version_gte_7?).at_least(:once).and_return false
+      end
+
+      it ':device_target is nil' do
+        options = { :device_target => nil }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :host
+      end
+
+      it ':device_target is the empty string' do
+        options = { :device_target => '' }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :host
+      end
+
+      it ":device_target is 'simulator'" do
+        options = { :device_target => 'simulator' }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :preferences
+      end
+
+      it ':device_target is a simulator UDID' do
+        expect(sim_control).to receive(:simulators).and_return [simulator]
+        options = { :device_target =>  simulator.udid }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :preferences
+      end
+
+      it ':device_target is a simulator name' do
+        expect(sim_control).to receive(:simulators).and_return [simulator]
+        expect(simulator).to receive(:instruments_identifier).and_return 'name'
+        options = { :device_target => 'name' }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :preferences
+      end
+
+      describe 'physical devices' do
+
+        let(:v71) { RunLoop::Version.new('7.1') }
+
+        before do
+          expect(sim_control).to receive(:simulators).and_return []
+          expect(instruments).to receive(:physical_devices).and_return [device]
+        end
+
+        describe ':device_target is a device UDID' do
+          it 'iOS >= 8.0' do
+            options = { :device_target => device.udid }
+
+            actual = launcher.default_uia_strategy(options, sim_control, instruments)
+            expect(actual).to be == :host
+          end
+
+          it 'iOS < 7.0' do
+            expect(device).to receive(:version).at_least(:once).and_return v71
+            options = { :device_target => device.udid }
+
+            actual = launcher.default_uia_strategy(options, sim_control, instruments)
+            expect(actual).to be == :preferences
+          end
+        end
+
+        describe ':device_target is a device name' do
+          it 'iOS >= 8.0' do
+            options = { :device_target => device.name }
+
+            actual = launcher.default_uia_strategy(options, sim_control, instruments)
+            expect(actual).to be == :host
+          end
+
+          it 'iOS < 7.0' do
+            expect(device).to receive(:version).at_least(:once).and_return v71
+            options = { :device_target => device.name }
+
+            actual = launcher.default_uia_strategy(options, sim_control, instruments)
+            expect(actual).to be == :preferences
+          end
+        end
+      end
+
+      it 'returns :host when all else fails' do
+        expect(sim_control).to receive(:simulators).and_return []
+        expect(instruments).to receive(:physical_devices).and_return []
+        options = { :device_target => device.udid }
+
+        actual = launcher.default_uia_strategy(options, sim_control, instruments)
+        expect(actual).to be == :host
+      end
+    end
+  end
+
+  describe '#simulator_target?' do
+
+    it ':device_target is nil' do
+      options = { :device_target => nil }
+
+      expect(launcher.simulator_target?(options)).to be_falsey
     end
 
-    it 'should return false if DEVICE_TARGET is device' do
-      stub_env('DEVICE_TARGET', 'device')
-      expect(launcher.simulator_target?).to be == false
+    it ':device_target is the empty string' do
+      options = { :device_target => '' }
+
+      expect(launcher.simulator_target?(options)).to be_falsey
     end
 
-    it 'should return false if DEVICE_TARGET is udid' do
-      # noinspection SpellCheckingInspection
-      stub_env('DEVICE_TARGET', UDID)
-      expect(launcher.simulator_target?).to be == false
+    it ":device_target is 'simulator'" do
+      options = { :device_target => 'simulator' }
+
+      expect(launcher.simulator_target?(options)).to be_truthy
     end
 
-    it 'should return true for Xcode 5.1 style simulator names' do
-      stub_env('DEVICE_TARGET', 'iPhone Retina (4-inch) - Simulator - iOS 7.1')
-      expect(launcher.simulator_target?).to be == true
+    it ':device_target is a Xcode 5 Simulator' do
+      options = { :device_target => 'iPhone Retina (4-inch) - Simulator - iOS 7.1' }
 
-      stub_env('DEVICE_TARGET', 'iPhone - Simulator - iOS 6.1')
-      expect(launcher.simulator_target?).to be == true
-
-      stub_env('DEVICE_TARGET', 'iPad Retina (64-bit) - Simulator - iOS 7.0')
-      expect(launcher.simulator_target?).to be == true
+      expect(launcher.simulator_target?(options)).to be_truthy
     end
 
-    it 'should return true when passed a hash with :device_target => a simulator' do
-      hash = {:device_target => 'simulator'}
-      expect(launcher.simulator_target?(hash)).to be == true
-      hash = {:device_target => 'iPhone Retina (4-inch) - Simulator - iOS 7.1'}
-      expect(launcher.simulator_target?(hash)).to be == true
+    it ':device_target is a Xcode 6 CoreSimulator' do
+      options = { :device_target => 'iPhone 5s (8.4 Simulator)' }
+
+      expect(launcher.simulator_target?(options)).to be_truthy
     end
 
-    it 'should return false when passed a hash with :device_target != a simulator' do
-      hash = {:device_target => 'device'}
-      expect(launcher.simulator_target?(hash)).to be == false
+    it ':device_target is a UDID' do
+      options = { :device_target => UDID }
 
-      hash = {:device_target => UDID}
-      expect(launcher.simulator_target?(hash)).to be == false
-
-      hash = {:device_target => 'foobar'}
-      expect(launcher.simulator_target?(hash)).to be == false
+      expect(launcher.simulator_target?(options)).to be_falsey
     end
 
-    it 'should return false when passed a hash with no :device_target key' do
-      hash = {:foobar => 'foobar'}
-      expect(launcher.simulator_target?(hash)).to be == false
+    it 'not a CoreSimulator environment' do
+      expect(launcher.xcode).to receive(:version_gte_6?).and_return false
+      options = { :device_target => 'some name' }
+
+      expect(launcher.simulator_target?(options)).to be_falsey
+    end
+
+    describe 'CoreSimulator' do
+
+      before do
+        expect(launcher.xcode).to receive(:version_gte_6?).at_least(:once).and_return true
+      end
+
+      let(:sim_control) { RunLoop::SimControl.new }
+
+      describe 'matches a simulator' do
+
+        let(:options) do { :sim_control => sim_control } end
+
+        before do
+          expect(sim_control).to receive(:simulators).and_return [simulator]
+        end
+
+        it 'by instruments identifier' do
+          # Xcode 7 CoreSimulator - does not contain 'Simulator' in the name.
+          expect(simulator).to receive(:instruments_identifier).and_return 'iPhone 5s (9.0)'
+          options[:device_target] = 'iPhone 5s (9.0)'
+
+          expect(launcher.simulator_target?(options)).to be_truthy
+        end
+
+        it 'by sim udid' do
+          options[:device_target] = simulator.udid
+
+          expect(launcher.simulator_target?(options)).to be_truthy
+        end
+      end
+
+      it 'matches no simulator' do
+        expect(sim_control).to receive(:simulators).and_return []
+        options = { :device_target => 'some name',
+                    :sim_control => sim_control }
+
+        expect(launcher.simulator_target?(options)).to be_falsey
+      end
     end
   end
 

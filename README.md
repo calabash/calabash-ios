@@ -26,7 +26,7 @@ While Calabash is completely free, Xamarin provides a number of commercial servi
 
 Xamarin Studio users should visit [http://developer.xamarin.com/testcloud/](http://developer.xamarin.com/testcloud/) for setup instructions and requirements.
 
-We recommend that you the most recent released version of Xcode, MacOS, and Ruby.
+We recommend that you use the most recent released version of Xcode, MacOS, and Ruby.
 
 * MacOS 10.9 or 10.10
 * Xcode 5.1.1 - Xcode 6
