@@ -49,15 +49,6 @@ describe 'Calabash Launcher' do
     let(:xcode) { sim_control.xcode }
     let(:instruments) { RunLoop::Instruments.new }
 
-    describe 'Xcode >= 7.0' do
-      it 'returns :host' do
-        expect(sim_control.xcode).to receive(:version_gte_7?).and_return true
-
-        actual = launcher.default_uia_strategy({}, sim_control, instruments)
-        expect(actual).to be == :host
-      end
-    end
-
     describe 'Xcode < 7.0' do
 
       before do
