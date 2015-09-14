@@ -665,42 +665,38 @@ class Calabash::Cucumber::Launcher
   # @param [RunLoop::SimControl] sim_control Used to find simulators.
   # @param [RunLoop::Instruments] instruments Used to find physical devices.
   def default_uia_strategy(launch_args, sim_control, instruments)
-
     xcode = sim_control.xcode
-    if xcode.version_gte_7?
-      :host
-    else
-      udid_or_name = launch_args[:device_target]
 
-      # Can't make a determination, so return :host because it works everywhere.
-      return :host if udid_or_name == nil || udid_or_name == ''
+    udid_or_name = launch_args[:device_target]
 
-      # The default.
-      # No DEVICE_TARGET is set and no option was passed to relaunch.
-      return :preferences if udid_or_name.downcase.include?('simulator')
+    # Can't make a determination, so return :host because it works everywhere.
+    return :host if udid_or_name == nil || udid_or_name == ''
 
-      simulator = sim_control.simulators.find do |sim|
-        sim.instruments_identifier(xcode) == udid_or_name ||
-              sim.udid == udid_or_name
-      end
+    # The default.
+    # No DEVICE_TARGET is set and no option was passed to relaunch.
+    return :preferences if udid_or_name.downcase.include?('simulator')
 
-      return :preferences if simulator
+    simulator = sim_control.simulators.find do |sim|
+      sim.instruments_identifier(xcode) == udid_or_name ||
+            sim.udid == udid_or_name
+    end
 
-      physical_device = instruments.physical_devices.find do |device|
-        device.name == udid_or_name ||
-              device.udid == udid_or_name
-      end
+    return :preferences if simulator
 
-      if physical_device
-        if physical_device.version < RunLoop::Version.new('8.0')
-          :preferences
-        else
-          :host
-        end
+    physical_device = instruments.physical_devices.find do |device|
+      device.name == udid_or_name ||
+            device.udid == udid_or_name
+    end
+
+    if physical_device
+      if physical_device.version < RunLoop::Version.new('8.0')
+        :preferences
       else
-        # Return host because it works everywhere.
         :host
       end
+    else
+      # Return host because it works everywhere.
+      :host
     end
   end
 
