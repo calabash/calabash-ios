@@ -10,6 +10,7 @@ module Calabash
       include Calabash::Cucumber::Logging
 
       # @!visibility private
+      # @deprecated 0.16.1
       def rotation_candidates
         %w(rotate_left_home_down rotate_left_home_left rotate_left_home_right rotate_left_home_up
            rotate_right_home_down rotate_right_home_left rotate_right_home_right rotate_right_home_up)
@@ -44,7 +45,7 @@ module Calabash
       # @note This method generates verbose messages when full console logging
       #  is enabled.  See {Calabash::Cucumber::Logging#full_console_logging?}.
       #
-      # @param [Symbol] dir The position of the home button after the rotation.
+      # @param [Symbol] direction The position of the home button after the rotation.
       #  Can be one of `{:down | :left | :right | :up }`.
       #
       # @note A rotation will only occur if your view controller and application
@@ -52,63 +53,24 @@ module Calabash
       #
       # @return [Symbol] The position of the home button relative to the status
       #  bar when all rotations have been completed.
-      def rotate_home_button_to(dir)
-        dir_sym = dir.to_sym
-        if dir_sym.eql?(:top)
-          if full_console_logging?
-            calabash_warn "converting '#{dir}' to ':up' - please adjust your code"
-          end
-          dir_sym = :up
+      def rotate_home_button_to(direction)
+
+        begin
+          as_symbol = ensure_valid_rotate_home_to_arg(direction)
+        rescue ArgumentError => e
+          raise ArgumentError, e.message
         end
 
-        if dir_sym.eql?(:bottom)
-          if full_console_logging?
-            calabash_warn "converting '#{dir}' to ':down' - please adjust your code"
-          end
-          dir_sym = :down
-        end
+        current_orientation = status_bar_orientation.to_sym
 
-        directions = [:down, :up, :left, :right]
-        unless directions.include?(dir_sym)
-          screenshot_and_raise "expected one of '#{directions}' as an arg to 'rotate_home_button_to but found '#{dir}'"
-        end
+        return current_orientation if current_orientation == as_symbol
 
-        res = status_bar_orientation()
-        if res.nil?
-          screenshot_and_raise "expected 'status_bar_orientation' to return a non-nil value"
-        else
-          res = res.to_sym
-        end
-
-        return res if res.eql? dir_sym
-
-        rotation_candidates.each { |candidate|
-          if full_console_logging?
-            puts "try to rotate to '#{dir_sym}' using '#{candidate}'"
-          end
-          playback(candidate)
-          sleep(0.4)
-          recalibrate_after_rotation()
-
-          res = status_bar_orientation
-          if res.nil?
-            screenshot_and_raise "expected 'status_bar_orientation' to return a non-nil value"
-          else
-            res = res.to_sym
-          end
-
-          return if res.eql? dir_sym
-        }
-
-        if full_console_logging?
-          calabash_warn "Could not rotate home button to '#{dir}'."
-          calabash_warn 'Is rotation enabled for this controller?'
-          calabash_warn "Will return 'down'"
-        end
-        :down
+        rotate_to_uia_orientation(as_symbol)
+        recalibrate_after_rotation
+        status_bar_orientation.to_sym
       end
 
-      # Rotates the device in the direction indicated by `dir`.
+      # Rotates the device in the direction indicated by `direction`.
       #
       # @example rotate left
       #  rotate :left
@@ -116,53 +78,190 @@ module Calabash
       # @example rotate right
       #  rotate :right
       #
-      # @param [Symbol] dir The direction to rotate.  Can be :left or :right.
+      # @param [Symbol] direction The direction to rotate. Can be :left or :right.
       #
       # @return [Symbol] The position of the home button relative to the status
-      #   bar after the rotation.  Can be one of `{:down | :left | :right | :up }`.
-      def rotate(dir)
-        dir = dir.to_sym
-        current_orientation = status_bar_orientation().to_sym
-        rotate_cmd = nil
-        case dir
-          when :left then
-            if current_orientation == :down
-              rotate_cmd = 'left_home_down'
-            elsif current_orientation == :right
-              rotate_cmd = 'left_home_right'
-            elsif current_orientation == :left
-              rotate_cmd = 'left_home_left'
-            elsif current_orientation == :up
-              rotate_cmd = 'left_home_up'
-            end
-          when :right then
-            if current_orientation == :down
-              rotate_cmd = 'right_home_down'
-            elsif current_orientation == :left
-              rotate_cmd = 'right_home_left'
-            elsif current_orientation == :right
-              rotate_cmd = 'right_home_right'
-            elsif current_orientation == :up
-              rotate_cmd = 'right_home_up'
-            end
+      #   bar after the rotation.  Will be one of `{:down | :left | :right | :up }`.
+      # @raise [ArgumentError] If direction is not :left or :right.
+      def rotate(direction)
+
+        as_symbol = direction.to_sym
+
+        if as_symbol != :left && as_symbol != :right
+          raise ArgumentError,
+                "Expected '#{direction}' to be :left or :right"
         end
 
-        if rotate_cmd.nil?
-          if full_console_logging?
-            puts "Could not rotate device in direction '#{dir}' with orientation '#{current_orientation} - will do nothing"
-          end
-        else
-          result = playback("rotate_#{rotate_cmd}")
-          recalibrate_after_rotation
-          result
-        end
+        current_orientation = status_bar_orientation.to_sym
+
+        result = rotate_with_uia(as_symbol, current_orientation)
+
+        recalibrate_after_rotation
+
+        ap result if debug_logging?
+
+        status_bar_orientation
       end
 
+      private
+
+      # @! visibility private
       def recalibrate_after_rotation
         uia_query :window
       end
 
+      # @! visibility private
+      def ensure_valid_rotate_home_to_arg(arg)
+        coerced = arg.to_sym
 
+        if coerced == :top
+          coerced = :up
+        elsif coerced == :bottom
+          coerced = :down
+        end
+
+        allowed = [:down, :up, :left, :right]
+        unless allowed.include?(coerced)
+          raise ArgumentError,
+                "Expected '#{arg}' to be :down, :up, :left, or :right"
+        end
+        coerced
+      end
+
+      # @! visibility private
+      UIA_DEVICE_ORIENTATION = {
+            :portrait => 1,
+            :upside_down => 2,
+            :landscape_left => 3,
+            :landscape_right => 4
+      }.freeze
+
+      # @! visibility private
+      # @deprecated 0.16.1
+      def rotate_home_button_to_position_with_playback(home_button_position)
+
+        rotation_candidates.each do |candidate|
+          if debug_logging?
+            calabash_info "Trying to rotate Home Button to '#{home_button_position}' using '#{candidate}'"
+          end
+
+          playback(candidate)
+          sleep(0.4)
+          recalibrate_after_rotation
+
+          current_orientation = status_bar_orientation.to_sym
+          if current_orientation == home_button_position
+            return current_orientation
+          end
+        end
+
+        if debug_logging?
+          calabash_warn %Q{
+Could not rotate Home Button to '#{home_button_position}'."
+Is rotation enabled for this controller?}
+        end
+        :down
+      end
+
+      # @! visibility private
+      def rotate_to_uia_orientation(orientation)
+        case orientation
+          when :down then key = :portrait
+          when :up then key = :upside_down
+          when :left then key = :landscape_right
+          when :right then key = :landscape_left
+          else
+            raise ArgumentError,
+                  "Expected '#{orientation}' to be :left, :right, :up, or :down"
+        end
+        value = UIA_DEVICE_ORIENTATION[key]
+        cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
+        uia(cmd)
+      end
+
+      # @! visibility private
+      def rotate_with_uia(direction, current_orientation)
+        key = uia_orientation_key(direction, current_orientation)
+        value = UIA_DEVICE_ORIENTATION[key]
+        cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
+        uia(cmd)
+      end
+
+      # @! visibility private
+      def uia_orientation_key(direction, current_orientation)
+
+        key = nil
+        case direction
+          when :left then
+            if current_orientation == :down
+              key = :landscape_right
+            elsif current_orientation == :right
+              key = :portrait
+            elsif current_orientation == :left
+              key = :upside_down
+            elsif current_orientation == :up
+              key = :landscape_left
+            end
+          when :right then
+            if current_orientation == :down
+              key = :landscape_left
+            elsif current_orientation == :right
+              key = :upside_down
+            elsif current_orientation == :left
+              key = :portrait
+            elsif current_orientation == :up
+              key = :landscape_right
+            end
+          else
+            raise ArgumentError,
+                  "Expected '#{direction}' to be :left or :right"
+        end
+        key
+      end
+
+      # @! visibility private
+      # @deprecated 0.16.1
+      def recording_name(direction, current_orientation)
+        recording_name = nil
+        case direction
+          when :left then
+            if current_orientation == :down
+              recording_name = 'left_home_down'
+            elsif current_orientation == :right
+              recording_name = 'left_home_right'
+            elsif current_orientation == :left
+              recording_name = 'left_home_left'
+            elsif current_orientation == :up
+              recording_name = 'left_home_up'
+            end
+          when :right then
+            if current_orientation == :down
+              recording_name = 'right_home_down'
+            elsif current_orientation == :left
+              recording_name = 'right_home_left'
+            elsif current_orientation == :right
+              recording_name = 'right_home_right'
+            elsif current_orientation == :up
+              recording_name = 'right_home_up'
+            end
+          else
+            raise ArgumentError,
+                  "Expected '#{direction}' to be 'left' or 'right'"
+        end
+        "rotate_#{recording_name}"
+      end
+
+      # @! visibility private
+      # @deprecated 0.16.1
+      def rotate_with_playback(direction, current_orientation)
+        name = recording_name(direction, current_orientation)
+
+        if debug_logging?
+          puts "Could not rotate device '#{direction}' given '#{current_orientation}'; nothing to do."
+        end
+
+        playback(name)
+      end
     end
   end
 end
