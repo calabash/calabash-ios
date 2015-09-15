@@ -33,19 +33,10 @@ describe Calabash::Cucumber::RotationHelpers do
       expect(helper.rotate_home_button_to('down')).to be == :down
     end
 
-    it 'iOS >= 9' do
-      expect(helper).to receive(:ios_version).and_return RunLoop::Version.new('9.0')
+    it 'rotates' do
       expect(helper).to receive(:rotate_to_uia_orientation).with(:down).and_return :rotation_result
       expect(helper).to receive(:recalibrate_after_rotation).and_call_original
       expect(helper).to receive(:status_bar_orientation).and_return('before', 'after')
-
-      expect(helper.rotate_home_button_to('down')).to be == :after
-    end
-
-    it 'iOS < 9' do
-      expect(helper).to receive(:ios_version).and_return RunLoop::Version.new('8.0')
-      expect(helper).to receive(:status_bar_orientation).and_return('before')
-      expect(helper).to receive(:rotate_home_button_to_position_with_playback).with(:down).and_return :after
 
       expect(helper.rotate_home_button_to('down')).to be == :after
     end
@@ -62,7 +53,6 @@ describe Calabash::Cucumber::RotationHelpers do
       describe 'valid arguments' do
 
         before do
-          expect(helper).to receive(:ios_version).and_return RunLoop::Version.new('9.0')
           expect(helper).to receive(:status_bar_orientation).and_return(:before, :after)
           expect(helper).to receive(:rotate_with_uia).and_return :orientation
           expect(helper).to receive(:recalibrate_after_rotation).and_call_original
@@ -75,19 +65,9 @@ describe Calabash::Cucumber::RotationHelpers do
       end
     end
 
-    it 'iOS 9' do
-      expect(helper).to receive(:ios_version).and_return RunLoop::Version.new('9.0')
+    it 'rotates' do
       expect(helper).to receive(:status_bar_orientation).and_return(:before, :after)
       expect(helper).to receive(:rotate_with_uia).with(:left, :before).and_return :orientation
-      expect(helper).to receive(:recalibrate_after_rotation).and_call_original
-
-      expect(helper.rotate(:left)).to be == :after
-    end
-
-    it 'iOS < 9' do
-      expect(helper).to receive(:ios_version).and_return RunLoop::Version.new('8.0')
-      expect(helper).to receive(:status_bar_orientation).and_return(:before, :after)
-      expect(helper).to receive(:rotate_with_playback).with(:left, :before).and_return :orientation
       expect(helper).to receive(:recalibrate_after_rotation).and_call_original
 
       expect(helper.rotate(:left)).to be == :after

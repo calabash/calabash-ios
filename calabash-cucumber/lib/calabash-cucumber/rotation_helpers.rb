@@ -64,13 +64,9 @@ module Calabash
 
         return current_orientation if current_orientation == as_symbol
 
-        if ios_version >= RunLoop::Version.new('9.0')
-          rotate_to_uia_orientation(as_symbol)
-          recalibrate_after_rotation
-          status_bar_orientation.to_sym
-        else
-          rotate_home_button_to_position_with_playback(as_symbol)
-        end
+        rotate_to_uia_orientation(as_symbol)
+        recalibrate_after_rotation
+        status_bar_orientation.to_sym
       end
 
       # Rotates the device in the direction indicated by `direction`.
@@ -97,11 +93,8 @@ module Calabash
 
         current_orientation = status_bar_orientation.to_sym
 
-        if ios_version >= RunLoop::Version.new('9.0')
-          result = rotate_with_uia(as_symbol, current_orientation)
-        else
-          result = rotate_with_playback(as_symbol, current_orientation)
-        end
+        result = rotate_with_uia(as_symbol, current_orientation)
+
         recalibrate_after_rotation
 
         ap result if debug_logging?
