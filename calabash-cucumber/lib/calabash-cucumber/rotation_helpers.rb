@@ -10,6 +10,7 @@ module Calabash
       include Calabash::Cucumber::Logging
 
       # @!visibility private
+      # @deprecated 0.16.1
       def rotation_candidates
         %w(rotate_left_home_down rotate_left_home_left rotate_left_home_right rotate_left_home_up
            rotate_right_home_down rotate_right_home_left rotate_right_home_right rotate_right_home_up)
@@ -136,6 +137,7 @@ module Calabash
       }.freeze
 
       # @! visibility private
+      # @deprecated 0.16.1
       def rotate_home_button_to_position_with_playback(home_button_position)
 
         rotation_candidates.each do |candidate|
@@ -218,6 +220,7 @@ Is rotation enabled for this controller?}
       end
 
       # @! visibility private
+      # @deprecated 0.16.1
       def recording_name(direction, current_orientation)
         recording_name = nil
         case direction
@@ -249,6 +252,7 @@ Is rotation enabled for this controller?}
       end
 
       # @! visibility private
+      # @deprecated 0.16.1
       def rotate_with_playback(direction, current_orientation)
         name = recording_name(direction, current_orientation)
 
