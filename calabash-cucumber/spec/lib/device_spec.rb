@@ -35,16 +35,14 @@ describe Calabash::Cucumber::Device do
   end
 
   it '#form_factor' do
-    version_data = Resources.shared.server_version(:simulator)
-    device = Calabash::Cucumber::Device.new(double('end_point'), version_data)
+    version_data['form_factor'] = 'iphone 4in'
+    device = Calabash::Cucumber::Device.new(endpoint, version_data)
+
     expect(device.form_factor).to be == 'iphone 4in'
   end
 
   describe 'form_factor query methods' do
-    let(:device) {
-      version_data = Resources.shared.server_version(:simulator)
-      Calabash::Cucumber::Device.new(double('end_point'), version_data)
-    }
+    let(:device) { Calabash::Cucumber::Device.new(endpoint, version_data) }
 
     describe '#iphone_6?' do
       it "is true when form factor is 'iphone 6'" do
@@ -91,6 +89,20 @@ describe Calabash::Cucumber::Device do
       it 'is false otherwise' do
         expect(device).to receive(:form_factor).and_return('any other value')
         expect(device.iphone_4in?).to be == false
+      end
+    end
+
+    describe '#ipad_pro?' do
+      it 'is true when form factor is ipad pro' do
+        expect(device).to receive(:form_factor).and_return('ipad pro')
+
+        expect(device.ipad_pro?).to be_truthy
+      end
+
+      it 'is false otherwise' do
+        expect(device).to receive(:form_factor).and_return('any other value')
+
+        expect(device.ipad_pro?).to be_falsey
       end
     end
   end

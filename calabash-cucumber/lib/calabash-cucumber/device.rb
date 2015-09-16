@@ -230,6 +230,12 @@ module Calabash
         form_factor == 'iphone 3.5in'
       end
 
+      # Is this device an iPad Pro?
+      # @return [Boolean] true if this device is an iPad Pro
+      def ipad_pro?
+        form_factor == 'ipad pro'
+      end
+
       # @!visibility private
       def version_hash (version_str)
         tokens = version_str.split(/[,.]/)
