@@ -47,11 +47,13 @@ describe Calabash::Cucumber::Device do
     describe '#iphone_6?' do
       it "is true when form factor is 'iphone 6'" do
         expect(device).to receive(:form_factor).and_return('iphone 6')
+
         expect(device.iphone_6?).to be == true
       end
 
       it 'is false otherwise' do
         expect(device).to receive(:form_factor).and_return('any other value')
+
         expect(device.iphone_6?).to be == false
       end
     end
@@ -59,11 +61,13 @@ describe Calabash::Cucumber::Device do
     describe '#iphone_6_plus?' do
       it "is true when form factor is 'iphone 6+'" do
         expect(device).to receive(:form_factor).and_return('iphone 6+')
+
         expect(device.iphone_6_plus?).to be == true
       end
 
       it 'is false otherwise' do
         expect(device).to receive(:form_factor).and_return('any other value')
+
         expect(device.iphone_6_plus?).to be == false
       end
     end
@@ -71,11 +75,13 @@ describe Calabash::Cucumber::Device do
     describe '#iphone_35in?' do
       it "is true when form factor is 'iphone 3.5in'" do
         expect(device).to receive(:form_factor).and_return('iphone 3.5in')
+
         expect(device.iphone_35in?).to be == true
       end
 
       it 'is false otherwise' do
         expect(device).to receive(:form_factor).and_return('any other value')
+
         expect(device.iphone_35in?).to be == false
       end
     end
@@ -83,11 +89,13 @@ describe Calabash::Cucumber::Device do
     describe '#iphone_4in?' do
       it "is true when form factor is 'iphone 4in'" do
         expect(device).to receive(:form_factor).and_return('iphone 4in')
+
         expect(device.iphone_4in?).to be == true
       end
 
       it 'is false otherwise' do
         expect(device).to receive(:form_factor).and_return('any other value')
+
         expect(device.iphone_4in?).to be == false
       end
     end
