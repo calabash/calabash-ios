@@ -8,8 +8,20 @@ class Resources
     Resources.instance
   end
 
+  def xcode
+    @xcode ||= RunLoop::Xcode.new
+  end
+
   def active_xcode_version
-    @active_xcode_version ||= RunLoop::Xcode.new.version
+    @active_xcode_version ||= xcode.version
+  end
+
+  def sim_control
+    @sim_control ||= RunLoop::SimControl.new
+  end
+
+  def instruments
+    @instruments ||= RunLoop::Instruments.new
   end
 
   def resources_dir
@@ -33,6 +45,15 @@ class Resources
       else
         raise "unexpected argument '#{bundle_name}'"
     end
+  end
+
+  def simulator_identifier_with_name(name)
+    @simulators ||= sim_control.simulators
+
+    match = @simulators.shuffle.find do |simulator|
+      simulator.name == name
+    end
+    match.instruments_identifier(xcode)
   end
 
   def ipa_path
