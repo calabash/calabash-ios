@@ -68,23 +68,6 @@ module Calabash
       # @return [String] the version of the iOS that is running on this device
       attr_reader :ios_version
 
-      # The hardware architecture of this device.  Also known as the chip set.
-      #
-      # @example
-      #  # simulator
-      #  i386
-      #  x86_64
-      #
-      # @example
-      #  # examples from physical devices
-      #  armv6
-      #  armv7s
-      #  arm64
-      #
-      # @attribute [r] system
-      # @return [String] the hardware architecture of this device.
-      #  this device.
-      attr_reader :system
 
       # The version of the embedded Calabash server that is running in the
       # app under test on this device.
@@ -135,6 +118,23 @@ module Calabash
       # @attribute [r] screen_dimensions
       # @return [Hash] screen dimensions, scale and down/up sampling fraction.
       attr_reader :screen_dimensions
+
+      # @deprecated 0.16.2 No replacement.
+      #
+      # @example
+      #  # simulator
+      #  i386
+      #  x86_64
+      #
+      # @example
+      #  # examples from physical devices
+      #  iPhone7,1
+      #  iPhone5,2
+      #
+      # @attribute [r] system
+      # @return [String] The model of this device.
+      #  this device.
+      attr_reader :system
 
       # @deprecated 0.13.1 no replacement
       # Indicates whether or not this device has a 4in screen.
