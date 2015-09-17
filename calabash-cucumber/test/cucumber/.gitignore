@@ -9,3 +9,6 @@ screenshots
 # irb
 .irb-history
 
+# bundler
+!Gemfile.lock
+
