@@ -20,6 +20,7 @@ module Briar
       home_position = 'up' if home_position.eql?('top')
       rotate_home_button_to home_position
       wait_for_none_animating
+      expect(status_bar_orientation).to be == home_position
     end
   end
 end

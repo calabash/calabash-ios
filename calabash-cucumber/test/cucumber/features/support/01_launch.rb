@@ -36,27 +36,9 @@ Before do |_|
 
   launcher.relaunch(launch_options)
   launcher.calabash_notify(self)
-
-  ENV['RESET_BETWEEN_SCENARIOS'] = '0'
 end
 
 After do |_|
-  launcher = Calabash::LaunchControl.instance.launcher
-  unless launcher.calabash_no_stop?
-    calabash_exit
-    if launcher.active?
-      launcher.stop
-    end
-  end
+  ENV['RESET_BETWEEN_SCENARIOS'] = '0'
 end
 
-at_exit do
-  launcher = Calabash::LaunchControl.instance.launcher
-  if launcher.simulator_target?
-    if launcher.calabash_no_stop?
-
-    else
-      launcher.simulator_launcher.stop
-    end
-  end
-end

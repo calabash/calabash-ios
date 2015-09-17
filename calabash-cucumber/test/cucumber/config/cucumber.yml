@@ -1,100 +1,22 @@
 <%
+require 'fileutils'
 
-require 'run_loop'
+screenshots_dir = File.expand_path('./screenshots')
+FileUtils.mkdir_p(screenshots_dir)
 
-xcode_tools = RunLoop::Xcode.new
-sims = {}
-if xcode_tools.version_gte_61?
-  sims[:ipad2]     = 'iPad 2 (8.1 Simulator)'
-  sims[:ipad2_mid] = 'iPad 2 (7.1 Simulator)'
-
-  sims[:air] =     'iPad Air (8.1 Simulator)'
-  sims[:air_mid] = 'iPad Air (7.1 Simulator)'
-
-  sims[:ipad]     = 'iPad Retina (8.1 Simulator)'
-  sims[:ipad_mid] = 'iPad Retina (7.1 Simulator)'
-
-  sims[:iphone4s]     = 'iPhone 4s (8.1 Simulator)'
-  sims[:iphone4s_mid] = 'iPhone 4s (7.1 Simulator)'
-
-  sims[:iphone5s]     = 'iPhone 5s (8.1 Simulator)'
-  sims[:iphone5s_mid] = 'iPhone 5s (7.1 Simulator)'
-
-  sims[:iphone5]     = 'iPhone 5 (8.1 Simulator)'
-  sims[:iphone5_mid] = 'iPhone 5 (7.1 Simulator)'
-
-  sims[:iphone6]     = 'iPhone 6 (8.1 Simulator)'
-  sims[:iphone6plus] = 'iPhone 6 Plus (8.1 Simulator)'
-
-  sims[:default]     = 'iPhone 5 (8.1 Simulator)'
-
-else
-
-  sims[:ipad2]     = 'iPad 2 (8.0 Simulator)'
-  sims[:ipad2_mid] = 'iPad 2 (7.1 Simulator)'
-
-  sims[:air] =     'iPad Air (8.0 Simulator)'
-  sims[:air_mid] = 'iPad Air (7.1 Simulator)'
-
-  sims[:ipad]     = 'iPad Retina (8.0 Simulator)'
-  sims[:ipad_mid] = 'iPad Retina (7.1 Simulator)'
-
-  sims[:iphone4s]     = 'iPhone 4s (8.0 Simulator)'
-  sims[:iphone4s_mid] = 'iPhone 4s (7.1 Simulator)'
-
-  sims[:iphone5s]     = 'iPhone 5s (8.0 Simulator)'
-  sims[:iphone5s_mid] = 'iPhone 5s (7.1 Simulator)'
-
-  sims[:iphone5]     = 'iPhone 5 (8.0 Simulator)'
-  sims[:iphone5_mid] = 'iPhone 5 (7.1 Simulator)'
-
-  sims[:iphone6]     = 'iPhone 6 (8.0 Simulator)'
-  sims[:iphone6plus] = 'iPhone 6 Plus (8.0 Simulator)'
-
-  sims[:default]     = 'iPhone 5 (8.0 Simulator)'
-end
-
-if ENV["USER"] == "jenkins" or ENV['TRAVIS']
+if ENV['USER'] == "jenkins" or ENV['TRAVIS']
   formatter = "pretty"
-  keep_sim_open_after = "0"
 else
   formatter = "Slowhandcuke::Formatter"
-  keep_sim_open_after = "1"
 end
 
 %>
 
 verbose: CALABASH_FULL_CONSOLE_OUTPUT=1 DEBUG=1
-common: -f <%= formatter %> NO_STOP=<%= keep_sim_open_after %> --expand --no-multiline --no-source
+args: --expand --no-multiline --no-source
+common: -f <%= formatter %> SCREENSHOTS_DIR=<%= screenshots_dir %> -p args
 
-ipad_tags:   --tags ~@iphone --tags ~@iphone_only
-iphone_tags: --tags ~@ipad   --tags ~@ipad_only
+app:     APP=./LPSimpleExample-cal.app
+simulator: -p app -p common
+default:   -p simulator
 
-app:           APP=LPSimpleExample-cal.app
-
-simulator:     -p common --tags ~@device_only --tags ~@device -p app
-sim61_sl:      -p simulator LAUNCH_VIA=sim_launcher DEVICE_TARGET='iPhone (3.5-inch) - Simulator - iOS 6.1'
-
-simulators:         SIMULATORS="<%= sims %>"
-ipad2:              -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad2] %>"
-ipad2_mid:          -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad2_mid] %>"
-
-air:                -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:air] %>"
-air_mid:            -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:air_mid] %>"
-
-ipad:               -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad] %>"
-ipad_mid:           -p simulator -p ipad_tags DEVICE_TARGET="<%= sims[:ipad_mid] %>"
-
-iphone4s:           -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone4s] %>"
-iphone4s_mid:       -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone4s_mid] %>"
-
-iphone5:            -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5] %>"
-iphone5_mid:        -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5_mid] %>"
-
-iphone5s:           -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5s] %>"
-iphone5s_mid:       -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:iphone5s_mid] %>"
-
-iphone6:         -p simulator DEVICE_TARGET="<%= sims[:iphone6] %>"
-iphone6plus:     -p simulator DEVICE_TARGET="<%= sims[:iphone6plus] %>"
-
-default:            -p simulator -p iphone_tags DEVICE_TARGET="<%= sims[:default] %>"

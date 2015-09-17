@@ -143,6 +143,21 @@ module Calabash
         RunLoop::Version.new(_default_device_or_create.ios_version)
       end
 
+      # The screen dimensions of the device under test.
+      #
+      # This is a hash of form:
+      #  {
+      #    :sample => 1,
+      #    :height => 1334,
+      #    :width => 750,
+      #    :scale" => 2
+      #  }
+      # @raise [RuntimeError] If the server cannot be reached.
+      # @return [RunLoop::Version] The version of the iOS running on the device.
+      def screen_dimensions
+        _default_device_or_create.screen_dimensions
+      end
+
       # Is the device under test running iOS 5?
       #
       # @note
