@@ -732,7 +732,6 @@ module Calabash
         end
       end
 
-
       # Ensures that the iPad keyboard is undocked.
       #
       # Undocked means the keyboard is floating in the middle of the view.
@@ -746,7 +745,7 @@ module Calabash
       # @raise [RuntimeError] if there is no visible keyboard
       # @raise [RuntimeError] an undocked keyboard was not achieved
       def ensure_undocked_keyboard
-        wait_for_keyboard()
+        wait_for_keyboard
 
         return if device_family_iphone?
 
