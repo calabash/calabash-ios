@@ -20,9 +20,12 @@ Before('@reset_simulator_before_hook') do
   launcher = Calabash::LaunchControl.instance.launcher
   if launcher.simulator_target?
     launcher.reset_simulator
+    keychain_clear
   elsif xamarin_test_cloud?
     ENV['RESET_BETWEEN_SCENARIOS'] = '1'
+    keychain_clear
   else
+    keychain_clear
     # no-op for devices
   end
 end
@@ -36,11 +39,9 @@ Before do |_|
 
   launcher.relaunch(launch_options)
   launcher.calabash_notify(self)
-
-  ENV['RESET_BETWEEN_SCENARIOS'] = '0'
 end
 
 After do |_|
-
+  ENV['RESET_BETWEEN_SCENARIOS'] = '0'
 end
 
