@@ -143,14 +143,17 @@ module Calabash
       # @param [Hash] version_data the output of the `server_version` function
       # @return [Device] a new Device instance
       def initialize (endpoint, version_data)
-        simulator_device = version_data['simulator_device']
         @endpoint = endpoint
-        @system = version_data['system']
-        @device_family = @system.eql?(GESTALT_SIM_SYS) ? simulator_device : @system.split(/[\d,.]/).first
+        @model_identifier = version_data['model_identifier']
+        @device_family = version_data['device_family']
         @simulator_details = version_data['simulator']
-        @ios_version = version_data['iOS_version']
+        @ios_version = version_data['ios_version']
         @server_version = version_data['version']
         @iphone_app_emulated_on_ipad = version_data['iphone_app_emulated_on_ipad']
+        @form_factor = version_data['form_factor']
+        @device_name = version_data['device_name']
+
+        # Available 0.10.2
         screen_dimensions = version_data['screen_dimensions']
         if screen_dimensions
           @screen_dimensions = {}
@@ -158,7 +161,25 @@ module Calabash
             @screen_dimensions[key.to_sym] = val
           end
         end
-        @form_factor = version_data['form_factor']
+
+        # Deprecated 0.16.2 server
+        @system = version_data['system']
+
+        # 0.16.2 server adds 'device_family' key.
+        unless @device_family
+          # Deprecated 0.16.2 server
+          simulator_device = version_data['simulator_device']
+          if @system == GESTALT_SIM_SYS
+            @device_family = simulator_device
+          else
+            @device_family = @system.split(/[\d,.]/).first
+          end
+        end
+
+        # 0.16.2 server adds 'ios_version' key
+        unless @ios_version
+          @ios_version = version_data['iOS_version']
+        end
 
         # Deprecated 0.13.0
         @iphone_4in = version_data['4inch']

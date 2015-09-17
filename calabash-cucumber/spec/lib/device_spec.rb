@@ -26,6 +26,116 @@ describe Calabash::Cucumber::Device do
       expect(device.device_name).to be == 'whale'
       expect(device.instance_variable_get(:@device_name)).to be == 'whale'
     end
+
+    it 'sets @endpoint' do
+      expect(device.endpoint).to be == endpoint
+      expect(device.instance_variable_get(:@endpoint)).to be == endpoint
+    end
+
+    describe 'sets @ios_version' do
+      it "uses 'ios_version' when available" do
+        version_data['ios_version'] = 'this one'
+        version_data['iOS_version'] = 'deprecated'
+
+        expect(device.ios_version).to be == 'this one'
+        expect(device.instance_variable_get(:@ios_version)).to be == 'this one'
+      end
+
+      it "uses 'iOS_version' when 'ios_version' not available" do
+        version_data['iOS_version'] = 'deprecated'
+
+        expect(device.ios_version).to be == 'deprecated'
+        expect(device.instance_variable_get(:@ios_version)).to be == 'deprecated'
+      end
+    end
+
+    it 'sets @server_version' do
+      version_data['version'] = 'server version'
+
+      expect(device.server_version).to be == 'server version'
+      expect(device.instance_variable_get(:@server_version)).to be == 'server version'
+    end
+
+    it 'sets @iphone_app_emulated_on_ipad' do
+      version_data['iphone_app_emulated_on_ipad'] = 'emulated'
+
+      expect(device.instance_variable_get(:@iphone_app_emulated_on_ipad)).to be == 'emulated'
+      expect(device.iphone_app_emulated_on_ipad?).to be_truthy
+    end
+
+    it 'sets @form_factor' do
+      version_data['form_factor'] = 'form'
+
+      expect(device.form_factor).to be == 'form'
+      expect(device.instance_variable_get(:@form_factor)).to be == 'form'
+    end
+
+    it 'sets @system # deprecated' do
+      expect(device.instance_variable_get(:@system)).to be == ''
+    end
+
+    it 'sets @iphone_4in # deprecated' do
+      version_data['4inch'] = 'deprecated'
+
+      expect(device.instance_variable_get(:@iphone_4in)).to be == 'deprecated'
+    end
+
+    describe 'sets @device_family' do
+      it "uses 'device_family' if it is available" do
+        version_data['device_family'] = 'this one'
+        version_data['system'] = 'deprecated'
+
+        expect(device.device_family).to be == 'this one'
+        expect(device.instance_variable_get(:@device_family)).to be == 'this one'
+      end
+
+      describe "parses 'system' if it is not available # deprecated" do
+        it 'is a simulator' do
+          # deprecated key
+          version_data['simulator_device'] = 'iPhone'
+          version_data['device_family'] = nil
+          version_data['system'] = 'x86_64'
+
+          expect(device.device_family).to be == 'iPhone'
+          expect(device.instance_variable_get(:@device_family)).to be == 'iPhone'
+        end
+
+        it 'is a device' do
+          # deprecated key
+          version_data['simulator_device'] = nil
+          version_data['device_family'] = nil
+          version_data['system'] = 'iPad5,4'
+
+          expect(device.device_family).to be == 'iPad'
+          expect(device.instance_variable_get(:@device_family)).to be == 'iPad'
+        end
+      end
+    end
+
+    it 'sets @simulator_details' do
+      version_data['simulator'] = 'Core Simulator'
+
+      expect(device.simulator_details).to be == 'Core Simulator'
+      expect(device.instance_variable_get(:@simulator_details)).to be == 'Core Simulator'
+    end
+
+    describe 'sets @screen_dimensions' do
+      it 'converts to a symbol key/value pairs' do
+        version_data['screen_dimensions'] = { 'a' => 1, 'b' => 2 }
+
+        expected = {:a => 1, :b => 2}
+
+        expect(device.screen_dimensions).to be == expected
+        expect(device.instance_variable_get(:@screen_dimensions)).to be == expected
+      end
+
+      it "does nothing if 'screen_dimensions' is not available" do
+        version_data['screen_dimensions'] = nil
+
+        expect(device.screen_dimensions).to be == nil
+        expect(device.instance_variable_get(:@screen_dimensions)).to be == nil
+      end
+    end
   end
 
   describe 'iOS version' do
