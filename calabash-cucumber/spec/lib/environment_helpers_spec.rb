@@ -71,4 +71,10 @@ describe Calabash::Cucumber::EnvironmentHelpers do
       expect(world.ipad_pro?).to be_falsey
     end
   end
+
+  it '.screen_dimensions' do
+    expect(device).to receive(:screen_dimensions).and_return({:a => 1})
+
+    expect(world.screen_dimensions).to be == {:a => 1}
+  end
 end

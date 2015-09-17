@@ -3,7 +3,7 @@ module Calabash
 
     # @!visibility public
     # The Calabash iOS gem version.
-    VERSION = '0.16.2'
+    VERSION = '0.16.3'
 
     # @!visibility public
     # The minimum required version of the Calabash embedded server.

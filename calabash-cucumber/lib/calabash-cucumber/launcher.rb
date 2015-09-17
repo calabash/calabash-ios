@@ -277,16 +277,16 @@ class Calabash::Cucumber::Launcher
     merged_opts = default_opts.merge opts
 
     sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
+    xcode = sim_control.xcode
+
     if sim_control.xcode_version_gte_6?
       default_sim = RunLoop::Core.default_simulator(xcode)
       name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
 
-      target_simulator = nil
-      sim_control.simulators.each do |device|
-        instruments_launch_name = "#{device.name} (#{device.version.to_s} Simulator)"
-        if instruments_launch_name == name_or_udid or device.udid == name_or_udid
-          target_simulator = device
-        end
+      target_simulator = sim_control.simulators.find do |sim|
+        [name_or_udid == sim.instruments_identifier(xcode),
+         name_or_udid == sim.udid,
+         name_or_udid == sim.name].any?
       end
 
       if target_simulator.nil?
