@@ -78,6 +78,14 @@ module Calabash
         _default_device_or_create.ipod?
       end
 
+      # Is the device under test an iPad Pro
+      #
+      # @raise [RuntimeError] If the server cannot be reached.
+      # @return [Boolean] true if device under test is an iPod.
+      def ipad_pro?
+        _default_device_or_create.ipad_pro?
+      end
+
       # Is the device under test an iPhone or iPod?
       #
       # @raise [RuntimeError] If the server cannot be reached.

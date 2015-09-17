@@ -1,120 +1,74 @@
-module Calabash
-  module RspecTests
-    module EnvironmentHelpers
-      class TestObject
-        include Calabash::Cucumber::EnvironmentHelpers
-      end
-    end
-  end
-end
-
 describe Calabash::Cucumber::EnvironmentHelpers do
 
+  let(:world) do
+    Class.new do
+      include Calabash::Cucumber::EnvironmentHelpers
+    end.new
+  end
+
   let(:endpoint) { 'http://localhost:37265' }
-  let(:test_obj) { Calabash::RspecTests::EnvironmentHelpers::TestObject.new }
+  let(:version_data) { {'system' => ''} }
+  let(:device) { Calabash::Cucumber::Device.new(endpoint, version_data) }
+
+  before do
+    expect(world).to receive(:default_device).at_least(:once).and_return device
+  end
 
   it '.ios_version' do
-    simulator_data = Resources.shared.server_version :simulator
-    device = Calabash::Cucumber::Device.new(endpoint, simulator_data)
-    expect(test_obj).to receive(:default_device).and_return(device)
+    expected = RunLoop::Version.new('9.0')
+    expect(device).to receive(:ios_version).and_return('9.0')
 
-    version = test_obj.ios_version
-    expect(version).to be_a_kind_of RunLoop::Version
-    expect(version).to be == RunLoop::Version.new('7.1')
+    expect(world.ios_version).to be == expected
   end
 
-  describe '.ios8?' do
-    let(:simulator_data) { Resources.shared.server_version :simulator }
+  it '.ios8?' do
+    expect(device).to receive(:ios8?).and_return(true, false)
 
-    it 'returns true when device under test is iOS 8' do
-      simulator_data['iOS_version'] = '8.0'
-      device = Calabash::Cucumber::Device.new(endpoint, simulator_data)
-      expect(test_obj).to receive(:default_device).and_return(device)
-      expect(test_obj.ios8?).to be == true
-    end
-
-    it 'returns false when device under test is not iOS 8' do
-      simulator_data['iOS_version'] = '7.0'
-      device = Calabash::Cucumber::Device.new(endpoint, simulator_data)
-      expect(test_obj).to receive(:default_device).and_return(device)
-      expect(test_obj.ios8?).to be == false
-    end
+    expect(world.ios8?).to be_truthy
+    expect(world.ios8?).to be_falsey
   end
 
-  describe '.ios9?' do
-    let(:simulator_data) { Resources.shared.server_version :simulator }
+  it '.ios9?' do
+    expect(device).to receive(:ios9?).and_return(true, false)
 
-    it 'returns true when device under test is iOS 9' do
-      simulator_data['iOS_version'] = '9.0'
-      device = Calabash::Cucumber::Device.new(endpoint, simulator_data)
-      expect(test_obj).to receive(:default_device).and_return(device)
-
-      expect(test_obj.ios9?).to be == true
-    end
-
-    it 'returns false when device under test is not iOS 9' do
-      simulator_data['iOS_version'] = '8.0'
-      device = Calabash::Cucumber::Device.new(endpoint, simulator_data)
-      expect(test_obj).to receive(:default_device).and_return(device)
-
-      expect(test_obj.ios9?).to be == false
-    end
+    expect(world.ios9?).to be_truthy
+    expect(world.ios9?).to be_falsey
   end
 
   describe 'form factor helpers' do
-    let(:device) {
-      simulator_data = Resources.shared.server_version :simulator
-      device = Calabash::Cucumber::Device.new(endpoint, simulator_data)
-      expect(test_obj).to receive(:default_device).and_return(device)
-      device
-    }
+    it '.iphone_35in?' do
+      expect(device).to receive(:iphone_35in?).and_return(true, false)
 
-    describe '.iphone_35in?' do
-      it 'returns true' do
-        expect(device).to receive(:iphone_35in?).and_return(true)
-        expect(test_obj.iphone_35in?).to be == true
-      end
-
-      it 'returns false' do
-        expect(device).to receive(:iphone_35in?).and_return(false)
-        expect(test_obj.iphone_35in?).to be == false
-      end
+      expect(world.iphone_35in?).to be_truthy
+      expect(world.iphone_35in?).to be_falsey
     end
 
-    describe '.iphone_4in?' do
-      it 'returns true' do
-        expect(device).to receive(:iphone_4in?).and_return(true)
-        expect(test_obj.iphone_4in?).to be == true
-      end
+    it '.iphone_4in?' do
+      expect(device).to receive(:iphone_4in?).and_return(true, false)
 
-      it 'returns false' do
-        expect(device).to receive(:iphone_4in?).and_return(false)
-        expect(test_obj.iphone_4in?).to be == false
-      end
+      expect(world.iphone_4in?).to be_truthy
+      expect(world.iphone_4in?).to be_falsey
     end
 
-    describe '.iphone_6?' do
-      it 'returns true' do
-        expect(device).to receive(:iphone_6?).and_return(true)
-        expect(test_obj.iphone_6?).to be == true
-      end
+    it '.iphone_6?' do
+      expect(device).to receive(:iphone_6?).and_return(true, false)
 
-      it 'returns false' do
-        expect(device).to receive(:iphone_6?).and_return(false)
-        expect(test_obj.iphone_6?).to be == false
-      end
+      expect(world.iphone_6?).to be_truthy
+      expect(world.iphone_6?).to be_falsey
     end
 
-    describe '.iphone_6_plus?' do
-      it 'returns true' do
-        expect(device).to receive(:iphone_6_plus?).and_return(true)
-        expect(test_obj.iphone_6_plus?).to be == true
-      end
+    it '.iphone_6_plus?' do
+      expect(device).to receive(:iphone_6_plus?).and_return(true, false)
 
-      it 'returns false' do
-        expect(device).to receive(:iphone_6_plus?).and_return(false)
-        expect(test_obj.iphone_6_plus?).to be == false
-      end
+      expect(world.iphone_6_plus?).to be_truthy
+      expect(world.iphone_6_plus?).to be_falsey
+    end
+
+    it '.ipad_pro?' do
+      expect(device).to receive(:ipad_pro?).and_return(true, false)
+
+      expect(world.ipad_pro?).to be_truthy
+      expect(world.ipad_pro?).to be_falsey
     end
   end
 end
