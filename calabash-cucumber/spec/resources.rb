@@ -42,6 +42,8 @@ class Resources
         return @calabash_not_linked ||= File.join(self.resources_dir, 'CalNotLinked.app')
       when :server_gem_compatibility
         return @server_gem_compatibility_app_bundle_path ||= File.join(self.resources_dir, 'server-gem-compatibility.app')
+      when :cal_smoke_app
+        @smoke_cal_app_bundle ||= File.join(self.resources_dir, 'CalSmoke-cal.app')
       else
         raise "unexpected argument '#{bundle_name}'"
     end
