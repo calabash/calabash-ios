@@ -88,11 +88,12 @@ module Calabash
         orientation = status_bar_orientation.to_sym
         keyboard_height = res['rect']['height']
         keyboard_y = res['rect']['y']
+        scale = screen_dimensions[:scale]
 
         if orientation == :left || orientation == :right
-          screen_height = screen_dimensions[:width]
+          screen_height = screen_dimensions[:width]/scale
         else
-          screen_height = screen_dimensions[:height]
+          screen_height = screen_dimensions[:height]/scale
         end
 
         screen_height - keyboard_height == keyboard_y
