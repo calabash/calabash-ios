@@ -115,6 +115,17 @@ module Calabash
       # @return [Hash] screen dimensions, scale and down/up sampling fraction.
       attr_reader :screen_dimensions
 
+      # Requires calabash server > 0.16.2
+      #
+      # * iPhone7,1
+      # * iPhone5,2
+      # * iPad6,1
+      # * iPad6,8
+      #
+      # @attribute [r] model_identifier
+      # @return [String] The low-level model identifier.
+      attr_reader :model_identifier
+
       # Creates a new instance of Device.
       #
       # @see Calabash::Cucumber::Core#server_version

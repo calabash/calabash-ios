@@ -12,6 +12,15 @@ describe Calabash::Cucumber::Device do
 
   let(:device) { device_factory.call(version_data) }
 
+  describe '.new' do
+    it 'sets @model_identifier' do
+      version_data['model_identifier'] = 'iPhone11,11'
+
+      expect(device.model_identifier).to be == 'iPhone11,11'
+      expect(device.instance_variable_get(:@model_identifier)).to be == 'iPhone11,11'
+    end
+  end
+
   describe 'iOS version' do
     let(:nine) { RunLoop::Version.new('9.0') }
     let(:eight) { RunLoop::Version.new('8.0') }
