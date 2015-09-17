@@ -18,6 +18,7 @@ run_loop
 .yardoc
 _yardoc
 doc
+!script/doc
 rdoc
 
 # for a library or gem, you might want to ignore these files since the code is
