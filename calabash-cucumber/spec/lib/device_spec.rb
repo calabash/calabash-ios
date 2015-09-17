@@ -12,38 +12,39 @@ describe Calabash::Cucumber::Device do
 
   let(:device) { device_factory.call(version_data) }
 
-  describe '#ios9?' do
-    it 'returns false when target is not iOS 9' do
-      version_data['ios_version'] = '8.1'
-      device = device_factory.call(version_data)
+  describe 'iOS version' do
+    let(:nine) { RunLoop::Version.new('9.0') }
+    let(:eight) { RunLoop::Version.new('8.0') }
+    let(:seven) { RunLoop::Version.new('7.0') }
 
-      expect(device.ios9?).to be == false
+    it '#ios9?' do
+      expect(device).to receive(:ios_version_object).and_return(nine, eight)
+
+      expect(device.ios9?).to be_truthy
+      expect(device.ios9?).to be_falsey
     end
 
-    it 'returns true when target is iOS 9' do
-      version_data['ios_version'] = '9.1'
-      device = device_factory.call(version_data)
+    it '#ios8?' do
+      expect(device).to receive(:ios_version_object).and_return(eight, seven)
 
-      expect(device.ios9?).to be == true
+      expect(device.ios8?).to be_truthy
+      expect(device.ios8?).to be_falsey
+    end
+
+    it '#ios7?' do
+      expect(device).to receive(:ios_version_object).and_return(seven, eight)
+
+      expect(device.ios7?).to be_truthy
+      expect(device.ios7?).to be_falsey
+    end
+
+    it '#ios_major_version' do
+      expect(device).to receive(:ios_version_object).and_return(nine)
+
+      expect(device.ios_major_version).to be == '9'
     end
   end
 
-  describe '#ios8?' do
-    it 'returns false when target is not iOS 8' do
-      version_data['ios_version'] = '7.1'
-      device = device_factory.call(version_data)
-
-      expect(device.ios8?).to be == false
-    end
-
-    it 'returns true when target is iOS 8' do
-      version_data['ios_version'] = '8.0'
-      device = device_factory.call(version_data)
-
-      device = Calabash::Cucumber::Device.new(endpoint, version_data)
-      expect(device.ios8?).to be == true
-    end
-  end
 
   it '#form_factor' do
     version_data['form_factor'] = 'iphone 4in'

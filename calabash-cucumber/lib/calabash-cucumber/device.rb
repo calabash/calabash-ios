@@ -236,48 +236,40 @@ module Calabash
         form_factor == 'ipad pro'
       end
 
-      # @!visibility private
-      def version_hash (version_str)
-        tokens = version_str.split(/[,.]/)
-        {:major_version => tokens[0],
-         :minor_version => tokens[1],
-         :bug_version => tokens[2]}
-      end
-
       # The major iOS version of this device.
       # @return [String] the major version of the OS
       def ios_major_version
-        version_hash(ios_version)[:major_version]
+        ios_version_object.major.to_s
       end
 
       # Is this device running iOS 9?
       # @return [Boolean] true if the major version of the OS is 9
       def ios9?
-        ios_major_version == '9'
+        ios_version_object.major == 9
       end
 
       # Is this device running iOS 8?
       # @return [Boolean] true if the major version of the OS is 8
       def ios8?
-        ios_major_version.eql?('8')
+        ios_version_object.major == 8
       end
 
       # Is this device running iOS 7?
       # @return [Boolean] true if the major version of the OS is 7
       def ios7?
-        ios_major_version.eql?('7')
+        ios_version_object.major == 7
       end
 
       # Is this device running iOS 6?
       # @return [Boolean] true if the major version of the OS is 6
       def ios6?
-        ios_major_version.eql?('6')
+        ios_version_object.major == 6
       end
 
       # Is this device running iOS 5?
       # @return [Boolean] true if the major version of the OS is 5
       def ios5?
-        ios_major_version.eql?('5')
+        ios_version_object.major == 5
       end
 
       # @deprecated 0.11.2 Replaced with screen_dimensions.
@@ -343,6 +335,13 @@ module Calabash
       def iphone_4in
         _deprecated('0.13.1', "use 'iphone_4in?' instead", :warn)
         @iphone_4in
+      end
+
+      private
+
+      # @!visibility private
+      def ios_version_object
+        @ios_version_object ||= RunLoop::Version.new(ios_version)
       end
     end
   end
