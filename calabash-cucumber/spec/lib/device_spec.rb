@@ -82,11 +82,11 @@ describe Calabash::Cucumber::Device do
 
     describe 'sets @device_family' do
       it "uses 'device_family' if it is available" do
-        version_data['device_family'] = 'this one'
+        version_data['device_family'] = 'first element only'
         version_data['system'] = 'deprecated'
 
-        expect(device.device_family).to be == 'this one'
-        expect(device.instance_variable_get(:@device_family)).to be == 'this one'
+        expect(device.device_family).to be == 'first'
+        expect(device.instance_variable_get(:@device_family)).to be == 'first'
       end
 
       describe "parses 'system' if it is not available # deprecated" do

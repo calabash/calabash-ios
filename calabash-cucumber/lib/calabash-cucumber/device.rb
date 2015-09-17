@@ -145,13 +145,17 @@ module Calabash
       def initialize (endpoint, version_data)
         @endpoint = endpoint
         @model_identifier = version_data['model_identifier']
-        @device_family = version_data['device_family']
         @simulator_details = version_data['simulator']
         @ios_version = version_data['ios_version']
         @server_version = version_data['version']
         @iphone_app_emulated_on_ipad = version_data['iphone_app_emulated_on_ipad']
         @form_factor = version_data['form_factor']
         @device_name = version_data['device_name']
+
+        family = version_data['device_family']
+        if family
+          @device_family = family.split(' ').first
+        end
 
         # Available 0.10.2
         screen_dimensions = version_data['screen_dimensions']
