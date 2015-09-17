@@ -579,10 +579,6 @@ module Calabash
         res = send_uia_command({:command => "#{_query_uia_hide_keyboard_button}.rect()"})
         origin = res['value']['origin']
         {:x => origin['x'], :y => origin['y']}
-
-        # this did not work.
-        #size = res['value']['size']
-        #{:x => (origin['x']  (size['width']/2)), :y => (origin['y']  (size['height']/2))}
       end
 
       # @!visibility private
