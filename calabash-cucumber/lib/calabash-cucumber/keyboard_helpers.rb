@@ -682,8 +682,10 @@ module Calabash
           # there are 10 pt btw the key and the popup and each row is 50 pt
           # NB: no amount of offsetting seems to allow touching the top row
           #     when the keyboard is split
+
+          x_offset = 40
           y_offset = 10 + 50 + 25
-          end_pt = {:x => (start_pt[:x] - 40), :y => (start_pt[:y] - y_offset)}
+          end_pt = {:x => (start_pt[:x] - x_offset), :y => (start_pt[:y] - y_offset)}
           uia_pan_offset(start_pt, end_pt, {:duration => 1.0})
         else
           pan(_query_for_keyboard_mode_key, nil, {})
