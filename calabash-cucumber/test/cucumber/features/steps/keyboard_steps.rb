@@ -22,13 +22,21 @@ end
 
 Then(/^I see a undocked keyboard if I am testing an iPad$/) do
   if ipad?
-    expect(undocked_keyboard_visible?).to be_truthy
+    if ios9?
+      expect(docked_keyboard_visible?).to be_truthy
+    else
+      expect(undocked_keyboard_visible?).to be_truthy
+    end
   end
 end
 
 Then(/^I see a split keyboard if I am testing an iPad$/) do
   if ipad?
-    expect(split_keyboard_visible?).to be_truthy
+    if ios9?
+      expect(docked_keyboard_visible?).to be_truthy
+    else
+      expect(split_keyboard_visible?).to be_truthy
+    end
   end
 end
 
@@ -37,11 +45,31 @@ And(/^if I am testing an iPad, the keyboard is docked$/) do
 end
 
 And(/^if I am testing an iPad, the keyboard is undocked$/) do
-  ensure_undocked_keyboard if ipad?
+  if ipad?
+    if ios9?
+      Luffa.log_warn("\n\niPad keyboard modes are not available on iOS 9\n")
+      expect do
+        ensure_undocked_keyboard
+      end.to raise_error Calabash::Cucumber::KeyboardModeError,
+      /Changing keyboard modes is not supported on iOS 9/
+    else
+      ensure_undocked_keyboard
+    end
+  end
 end
 
 And(/^if I am testing an iPad, the keyboard is split$/) do
-  ensure_split_keyboard if ipad?
+  if ipad?
+    if ios9?
+      Luffa.log_warn("\n\nPad keyboard modes are not available on iOS 9\n")
+      expect do
+        ensure_split_keyboard
+      end.to raise_error Calabash::Cucumber::KeyboardModeError,
+      /Changing keyboard modes is not supported on iOS 9/
+    else
+      ensure_split_keyboard
+    end
+  end
 end
 
 And(/^I can dock the keyboard$/) do
