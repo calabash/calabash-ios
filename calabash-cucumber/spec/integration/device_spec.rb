@@ -8,13 +8,43 @@ unless Luffa::Environment.travis_ci?
     let(:endpoint) { 'http://localhost:37265' }
     let(:xcode) { Resources.shared.xcode }
 
+    it 'sets instance variables' do
+      device_target = Resources.shared.simulator_identifier_with_name('iPhone 5s')
+      options = {
+            :app => Resources.shared.app_bundle_path(:cal_smoke_app),
+            :device_target =>  device_target,
+            :xcode => xcode,
+            :sim_control => Resources.shared.sim_control,
+            :instruments => Resources.shared.instruments,
+            :launch_retries => Luffa::Retry.instance.launch_retries
+      }
+      launcher = Calabash::Cucumber::Launcher.new
+      launcher.relaunch(options)
+      device = launcher.device
+
+      expect(device.model_identifier).to be == 'iPhone6,1'
+      expect(device.device_family).to be == 'iPhone'
+      expect(device.simulator_details[/CoreSimulator/,0]).to be_truthy
+      expect(device.ios_version).to be_truthy
+      expect(device.server_version).to be_truthy
+      expect(device.iphone_app_emulated_on_ipad?).to be_falsey
+      expect(device.form_factor).to be == 'iphone 4in'
+      expect(device.device_name).to be == 'iPhone Simulator'
+      expect(device.screen_dimensions.count).to be == 4
+
+      # deprecated
+      expect(device.system).to be_truthy
+    end
+
     describe '#form_factor' do
+
       let(:device)  do
         options = {
               :app => Resources.shared.app_bundle_path(:cal_smoke_app),
               :device_target =>  device_target,
               :xcode => xcode,
               :sim_control => Resources.shared.sim_control,
+              :instruments => Resources.shared.instruments,
               :launch_retries => Luffa::Retry.instance.launch_retries
         }
         launcher = Calabash::Cucumber::Launcher.new
