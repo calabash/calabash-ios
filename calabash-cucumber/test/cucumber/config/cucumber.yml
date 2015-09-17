@@ -1,18 +1,22 @@
 <%
+require 'fileutils'
+
+screenshots_dir = File.expand_path('./screenshots')
+FileUtils.mkdir_p(screenshots_dir)
 
 if ENV['USER'] == "jenkins" or ENV['TRAVIS']
   formatter = "pretty"
-  keep_sim_open_after = "0"
 else
   formatter = "Slowhandcuke::Formatter"
-  keep_sim_open_after = "1"
 end
 
 %>
 
 verbose: CALABASH_FULL_CONSOLE_OUTPUT=1 DEBUG=1
-common: -f <%= formatter %> NO_STOP=<%= keep_sim_open_after %> --expand --no-multiline --no-source
+args: --expand --no-multiline --no-source
+common: -f <%= formatter %> SCREENSHOTS_DIR=<%= screenshots_dir %> -p args
 
 app:     APP=./LPSimpleExample-cal.app
-default: -p app -p common
+simulator: -p app -p common
+default:   -p simulator
 
