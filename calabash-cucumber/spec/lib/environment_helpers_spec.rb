@@ -63,5 +63,12 @@ describe Calabash::Cucumber::EnvironmentHelpers do
       expect(world.iphone_6_plus?).to be_truthy
       expect(world.iphone_6_plus?).to be_falsey
     end
+
+    it '.ipad_pro?' do
+      expect(device).to receive(:ipad_pro?).and_return(true, false)
+
+      expect(world.ipad_pro?).to be_truthy
+      expect(world.ipad_pro?).to be_falsey
+    end
   end
 end
