@@ -80,36 +80,22 @@ module Calabash
       # @return [Boolean] if a keyboard is visible and docked.
       def docked_keyboard_visible?
         res = query(_qstr_for_keyboard).first
+
         return false if res.nil?
 
         return true if device_family_iphone?
 
-        rect = res['rect']
-        o = status_bar_orientation.to_sym
-        case o
-          when :left
-            if ios8?
-              rect['center_x'] == 512 and rect['center_y'] == 592
-            else
-              rect['center_x'] == 592 and rect['center_y'] == 512
-            end
-          when :right
-            if ios8?
-              rect['center_x'] == 512 and rect['center_y'] == 592
-            else
-              rect['center_x'] == 176 and rect['center_y'] == 512
-            end
-          when :up
-            if ios8?
-              rect['center_x'] == 384 and rect['center_y'] == 892
-            else
-              rect['center_x'] == 384 and rect['center_y'] == 132
-            end
-          when :down
-              rect['center_x'] == 384 and rect['center_y'] == 892
-          else
-            false
+        orientation = status_bar_orientation.to_sym
+        keyboard_height = res['rect']['height']
+        keyboard_y = res['rect']['y']
+
+        if orientation == :left || orientation == :right
+          screen_height = screen_dimensions[:width]
+        else
+          screen_height = screen_dimensions[:height]
         end
+
+        screen_height - keyboard_height == keyboard_y
       end
 
       # Returns true if an undocked keyboard is visible.
