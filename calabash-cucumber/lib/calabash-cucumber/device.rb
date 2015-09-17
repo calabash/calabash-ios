@@ -188,7 +188,12 @@ module Calabash
       # Is this device a simulator or physical device?
       # @return [Boolean] true if this device is a simulator
       def simulator?
-        system.eql?(GESTALT_SIM_SYS)
+        # Post 0.16.2 server
+        if simulator_details
+          true
+        else
+          system == GESTALT_SIM_SYS
+        end
       end
 
       # Is this device a device or simulator?
