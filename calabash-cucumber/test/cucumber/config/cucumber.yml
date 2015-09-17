@@ -1,6 +1,6 @@
 <%
 
-if ENV["USER"] == "jenkins" or ENV['TRAVIS']
+if ENV['USER'] == "jenkins" or ENV['TRAVIS']
   formatter = "pretty"
   keep_sim_open_after = "0"
 else
@@ -13,11 +13,6 @@ end
 verbose: CALABASH_FULL_CONSOLE_OUTPUT=1 DEBUG=1
 common: -f <%= formatter %> NO_STOP=<%= keep_sim_open_after %> --expand --no-multiline --no-source
 
-ipad_tags:   --tags ~@iphone --tags ~@iphone_only
-iphone_tags: --tags ~@ipad   --tags ~@ipad_only
-
-app:           APP=LPSimpleExample-cal.app
-
-simulator:     -p common --tags ~@device_only --tags ~@device -p app
-default:       -p simulator -p iphone_tags
+app:     APP=./LPSimpleExample-cal.app
+default: -p app -p common
 
