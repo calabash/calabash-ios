@@ -278,12 +278,13 @@ class Calabash::Cucumber::Launcher
 
     sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
     if sim_control.xcode_version_gte_6?
+      postfix = sim_control.xcode_version_gte_7? ? '' : ' Simulator'
       default_sim = RunLoop::Core.default_simulator(xcode)
       name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
 
       target_simulator = nil
       sim_control.simulators.each do |device|
-        instruments_launch_name = "#{device.name} (#{device.version.to_s} Simulator)"
+        instruments_launch_name = "#{device.name} (#{device.version.to_s}#{postfix})"
         if instruments_launch_name == name_or_udid or device.udid == name_or_udid
           target_simulator = device
         end
