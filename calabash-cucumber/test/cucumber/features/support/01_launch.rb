@@ -41,22 +41,6 @@ Before do |_|
 end
 
 After do |_|
-  launcher = Calabash::LaunchControl.instance.launcher
-  unless launcher.calabash_no_stop?
-    calabash_exit
-    if launcher.active?
-      launcher.stop
-    end
-  end
+
 end
 
-at_exit do
-  launcher = Calabash::LaunchControl.instance.launcher
-  if launcher.simulator_target?
-    if launcher.calabash_no_stop?
-
-    else
-      launcher.simulator_launcher.stop
-    end
-  end
-end
