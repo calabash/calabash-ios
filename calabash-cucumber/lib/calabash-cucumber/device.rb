@@ -126,6 +126,15 @@ module Calabash
       # @return [String] The low-level model identifier.
       attr_reader :model_identifier
 
+      # Requires calabash server > 0.16.2
+      #
+      # For simulators, this is known to return '< form factor > Simulator'
+      #
+      # For devices, this will return the name of the device as seen in Xcode.
+      #
+      # @attribute [r] device_name
+      attr_reader :device_name
+
       # Creates a new instance of Device.
       #
       # @see Calabash::Cucumber::Core#server_version

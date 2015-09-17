@@ -19,6 +19,13 @@ describe Calabash::Cucumber::Device do
       expect(device.model_identifier).to be == 'iPhone11,11'
       expect(device.instance_variable_get(:@model_identifier)).to be == 'iPhone11,11'
     end
+
+    it 'sets @device_name' do
+      version_data['device_name'] = 'whale'
+
+      expect(device.device_name).to be == 'whale'
+      expect(device.instance_variable_get(:@device_name)).to be == 'whale'
+    end
   end
 
   describe 'iOS version' do
