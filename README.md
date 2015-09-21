@@ -29,8 +29,8 @@ Xamarin Studio users should visit [http://developer.xamarin.com/testcloud/](http
 We recommend that you use the most recent released version of Xcode, MacOS, and Ruby.
 
 * MacOS 10.9 or 10.10
-* Xcode 5.1.1 - Xcode 6
-* iOS >= 6.0
+* Xcode 6 or 7
+* iOS >= 7.1
 * ruby 1.9.3 - 2.2.+
 
 We recommend that you use a managed ruby like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/).  If you prefer to stick with the pre-installed ruby on MacOS, please avoid installing gems with `sudo`.  Simply put, using `sudo` is dangerous.  Follow these [excellent instructions](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/installing-gems/) for a ruby setup that avoids `sudo`.
