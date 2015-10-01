@@ -80,26 +80,31 @@ task :build_server do
     end
 
     unless File.exist?(target)
-      Luffa.log_error('There was a problem archiving the calabash.framework to ./static lib')
+      Luffa.log_error('There was a problem archiving the calabash.framework.zip to ./staticlib')
       exit 1
     end
 
     Luffa.log_pass('Installed framework to ./staticlib/calabash.framework.zip')
 
-    # frank
-    puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make frank"
-    `make frank`
-    frank_library_name='libFrankCalabash.a'
-    if File.exist? frank_library_name
-      path_to_frank_library = File.expand_path(frank_library_name)
-    else
-      puts 'FAIL: unable to build the frank library'
-      puts "FAIL:  run 'make frank' in #{File.expand_path(calabash_server_dir)} to diagnose"
-      raise 'could not build libFrankCalabash.a'
+    unless system('make', 'frank')
+      Luffa.log_error("There was an error executing 'make frank'")
+      exit 1
     end
 
-    FileUtils.mv(path_to_frank_library, gem_static_libs_dir, :force => true)
-    puts "INFO: libFrankCalabash.a installed in #{gem_static_libs_dir}"
+    source = File.expand_path('./libFrankCalabash.a')
+    target = File.join(gem_static_libs_dir, 'libFrankCalabash.a')
+    args = ['ditto', source, target]
+
+    Luffa::Debug.with_debugging do
+      RunLoop::Xcrun.new.exec(args, {log_cmd: true})
+    end
+
+    unless File.exist?(target)
+      Luffa.log_error('There was a problem archiving the libFrankCalabash.a to ./staticlib')
+      exit 1
+    end
+
+    Luffa.log_pass('Installed frank plugin to ./staticlib/libFrankCalabash.a')
 
     # dylibs
     if skip_dylibs
