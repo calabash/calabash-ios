@@ -10,9 +10,6 @@ Dir.chdir working_directory do
   do_system('git clone --depth 1 --recursive https://github.com/calabash/calabash-ios-server')
   server_dir = File.expand_path(File.join(working_directory, 'calabash-ios-server'))
 
-  do_system('rm -rf staticlib')
-  do_system('rm -rf dylibs')
-  # noinspection RubyStringKeysInHashInspection
   env_vars =
         {
               'CALABASH_SERVER_PATH' => server_dir,
