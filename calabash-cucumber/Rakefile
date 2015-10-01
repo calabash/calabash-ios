@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'luffa'
 
 require 'bundler'
 Bundler::GemHelper.install_tasks
@@ -42,6 +43,8 @@ end
 #  $ CALABASH_SERVER_PATH=/your/path rake build_server
 desc 'Build and install the Objective-C libraries that this gem requires.'
 task :build_server do
+
+  banner 'Preparing'
 
   calabash_server_dir = find_server_repo_or_raise
 
@@ -124,6 +127,10 @@ task :build_server do
       end
     end
   end
+end
+
+def banner(log)
+   puts "\033[35m\n####### #{log} ########\n\033[0m"
 end
 
 def find_server_repo_or_raise
