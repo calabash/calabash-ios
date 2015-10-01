@@ -51,7 +51,7 @@ task :build_server do
 
   expect_server_is_on_master_branch(calabash_server_dir)
 
-  skip_dylibs = skip_dylibs?
+  log_warning_about_skipping_dylibs
 
   gem_lib_dirs = prepare_gem_library_directories
   gem_static_libs_dir = gem_lib_dirs[:static_libs]
@@ -106,29 +106,34 @@ task :build_server do
 
     Luffa.log_pass('Installed frank plugin to ./staticlib/libFrankCalabash.a')
 
-    # dylibs
-    if skip_dylibs
-      puts "WARN: Skipping dylibs because CALABASH_NO_DYLIBS = '#{ENV['CALABASH_NO_DYLIBS']}'"
-      puts 'WARN: If you are building the gem for release, you must include the dylibs'
-    else
-      puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make dylibs"
-      `make dylibs`
-      dylib_paths = ['./calabash-dylibs/libCalabashDynSim.dylib','./calabash-dylibs/libCalabashDyn.dylib']
-      dylibs = []
-      dylib_paths.each do |dylib|
-        if File.exist? dylib
-          dylibs << File.expand_path(dylib)
-        else
-          puts "FAIL: unable to build the dylib library: #{dylib}"
-          puts "FAIL: run 'make dylibs' in #{File.expand_path(calabash_server_dir)} to diagnose"
-          raise 'could not build dylibs'
-        end
+    if Luffa::Environment.travis_ci?
+      Luffa.log_warn('Skipping dylib creation on Travis CI; no codesigning environment')
+      exit 0
+    end
+
+    unless system('make', 'dylibs')
+      Luffa.log_fail("There was an error executing 'make dylibs'")
+      exit 1
+    end
+
+   ['libCalabashDynSim.dylib',
+    'libCalabashDyn.dylib',
+    'libCalabashDynFAT.dylib'].each do |dylib|
+
+      source = File.join('calabash-dylibs', dylib)
+      target = File.join(gem_dylibs_dir, dylib)
+      args = ['ditto', source, target]
+
+      Luffa::Debug.with_debugging do
+        RunLoop::Xcrun.new.exec(args, {log_cmd: true})
       end
 
-      dylibs.each do |dylib|
-        FileUtils.mv(dylib, gem_dylibs_dir, :force => true)
-        puts "INFO: #{File.basename(dylib)} installed in '#{gem_dylibs_dir}'"
+      unless File.exist?(target)
+        Luffa.log_fail('There was a problem archiving the libFrankCalabash.a to ./staticlib')
+        exit 1
       end
+
+      Luffa.log_pass("Installed #{dylib} to #{source}")
     end
   end
 end
@@ -159,14 +164,14 @@ Expected git branch of repo #{calabash_server_dir} to be 'master' but found
   end
 end
 
-def skip_dylibs?
+def log_warning_about_skipping_dylibs
   skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
-  if skip_dylibs && !Luffa::Environment.travis_ci?
-    Luffa.log_warn("This rake task is for building for release.")
-    Luffa.log_warn("The gem cannot be built without the dylibs.")
-    Luffa.log_warn("Ignoring CALABASH_NO_DYLIBS=1")
+  if skip_dylibs
+    Luffa.log_warn('CALABASH_NO_DYLIBS is deprecated since 0.16.4')
+    Luffa.log_warn('This rake task is for building for release.')
+    Luffa.log_warn('The gem cannot be built without the dylibs.')
+    Luffa.log_warn('Ignoring CALABASH_NO_DYLIBS=1')
   end
-  skip_dylibs
 end
 
 def prepare_gem_library_directories
