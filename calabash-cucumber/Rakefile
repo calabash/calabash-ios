@@ -45,6 +45,8 @@ task :build_server do
 
   calabash_server_dir = find_server_repo_or_raise
 
+  expect_server_is_on_master_branch(calabash_server_dir)
+
   skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
 
   gem_static_libs_dir = File.expand_path('staticlib')
@@ -135,3 +137,14 @@ to the Calabash server.
   end
   calabash_server_dir
 end
+
+def expect_server_is_on_master_branch(calabash_server_dir)
+  branch = `git -C #{calabash_server_dir} rev-parse --abbrev-ref HEAD`.chomp
+  unless branch == 'master'
+    raise %Q{
+Expected git branch of repo #{calabash_server_dir} to be 'master' but found
+'#{branch}'.  The server must be built from the master branch."
+}
+  end
+end
+
