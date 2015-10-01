@@ -51,8 +51,7 @@ Bundle exec detected!
 
 This command cannot be run in the context of bundle exec.
 
-Please run again without bundle exec.
-\033[0m
+Please run again without bundle exec.\033[0m
 }
   end
 
@@ -71,13 +70,13 @@ Please run again without bundle exec.
   Dir.chdir(calabash_server_dir) do
     banner 'Cleaning'
 
-#    unless system('make', 'clean')
-#      Luffa.log_error("There was an error executing 'make clean'")
-#      exit 1
-#    end
+    unless system('make', 'clean')
+      log_error("There was an error executing 'make clean'")
+      exit 1
+    end
 
     unless system('make', 'framework')
-      Luffa.log_error("There was an error executing 'make framework'")
+      log_error("There was an error executing 'make framework'")
       exit 1
     end
 
@@ -91,14 +90,14 @@ Please run again without bundle exec.
     end
 
     unless File.exist?(target)
-      Luffa.log_error('There was a problem archiving the calabash.framework.zip to ./staticlib')
+      log_error('There was a problem installing calabash.framework.zip to ./staticlib')
       exit 1
     end
 
-    Luffa.log_pass('Installed framework to ./staticlib/calabash.framework.zip')
+    log_info('Installed framework to ./staticlib/calabash.framework.zip')
 
     unless system('make', 'frank')
-      Luffa.log_error("There was an error executing 'make frank'")
+      log_error("There was an error executing 'make frank'")
       exit 1
     end
 
@@ -111,19 +110,19 @@ Please run again without bundle exec.
     end
 
     unless File.exist?(target)
-      Luffa.log_error('There was a problem archiving the libFrankCalabash.a to ./staticlib')
+      log_error('There was a problem installing the libFrankCalabash.a to ./staticlib')
       exit 1
     end
 
-    Luffa.log_pass('Installed frank plugin to ./staticlib/libFrankCalabash.a')
+    log_info('Installed frank plugin to ./staticlib/libFrankCalabash.a')
 
     if Luffa::Environment.travis_ci?
-      Luffa.log_warn('Skipping dylib creation on Travis CI; no codesigning environment')
+      log_info('Skipping dylib creation on Travis CI; no codesigning environment')
       exit 0
     end
 
     unless system('make', 'dylibs')
-      Luffa.log_fail("There was an error executing 'make dylibs'")
+      log_error("There was an error executing 'make dylibs'")
       exit 1
     end
 
@@ -140,11 +139,11 @@ Please run again without bundle exec.
       end
 
       unless File.exist?(target)
-        Luffa.log_fail('There was a problem archiving the libFrankCalabash.a to ./staticlib')
+        log_error("There was a problem installing #{dylib} to ./#{File.basename(gem_dylibs_dir)}")
         exit 1
       end
 
-      Luffa.log_pass("Installed #{dylib} to #{source}")
+      log_info("Installed #{dylib} to #{source}")
     end
   end
 
@@ -157,20 +156,37 @@ Please run again without bundle exec.
     system('ls', '-hal', 'dylibs')
   end
 
-  Luffa.log_pass('Done!')
+  log_info('Done!')
 end
 
 def banner(log)
    puts "\033[35m\n####### #{log} ########\n\033[0m"
 end
 
+def log_error(log)
+   puts "\033[31mERROR: #{log}\033[0m"
+end
+
+def log_info(log)
+   puts "\033[32mINFO: #{log}\033[0m"
+end
+
 def find_server_repo_or_raise
   calabash_server_dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
   unless File.exist?(calabash_server_dir)
-    raise %Q{
-Unable to find calabash server checked out at #{calabash_server_dir}.
-Please checkout as #{calabash_server_dir} or set CALABASH_SERVER_PATH to point
-to the Calabash server.
+    raise %Q{\033[31m
+Expected to find the calabash-ios-server repo at:
+
+  #{File.expand_path(calabash_server_dir)}
+
+Either clone the repo to that location with:
+
+  $ git clone --recursive git@github.com:calabash/calabash-ios-server.git
+
+or set CALABASH_SERVER_PATH to point to your local copy of the server.
+
+  $ CALABASH_SERVER_PATH=/path/to/server rake build_server\033[0m
+
 }
   end
   calabash_server_dir
@@ -179,9 +195,15 @@ end
 def expect_server_is_on_master_branch(calabash_server_dir)
   branch = `git -C #{calabash_server_dir} rev-parse --abbrev-ref HEAD`.chomp
   unless branch == 'master'
-    raise %Q{
-Expected git branch of repo #{calabash_server_dir} to be 'master' but found
-'#{branch}'.  The server must be built from the master branch."
+    raise %Q{\033[31m
+Expected git branch of of the server repo at:
+
+  #{File.expand_path(calabash_server_dir)}
+
+to be 'master' but found '#{branch}'.
+
+The server must be built from the master branch.\033[0m
+
 }
   end
 end
