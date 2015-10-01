@@ -12,8 +12,7 @@ Dir.chdir working_directory do
 
   env_vars =
         {
-              'CALABASH_SERVER_PATH' => server_dir,
-              'CALABASH_NO_DYLIBS' => travis_ci? ? '1' : '0'
+              'CALABASH_SERVER_PATH' => server_dir
         }
 
   # Xcode 6 supports dylib targets, but dylibs require code-signing which
