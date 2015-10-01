@@ -2,6 +2,7 @@ language: objective-c
 
 before_script:
   - gem install luffa --no-document --env-shebang --no-prerelease
+  - gem install xcpretty --no-document --env-shebang --no-prerelease
   - luffa authorize
   - script/ci/travis/install-dot-gemrc.rb
   - gem install json --no-document
