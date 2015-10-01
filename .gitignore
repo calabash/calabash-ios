@@ -12,8 +12,9 @@ tmp
 .irb-history
 .pry-history
 
-# CI - occasionally we need to pull down run_loop to test
+# These repos are cloned during CI, which we run locally to test.
 run_loop
+calabash-ios-server
 
 # Documentation cache and generated files:
 .yardoc
