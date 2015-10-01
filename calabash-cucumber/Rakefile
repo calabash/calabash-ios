@@ -52,11 +52,9 @@ task :build_server do
 
   skip_dylibs = skip_dylibs?
 
-  gem_static_libs_dir = File.expand_path('staticlib')
-  FileUtils.mkdir_p gem_static_libs_dir
-
-  gem_dylibs_dir = File.expand_path('dylibs')
-  FileUtils.mkdir_p gem_dylibs_dir
+  gem_lib_dirs = prepare_gem_library_directories
+  gem_static_libs_dir = gem_lib_dirs[:static_lib]
+  gem_dylibs_dir = gem_lib_dirs[:dylibs]
 
   Dir.chdir(calabash_server_dir) do
     puts 'INFO: building the server libraries...'
@@ -165,4 +163,18 @@ def skip_dylibs?
   skip_dylibs
 end
 
+def prepare_gem_library_directories
+  static_libs_dir = File.expand_path('staticlib')
+  FileUtils.rm_rf static_libs_dir
+  FileUtils.mkdir_p static_libs_dir
+
+  dylibs_dir = File.expand_path('dylibs')
+  FileUtils.rm_rf dylibs_dir
+  FileUtils.mkdir_p dylibs_dir
+
+  {
+    staticlib: static_libs_dir,
+    dylibs: dylibs_dir
+  }
+end
 
