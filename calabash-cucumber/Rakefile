@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'luffa'
+require 'run_loop'
 
 require 'bundler'
 Bundler::GemHelper.install_tasks
@@ -53,40 +54,37 @@ task :build_server do
   skip_dylibs = skip_dylibs?
 
   gem_lib_dirs = prepare_gem_library_directories
-  gem_static_libs_dir = gem_lib_dirs[:static_lib]
+  gem_static_libs_dir = gem_lib_dirs[:static_libs]
   gem_dylibs_dir = gem_lib_dirs[:dylibs]
 
   Dir.chdir(calabash_server_dir) do
     banner 'Cleaning'
 
-    unless system('make', 'clean')
-      Luffa.log_error("There was an error executing 'make clean'")
+#    unless system('make', 'clean')
+#      Luffa.log_error("There was an error executing 'make clean'")
+#      exit 1
+#    end
+
+    unless system('make', 'framework')
+      Luffa.log_error("There was an error executing 'make framework'")
       exit 1
     end
 
-    puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make framework"
-    `make framework`
-    framework_dir='calabash.framework'
-    framework_zip="#{framework_dir}.zip"
-    if File.exist?(framework_dir)
-      puts 'INFO:  creating a zip archive of calabash.framework'
-      zip_cmd = "zip -y -q -r #{framework_zip} #{framework_dir}"
-      puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; #{zip_cmd}"
-      `#{zip_cmd}`
-      framework_zip = File.expand_path(framework_zip)
-      unless File.exist?(framework_zip)
-        puts 'FAIL:  unable to create a zip archive of calabash.framework'
-        puts "FAIL:  run '#{zip_cmd}' in #{File.expand_path(calabash_server_dir)} to diagnose"
-        raise 'Unable to zip down framework...'
-      end
-    else
-      puts 'FAIL:  unable to build calabash.framework'
-      puts "FAIL:  run 'make framework' in #{File.expand_path(calabash_server_dir)} to diagnose"
-      raise 'could not build the calabash.framework'
+    source = File.expand_path('./calabash.framework')
+    target = File.join(gem_static_libs_dir, 'calabash.framework.zip')
+    args = ['ditto', '-c', '-k', '--rsrc', '--sequesterRsrc', '--keepParent',
+            source, target]
+
+    Luffa::Debug.with_debugging do
+      RunLoop::Xcrun.new.exec(args, {log_cmd: true})
     end
 
-    FileUtils.mv(framework_zip, gem_static_libs_dir, :force => true)
-    puts "INFO: calabash.framework.zip installed in #{gem_static_libs_dir}"
+    unless File.exist?(target)
+      Luffa.log_error('There was a problem archiving the calabash.framework to ./static lib')
+      exit 1
+    end
+
+    Luffa.log_pass('Installed framework to ./staticlib/calabash.framework.zip')
 
     # frank
     puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make frank"
@@ -176,7 +174,7 @@ def prepare_gem_library_directories
   FileUtils.mkdir_p dylibs_dir
 
   {
-    staticlib: static_libs_dir,
+    static_libs: static_libs_dir,
     dylibs: dylibs_dir
   }
 end
