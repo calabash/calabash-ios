@@ -50,7 +50,7 @@ task :build_server do
 
   expect_server_is_on_master_branch(calabash_server_dir)
 
-  skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
+  skip_dylibs = skip_dylibs?
 
   gem_static_libs_dir = File.expand_path('staticlib')
   FileUtils.mkdir_p gem_static_libs_dir
@@ -154,4 +154,15 @@ Expected git branch of repo #{calabash_server_dir} to be 'master' but found
 }
   end
 end
+
+def skip_dylibs?
+  skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
+  if skip_dylibs && !Luffa::Environment.travis_ci?
+    Luffa.log_warn("This rake task is for building for release.")
+    Luffa.log_warn("The gem cannot be built without the dylibs.")
+    Luffa.log_warn("Ignoring CALABASH_NO_DYLIBS=1")
+  end
+  skip_dylibs
+end
+
 
