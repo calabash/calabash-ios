@@ -43,14 +43,7 @@ end
 desc 'Build and install the Objective-C libraries that this gem requires.'
 task :build_server do
 
-  calabash_server_dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
-  unless File.exist?(calabash_server_dir)
-    raise <<EOF
-      Unable to find calabash server checked out at #{calabash_server_dir}.
-      Please checkout as #{calabash_server_dir} or set CALABASH_SERVER_PATH to point
-      to Calabash server (branch master).
-EOF
-  end
+  calabash_server_dir = find_server_repo_or_raise
 
   skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
 
@@ -131,3 +124,14 @@ EOF
   end
 end
 
+def find_server_repo_or_raise
+  calabash_server_dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
+  unless File.exist?(calabash_server_dir)
+    raise %Q{
+Unable to find calabash server checked out at #{calabash_server_dir}.
+Please checkout as #{calabash_server_dir} or set CALABASH_SERVER_PATH to point
+to the Calabash server.
+}
+  end
+  calabash_server_dir
+end
