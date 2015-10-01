@@ -136,6 +136,17 @@ task :build_server do
       Luffa.log_pass("Installed #{dylib} to #{source}")
     end
   end
+
+  banner('Visual Confirmation')
+  if `which tree`.chomp != ''
+    system('tree', '-s', 'staticlib')
+    system('tree', '-s', 'dylibs')
+  else
+    system('ls', '-hal', 'staticlib')
+    system('ls', '-hal', 'dylibs')
+  end
+
+  Luffa.log_pass('Done!')
 end
 
 def banner(log)
