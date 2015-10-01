@@ -2,9 +2,6 @@ require 'fileutils'
 require 'luffa'
 require 'run_loop'
 
-require 'bundler'
-Bundler::GemHelper.install_tasks
-
 begin
   require 'rspec/core/rake_task'
   RSpec::Core::RakeTask.new(:spec)
@@ -21,6 +18,47 @@ begin
     # see .yardopts for options
   end
 rescue LoadError => _
+end
+
+require 'bundler'
+Bundler::GemHelper.install_tasks
+
+module Bundler
+  class GemHelper
+
+    # The gem build step will detect if the files exist,
+    # but we need them to be non-zero in size which can
+    # happen during development.
+    def libraries_built?
+      ['staticlib/calabash.framework.zip',
+       'staticlib/libFrankCalabash.a',
+       # Not yet, maybe never.
+       # 'dylibs/libCalabashDynFAT.dylib',
+       'dylibs/libCalabashDyn.dylib',
+       'dylibs/libCalabashDynSim.dylib'
+      ].all? do |lib|
+        File.size?(lib)
+      end
+    end
+
+    def guard_clean
+      unless libraries_built?
+        raise %Q{\033[31m
+Expected the static and dylib libraries to be installed AND
+have non-zero size.  At least one library has size zero.
+
+You must run:
+
+  $ rake build_server
+
+before running 'rake release'.\033[0m
+
+}
+      end
+
+      clean? && committed? or raise("There are files that need to be committed first.")
+    end
+  end
 end
 
 # Builds and installs the Objective-C libraries that this gem requires.
@@ -46,6 +84,12 @@ desc 'Build and install the Objective-C libraries that this gem requires.'
 task :build_server do
   include Calabash::Rake
   Calabash::Rake.build_server
+end
+
+desc 'Clean the staticlib and dylib libraries'
+task :clean_libs do
+  include Calabash::Rake
+  Calabash::Rake.prepare_gem_library_directories
 end
 
 module Calabash::Rake
