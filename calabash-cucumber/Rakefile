@@ -1,7 +1,6 @@
 require 'fileutils'
-
-require 'bundler'
-Bundler::GemHelper.install_tasks
+require 'luffa'
+require 'run_loop'
 
 begin
   require 'rspec/core/rake_task'
@@ -19,6 +18,47 @@ begin
     # see .yardopts for options
   end
 rescue LoadError => _
+end
+
+require 'bundler'
+Bundler::GemHelper.install_tasks
+
+module Bundler
+  class GemHelper
+
+    # The gem build step will detect if the files exist,
+    # but we need them to be non-zero in size which can
+    # happen during development.
+    def libraries_built?
+      ['staticlib/calabash.framework.zip',
+       'staticlib/libFrankCalabash.a',
+       # Not yet, maybe never.
+       # 'dylibs/libCalabashDynFAT.dylib',
+       'dylibs/libCalabashDyn.dylib',
+       'dylibs/libCalabashDynSim.dylib'
+      ].all? do |lib|
+        File.size?(lib)
+      end
+    end
+
+    def guard_clean
+      unless libraries_built?
+        raise %Q{\033[31m
+Expected the static and dylib libraries to be installed AND
+have non-zero size.  At least one library has size zero.
+
+You must run:
+
+  $ rake build_server
+
+before running 'rake release'.\033[0m
+
+}
+      end
+
+      clean? && committed? or raise("There are files that need to be committed first.")
+    end
+  end
 end
 
 # Builds and installs the Objective-C libraries that this gem requires.
@@ -42,96 +82,205 @@ end
 #  $ CALABASH_SERVER_PATH=/your/path rake build_server
 desc 'Build and install the Objective-C libraries that this gem requires.'
 task :build_server do
+  include Calabash::Rake
+  Calabash::Rake.build_server
+end
 
-  calabash_server_dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
-  unless File.exist?(calabash_server_dir)
-    raise <<EOF
-      Unable to find calabash server checked out at #{calabash_server_dir}.
-      Please checkout as #{calabash_server_dir} or set CALABASH_SERVER_PATH to point
-      to Calabash server (branch master).
-EOF
+desc 'Clean the staticlib and dylib libraries'
+task :clean_libs do
+  include Calabash::Rake
+  Calabash::Rake.prepare_gem_library_directories
+end
+
+module Calabash::Rake
+
+  def build_server
+    if Module.method_defined?('gem')
+      raise %Q{\033[31m
+Bundle exec detected!
+
+This command cannot be run in the context of bundle exec.
+
+Please run again without bundle exec.\033[0m
+      }
+    end
+
+    banner 'Preparing'
+
+    calabash_server_dir = find_server_repo_or_raise
+
+    expect_server_is_on_master_branch(calabash_server_dir)
+
+    log_warning_about_skipping_dylibs
+
+    gem_lib_dirs = prepare_gem_library_directories
+    gem_static_libs_dir = gem_lib_dirs[:static_libs]
+    gem_dylibs_dir = gem_lib_dirs[:dylibs]
+
+    Dir.chdir(calabash_server_dir) do
+      banner 'Cleaning'
+
+      unless system('make', 'clean')
+        log_error("There was an error executing 'make clean'")
+        exit 1
+      end
+
+      unless system('make', 'framework')
+        log_error("There was an error executing 'make framework'")
+        exit 1
+      end
+
+      source = File.expand_path('./calabash.framework')
+      target = File.join(gem_static_libs_dir, 'calabash.framework.zip')
+      args = ['ditto', '-c', '-k', '--rsrc', '--sequesterRsrc', '--keepParent',
+              source, target]
+
+      Luffa::Debug.with_debugging do
+        RunLoop::Xcrun.new.exec(args, {log_cmd: true})
+      end
+
+      unless File.exist?(target)
+        log_error('There was a problem installing calabash.framework.zip to ./staticlib')
+        exit 1
+      end
+
+      log_info('Installed framework to ./staticlib/calabash.framework.zip')
+
+      unless system('make', 'frank')
+        log_error("There was an error executing 'make frank'")
+        exit 1
+      end
+
+      source = File.expand_path('./libFrankCalabash.a')
+      target = File.join(gem_static_libs_dir, 'libFrankCalabash.a')
+      args = ['ditto', source, target]
+
+      Luffa::Debug.with_debugging do
+        RunLoop::Xcrun.new.exec(args, {log_cmd: true})
+      end
+
+      unless File.exist?(target)
+        log_error('There was a problem installing the libFrankCalabash.a to ./staticlib')
+        exit 1
+      end
+
+      log_info('Installed frank plugin to ./staticlib/libFrankCalabash.a')
+
+      if Luffa::Environment.travis_ci?
+        log_info('Skipping dylib creation on Travis CI; no codesigning environment')
+        exit 0
+      end
+
+      unless system('make', 'dylibs')
+        log_error("There was an error executing 'make dylibs'")
+        exit 1
+      end
+
+      ['libCalabashDynSim.dylib',
+       'libCalabashDyn.dylib',
+       'libCalabashDynFAT.dylib'].each do |dylib|
+
+         source = File.join('calabash-dylibs', dylib)
+         target = File.join(gem_dylibs_dir, dylib)
+         args = ['ditto', source, target]
+
+         Luffa::Debug.with_debugging do
+           RunLoop::Xcrun.new.exec(args, {log_cmd: true})
+         end
+
+         unless File.exist?(target)
+           log_error("There was a problem installing #{dylib} to ./#{File.basename(gem_dylibs_dir)}")
+           exit 1
+         end
+
+         log_info("Installed #{dylib} to #{source}")
+       end
+    end
+
+    banner('Visual Confirmation')
+    if `which tree`.chomp != ''
+      system('tree', '-s', 'staticlib')
+      system('tree', '-s', 'dylibs')
+    else
+      system('ls', '-hal', 'staticlib')
+      system('ls', '-hal', 'dylibs')
+    end
+
+    log_info('Done!')
   end
 
-  skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
+  def banner(log)
+    puts "\033[35m\n####### #{log} ########\n\033[0m"
+  end
 
-  gem_static_libs_dir = File.expand_path('staticlib')
-  FileUtils.mkdir_p gem_static_libs_dir
+  def log_error(log)
+    puts "\033[31mERROR: #{log}\033[0m"
+  end
 
-  gem_dylibs_dir = File.expand_path('dylibs')
-  FileUtils.mkdir_p gem_dylibs_dir
+  def log_info(log)
+    puts "\033[32mINFO: #{log}\033[0m"
+  end
 
-  Dir.chdir(calabash_server_dir) do
-    puts 'INFO: building the server libraries...'
+  def find_server_repo_or_raise
+    calabash_server_dir = ENV['CALABASH_SERVER_PATH'] || File.join('..', '..', 'calabash-ios-server')
+    unless File.exist?(calabash_server_dir)
+      raise %Q{\033[31m
+Expected to find the calabash-ios-server repo at:
 
-    # framework
-    puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make framework"
-    `make framework`
+      #{File.expand_path(calabash_server_dir)}
 
-    framework_dir='calabash.framework'
-    framework_zip="#{framework_dir}.zip"
-    if File.exist?(framework_dir)
-      puts 'INFO:  creating a zip archive of calabash.framework'
-      zip_cmd = "zip -y -q -r #{framework_zip} #{framework_dir}"
-      puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; #{zip_cmd}"
-      `#{zip_cmd}`
-      framework_zip = File.expand_path(framework_zip)
-      unless File.exist?(framework_zip)
-        puts 'FAIL:  unable to create a zip archive of calabash.framework'
-        puts "FAIL:  run '#{zip_cmd}' in #{File.expand_path(calabash_server_dir)} to diagnose"
-        raise 'Unable to zip down framework...'
-      end
-    else
-      puts 'FAIL:  unable to build calabash.framework'
-      puts "FAIL:  run 'make framework' in #{File.expand_path(calabash_server_dir)} to diagnose"
-      raise 'could not build the calabash.framework'
+Either clone the repo to that location with:
+
+  $ git clone --recursive git@github.com:calabash/calabash-ios-server.git
+
+or set CALABASH_SERVER_PATH to point to your local copy of the server.
+
+  $ CALABASH_SERVER_PATH=/path/to/server rake build_server\033[0m
+
+      }
     end
+    calabash_server_dir
+  end
 
-    FileUtils.mv(framework_zip, gem_static_libs_dir, :force => true)
-    puts "INFO: calabash.framework.zip installed in #{gem_static_libs_dir}"
+  def expect_server_is_on_master_branch(calabash_server_dir)
+    branch = `git -C #{calabash_server_dir} rev-parse --abbrev-ref HEAD`.chomp
+    unless branch == 'master'
+      raise %Q{\033[31m
+Expected git branch of of the server repo at:
 
-    # frank
-    puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make frank"
-    `make frank`
-    frank_library_name='libFrankCalabash.a'
-    if File.exist? frank_library_name
-      path_to_frank_library = File.expand_path(frank_library_name)
-    else
-      puts 'FAIL: unable to build the frank library'
-      puts "FAIL:  run 'make frank' in #{File.expand_path(calabash_server_dir)} to diagnose"
-      raise 'could not build libFrankCalabash.a'
+      #{File.expand_path(calabash_server_dir)}
+
+to be 'master' but found '#{branch}'.
+
+The server must be built from the master branch.\033[0m
+
+      }
     end
+  end
 
-    FileUtils.mv(path_to_frank_library, gem_static_libs_dir, :force => true)
-    puts "INFO: libFrankCalabash.a installed in #{gem_static_libs_dir}"
-
-    # dylibs
+  def log_warning_about_skipping_dylibs
+    skip_dylibs = ENV['CALABASH_NO_DYLIBS'] == '1'
     if skip_dylibs
-      puts "WARN: Skipping dylibs because CALABASH_NO_DYLIBS = '#{ENV['CALABASH_NO_DYLIBS']}'"
-      puts 'WARN: If you are building the gem for release, you must include the dylibs'
-    else
-      puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make dylibs"
-      `make dylibs`
-      dylib_paths = ['./calabash-dylibs/libCalabashDynSim.dylib','./calabash-dylibs/libCalabashDyn.dylib']
-      dylibs = []
-      dylib_paths.each do |dylib|
-        if File.exist? dylib
-          dylibs << File.expand_path(dylib)
-        else
-          puts "FAIL: unable to build the dylib library: #{dylib}"
-          puts "FAIL: run 'make dylibs' in #{File.expand_path(calabash_server_dir)} to diagnose"
-          raise 'could not build dylibs'
-        end
-      end
-
-      dylibs.each do |dylib|
-        FileUtils.mv(dylib, gem_dylibs_dir, :force => true)
-        puts "INFO: #{File.basename(dylib)} installed in '#{gem_dylibs_dir}'"
-      end
+      Luffa.log_warn('CALABASH_NO_DYLIBS is deprecated since 0.16.4')
+      Luffa.log_warn('This rake task is for building for release.')
+      Luffa.log_warn('The gem cannot be built without the dylibs.')
+      Luffa.log_warn('Ignoring CALABASH_NO_DYLIBS=1')
     end
+  end
+
+  def prepare_gem_library_directories
+    static_libs_dir = File.expand_path('staticlib')
+    FileUtils.rm_rf static_libs_dir
+    FileUtils.mkdir_p static_libs_dir
+
+    dylibs_dir = File.expand_path('dylibs')
+    FileUtils.rm_rf dylibs_dir
+    FileUtils.mkdir_p dylibs_dir
+
+    {
+      static_libs: static_libs_dir,
+      dylibs: dylibs_dir
+    }
   end
 end
 
-desc 'alias for build_server; deprecated since 0.10.0'
-task :install_server => [:build_server]
-desc 'alias for build_server; deprecated since 0.10.0'
-task :release_server => [:build_server]
