@@ -57,12 +57,15 @@ task :build_server do
   gem_dylibs_dir = gem_lib_dirs[:dylibs]
 
   Dir.chdir(calabash_server_dir) do
-    puts 'INFO: building the server libraries...'
+    banner 'Cleaning'
 
-    # framework
+    unless system('make', 'clean')
+      Luffa.log_error("There was an error executing 'make clean'")
+      exit 1
+    end
+
     puts "INFO: $ cd #{File.expand_path(calabash_server_dir)} ; make framework"
     `make framework`
-
     framework_dir='calabash.framework'
     framework_zip="#{framework_dir}.zip"
     if File.exist?(framework_dir)
