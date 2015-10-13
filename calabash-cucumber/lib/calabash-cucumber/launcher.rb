@@ -1083,7 +1083,7 @@ class Calabash::Cucumber::Launcher
       msgs = [
             'The server version is not compatible with gem version.',
             'Please update your server.',
-            'https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version',
+            'https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version',
             "       gem version: '#{gem_version}'",
             "min server version: '#{min_server_version}'",
             "    server version: '#{server_version}'"]
