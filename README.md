@@ -12,7 +12,7 @@ Calabash is a free-to-use open source project that is developed and maintained b
 
 While Calabash is completely free, Xamarin provides a number of commercial services centered around Calabash and quality assurance for mobile, namely Xamarin Test Cloud consisting of hosted test-execution environments which let you execute Calabash tests on a large number of Android and iOS devices.  For more information about the Xamarin Test Cloud visit [http://xamarin.com/test-cloud](http://xamarin.com/test-cloud).
 
-## Quick Links
+## Links
 
 * [Getting Help](https://github.com/calabash/calabash-ios/wiki#getting-help)
 * [Reporting Problems](https://github.com/calabash/calabash-ios/wiki#reporting-problems)
@@ -22,7 +22,7 @@ While Calabash is completely free, Xamarin provides a number of commercial servi
 * [Contributing](CONTRIBUTING.md)
 * [CHANGELOGS](https://github.com/calabash/calabash-ios/tree/master/changelog)
 
-## Setup and Requirements
+## Requirements
 
 Xamarin Studio users should visit [http://developer.xamarin.com/testcloud/](http://developer.xamarin.com/testcloud/) for setup instructions and requirements.
 
