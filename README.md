@@ -38,6 +38,18 @@ We recommend that you use a managed ruby like [rbenv](https://github.com/sstephe
 * [Ruby on MacOS](https://github.com/calabash/calabash-ios/wiki/Ruby-on-MacOS)
 * [Best Practice: Never install gems with sudo](https://github.com/calabash/calabash-ios/wiki/Best-Practice%3A--Never-install-gems-with-sudo)
 
+## Setup
+
+Calabash is a client/server architecture.  The client is a ruby gem. The server is embedded in the app you want to test by linking or loading a library that contains the Calabash server.  There are many ways to link or load a library.  For most users, we recommend maintaining a separate _-cal target_.
+
+### The -cal Target
+
+The traditional setup creates a separate Xcode target application based on your original application.  We call this new target the _-cal target._  The _-cal target_ is exactly like your original application except that it will contain an embedded Calabash iOS Server.
+
+**Why a separate target?**
+
+The Calabash server contains symbols and methods that will cause any application that links to it to _be rejected from the AppStore_.  A separate target with a different bundle identifier will ensure that you never accidently submit an application that has the Calabash server linked.
+
 ### Alternative Setups
 
 If the separate _-cal target_ does not suit your needs, there are many other ways to setup your project.  The community has collected these alternative methods for integrating Calabash into your Xcode project.
