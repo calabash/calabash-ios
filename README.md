@@ -48,7 +48,7 @@ If the separate _-cal target_ does not suit your needs, there are many other way
 
 If you are not already using CocoaPods, we don't recommend adopt CocoaPods just to link the Calabash library.
 
-### Create a -cal Target
+### The -cal Target
 
 The traditional setup creates a separate Xcode target application based on your original application.  We call this new target the _-cal target._  The _-cal target_ is exactly like your original application except that it will contain an embedded Calabash iOS Server.
 
@@ -56,60 +56,73 @@ The traditional setup creates a separate Xcode target application based on your 
 
 The Calabash server contains symbols and methods that will cause any application that links to it to _be rejected from the AppStore_.  A separate target with a different bundle identifier will ensure that you never accidently submit an application that has the Calabash server linked.
 
-### Setting up Xcode project
+### Step 1. Create the -cal Target
 
-Instructions:
+Right-click on the Production target and duplicate.
 
-* Step 1/3 is to duplicate your primary/production target.
- - Select your project in Xcode and select your production target for your app.
- - Right click (or two-finger tap) your target and select "Duplicate target"
- - Select "Duplicate only" (not transition to iPad)
- - Rename your new target from ".. copy" to "..-cal"
- - From the menu select Edit Scheme and select manage schemes.
- - Rename the new scheme from ".. copy" to "..-cal"
- - Optionally, set the Product name to ..-cal in Build settings for the new target.
-
-* Step 2/3: Link with framework.
-    - Download the latest version of calabash.framework with calabash-ios gem command:
-    - `calabash-ios download`
-    - Use Finder to open the folder that contains `calabash.framework`.
-    - Drag `calabash.framework` from Finder into your project's  `Frameworks` folder in Xcode.
-        * **Make sure that**
-            1. `Copy items into destination group's folder (if needed)` *is checked* and
-            2.  _only_ your "-cal " target is checked in `Add to targets`.
-
-      ![Linking with calabash.framework](documentation/images/Frameworks.png "Linking with frameworks")
-    - You must also link you -cal target with `CFNetwork.framework` (unless your production target
-      is  already linking with `CFNetwork`). To do this click on your -cal target in XCode. Click on
-      Build Phases, expand Link Binary with Libraries, click `+` to add `CFNetwork.framework`.
+-> ![alt text](.readme-images/setup-cal-target/00-duplicate-target.png "Duplicate Target: Step 1") <-
 
 
-* Step 3/3: cal-Target Build Settings
- - Click on your project and select your new "-cal" target.
- - Select "Build Settings".
- - Ensure that "All" and not "Basic" settings are selected in "build settings".
- - Find "Other Linker Flags" (you can type "other link" in the search field).
- - Ensure that "Other linker flags" contains: `-force_load "$(SRCROOT)/calabash.framework/calabash" -lstdc++`
+If you have an iPhone or iPad only app, you might see an alert like this one:
 
-*Note*: Now that you have created a separate target, new files that you add to your project are not automatically added to your -LP target. Make sure that any new files you add to your production target are also added to your -LP target.
+-> ![alt text](.readme-images/setup-cal-target/01-duplicate-alert.png "Duplicate Target: Possible Alert") <-
 
+If so, be sure to select "Duplicate Only".
 
-This screenshot is a reference for you build settings.
+#### 1.2 Rename with -cal
 
-![Build settings](documentation/images/linker_flags.png "Build settings")
+-> ![alt text](.readme-images/setup-cal-target/02-rename-duplicate-target.png "Duplicate Target: Rename with -cal") <-
 
+#### 1.3 Change the bundle identifier
 
-### Test that `calabash.framework` is loaded.
+-> ![alt text](.readme-images/setup-cal-target/03-change-bundle-identifier.png "Duplicate Target: Change Bundle Identifier") <-
+#### 1.4 Change the Info.plist-> ![alt text](.readme-images/setup-cal-target/04-change-info-plist.png "Duplicate Target: Change the Info.plist") <-
+#### 1.5 Delete duplicate Info.plist
+-> ![alt text](.readme-images/setup-cal-target/05-delete-duplicate-info-plist.png "Duplicate Target: Remove duplicate Info.plist") <-
 
-Make sure you select your "..-cal" scheme and then run you app on 4.x/5 simulator.
+### Step 2:  Create the -cal Scheme
 
-Verify that you see console output like
+-> ![alt text](.readme-images/setup-cal-target/06-scheme-manage.png "Scheme: Manage Schemes") <-
 
-    2012-01-19 LPSimpleExample[4318:11603] Creating the server: <HTTPServer: 0x7958d70>
-    2012-01-19 LPSimpleExample[4318:11603] HTTPServer: Started HTTP server on port 37265
-    2012-01-19 LPSimpleExample[4318:13903] Bonjour Service Published: domain(local.) type(_http._tcp.) name(Calabash Server)
+#### 2.2 Set the Scheme name
 
+Be sure to check both the "Show" and "Share" options.
+-> ![alt text](.readme-images/setup-cal-target/07-scheme-rename-and-share.png "Scheme: Rename and Share") <-#### 2.3 Set Scheme Executable
+This step may not be necessary.  You should confirm that the Executable for the -cal scheme is the -cal target.-> ![alt text](.readme-images/setup-cal-target/08-scheme-set-executable.png "Scheme: Set the Executable") <-### 3. Link CFNetwork.framework
 
+If your production app does not already link the CFNetwork.framework, you must add it to the -cal target.
+-> ![alt text](.readme-images/setup-cal-target/09-link-CFNetwork-0.png "CFNetwork: Navigate to General Settings") <--> ![alt text](.readme-images/setup-cal-target/10-link-CFNetwork-1.png "CFNetwork: Link") <-### 4. Link calabash.framework
+Create a Gemfile in the same directory as your .xcodeproj:
+```
+source "https://rubygems.org"
+
+gem "calabash-cucubmer", ">= 0.16", "< 2.0"```
+Then execute the following commands in that directory:
+```
+$ bundle$ bundle exec calabash-ios download
+----------Info----------
+caution: excluded filename not matched:  __MACOSX/*
+caution: excluded filename not matched:  calabash.framework/.DS_Store
+---------------------------```
+#### 4.2 Add the calabash.framework
+
+Be sure to add the calabash.framework to _no targets_.
+
+-> ![alt text](.readme-images/setup-cal-target/11-add-calabash-framework-0.png "Add calabash.framework") <--> ![alt text](.readme-images/setup-cal-target/12-add-calabash.framework-1.png "Add calabash.framework") <-#### 4.3 Link the calabash.framework
+-> ![alt text](.readme-images/setup-cal-target/13-add-calabash.framework-linker-flags.png
+ "Link the calabash.framework") <-
+
+### 5. Build and Run
+
+Be sure to select the _-cal target_ scheme.  You can target a simulator or physical device.
+
+In your Xcode console you should see the following output - the exact content will differ by Calabash version:
+
+```
+2015-10-21 15:44:59.627 DEBUG CalabashServer:222 | Creating the server: <LPHTTPServer: 0x7f80b3d066e0>
+2015-10-21 15:44:59.627 DEBUG CalabashServer:223 | Calabash iOS server version: CALABASH VERSION: 0.16.4
+2015-10-21 15:44:59.627 DEBUG CalabashServer:226 | App Base SDK: iphonesimulator9.0
+```
 ## Calabash 2.0
 
 Calabash 2.0 is a merge of the iOS and Android APIs.  Read the [Announcement: Calabash 2.0](https://github.com/calabash/calabash/issues/55) for details and to make comments.
