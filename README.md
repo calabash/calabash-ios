@@ -135,14 +135,6 @@ In your Xcode console you should see the following output - the exact content wi
 2015-10-21 15:44:59.627 DEBUG CalabashServer:223 | Calabash iOS server version: CALABASH VERSION: 0.16.4
 2015-10-21 15:44:59.627 DEBUG CalabashServer:226 | App Base SDK: iphonesimulator9.0
 ```
-## Calabash 2.0
-
-Calabash 2.0 is a merge of the iOS and Android APIs.  Read the [Announcement: Calabash 2.0](https://github.com/calabash/calabash/issues/55) for details and to make comments.
-
-## Frank
-
-Calabash can be used as a Frank plug-in for [Frank project](https://github.com/TestingWithFrank/Frank). The idea being to unify the communities more, although full unification will not be possible currently (as Calabash focuses on supporting on-device testing which is not currently a specific design-goal of Frank).  For instructions on how it integrate Calabash into your Frank project see the [README_FRANK.md](README_FRANK.md) document.
-
 ## License
 
 ```
