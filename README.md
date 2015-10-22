@@ -29,6 +29,22 @@ We recommend that you use a managed ruby like [rbenv](https://github.com/sstephe
 * [Ruby on MacOS](https://github.com/calabash/calabash-ios/wiki/Ruby-on-MacOS)
 * [Best Practice: Never install gems with sudo](https://github.com/calabash/calabash-ios/wiki/Best-Practice%3A--Never-install-gems-with-sudo)
 
+## Getting Started
+
+If you want to see Calabash iOS in action, head over to the [Calabash iOS Smoke Test App](https://github.com/calabash/ios-smoke-test-app) and follow the instructions in the README.  We use this app to document, demonstrate, and test Calabash iOS.  You can use this app to explore Calabash and as an example for how to configure your Xcode project and Calabash workflow.
+
+### Step 1: Add calabash.framework to your project
+
+To start using Calabash in your project, you need to link an Objective-C framework (calabash.framework) to your application.
+
+|Tutorial|Description|
+|:--------:|-----------|
+|[Debug Config](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A-Link-Calabash-in-Debug-config) | Use linker flags in the Debug build config to load the calabash.framework |
+|[Calabash Config](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A-Calabash-config) | Create a new Calabash Build Configuration |
+|[-cal Target](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A--Creating-a-cal-Target) | Add a new app target to Xcode.|
+
+If you want to get started quickly, just follow the [Debug Config]() instructions.  The [Tutorial: How to add Calabash to Xcode](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A-How-to-add-Calabash-to-Xcode) wiki page discusses the merits of each approach and has instructions for using CocoaPods.
+
 ## Links
 
 * [Getting Help](https://github.com/calabash/calabash-ios/wiki#getting-help)
