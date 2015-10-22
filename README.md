@@ -30,7 +30,8 @@ We recommend that you use the most recent released version of Xcode, MacOS, and 
 
 * MacOS 10.10 or 10.11
 * Xcode 6 or 7
-* iOS >= 7.1
+* iOS Devices >= 7.1
+* iOS Simulators >= 8.0
 * ruby >= 2.0 (latest is preferred)
 
 We recommend that you use a managed ruby like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/).  For more information, see these Wiki pages:
