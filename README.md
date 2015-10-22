@@ -12,16 +12,6 @@ Calabash is a free-to-use open source project that is developed and maintained b
 
 While Calabash is completely free, Xamarin provides a number of commercial services centered around Calabash and quality assurance for mobile, namely Xamarin Test Cloud consisting of hosted test-execution environments which let you execute Calabash tests on a large number of Android and iOS devices.  For more information about the Xamarin Test Cloud visit [http://xamarin.com/test-cloud](http://xamarin.com/test-cloud).
 
-## Links
-
-* [Getting Help](https://github.com/calabash/calabash-ios/wiki#getting-help)
-* [Reporting Problems](https://github.com/calabash/calabash-ios/wiki#reporting-problems)
-* [Public API](http://calabashapi.xamarin.com/ios/)
-* [Xamarin Studio + Ruby Client](http://developer.xamarin.com/guides/testcloud/calabash/configuring/)
-* [Xamarin Studio + UITest](http://developer.xamarin.com/guides/testcloud/uitest/)
-* [Contributing](CONTRIBUTING.md)
-* [CHANGELOGS](https://github.com/calabash/calabash-ios/tree/master/changelog)
-
 ## Requirements
 
 Xamarin Studio users should visit [http://developer.xamarin.com/testcloud/](http://developer.xamarin.com/testcloud/) for setup instructions and requirements.
@@ -39,6 +29,16 @@ We recommend that you use a managed ruby like [rbenv](https://github.com/sstephe
 * [Ruby on MacOS](https://github.com/calabash/calabash-ios/wiki/Ruby-on-MacOS)
 * [Best Practice: Never install gems with sudo](https://github.com/calabash/calabash-ios/wiki/Best-Practice%3A--Never-install-gems-with-sudo)
 
+## Links
+
+* [Getting Help](https://github.com/calabash/calabash-ios/wiki#getting-help)
+* [Reporting Problems](https://github.com/calabash/calabash-ios/wiki#reporting-problems)
+* [Public API](http://calabashapi.xamarin.com/ios/)
+* [Xamarin Studio + Ruby Client](http://developer.xamarin.com/guides/testcloud/calabash/configuring/)
+* [Xamarin Studio + UITest](http://developer.xamarin.com/guides/testcloud/uitest/)
+* [Contributing](CONTRIBUTING.md)
+* [CHANGELOGS](https://github.com/calabash/calabash-ios/tree/master/changelog)
+
 ## License
 
 ```
@@ -50,6 +50,3 @@ By using this software in any fashion, you are agreeing to be bound by
 the terms of this license. You must not remove this notice, or any other,
 from this software.
 ```
-
-
-
