@@ -1,46 +1,44 @@
-########################################
-#                                      #
-#       Important Note                 #
-#                                      #
-#   When running calabash-ios tests at #
-#   www.xamarin.com/test-cloud         #
-#   the  methods invoked by            #
-#   CalabashLauncher are overridden.   #
-#   It will automatically ensure       #
-#   running on device, installing apps #
-#   etc.                               #
-#                                      #
-########################################
-
 require 'calabash-cucumber/launcher'
 
+# You can find examples of more complicated launch hooks in these
+# two repositories:
+#
+# https://github.com/calabash/ios-smoke-test-app/blob/master/CalSmokeApp/features/support/01_launch.rb
+# https://github.com/calabash/ios-webview-test-app/blob/master/CalWebViewApp/features/support/01_launch.rb
 
-# APP_BUNDLE_PATH = "#{ENV['HOME']}/Library/Developer/Xcode/DerivedData/??/Build/Products/Calabash-iphonesimulator/??.app"
-# You may uncomment the above to overwrite the APP_BUNDLE_PATH
-# However the recommended approach is to let Calabash find the app itself
-# or set the environment variable APP_BUNDLE_PATH
+module Calabash::Launcher
+  @@launcher = nil
 
+  def self.launcher
+    @@launcher ||= Calabash::Cucumber::Launcher.new
+  end
+
+  def self.launcher=(launcher)
+    @@launcher = launcher
+  end
+end
 
 Before do |scenario|
-  @calabash_launcher = Calabash::Cucumber::Launcher.new
-  unless @calabash_launcher.calabash_no_launch?
-    @calabash_launcher.relaunch
-    @calabash_launcher.calabash_notify(self)
-  end
+  launcher = Calabash::Launcher.launcher
+  options = {
+    # Add launch options here.
+  }
+
+  launcher.relaunch(options)
+  launcher.calabash_notify(self)
 end
 
 After do |scenario|
-  unless @calabash_launcher.calabash_no_stop?
+  # Calabash can shutdown the app cleanly by calling the app life cycle methods
+  # in the UIApplicationDelegate.  This is really nice for CI environments, but
+  # not so good for local development.
+  #
+  # See the documentation for NO_STOP for a nice debugging workflow
+  #
+  # http://calabashapi.xamarin.com/ios/file.ENVIRONMENT_VARIABLES.html#label-NO_STOP
+  # http://calabashapi.xamarin.com/ios/Calabash/Cucumber/Core.html#console_attach-instance_method
+  unless launcher.calabash_no_stop?
     calabash_exit
-    if @calabash_launcher.active?
-      @calabash_launcher.stop
-    end
   end
 end
 
-at_exit do
-  launcher = Calabash::Cucumber::Launcher.new
-  if launcher.simulator_target?
-    launcher.simulator_launcher.stop unless launcher.calabash_no_stop?
-  end
-end
