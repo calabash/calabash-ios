@@ -1,30 +1,56 @@
 #!/usr/bin/env ruby
 
-require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
+require "luffa"
 
-install_gem('dotenv')
+Luffa::Gem.install_gem("dotenv")
 require 'dotenv'
 
-working_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..'))
+# Create a clean gem environment
+Luffa::Gem.uninstall_gem("calabash-cucumber")
+Luffa::Gem.uninstall_gem("run_loop")
 
-# Before script.
-install_gem 'json'
-uninstall_gem('calabash-cucumber')
-install_gem('run_loop', {:prerelease => true})
-install_gem('xamarin-test-cloud')
-system('script/ci/travis/install-gem-libs.rb')
-system('script/ci/travis/install-gem-ci.rb')
+Luffa::Gem.install_gem("run_loop", {:prerelease => true})
+Luffa::Gem.install_gem("xamarin-test-cloud")
 
-xtc_test_dir = File.join(working_dir, 'calabash-cucumber', 'test', 'xtc')
-Dir.chdir xtc_test_dir do
+# Clean install of _this_ version of Calabash
+Dir.chdir(File.join("calabash-cucumber")) do
+  Luffa.unix_command("rm -rf dylibs")
+  Luffa.unix_command("mkdir -p dylibs")
+  Luffa.unix_command("rm -rf staticlib")
+  Luffa.unix_command("mkdir -p staticlib")
 
-  calabash_version = `calabash-ios version`.chomp
-  File.open('Gemfile', 'w') do |file|
-    file.write("source 'https://rubygems.org'\n")
-    file.write("gem 'calabash-cucumber', '#{calabash_version}'")
+  ["dylibs/libCalabashDyn.dylib",
+   "dylibs/libCalabashDynSim.dylib",
+   "staticlib/calabash.framework.zip",
+   "staticlib/libFrankCalabash.a"].each do |library|
+     Luffa.unix_command("echo \"touch\" > #{library}")
+   end
+  Luffa.unix_command("rake install")
+end
+
+calabash_version = lambda {
+  file = File.join("calabash-cucumber", "lib", "calabash-cucumber", "version.rb")
+  content = File.read(file)
+  regex = /(\d+\.\d+\.\d+(\.pre\d+)?)/
+  match = content[regex, 0]
+
+  if !match
+    raise "Could not find a VERSION line in '#{file}' with #{regex}"
   end
 
-  log_pass("wrote new Gemfile with calabash-version '#{calabash_version}'")
+  match
+}.call
+
+xtc_test_dir = File.join("calabash-cucumber", "test", "xtc")
+Dir.chdir xtc_test_dir do
+
+  # Force XTC submit to use _this_ version of Calabash
+  File.open("Gemfile", "w") do |file|
+    file.write("source \"https://rubygems.org\"\n")
+    file.write("gem \"calabash-cucumber\", \"#{calabash_version}\"\n")
+  end
+
+  Luffa.log_pass("Wrote new Gemfile with calabash-version '#{calabash_version}'")
 
   # On Travis, the XTC api token and user are _private_ and are available to gem
   # maintainers only.  Pull requests and commits that do not originate from a
@@ -70,14 +96,15 @@ Dir.chdir xtc_test_dir do
           '--series', 'travis-ci-calabash-ios-gem',
           '-d', device_set,
           wait_for_results,
-          '--user', user]
+          '--user', user,
+          "--dsym-file", "CalSmoke-cal.app.dSYM"]
 
   ipa = 'CalSmoke-cal.ipa'
 
-  cmd = "test-cloud submit #{ipa} #{token} #{args.join(' ')}"
+  cmd = "test-cloud submit #{ipa} #{token} #{args.join(" ")}"
 
-  do_system(cmd, {:pass_msg => 'XTC job completed',
-                  :fail_msg => 'XTC job failed',
-                  :obscure_fields => [token, user]})
+  Luffa.unix_command(cmd, {:pass_msg => "XTC job completed",
+                           :fail_msg => "XTC job failed",
+                           :obscure_fields => [token, user]})
 end
 
