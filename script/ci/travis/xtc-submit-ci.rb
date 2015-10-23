@@ -80,9 +80,9 @@ Dir.chdir xtc_test_dir do
 
   user = ENV['XTC_USER']
 
-  if ENV['XTC_WAIT_FOR_RESULTS'] == '0'
-    wait_for_results = '--async'
-  else
+  wait_for_results = "--async"
+
+  if ENV["XTC_WAIT_FOR_RESULTS"] == "1"
     wait_for_results = '--no-async'
   end
 
