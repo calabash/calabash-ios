@@ -38,6 +38,4 @@ env:
     # -r calabash/calabash-ios
     - secure: "Fl27YECPUQ1eK3lcUiG8WgbKvvEBm9KG+sFt3nsUc1TLATwBCeL3jU+CDTFUZYh509G/L0p3k1VfOKoRubwyuKI1NRAg2qr5e1YhiMblA8QdgGuPZS6o5mgmYKCG6wriKsHFLrGETwtJF9gBugwPHs9NGe7AMyqGk+Q3j+zmdJY="
     - secure: "pE7fLQ1ZYSVH3PD700kN8ygwMQcSbRXCthkNXUhp16zGx5mQLBGGffmCz6HhiURHAjSmjRu2XlCvIx95Lg0XKPe/zATYsLiBMyFNdZNwIFHEFSWFLCuaVXEzdXVNuLJOS8vHLBsVi6GFagwk1Qi+0x2FrtbZXz/u2Qk99gtuf18="
-    # -r jmoody/calabash-ios
-    - secure: "QBD8Vf18ZJ1a6SKdkoAaUJ7iBREyhJzeFNObVDnAddl5NoNVc1X3ifcvRn6phSrC5jOesqgvGS9wKPiZpoax2UWJGK360MEJt7m7/9xU1YLfUtQwu5pY4sgSH0JOq0oHnnxREF89H67AQ5gjLHtUptTRgshmjNMORoQwFUVRIjc="
-    - secure: "a9pLFQJjhTq8bXBLB+aSOhsquNADJkIQLoV+nYWe+NBD3pCKUTqYATs+ErcrfhKb4mOei2VjFIGd+X7uQj4rsoUdOA/dcf9vFCREPZBiYFGb5vSxosgOSCE7TQy+GOB4HJ/IVS9Xzjxtw8PWo4EvothAUD+ub2hVImRInhX7BcY="
+
