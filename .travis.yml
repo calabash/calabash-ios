@@ -9,18 +9,18 @@ before_script:
   - script/ci/travis/install-gem-libs.rb
 
 script:
-  # Skip XTC run on all but 2.1.5 to avoid redundant testing. This is just a
+  # Skip XTC run on all but the latest to avoid redundant testing. This is just a
   # smoke test to ensure a job can be validated; the ruby version is immaterial.
-  #- if [[ ( ! -z $XTC_API_TOKEN && ! -z $XTC_USER && `ruby -e 'print RUBY_VERSION'` == '2.1.5' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
+  # - if [[ ( ! -z $XTC_API_TOKEN && ! -z $XTC_USER && `ruby -e 'print RUBY_VERSION'` == '2.2.3' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
   - script/ci/travis/bundle-install.rb
   - script/ci/travis/install-gem-ci.rb
   - script/ci/travis/rspec-ci.rb
   - script/ci/travis/cucumber-ci.rb --tags ~@no_ci
 
 rvm:
-  - 1.9.3
   - 2.0.0
-  - 2.1.5
+  - 2.1.7
+  - 2.2.3
 
 notifications:
   email:

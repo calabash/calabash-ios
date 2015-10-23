@@ -51,7 +51,7 @@ Gem::Specification.new do |s|
   s.require_paths = %w(lib)
   s.license       = 'EPL-1.0'
 
-  s.required_ruby_version = '>= 1.9'
+  s.required_ruby_version = '>= 2.0'
 
   s.add_dependency('cucumber', '~> 1.3.17')
   s.add_dependency('calabash-common', '~> 0.0.2')
