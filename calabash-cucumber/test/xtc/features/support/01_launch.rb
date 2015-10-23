@@ -1,23 +1,12 @@
-########################################
-#                                      #
-#       Important Note                 #
-#                                      #
-#   When running calabash-ios tests at #
-#   www.xamarin.com/test-cloud         #
-#   this file will be overwritten by   #
-#   a file which automates             #
-#   app launch on devices.             #
-#                                      #
-#   Don't rely on this file being      #
-#   present when running at            #
-#   Xamarin Test Cloud                 #
-#                                      #
-########################################
-
 require 'calabash-cucumber/launcher'
 
-# noinspection ALL
-module LaunchControl
+# You can find examples of more complicated launch hooks in these
+# two repositories:
+#
+# https://github.com/calabash/ios-smoke-test-app/blob/master/CalSmokeApp/features/support/01_launch.rb
+# https://github.com/calabash/ios-webview-test-app/blob/master/CalWebViewApp/features/support/01_launch.rb
+
+module Calabash::Launcher
   @@launcher = nil
 
   def self.launcher
@@ -30,26 +19,17 @@ module LaunchControl
 end
 
 Before do |scenario|
-  launcher = LaunchControl.launcher
-  unless launcher.calabash_no_launch?
-    launcher.relaunch
-    launcher.calabash_notify(self)
-  end
+  launcher = Calabash::Launcher.launcher
+  options = {
+    # Add launch option here.
+  }
+
+  launcher.relaunch(options)
+  launcher.calabash_notify(self)
 end
 
 After do |scenario|
-  launcher = LaunchControl.launcher
-  unless launcher.calabash_no_stop?
-    calabash_exit
-    if launcher.active?
-      launcher.stop
-    end
-  end
+ # Shutdown the app cleanly
+ calabash_exit
 end
 
-at_exit do
-  launcher = LaunchControl.launcher
-  if launcher.simulator_target?
-    Calabash::Cucumber::SimulatorHelper.stop unless launcher.calabash_no_stop?
-  end
-end

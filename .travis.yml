@@ -3,6 +3,8 @@ language: objective-c
 before_script:
   - gem install luffa --no-document --env-shebang --no-prerelease
   - gem install xcpretty --no-document --env-shebang --no-prerelease
+  - gem install dotenv --no-document --env shebang --no-prerelease
+  - gem install xamarin-test-cloud --no-document --env shebang --no-prerelease
   - luffa authorize
   - script/ci/travis/install-dot-gemrc.rb
   - script/ci/travis/clone-and-install-run-loop.rb
@@ -11,7 +13,7 @@ before_script:
 script:
   # Skip XTC run on all but the latest to avoid redundant testing. This is just a
   # smoke test to ensure a job can be validated; the ruby version is immaterial.
-  # - if [[ ( ! -z $XTC_API_TOKEN && ! -z $XTC_USER && `ruby -e 'print RUBY_VERSION'` == '2.2.3' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
+  - if [[ ( ! -z $XTC_API_TOKEN && ! -z $XTC_USER && `ruby -e 'print RUBY_VERSION'` == '2.2.3' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
   - script/ci/travis/bundle-install.rb
   - script/ci/travis/install-gem-ci.rb
   - script/ci/travis/rspec-ci.rb

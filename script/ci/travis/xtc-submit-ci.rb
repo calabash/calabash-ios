@@ -1,30 +1,51 @@
 #!/usr/bin/env ruby
 
-require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
+require "luffa"
+require "dotenv"
 
-install_gem('dotenv')
-require 'dotenv'
+# Clean install of _this_ version of Calabash
+Luffa::Gem.uninstall_gem("calabash-cucumber")
+Dir.chdir(File.join("calabash-cucumber")) do
+  exit_code = Luffa.unix_command("rake install",
+                                 :exit_on_nonzero_status => false)
+  if exit_code != 0
+    Luffa.unix_command("rm -rf dylibs")
+    Luffa.unix_command("mkdir -p dylibs")
+    Luffa.unix_command("rm -rf staticlib")
+    Luffa.unix_command("mkdir -p staticlib")
 
-working_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..'))
+    ["dylibs/libCalabashDyn.dylib",
+     "dylibs/libCalabashDynSim.dylib",
+     "staticlib/calabash.framework.zip",
+     "staticlib/libFrankCalabash.a"].each do |library|
+       Luffa.unix_command("echo \"touch\" > #{library}")
+     end
+  end
+end
 
-# Before script.
-install_gem 'json'
-uninstall_gem('calabash-cucumber')
-install_gem('run_loop', {:prerelease => true})
-install_gem('xamarin-test-cloud')
-system('script/ci/travis/install-gem-libs.rb')
-system('script/ci/travis/install-gem-ci.rb')
+calabash_version = lambda {
+  file = File.join("calabash-cucumber", "lib", "calabash-cucumber", "version.rb")
+  content = File.read(file)
+  regex = /(\d+\.\d+\.\d+(\.pre\d+)?)/
+  match = content[regex, 0]
 
-xtc_test_dir = File.join(working_dir, 'calabash-cucumber', 'test', 'xtc')
-Dir.chdir xtc_test_dir do
-
-  calabash_version = `calabash-ios version`.chomp
-  File.open('Gemfile', 'w') do |file|
-    file.write("source 'https://rubygems.org'\n")
-    file.write("gem 'calabash-cucumber', '#{calabash_version}'")
+  if !match
+    raise "Could not find a VERSION line in '#{file}' with #{regex}"
   end
 
-  log_pass("wrote new Gemfile with calabash-version '#{calabash_version}'")
+  match
+}.call
+
+xtc_test_dir = File.join("calabash-cucumber", "test", "xtc")
+Dir.chdir xtc_test_dir do
+
+  # Force XTC submit to use _this_ version of Calabash
+  File.open("Gemfile", "w") do |file|
+    file.write("source \"https://rubygems.org\"\n")
+    file.write("gem \"calabash-cucumber\", \"#{calabash_version}\"\n")
+  end
+
+  Luffa.log_pass("Wrote new Gemfile with calabash-version '#{calabash_version}'")
 
   # On Travis, the XTC api token and user are _private_ and are available to gem
   # maintainers only.  Pull requests and commits that do not originate from a
@@ -46,22 +67,22 @@ Dir.chdir xtc_test_dir do
   device_set = ENV['XTC_DEVICE_SET']
 
   unless device_set
-    # A collection of device sets that have one iOS 7* device.
+    # A collection of device sets that have one iOS >= 8.0 device.
     device_set =
           [
-                '78c84725', 'dd030a4d', '77388643', 'de3f1384', 'd3f07761',
-                'b354dd28', '4d614d40', '7660a1f0', 'dfa1cb5a', 'beb5c652',
-                '2ad574d4', '3c9d9e38', 'a690cafd', 'cb8ce9a8', '1b12481d',
-                'c4e5ddfb', '58d479d8', '7e8bfc9a', '8cdd13fe', '69329018',
-                '4396bc4e', '92f59830', '40d1d879', '2a817e4a'
+                'd2b869c3', '13629e4e', '6e501bf5', 'beaa6b1e', 'cd93c414',
+                '1d7d45da', '4d1f1f17', '529ebd0b', '5189dc60', '953a5c9d',
+                '90c31e8c', '55a5742b', '28e55ca5', '615b2706', 'a9209568',
+                '154ea192', 'ffd4b340', 'bce0fcdd', 'abfd755e', '64fd338e',
+                'd2805bcb', '6463528a', '79ed6ab6', '24bb451d'
           ].sample
   end
 
   user = ENV['XTC_USER']
 
-  if ENV['XTC_WAIT_FOR_RESULTS'] == '0'
-    wait_for_results = '--async'
-  else
+  wait_for_results = "--async"
+
+  if ENV["XTC_WAIT_FOR_RESULTS"] == "1"
     wait_for_results = '--no-async'
   end
 
@@ -70,14 +91,15 @@ Dir.chdir xtc_test_dir do
           '--series', 'travis-ci-calabash-ios-gem',
           '-d', device_set,
           wait_for_results,
-          '--user', user]
+          '--user', user,
+          "--dsym-file", "CalSmoke-cal.app.dSYM"]
 
   ipa = 'CalSmoke-cal.ipa'
 
-  cmd = "test-cloud submit #{ipa} #{token} #{args.join(' ')}"
+  cmd = "test-cloud submit #{ipa} #{token} #{args.join(" ")}"
 
-  do_system(cmd, {:pass_msg => 'XTC job completed',
-                  :fail_msg => 'XTC job failed',
-                  :obscure_fields => [token, user]})
+  Luffa.unix_command(cmd, {:pass_msg => "XTC job completed",
+                           :fail_msg => "XTC job failed",
+                           :obscure_fields => [token, user]})
 end
 
