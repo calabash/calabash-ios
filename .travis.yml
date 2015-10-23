@@ -3,6 +3,8 @@ language: objective-c
 before_script:
   - gem install luffa --no-document --env-shebang --no-prerelease
   - gem install xcpretty --no-document --env-shebang --no-prerelease
+  - gem install dotenv --no-document --env shebang --no-prerelease
+  - gem install xamarin-test-cloud --no-document --env shebang --no-prerelease
   - luffa authorize
   - script/ci/travis/install-dot-gemrc.rb
   - script/ci/travis/clone-and-install-run-loop.rb

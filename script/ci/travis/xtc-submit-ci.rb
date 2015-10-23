@@ -1,31 +1,26 @@
 #!/usr/bin/env ruby
 
 require "luffa"
-
-Luffa::Gem.install_gem("dotenv")
-require 'dotenv'
-
-# Create a clean gem environment
-Luffa::Gem.uninstall_gem("calabash-cucumber")
-Luffa::Gem.uninstall_gem("run_loop")
-
-Luffa::Gem.install_gem("run_loop", {:prerelease => true})
-Luffa::Gem.install_gem("xamarin-test-cloud")
+require "dotenv"
 
 # Clean install of _this_ version of Calabash
+Luffa::Gem.uninstall_gem("calabash-cucumber")
 Dir.chdir(File.join("calabash-cucumber")) do
-  Luffa.unix_command("rm -rf dylibs")
-  Luffa.unix_command("mkdir -p dylibs")
-  Luffa.unix_command("rm -rf staticlib")
-  Luffa.unix_command("mkdir -p staticlib")
+  exit_code = Luffa.unix_command("rake install",
+                                 :exit_on_nonzero_status => false)
+  if exit_code != 0
+    Luffa.unix_command("rm -rf dylibs")
+    Luffa.unix_command("mkdir -p dylibs")
+    Luffa.unix_command("rm -rf staticlib")
+    Luffa.unix_command("mkdir -p staticlib")
 
-  ["dylibs/libCalabashDyn.dylib",
-   "dylibs/libCalabashDynSim.dylib",
-   "staticlib/calabash.framework.zip",
-   "staticlib/libFrankCalabash.a"].each do |library|
-     Luffa.unix_command("echo \"touch\" > #{library}")
-   end
-  Luffa.unix_command("rake install")
+    ["dylibs/libCalabashDyn.dylib",
+     "dylibs/libCalabashDynSim.dylib",
+     "staticlib/calabash.framework.zip",
+     "staticlib/libFrankCalabash.a"].each do |library|
+       Luffa.unix_command("echo \"touch\" > #{library}")
+     end
+  end
 end
 
 calabash_version = lambda {
