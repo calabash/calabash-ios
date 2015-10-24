@@ -24,7 +24,9 @@ We recommend that you use the most recent released version of Xcode, MacOS, and 
 * iOS Simulators >= 8.0
 * ruby >= 2.0 (latest is preferred)
 
-We recommend that you use a managed ruby like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/).  For more information, see these Wiki pages:
+We recommend that you use a managed ruby (_e.g._ [rbenv](https://github.com/sstephenson/rbenv), [rvm](https://rvm.io/)) or manually manage your gem environment with [this script](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/installing-gems/).
+
+For more information about ruby on MacOS, see these Wiki pages:
 
 * [Ruby on MacOS](https://github.com/calabash/calabash-ios/wiki/Ruby-on-MacOS)
 * [Best Practice: Never install gems with sudo](https://github.com/calabash/calabash-ios/wiki/Best-Practice%3A--Never-install-gems-with-sudo)
