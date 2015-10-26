@@ -34,6 +34,10 @@ module Calabash
       # The file path to the default Xcode DerivedData directory.
       DERIVED_DATA = File.expand_path('~/Library/Developer/Xcode/DerivedData')
 
+      # @!visibility private]
+      # The file path to the default Xcode preferences plist.
+      XCODE_PREFS = File.expand_path('~/Library/Preferences/com.apple.dt.Xcode.plist')
+
       # @!visibility private
       # REGEX for finding application Info.plist.
       DEFAULT_DERIVED_DATA_INFO = File.expand_path("#{DERIVED_DATA}/*/info.plist")
@@ -162,6 +166,33 @@ module Calabash
       end
 
       # @!visibility private
+      # Returns the absolute build path to the project directory.
+      #
+      # @return [String] absolute path to the projects build directory
+      def build_output_dir_for_project
+        xcode_temp_prefs = File.join(project_dir, '.cal_xcode_prefs')
+        FileUtils.cp(XCODE_PREFS, xcode_temp_prefs)
+        `plutil -convert xml1 "#{xcode_temp_prefs}"`
+
+        plist = CFPropertyList::List.new(:file => xcode_temp_prefs)
+        hash = CFPropertyList.native_types(plist.value)
+
+        if hash.has_key?('IDESharedBuildFolderName')
+          build_folder_name = hash['IDESharedBuildFolderName']
+          output_dir = "#{DERIVED_DATA}/#{build_folder_name}/Products"
+        elsif hash.has_key?('IDECustomBuildProductsPath')
+          products_path = hash['IDECustomBuildProductsPath']
+          File.join(project_dir, products_path)
+        else
+          output_dir = derived_data_dir_for_project
+        end
+
+        FileUtils.rm(xcode_temp_prefs)
+
+        output_dir
+      end
+
+      # @!visibility private
       # Returns the absolute path to the project directory.
       #
       # Unless `PROJECT_DIR` is defined, returns the absolute path to the current
@@ -220,12 +251,13 @@ module Calabash
             puts('-'*37)
           end
         else
-          dd_dir = derived_data_dir_for_project
-          sim_dirs = Dir.glob(File.join(dd_dir, 'Build', 'Products', '*-iphonesimulator', '*.app'))
+          bo_dir = build_output_dir_for_project
+          sim_dirs = Dir.glob(File.join(bo_dir, '*-iphonesimulator', '*.app'))
+          
           if sim_dirs.empty?
             msg = ['Unable to auto detect APP_BUNDLE_PATH.']
             msg << 'Have you built your app for simulator?'
-            msg << "Searched dir: #{dd_dir}/Build/Products"
+            msg << "Searched dir: #{bo_dir}"
             msg << 'Please build your app from Xcode'
             msg << 'You should build the -cal target.'
             msg << ''
