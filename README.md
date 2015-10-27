@@ -35,7 +35,7 @@ For more information about ruby on MacOS, see these Wiki pages:
 
 If you want to see Calabash iOS in action, head over to the [Calabash iOS Smoke Test App](https://github.com/calabash/ios-smoke-test-app) and follow the instructions in the README.  We use this app to document, demonstrate, and test Calabash iOS.  You can use this app to explore Calabash and as an example for how to configure your Xcode project and Calabash workflow.
 
-### Step 1: Add calabash.framework to your project
+### Step 1: Link calabash.framework
 
 To start using Calabash in your project, you need to link an Objective-C framework (calabash.framework) to your application.
 
@@ -45,7 +45,44 @@ To start using Calabash in your project, you need to link an Objective-C framewo
 |[Calabash Config](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A-Calabash-config) | Create a new Calabash Build Configuration |
 |[-cal Target](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A--Creating-a-cal-Target) | Add a new app target to Xcode.|
 
-If you want to get started quickly, just follow the [Debug Config]() instructions.  The [Tutorial: How to add Calabash to Xcode](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A-How-to-add-Calabash-to-Xcode) wiki page discusses the merits of each approach and has instructions for using CocoaPods.
+If you want to get started quickly, follow the [Debug Config](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A-Link-Calabash-in-Debug-config) instructions.  The [Tutorial: How to add Calabash to Xcode](https://github.com/calabash/calabash-ios/wiki/Tutorial%3A-How-to-add-Calabash-to-Xcode) wiki page discusses the merits of each approach and has instructions for using CocoaPods.
+
+### Step 2: Run Cucumber against an iOS Simulator
+
+The [Calabash iOS Example](https://github.com/calabash/calabash-ios-example) README has simple instructions for how to link the calabash.framwork, generate a features directory, run cucumber, and and open a Calabash console.
+
+```
+# In the directory where your .xcodeproj and Gemfile are
+$ bundle exec calabash-ios gen
+
+# Tell Calabash where your .app is (see the note below)
+$ export APP=/path/to/Your.app
+
+$ bundle exec cucumber
+```
+
+Calabash needs to know what app to launch.  By default, Xcode builds to a DerivedData directory:
+
+```
+~/Library/Developer/Xcode/DerivedData/<UDID>/Build/Products/Debug-iphonesimulator/<NAME>.app
+```
+
+Calabash tries to analyze the DerivedData directory to find your .app, but there are often several possible matches.  This makes automatically detecting the right .app difficult to impossible.  We recommend two ways of telling Calabash where your .app is.
+
+#### Symlink
+
+
+
+### Where to go from here?
+
+| Topic | Description |
+|-------|-------------|
+| [Getting Started](https://github.com/calabash/calabash-ios/wiki/Getting-Started) | A more in-depth tutorial using the LPSimpleExample. |
+| [Testing on Physical Devices](https://github.com/calabash/calabash-ios/wiki/Testing-on-Physical-Devices) | Everything you need to know about testing on physical devices. |
+| [API Docs](http://calabashapi.xamarin.com/ios) | The Calabash iOS ruby API |
+| [iOS Smoke Test App](https://github.com/calabash/ios-smoke-test-app) | Demonstrates advanced features, setups, and workflows|
+| [iOS WebView Test App](https://github.com/calabash/ios-webview-test-app) | Demonstrates how to interact with UIWebView and WKWebView|
+| [Getting Help](https://github.com/calabash/calabash-ios/wiki) | The Calabash iOS Wiki |
 
 ## Links
 
