@@ -54,24 +54,33 @@ The [Calabash iOS Example](https://github.com/calabash/calabash-ios-example) REA
 ```
 # In the directory where your .xcodeproj and Gemfile are
 $ bundle exec calabash-ios gen
+```
 
-# Tell Calabash where your .app is (see the note below)
-$ export APP=/path/to/Your.app
+Build and run in Xcode, targeting an iOS Simulator.  Calabash will try to detect the .app you just built.
 
+```
 $ bundle exec cucumber
 ```
 
-Calabash needs to know what app to launch.  By default, Xcode builds to a DerivedData directory:
+If Calabash cannot find the .app you just built, it will raise an error.  If this happens, you will to tell Calabash where it can find your .app.
+
+By default, Xcode builds to a DerivedData directory:
 
 ```
 ~/Library/Developer/Xcode/DerivedData/<UDID>/Build/Products/Debug-iphonesimulator/<NAME>.app
 ```
 
-Calabash tries to analyze the DerivedData directory to find your .app, but there are often several possible matches.  This makes automatically detecting the right .app difficult to impossible.  We recommend two ways of telling Calabash where your .app is.
+Try to locate the .app and set the `APP` variable:
 
-#### Symlink
+```
+$ export APP="~/Library/Developer/Xcode/DerivedData/<UDID>/Build/Products/Debug-iphonesimulator/<NAME>.app"
+$ bundle exec cucumber
+```
 
+We recommend using scripts and/or changing the location where Xcode stages build products.
 
+* Tutorial: Build scripts  **WIP**
+* Tutorial: Xcode Location Settings **WIP**
 
 ### Where to go from here?
 
