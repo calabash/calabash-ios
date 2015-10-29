@@ -126,4 +126,70 @@ describe Calabash::Cucumber::Core do
       end
     end
   end
+
+  describe "#backdoor" do
+    let(:args) do
+      {
+        :method => :post,
+        :path => "backdoor"
+      }
+    end
+
+    let(:selector) { "myBackdoor:" }
+    let(:parameters) do
+      {
+        :selector => selector,
+        :arguments => ["a", "b", "c"]
+      }
+    end
+
+    describe "raises errors" do
+      it "http call fails" do
+        class MyHTTPError < RuntimeError ; end
+        expect(world).to receive(:http).and_raise MyHTTPError, "My error"
+
+        expect do
+          world.backdoor(selector)
+        end.to raise_error RuntimeError, /My error/
+      end
+
+      it "parsing the response fails" do
+        expect(world).to receive(:http).and_return ""
+        class MyJSONError < RuntimeError ; end
+        expect(world).to receive(:response_body_to_hash).with("").and_raise MyJSONError, "JSON error"
+
+        expect do
+          world.backdoor(selector)
+        end.to raise_error RuntimeError, /JSON error/
+      end
+
+      it "outcome is FAILURE" do
+        hash = {
+          "outcome" => "FAILURE",
+          "reason" => "This is unreasonable",
+          "details" => "The sordid details"
+        }
+
+        expect(world).to receive(:http).and_return ""
+        expect(world).to receive(:response_body_to_hash).with("").and_return(hash)
+
+        expect do
+          world.backdoor(selector, "a", "b", "c")
+        end.to raise_error RuntimeError, /backdoor call failed/
+      end
+    end
+
+    it "returns the results key" do
+        hash = {
+          "outcome" => "SUCCESS",
+          "results" => 1
+        }
+
+      expect(world).to receive(:http).with(args, parameters).and_return ""
+      expect(world).to receive(:response_body_to_hash).with("").and_return hash
+
+      actual = world.backdoor(selector, "a", "b", "c")
+      expect(actual).to be == hash["results"]
+    end
+  end
 end

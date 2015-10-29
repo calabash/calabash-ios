@@ -798,50 +798,43 @@ module Calabash
 
       # Calls a method on the app's AppDelegate object.
       #
-      # This is an escape hatch for calling an arbitrary hook inside
-      # (the test build) of your app.  Commonly used to "go around" the UI for
-      # speed purposes or reset the app to a good known state.
+      # Use this to call an arbitrary Objective-C or Swift method in your
+      # app's UIApplicationDelegate.
       #
-      # You must create a method on you app delegate of the form:
+      # Commonly used to "go around" the UI speed purposes or reset the app to
+      # a good known state.
       #
-      #     - (NSString *) calabashBackdoor:(NSString *)aIgnorable;
+      # @note For methods that take arguments, don't forget to include the
+      #   trailing ":"
       #
-      # or if you want to pass parameters
-      #
-      #     - (NSString *) calabashBackdoor:(NSDictionary *)params;
-      # @example
-      #   backdoor("calabashBackdoor:", '')
-      # @example
-      #   backdoor("calabashBackdoor:", {example:'param'})
-      # @param {String} selector the selector to perform on the app delegate
-      # @param {Object} argument the argument to pass to the selector
-      # @return {Object} the result of performing the selector with the argument (serialized)
-      def backdoor(selector, argument)
-
-        unless selector.end_with?(':')
-          messages =
-                [
-                     "Selector '#{selector}' is missing a trailing ':'",
-                     'Valid backdoor selectors must take one argument.',
-                     "Before 0.15.0, the server will append a trailing ':'.",
-                     ' After 0.15.0, this behavior is scheduled to change.',
-                     '',
-                     'http://developer.xamarin.com/guides/testcloud/calabash/working-with/backdoors/#backdoor_in_iOS',
-                     ''
-                ]
-          _deprecated('0.15.0', messages.join("\n"), :warn)
-        end
-
-        json = {
+      # @param [String] selector the selector to perform on the app delegate
+      # @param [Object] argument the argument to pass to the selector
+      # @return [Object] the result of performing the selector with the argument
+      def backdoor(selector, *arguments)
+        parameters = {
               :selector => selector,
-              :arg => argument
+              :arguments => arguments
         }
-        res = http({:method => :post, :path => 'backdoor'}, json)
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "backdoor #{json} failed because:\n\n#{res['reason']}\n#{res['details']}"
+
+        begin
+          body = http({:method => :post, :path => "backdoor"}, parameters)
+          result = response_body_to_hash(body)
+        rescue RuntimeError => e
+          raise RuntimeError, e
         end
-        res['result']
+
+        if result["outcome"] != "SUCCESS"
+           raise RuntimeError,
+%Q{backdoor call failed:
+ selector => '#{selector}'
+arguments => '#{arguments}'
+   reason => '#{result["reason"]}'
+
+#{result["details"]}
+
+}
+        end
+        result["results"]
       end
 
       # Attempts to shut the app down gracefully by simulating the transition
