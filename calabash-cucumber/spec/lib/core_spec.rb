@@ -269,4 +269,82 @@ describe Calabash::Cucumber::Core do
       expect(actual).to be == hash["results"]
     end
   end
+
+  describe "shake" do
+    describe "raises errors" do
+
+      it "raises argument error when seconds < 0.0" do
+        expect do
+          world.shake(0.0)
+        end.to raise_error ArgumentError, /must be >= 0.0/
+      end
+
+      it "http call fails" do
+        class MyHTTPError < RuntimeError ; end
+        expect(world).to receive(:http).and_raise MyHTTPError, "My error"
+
+        expect do
+          world.shake(1.0)
+        end.to raise_error RuntimeError, /My error/
+      end
+
+      it "parsing the response fails" do
+        expect(world).to receive(:http).and_return ""
+        class MyJSONError < RuntimeError ; end
+        expect(world).to receive(:response_body_to_hash).with("").and_raise MyJSONError, "JSON error"
+
+        expect do
+          world.shake(1.0)
+        end.to raise_error RuntimeError, /JSON error/
+      end
+
+      it "outcome is FAILURE" do
+        hash = {
+          "outcome" => "FAILURE",
+          "reason" => "This is unreasonable",
+          "details" => "The sordid details"
+        }
+
+        expect(world).to receive(:http).and_return ""
+        expect(world).to receive(:response_body_to_hash).with("").and_return(hash)
+
+        expect do
+          world.shake(1.0)
+        end.to raise_error RuntimeError, /Could not shake the device/
+      end
+    end
+
+    let(:args) { {:method => :post, :path => "shake"} }
+    let(:parameters) { {:duration => 1.0 } }
+
+    it "sets the http parameters correctly" do
+      parameters[:duration] = 5.0
+
+      hash = {
+        "outcome" => "SUCCESS",
+        "results" => 1
+      }
+
+      expect(world).to receive(:http).with(args, parameters).and_return ""
+      expect(world).to receive(:response_body_to_hash).with("").and_return(hash)
+
+      actual = world.shake(5.0)
+      expect(actual).to be == hash["results"]
+    end
+
+    it "returns the results key" do
+
+      hash = {
+        "outcome" => "SUCCESS",
+        "results" => 1
+      }
+
+      expect(world).to receive(:http).with(args, parameters).and_return ""
+      expect(world).to receive(:response_body_to_hash).with("").and_return hash
+
+      actual = world.shake(1.0)
+      expect(actual).to be == hash["results"]
+    end
+  end
 end
+
