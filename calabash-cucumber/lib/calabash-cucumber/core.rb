@@ -653,11 +653,37 @@ module Calabash
         views_touched
       end
 
-      # Sends app to background. Simulates pressing the home button.
-      # @param {Fixnum} secs number of seconds to be in the background
-      #  `should not be more than 60 secs`
-      def send_app_to_background(secs)
-        launcher.actions.send_app_to_background(secs)
+      # Sends the app to the background.
+      #
+      # Sending the app to the background for more than 60 seconds may
+      # cause unpredicatable results.
+      #
+      # @param [Numeric] seconds How long to send the app to the background.
+      # @raise [ArgumentError] if `seconds` argument is < 1.0
+      def send_app_to_background(seconds)
+        if seconds < 1.0
+          raise ArgumentError, "Seconds '#{seconds}' must be >= 1.0"
+        end
+
+        parameters = {
+          :duration => seconds
+        }
+
+        begin
+          body = http({:method => :post, :path => "suspend"}, parameters)
+          result = response_body_to_hash(body)
+        rescue RuntimeError => e
+          raise RuntimeError, e
+        end
+
+        if result["outcome"] != "SUCCESS"
+          raise RuntimeError,
+            %Q{Could not send app to background:
+ reason => '#{result["reason"]}'
+details => '#{result["details"]}'
+            }
+        end
+        result["results"]
       end
 
       # Simulates gps location of the device/simulator.
