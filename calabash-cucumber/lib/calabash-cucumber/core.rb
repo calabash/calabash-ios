@@ -686,6 +686,36 @@ details => '#{result["details"]}'
         result["results"]
       end
 
+      # Cause the device to shake.
+      #
+      # @param [Numeric] seconds How long to shake the device
+      # @raise [ArgumentError] if `seconds` argument is <= 0.0
+      def shake(seconds)
+        if seconds <= 0.0
+          raise ArgumentError, "Seconds '#{seconds}' must be >= 0.0"
+        end
+
+        parameters = {
+          :duration => seconds
+        }
+
+        begin
+          body = http({:method => :post, :path => "shake"}, parameters)
+          result = response_body_to_hash(body)
+        rescue RuntimeError => e
+          raise RuntimeError, e
+        end
+
+        if result["outcome"] != "SUCCESS"
+          raise RuntimeError,
+%Q{Could not shake the device:
+ reason => '#{result["reason"]}'
+details => '#{result["details"]}'
+            }
+        end
+        result["results"]
+      end
+
       # Simulates gps location of the device/simulator.
       # @note Seems UIAutomation is broken here on physical devices on iOS 7.1
       # @example
