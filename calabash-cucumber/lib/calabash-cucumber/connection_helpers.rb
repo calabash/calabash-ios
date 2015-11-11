@@ -53,12 +53,14 @@ This usually means your app has crashed.
 
           when 'SUCCESS'
             if !hash.has_key?('results')
-              raise ResponseError, "Server responded with '#{outcome}'" \
-                  "but response #{hash} does not contain 'results' key"
+              raise ResponseError,
+%Q{Server responded with '#{outcome}'
+but response #{hash} does not contain 'results' key
+}
             end
           else
-            raise ResponseError, 'Server responded with an invalid outcome:' \
-                "'#{hash['outcome']}'"
+            raise ResponseError,
+%Q{Server responded with an invalid outcome: '#{hash["outcome"]}'}
         end
         hash
       end
