@@ -136,6 +136,9 @@ Then (/^I should see the switch is (on|off)$/) do |state|
   end
 end
 
+Then(/I make a note of the switch state$/) do
+  @previous_switch_state = switch_state
+end
 
 And(/^I drop some files in the sandbox$/) do
   ['tmp', 'Documents', 'Library'].each do |dir|
