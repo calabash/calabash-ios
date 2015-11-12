@@ -56,11 +56,12 @@ module Calabash
       # 2. waiting for animations to complete on the view (and it's parents) and
       # 3. actually tapping the view.
       #
-      # This removes the common boiler-plate duo:
+      # This replaces the common pattern:
       #
       # ```
-      # wait_for_element_exists
       # wait_for_none_animating
+      # wait_for_element_exists("* marked:'log in'")
+      # touch("* marked:'log in'")
       # ```
       #
       # By default, taps the center of the view.
@@ -74,6 +75,7 @@ module Calabash
       # @option options {Hash} :frequency (0.2) polling frequency to for checking if the view is present (>= 0.1)
       # @return {Array<Hash>} serialized version of the tapped view
       def wait_tap(uiquery, options={})
+        wait_for_none_animating
         wait_for_element_exists(uiquery, options)
         touch(uiquery, options)
       end

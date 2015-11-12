@@ -68,4 +68,14 @@ describe Calabash::Cucumber::WaitHelpers do
       }.to raise_error(StandardError, 'I got raised!')
     end
   end
+
+  it ".wait_tap" do
+    query = "my query"
+    options = {:tap => :options}
+    expect(world).to receive(:wait_for_none_animating).and_return true
+    expect(world).to receive(:wait_for_element_exists).with(query, options).and_return true
+    expect(world).to receive(:touch).with(query, options).and_return true
+
+    expect(world.wait_tap(query, options)).to be == true
+  end
 end
