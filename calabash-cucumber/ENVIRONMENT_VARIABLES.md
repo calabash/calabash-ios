@@ -456,7 +456,7 @@ You should avoid `sleep` whenever possible.  You should always prefer to `wait` 
 There are times when sleep cannot be avoided.   It is very good idea to set a global sleep value and to never deviate from that value without documenting why.  A common bad practice is to fix failing tests by
 increasing sleep times.  This slows down the tests and hides bugs.
 
-* @see {Calabash::Cucumber::Core#wait_tap}
+* @see {Calabash::Cucumber::WaitHelpers#wait_tap}
 * @see {Calabash::Cucumber::WaitHelpers}
 
 ## Variables for Gem Developers

@@ -61,49 +61,6 @@ module Calabash
         end
       end
 
-
-      # @!visibility private
-      def uia_wait_tap(query, options={})
-        launcher = Calabash::Cucumber::Launcher.launcher_if_used
-        run_loop = launcher && launcher.active? && launcher.run_loop
-
-        unless run_loop
-          raise 'The current launcher must be active and be attached to a run_loop'
-        end
-
-        unless query
-          raise ArgumentError, "Expected a query argument but got '#{query}'"
-        end
-
-        strategy = run_loop[:uia_strategy]
-
-        case strategy
-          when :preferences
-            path = 'uia-tap'
-          when :shared_element
-            path = 'uia-tap-shared'
-          when :host
-            lines = ['wait_tap is not supported when using the :host strategy',
-                     'Please see:',
-                     '',
-                     'https://github.com/calabash/calabash-ios/issues/675',
-                     '',
-                     'for details and workarounds'
-            ]
-
-            raise lines.join("\n")
-          else
-            raise "Unknown UIA strategy '#{strategy}'; expected {:host | :preferences | :shared_element}"
-        end
-
-        res = http({:method => :post, :path => path}, {:query => query}.merge(options))
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          raise "wait-uia-tap action failed because: #{res['reason']}\n#{res['details']}"
-        end
-        res['results']
-      end
-
       # Invoke a Calabash query inside the UIAutomation Calabash engine
       # Note that this traverses the UIA (accessibility) hierarchy.
       # @example uia query equivalent of "button marked:'Hello'"

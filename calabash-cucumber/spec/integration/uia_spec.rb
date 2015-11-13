@@ -1,7 +1,12 @@
-class CoreIncluded
-  include Calabash::Cucumber::Core
-  include Calabash::Cucumber::KeyboardHelpers
-  include Calabash::Cucumber::WaitHelpers
+module Calabash
+  module RspecIntegrationTests
+    module UIA
+      class TestObject
+        include Calabash::Cucumber::KeyboardHelpers
+        include Calabash::Cucumber::WaitHelpers
+      end
+    end
+  end
 end
 
 describe Calabash::Cucumber::UIA do
@@ -13,7 +18,7 @@ describe Calabash::Cucumber::UIA do
       obj
     }
     let(:launcher) { Calabash::Cucumber::Launcher.new }
-    let(:core_instance) { CoreIncluded.new }
+    let(:test_object) { Calabash::RspecIntegrationTests::UIA::TestObject.new }
     let(:options) {
       options =
             {
@@ -28,23 +33,24 @@ describe Calabash::Cucumber::UIA do
       options[:uia_strategy] = :preferences
       launcher.relaunch(options)
       expect(launcher.run_loop).not_to be == nil
-      core_instance.wait_tap('textField')
-      core_instance.wait_for_keyboard
+      test_object.wait_tap('textField')
+      test_object.wait_for_keyboard
     end
 
     it "Xcode #{Resources.shared.active_xcode_version} strategy :shared_element" do
       options[:uia_strategy] = :shared_element
       launcher.relaunch(options)
       expect(launcher.run_loop).not_to be == nil
-      core_instance.wait_tap('textField')
-      core_instance.wait_for_keyboard
+      test_object.wait_tap('textField')
+      test_object.wait_for_keyboard
     end
 
     it "Xcode #{Resources.shared.active_xcode_version} strategy :host" do
       options[:uia_strategy] = :host
       launcher.relaunch(options)
       expect(launcher.run_loop).not_to be == nil
-      expect { core_instance.wait_tap('textField') }.to raise_error RuntimeError
+      test_object.wait_tap('textField')
+      test_object.wait_for_keyboard
     end
   end
 end

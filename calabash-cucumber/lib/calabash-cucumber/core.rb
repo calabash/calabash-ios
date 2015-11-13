@@ -161,7 +161,7 @@ module Calabash
       # If the view is not visible `touch` will fail. If the view is animating
       # `touch` will *silently* fail.
       # By default, taps the center of the view.
-      # @see #wait_tap
+      # @see Calabash::Cucumber::WaitHelpers#wait_tap
       # @see Calabash::Cucumber::Operations#tap_mark
       # @see #tap_point
       # @param {String} uiquery query describing view to tap. Note `nil` is allowed and is interpreted as
@@ -178,7 +178,7 @@ module Calabash
       end
 
       # Performs the `tap` gesture on an absolute coordinate.
-      # @see #wait_tap
+      # @see Calabash::Cucumber::WaitHelpers#wait_tap
       # @see Calabash::Cucumber::Operations#tap_mark
       # @see #touch
       # @param {Numeric} x x-coordinate to tap
@@ -186,33 +186,6 @@ module Calabash
       # @return {Boolean} `true`
       def tap_point(x,y)
         touch(nil, offset: {x:x, y:y})
-      end
-
-      # Performs the `tap` gesture on the (first) view that matches query `uiquery`.
-      #
-      # As opposed to `touch`, `wait_tap` is a high-level method that combines:
-      #
-      # 1. waiting for the view to appear,
-      # 2. waiting for animations to complete on the view (and it's parents) and
-      # 3. actually tapping the view.
-      #
-      # This removes the common boiler-plate trio: `wait_for_element_exists`,
-      # `wait_for_none_animating`, `touch`.
-      #
-      # By default, taps the center of the view.
-      # @see #touch
-      # @see #tap_point
-      # @param {String} uiquery query describing view to tap. Note `nil` is not allowed.
-      # @param {Hash} options option for modifying the details of the touch
-      # @option options {Hash} :offset (nil) optional offset to tap point. Offset has an `:x` and `:y` key
-      #   the tap will be performed on the center of the view plus the offset.
-      # @option options {Hash} :timeout (30) maximum number of seconds to wait for the view to appear
-      # @option options {Hash} :frequency (0.2) polling frequency to for checking if the view is present (>= 0.1)
-      # @return {Array<Hash>} serialized version of the tapped view
-      def wait_tap(uiquery, options={})
-        # noinspection RubyUnusedLocalVariable
-        _uiquery, options = extract_query_and_options(uiquery, options)
-        launcher.actions.wait_tap(options)
       end
 
       # Performs the "double tap" gesture on the (first) view that matches query `uiquery`.
