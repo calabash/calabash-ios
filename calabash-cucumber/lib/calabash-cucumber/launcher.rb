@@ -279,44 +279,20 @@ class Calabash::Cucumber::Launcher
     sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
     xcode = sim_control.xcode
 
-    if sim_control.xcode_version_gte_6?
-      default_sim = RunLoop::Core.default_simulator(xcode)
-      name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
+    default_sim = RunLoop::Core.default_simulator(xcode)
+    name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
 
-      target_simulator = sim_control.simulators.find do |sim|
-        [name_or_udid == sim.instruments_identifier(xcode),
-         name_or_udid == sim.udid,
-         name_or_udid == sim.name].any?
-      end
-
-      if target_simulator.nil?
-        raise "Could not find a simulator that matches '#{name_or_udid}'"
-      end
-
-      sim_control.reset_sim_content_and_settings({:sim_udid => target_simulator.udid})
-    else
-      sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
-      path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
-
-      app = File.basename(path)
-
-      directories_for_sdk_prefix(sdk).each do |sdk_dir|
-        app_dir = File.expand_path("#{sdk_dir}/Applications")
-        next unless File.exists?(app_dir)
-
-        bundle = `find "#{app_dir}" -type d -depth 2 -name "#{app}" | head -n 1`
-
-        next if bundle.empty? # Assuming we're already clean
-
-        if debug_logging?
-          puts "Reset app state for #{bundle}"
-        end
-        sandbox = File.dirname(bundle)
-        ['Library', 'Documents', 'tmp'].each do |content_dir|
-          FileUtils.rm_rf(File.join(sandbox, content_dir))
-        end
-      end
+    target_simulator = sim_control.simulators.find do |sim|
+      [name_or_udid == sim.instruments_identifier(xcode),
+       name_or_udid == sim.udid,
+       name_or_udid == sim.name].any?
     end
+
+    if target_simulator.nil?
+      raise "Could not find a simulator that matches '#{name_or_udid}'"
+    end
+
+    sim_control.reset_sim_content_and_settings({:sim_udid => target_simulator.udid})
   end
 
   # Erases the contents and setting for every available simulator.
