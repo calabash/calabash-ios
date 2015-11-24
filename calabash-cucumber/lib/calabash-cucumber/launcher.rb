@@ -471,33 +471,26 @@ Remove direct calls to reset_app_sandbox.
     end
   end
 
-  # Launches your app on the connected device or simulator. Stops the app if it is already running.
-  # `relaunch` does a lot of error detection and handling to reliably start the app and test. Instruments (particularly the cli)
-  # has stability issues which we workaround by restarting the simulator process and checking that UIAutomation is correctly
-  # attaching.
+  # Launches your app on the connected device or simulator.
   #
-  # Takes optional args to specify details of the launch (e.g. device or simulator, sdk version, target device, launch method...).
-  # @note an important part of relaunch behavior is controlled by environment variables, specified below
+  # `relaunch` does a lot of error detection and handling to reliably start the
+  # app and test. Instruments (particularly the cli) has stability issues which
+  # we workaround by restarting the simulator process and checking that
+  # UIAutomation is correctly attaching to your application.
   #
-  # The two most important environment variables are `DEVICE_TARGET` and `APP_BUNDLE_PATH`.
+  # Use the `args` parameter to to control:
   #
-  # - `DEVICE_TARGET` controls which device you're running on. To see the options run: `instruments -s devices`.
-  #   In addition you can specify `DEVICE_TARGET=device` to run on a (unique) usb-connected device.
-  # - `APP_BUNDLE_PATH` controls which `.app` bundle to launch in simulator (don't use for on-device testing, instead use `BUNDLE_ID`).
-  # - `BUNDLE_ID` used with `DEVICE_TARGET=device` to specify which app to launch on device
-  # - `DEBUG` - set to "1" to obtain debug info (typically used to debug launching, UIAutomation and other issues)
-  # - `DEBUG_HTTP` - set to "1" to show raw HTTP traffic
+  # * `:app` - which app to launch.
+  # * `:device_target` - simulator or device to target.
+  # * `:reset_app_sandbox - reset he app's data (sandbox) before testing
   #
+  # and many other behaviors.
   #
-  # @example Launching on iPad simulator with DEBUG settings
-  #   DEBUG_HTTP=1 DEVICE_TARGET="iPad - Simulator - iOS 7.1" DEBUG=1 APP_BUNDLE_PATH=FieldServiceiOS.app bundle exec calabash-ios console
-  # @param {Hash} args optional args to specify details of the launch (e.g. device or simulator, sdk version,
-  #   target device, launch method...).
-  # @option args {String} :app (detect the location of the bundle from project settings) app bundle path
-  # @option args {String} :bundle_id if launching on device, specify this or env `BUNDLE_ID` to be the bundle identifier
-  #   of the application to launch
-  # @option args {Hash} :privacy_settings preset privacy settings for the, e.g., `{:photos => {:allow => true}}`.
-  #    See {KNOWN_PRIVACY_SETTINGS}
+  # Many of these behaviors can be be controlled by environment variables. The
+  # most important environment variables are `APP`, `DEVICE_TARGET`, and
+  # `DEVICE_ENDPOINT`.
+  #
+  # @param {Hash} args optional arguments to control the how the app is launched
   def relaunch(args={})
     #TODO stopping is currently broken, but this works anyway because instruments stop the process before relaunching
     RunLoop.stop(run_loop) if run_loop
