@@ -267,32 +267,24 @@ class Calabash::Cucumber::Launcher
   #  `:all` is passed, then the sandboxes for all sdks will be deleted.
   # @option opts [String] :path (nil) path to the application bundle
   def reset_app_sandbox(opts={})
+    calabash_warn(%Q{
+Starting in Calabash 0.17.0, this method does nothing.
 
-    if device_target?
-      calabash_warn("calling 'reset_app_sandbox' when targeting a device.")
-      return
-    end
+You can still control whether or not your app's sandbox is
+reset between Scenarios using RESET_BETWEEN_SCENARIOS=1 or
+by passing :reset => true as a launch option.
 
-    default_opts = {:sdk => nil, :path => nil}
-    merged_opts = default_opts.merge opts
+options = {
+  :reset => true
+}
 
-    sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
-    xcode = sim_control.xcode
+launcher.relaunch(options)
 
-    default_sim = RunLoop::Core.default_simulator(xcode)
-    name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
+Please do not ignore this message.
 
-    target_simulator = sim_control.simulators.find do |sim|
-      [name_or_udid == sim.instruments_identifier(xcode),
-       name_or_udid == sim.udid,
-       name_or_udid == sim.name].any?
-    end
+Remove direct calls to reset_app_sandbox.
 
-    if target_simulator.nil?
-      raise "Could not find a simulator that matches '#{name_or_udid}'"
-    end
-
-    sim_control.reset_sim_content_and_settings({:sim_udid => target_simulator.udid})
+})
   end
 
   # Erases the contents and setting for every available simulator.
@@ -553,34 +545,11 @@ class Calabash::Cucumber::Launcher
 
     args[:device] ||= detect_device_from_args(args)
 
-    if simulator_target?(args) and args[:reset]
-      # attempt to find the sdk version from the :device_target
-      sdk = sdk_version_for_simulator_target(args)
-
-      # *** LEGACY SUPPORT ***
-      # If DEVICE_TARGET has not been set and is not a device UDID, then
-      # :device_target will be 'simulator'.  In that case, we cannot know what
-      # SDK version of the app sandbox we should reset.  The user _might_ give
-      # us a hint with SDK_VERSION, but we want to deprecate that variable ASAP.
-      #
-      # If passed a nil SDK arg, reset_app_sandbox will reset the _latest_ SDK.
-      # This is not good, because this is probably _not_ the SDK that should be
-      # reset.  Our only option is to reset every sandbox for all SDKs by
-      # passing :sdk => :all to reset_app_sandbox.
-      if sdk.nil? and args[:device_target] == 'simulator'
-        sdk = :all
-      end
-      reset_app_sandbox({:sdk => sdk,
-                         :path => args[:app],
-                         :udid => args[:udid],
-                         :sim_control => args[:sim_control]})
-    end
-
     if args[:privacy_settings]
       if simulator_target?(args)
         update_privacy_settings(args[:bundle_id], args[:privacy_settings])
       else
-        #Not supported on device
+        # Not supported on device
         puts 'Warning: :privacy_settings not supported on device'
       end
     end
