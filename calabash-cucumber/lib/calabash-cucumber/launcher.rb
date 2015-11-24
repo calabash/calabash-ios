@@ -492,8 +492,6 @@ Remove direct calls to reset_app_sandbox.
   #
   # @param {Hash} args optional arguments to control the how the app is launched
   def relaunch(args={})
-    #TODO stopping is currently broken, but this works anyway because instruments stop the process before relaunching
-    RunLoop.stop(run_loop) if run_loop
 
     # @todo Don't overwrite the _args_ parameter!
     args = default_launch_args.merge(args)
