@@ -16,6 +16,10 @@ describe Calabash::Cucumber::Preferences do
     end
   end
 
+  it "#version" do
+    expect(store.send(:version)).to be_truthy
+  end
+
   describe "#write" do
     describe "raises error when" do
       it "is passed nil" do

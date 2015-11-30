@@ -16,6 +16,16 @@ module Calabash
       private
 
       # @!visibility private
+      #
+      # The preferences version
+      VERSION = "1.0"
+
+      # @!visibility private
+      def version
+        read[:version]
+      end
+
+      # @!visibility private
       attr_reader :path
 
       # @!visibility private
@@ -29,6 +39,7 @@ module Calabash
       # @!visibility private
       def defaults
         {
+          :version => VERSION,
           :usage_tracking =>
           {
 
