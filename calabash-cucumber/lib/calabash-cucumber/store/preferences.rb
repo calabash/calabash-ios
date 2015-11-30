@@ -37,6 +37,59 @@ module Calabash
         }
       end
 
+      # @!visibility private
+      def write(hash)
+         if hash.nil?
+           raise ArgumentError, "Hash to write cannot be nil"
+         end
+
+         if !hash.is_a?(Hash)
+           raise ArgumentError, "Expected a Hash argument"
+         end
+
+         if hash.count == 0
+           raise ArgumentError, "Hash to write cannot be empty"
+         end
+
+         string = generate_json(hash)
+
+         dir = File.dirname(@path)
+         unless File.exist?(dir)
+           FileUtils.mkdir_p(dir)
+         end
+
+         File.open(path, "w:UTF-8") do |file|
+           file.write(string)
+         end
+
+         true
+      end
+
+      # @!visibility private
+      def generate_json(hash)
+        begin
+          JSON.pretty_generate(hash)
+        rescue TypeError, JSON::UnparserError => e
+          write_to_log(
+%Q{Error generating JSON from:
+ hash: #{hash}
+error: #{e}
+})
+          # Will always generate valid JSON
+          generate_json(defaults)
+        end
+      end
+
+      # @!visibility private
+      def write_to_log(error_message)
+        # TODO write to a log file?
+      end
+
+      # @!visibilit private
+      def log_default_overwritten
+        # TODO Tell the user their preferences have been overwrittenj
+      end
     end
   end
 end
+
