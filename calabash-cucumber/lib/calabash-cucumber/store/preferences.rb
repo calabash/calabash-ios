@@ -71,8 +71,42 @@ module Calabash
  hash: #{hash}
 error: #{e}
 })
+          log_defaults_reset
+
           # Will always generate valid JSON
           generate_json(defaults)
+        end
+      end
+
+      # @!visibility private
+      def read
+        if File.exist?(path)
+
+          string = File.read(path).force_encoding("UTF-8")
+
+          parse_json(string)
+        else
+          hash = defaults
+          write(hash)
+          hash
+        end
+      end
+
+      # @!visibility private
+      def parse_json(string)
+        begin
+          JSON.parse(string, {:symbolize_names => true})
+        rescue TypeError, JSON::ParserError => e
+          write_to_log(
+%Q{Error parsing JSON from:
+string: #{string}
+ error: #{e}
+})
+          log_defaults_reset
+
+          hash = defaults
+          write(hash)
+          hash
         end
       end
 
@@ -82,8 +116,8 @@ error: #{e}
       end
 
       # @!visibilit private
-      def log_default_overwritten
-        # TODO Tell the user their preferences have been overwrittenj
+      def log_defaults_reset
+        # TODO Tell the user their preferences have been overwritten
       end
     end
   end
