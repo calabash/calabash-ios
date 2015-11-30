@@ -5,16 +5,20 @@ module Calabash
       require "httpclient"
       require "run_loop"
 
+      # @!visibility private
       @@post_usage = true
 
+      # @!visibility private
       def self.enable_usage_posting
         @@post_usage = true
       end
 
+      # @!visibility private
       def self.disable_usage_posting
         @@post_usage = false
       end
 
+      # @!visibility private
       def post_usage
         if ENV["XAMARIN_TEST_CLOUD"] != "1" && @@post_usage
           begin
@@ -26,6 +30,7 @@ module Calabash
         end
       end
 
+      # @!visibility private
       def post_usage_async
         t = Thread.new do
           post_usage
