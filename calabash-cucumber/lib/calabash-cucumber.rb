@@ -1,4 +1,6 @@
 require "calabash-cucumber/dot_dir"
+require "calabash-cucumber/cache/cache.rb"
+require "calabash-cucumber/cache/preferences.rb"
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/keyboard_helpers'

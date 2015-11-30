@@ -1,6 +1,6 @@
-describe Calabash::DotDir do
+describe Calabash::Cucumber::DotDir do
 
-  let(:home_dir) { "./tmp/dot-calaash-examples" }
+  let(:home_dir) { "./tmp/dot-calabash-examples" }
   let(:dot_dir) { File.join(home_dir, ".calabash") }
 
   before do
@@ -9,7 +9,7 @@ describe Calabash::DotDir do
   end
 
   it ".directory" do
-    path = Calabash::DotDir.directory
+    path = Calabash::Cucumber::DotDir.directory
 
     expect(File.exist?(path)).to be_truthy
   end
