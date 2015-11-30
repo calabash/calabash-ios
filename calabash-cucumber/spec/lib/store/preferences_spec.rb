@@ -14,10 +14,6 @@ describe Calabash::Cucumber::Preferences do
       expect(store.instance_variable_get(:@path)).to be == path
       expect(store.send(:path)).to be == path
     end
-
-    it "ensures the path exists" do
-      expect(File.exist?(store.send(:path))).to be_truthy
-    end
   end
 
   describe "#write" do
@@ -41,20 +37,27 @@ describe Calabash::Cucumber::Preferences do
       end
     end
 
-    it "writes the hash to a file as JSON" do
-      hash = { :a => 1, :b => 2 }
-      store.send(:write, hash)
-      string = File.read(path).force_encoding("UTF-8")
+    describe "writing" do
 
-      expect(JSON.parse(string, {:symbolize_names => true })).to be == hash
-    end
+      before do
+        expect(store).to receive(:ensure_preferences_dir).and_call_original
+      end
 
-    it "can always write defaults" do
-      hash = store.send(:defaults)
-      store.send(:write, hash)
-      string = File.read(path).force_encoding("UTF-8")
+      it "writes the hash to a file as JSON" do
+        hash = { :a => 1, :b => 2 }
+        store.send(:write, hash)
+        string = File.read(path).force_encoding("UTF-8")
 
-      expect(JSON.parse(string, {:symbolize_names => true })).to be == hash
+        expect(JSON.parse(string, {:symbolize_names => true })).to be == hash
+      end
+
+      it "can always write defaults" do
+        hash = store.send(:defaults)
+        store.send(:write, hash)
+        string = File.read(path).force_encoding("UTF-8")
+
+        expect(JSON.parse(string, {:symbolize_names => true })).to be == hash
+      end
     end
   end
 

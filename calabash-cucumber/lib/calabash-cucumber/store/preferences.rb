@@ -11,21 +11,20 @@ module Calabash
       def initialize
         dot_dir = Calabash::Cucumber::DotDir.directory
         @path = File.join(dot_dir, "preferences", "preferences.json")
-
-        dir = File.dirname(@path)
-        unless File.exist?(dir)
-          FileUtils.mkdir_p(dir)
-        end
-
-        unless File.exist?(@path)
-          FileUtils.touch(@path)
-        end
       end
 
       private
 
       # @!visibility private
       attr_reader :path
+
+      # @!visibility private
+      def ensure_preferences_dir
+        dir = File.dirname(@path)
+        unless File.exist?(dir)
+          FileUtils.mkdir_p(dir)
+        end
+      end
 
       # @!visibility private
       def defaults
@@ -39,30 +38,27 @@ module Calabash
 
       # @!visibility private
       def write(hash)
-         if hash.nil?
-           raise ArgumentError, "Hash to write cannot be nil"
-         end
+        if hash.nil?
+          raise ArgumentError, "Hash to write cannot be nil"
+        end
 
-         if !hash.is_a?(Hash)
-           raise ArgumentError, "Expected a Hash argument"
-         end
+        if !hash.is_a?(Hash)
+          raise ArgumentError, "Expected a Hash argument"
+        end
 
-         if hash.count == 0
-           raise ArgumentError, "Hash to write cannot be empty"
-         end
+        if hash.count == 0
+          raise ArgumentError, "Hash to write cannot be empty"
+        end
 
-         string = generate_json(hash)
+        string = generate_json(hash)
 
-         dir = File.dirname(@path)
-         unless File.exist?(dir)
-           FileUtils.mkdir_p(dir)
-         end
+        ensure_preferences_dir
 
-         File.open(path, "w:UTF-8") do |file|
-           file.write(string)
-         end
+        File.open(path, "w:UTF-8") do |file|
+          file.write(string)
+        end
 
-         true
+        true
       end
 
       # @!visibility private
