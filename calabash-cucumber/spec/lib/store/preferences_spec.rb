@@ -149,5 +149,9 @@ describe Calabash::Cucumber::Preferences do
       end
     end
   end
+
+  it "#log_defaults_reset" do
+     store.send(:log_defaults_reset)
+  end
 end
 

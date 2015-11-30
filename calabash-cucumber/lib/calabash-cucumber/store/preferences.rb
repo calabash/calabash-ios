@@ -117,7 +117,20 @@ string: #{string}
 
       # @!visibilit private
       def log_defaults_reset
-        # TODO Tell the user their preferences have been overwritten
+        Calabash::Cucumber.log_warn(
+%q{An error occurred while accessing your user preferences.
+
+We have reset the preferences to the default settings.
+
+If this happens on a regular basis, please create a GitHub issue.
+
+Your preferences control various Calabash behaviors.  In particular, they tell
+us how much usage information you are willing to share.  If you have previously
+turned off usage tracking, you will need to disable it again using the command
+line tools or the irb.
+
+We do not recommend that edit the preferences file by hand.
+})
       end
     end
   end
