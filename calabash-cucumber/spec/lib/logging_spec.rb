@@ -33,3 +33,53 @@ describe 'calabash logging' do
   end
 
 end
+
+describe Calabash::Cucumber do
+  describe ".colorize" do
+    it "does nothing in win32 environments" do
+      expect(Calabash::Cucumber).to receive(:windows_env?).and_return true
+
+      actual = Calabash::Cucumber.send(:colorize, "string", 32)
+      expect(actual).to be == "string"
+    end
+
+    it "does nothing on the XTC" do
+      expect(Calabash::Cucumber).to receive(:windows_env?).and_return false
+      expect(RunLoop::Environment).to receive(:xtc?).and_return true
+
+      actual = Calabash::Cucumber.send(:colorize, "string", 32)
+      expect(actual).to be == "string"
+    end
+
+    it "applies the color" do
+      expect(Calabash::Cucumber).to receive(:windows_env?).and_return false
+      expect(RunLoop::Environment).to receive(:xtc?).and_return false
+
+      actual = Calabash::Cucumber.send(:colorize, "string", 32)
+      expect(actual[/32/, 0]).not_to be == nil
+    end
+  end
+
+  describe "logging" do
+    before do
+      allow(RunLoop::Environment).to receive(:debug?).and_return true
+    end
+
+    it ".log_warn" do
+      Calabash::Cucumber.log_warn("warn")
+    end
+
+    it ".log_debug" do
+      Calabash::Cucumber.log_debug("debug")
+    end
+
+    it ".log_error" do
+      Calabash::Cucumber.log_error("error")
+    end
+
+    # .log_info is already taken by the XTC logger. (>_O)
+    it ".log_info" do
+      Calabash::Cucumber.log_info("info")
+    end
+  end
+end
