@@ -28,6 +28,7 @@ describe Calabash::Cucumber::Preferences do
     end
 
     it "returns default value and resets the store if invalid value" do
+      allow(SecureRandom).to receive(:uuid).and_return("uuid")
       expect(store).to receive(:valid_user_tracking_value?).and_return false
 
       defaults = store.send(:defaults)
@@ -149,6 +150,7 @@ describe Calabash::Cucumber::Preferences do
 
   describe "#read" do
     it "calls write with defaults if file does not exist" do
+      allow(SecureRandom).to receive(:uuid).and_return("uuid")
       expect(File).to receive(:exist?).with(File.dirname(path)).and_return false
       expect(File).to receive(:exist?).with(path).and_return false
       expect(store).to receive(:write).and_call_original
@@ -171,6 +173,8 @@ describe Calabash::Cucumber::Preferences do
 
   describe "#parse_json" do
     it "can always parse JSON generated from defaults" do
+      allow(SecureRandom).to receive(:uuid).and_return("uuid")
+
       string = JSON.pretty_generate(store.send(:defaults))
 
       expect(store).not_to receive(:write_to_log)

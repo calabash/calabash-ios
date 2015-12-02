@@ -2,6 +2,7 @@ module Calabash
   module Cucumber
 
     require "fileutils"
+    require "securerandom"
 
     # Users preferences persisted across runs:
     #
@@ -77,7 +78,8 @@ module Calabash
       def defaults
         {
           :version => VERSION,
-          :usage_tracking => "system_info"
+          :usage_tracking => "system_info",
+          :user_id => SecureRandom.uuid
         }
       end
 
