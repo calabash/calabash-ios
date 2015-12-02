@@ -119,21 +119,11 @@ module Calabash
 
       # @!visibility private
       #
-      # The behavior here is TBD.
-      #
-      # False is the obvious default; this should be an opt in behavior.
-      def include_ip?
-        false
-      end
-
-      # @!visibility private
-      #
       # Collect a hash of usage info.
       def info
         {
           :event_name => "session",
           :data_version => DATA_VERSION,
-          :include_ip? => include_ip?,
 
           :platform => CALABASH_IOS,
           :host_os => host_os,
