@@ -126,7 +126,7 @@ string: #{string}
         # TODO write to a log file?
       end
 
-      # @!visibilit private
+      # @!visibility private
       def log_defaults_reset
         Calabash::Cucumber.log_warn(
 %q{An error occurred while accessing your user preferences.
