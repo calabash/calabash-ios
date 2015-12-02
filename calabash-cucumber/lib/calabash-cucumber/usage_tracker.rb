@@ -74,8 +74,8 @@ module Calabash
       ROUTE = "http://calabash-ci.macminicolo.net:56789/logEvent"
 
       # @!visibility private
-      def os
-        @os ||= lambda do
+      def host_os
+        @host_os ||= lambda do
           if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
             WINDOWS
           else
@@ -85,11 +85,11 @@ module Calabash
       end
 
       # @!visibility private
-      def os_version
-        @os_version ||= lambda do
-          if os == WINDOWS
+      def host_os_version
+        @host_os_version ||= lambda do
+          if host_os == WINDOWS
             `ver`.chomp
-          elsif os == OSX
+          elsif host_os == OSX
             `sw_vers -productVersion`.chomp
           else
             `uname -r`.chomp
@@ -136,8 +136,8 @@ module Calabash
           :include_ip? => include_ip?,
 
           :platform => CALABASH_IOS,
-          :os => os,
-          :os_version => os_version,
+          :host_os => host_os,
+          :host_os_version => host_os_version,
           :irb => irb?,
           :ruby_version => ruby_version,
           :used_bundle_exec => used_bundle_exec?,
