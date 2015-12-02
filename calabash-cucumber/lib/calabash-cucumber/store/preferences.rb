@@ -39,11 +39,40 @@ module Calabash
         write(preferences)
       end
 
+      # !@visibility private
+      def user_id
+        preferences = read
+
+        unless valid_user_id?(preferences[:user_id])
+          preferences[:user_id] = SecureRandom.uuid
+          write(preferences)
+        end
+
+        preferences[:user_id]
+      end
+
+      # !@visibility private
+      def user_id=(value)
+        if !valid_user_id?(value)
+          raise ArgumentError,
+            "Expected '#{value}' to not be nil and not an empty string"
+        end
+
+        preferences = read
+        preferences[:user_id] = value
+        write(preferences)
+      end
+
       private
 
       # @!visibility private
       def valid_user_tracking_value?(value)
         VALID_USAGE_TRACKING_VALUES.include?(value)
+      end
+
+      # @!visibility private
+      def valid_user_id?(value)
+        !value.nil? && value != "" && value.is_a?(String)
       end
 
       # @!visibility private

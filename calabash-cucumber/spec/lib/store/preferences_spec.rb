@@ -21,7 +21,7 @@ describe Calabash::Cucumber::Preferences do
   end
 
   describe "#usage_tracking" do
-    it "returns valid value as a symbol" do
+    it "returns valid value" do
       expect(store).to receive(:read).and_return({:usage_tracking => "none"})
 
       expect(store.usage_tracking).to be == "none"
@@ -67,6 +67,52 @@ describe Calabash::Cucumber::Preferences do
     it "true if an allowed value" do
       expect(store.send(:valid_user_tracking_value?, "none")).to be_truthy
       expect(store.send(:valid_user_tracking_value?, "events")).to be_truthy
+    end
+  end
+
+  describe "#valid_user_id?" do
+    it "false" do
+      value = "value"
+      expect(value).to receive(:is_a?).with(String).and_return false
+
+      expect(store.send(:valid_user_id?, value)).to be_falsey
+      expect(store.send(:valid_user_id?, nil)).to be_falsey
+      expect(store.send(:valid_user_id?, "")).to be_falsey
+    end
+
+    it "true" do
+      expect(store.send(:valid_user_id?, "valid")).to be_truthy
+    end
+  end
+
+  describe "#user_id" do
+    it "returns valid value" do
+      expect(store).to receive(:read).and_return({:user_id => "valid"})
+
+      expect(store.user_id).to be == "valid"
+    end
+
+    it "returns default value and resets the store if invalid value" do
+      allow(SecureRandom).to receive(:uuid).and_return("uuid")
+      expect(store).to receive(:valid_user_id?).and_return false
+
+      defaults = store.send(:defaults)
+      expect(store).to receive(:write).at_least(:once).with(defaults).and_call_original
+
+      expect(store.user_id).to be == defaults[:user_id]
+    end
+  end
+
+  describe "#user_id=" do
+    it "raises an error if value is invalid" do
+      expect do
+        store.user_id = nil
+      end.to raise_error ArgumentError, /Expected '' to not be nil and not an empty string/
+    end
+
+    it "persists the change to disk" do
+      store.user_id = "clever user"
+      expect(store.user_id).to be == "clever user"
     end
   end
 
