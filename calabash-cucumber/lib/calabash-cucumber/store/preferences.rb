@@ -25,6 +25,17 @@ module Calabash
 
         preferences[:usage_tracking]
       end
+
+      # !@visibility private
+      def usage_tracking=(value)
+        if !valid_user_tracking_value?(value)
+          raise ArgumentError,
+            "Expected '#{value}' to be one of #{VALID_USAGE_TRACKING_VALUES.join(", ")}"
+        end
+
+        preferences = read
+        preferences[:usage_tracking] = value
+        write(preferences)
       end
 
       private
@@ -35,15 +46,6 @@ module Calabash
       end
 
       # @!visibility private
-      def ensure_valid_user_tracking_value?(value)
-        unless valid_user_tracking_value?(value)
-          log_defaults_reset
-          preferences[:usage_tracking] = defaults[:usage_tracking]
-          write(preferences)
-        end
-      end
-
-      # @!visibility private
       #
       # The preferences version
       VERSION = "1.0"
@@ -51,6 +53,8 @@ module Calabash
       # @!visibility private
       #
       # Ordered by permissiveness left to right ascending.
+      #
+      # "system_info" implies that "events" are also allowed.
       VALID_USAGE_TRACKING_VALUES = ["none", "events", "system_info"]
 
       # @!visibility private
@@ -73,18 +77,6 @@ module Calabash
       def defaults
         {
           :version => VERSION,
-
-          # Controls what information we are allowed to track.
-          #
-          # If this is "none", then no information is sent.
-          #
-          # Allowed values:
-          #
-          # 1. "none"
-          # 2. "events"  Events only.
-          # 3. "system_info"  Events and system info
-          #
-          # The value must be string and it must respond nicely to .to_sym
           :usage_tracking => "system_info"
         }
       end

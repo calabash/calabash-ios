@@ -38,6 +38,24 @@ describe Calabash::Cucumber::Preferences do
     end
   end
 
+  describe "#usage_tracking=" do
+    it "raises an error if value is invalid" do
+      expect do
+        store.usage_tracking = "invalid"
+      end.to raise_error ArgumentError, /Expected 'invalid' to be one of/
+    end
+
+    it "persists the change to disk" do
+      old = store.usage_tracking
+      expect(old).to be == store.send(:defaults)[:usage_tracking]
+      expect(old).not_to be == "none"
+
+      store.usage_tracking = "none"
+
+      expect(store.usage_tracking).to be == "none"
+    end
+  end
+
   describe "#valid_user_tracking_value?" do
     it "false if not an allowed value" do
       expect(store.send(:valid_user_tracking_value?, nil)).to be_falsey
