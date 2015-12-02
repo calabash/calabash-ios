@@ -40,10 +40,19 @@ module Calabash
       def defaults
         {
           :version => VERSION,
-          :usage_tracking =>
-          {
 
-          }
+          # Controls what information we are allowed to track.
+          #
+          # If this is "none", then no information is sent.
+          #
+          # Allowed values:
+          #
+          # 1. "none"
+          # 2. "events"  Events only.
+          # 3. "system_info"  Events and system info
+          #
+          # The value must be string and it must respond nicely to .to_sym
+          :usage_tracking => "system_info"
         }
       end
 
