@@ -6,21 +6,21 @@ module Calabash
       require "run_loop"
 
       # @!visibility private
-      @@post_usage = true
+      @@track_usage = true
 
       # @!visibility private
-      def self.enable_usage_posting
-        @@post_usage = true
+      def self.enable_usage_tracking
+        @@track_usage = true
       end
 
       # @!visibility private
-      def self.disable_usage_posting
-        @@post_usage = false
+      def self.disable_usage_tracking
+        @@track_usage = false
       end
 
       # @!visibility private
       def post_usage
-        if ENV["XAMARIN_TEST_CLOUD"] != "1" && @@post_usage
+        if Calabash::Cucumber::UsageTracker.track_usage?
           begin
             HTTPClient.post(ROUTE, info)
           rescue => _
@@ -54,6 +54,16 @@ module Calabash
       end
 
       private
+
+      # @!visibility private
+      def self.track_usage?
+        @@track_usage && !self.xtc?
+      end
+
+      # @!visibility private
+      def self.xtc?
+        ENV["XAMARIN_TEST_CLOUD"] == "1"
+      end
 
       # @!visibility private
       DATA_VERSION = "1.0"
