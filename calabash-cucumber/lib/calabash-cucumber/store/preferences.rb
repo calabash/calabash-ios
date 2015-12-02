@@ -13,12 +13,45 @@ module Calabash
         @path = File.join(dot_dir, "preferences", "preferences.json")
       end
 
+      # !@visibility private
+      def usage_tracking
+        preferences = read
+
+        unless valid_user_tracking_value?(preferences[:usage_tracking])
+          log_defaults_reset
+          preferences[:usage_tracking] = defaults[:usage_tracking]
+          write(preferences)
+        end
+
+        preferences[:usage_tracking]
+      end
+      end
+
       private
+
+      # @!visibility private
+      def valid_user_tracking_value?(value)
+        VALID_USAGE_TRACKING_VALUES.include?(value)
+      end
+
+      # @!visibility private
+      def ensure_valid_user_tracking_value?(value)
+        unless valid_user_tracking_value?(value)
+          log_defaults_reset
+          preferences[:usage_tracking] = defaults[:usage_tracking]
+          write(preferences)
+        end
+      end
 
       # @!visibility private
       #
       # The preferences version
       VERSION = "1.0"
+
+      # @!visibility private
+      #
+      # Ordered by permissiveness left to right ascending.
+      VALID_USAGE_TRACKING_VALUES = ["none", "events", "system_info"]
 
       # @!visibility private
       def version

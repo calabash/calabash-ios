@@ -20,6 +20,37 @@ describe Calabash::Cucumber::Preferences do
     expect(store.send(:version)).to be_truthy
   end
 
+  describe "#usage_tracking" do
+    it "returns valid value as a symbol" do
+      expect(store).to receive(:read).and_return({:usage_tracking => "none"})
+
+      expect(store.usage_tracking).to be == "none"
+    end
+
+    it "returns default value and resets the store if invalid value" do
+      expect(store).to receive(:valid_user_tracking_value?).and_return false
+
+      defaults = store.send(:defaults)
+      expect(store).to receive(:log_defaults_reset).and_call_original
+      expect(store).to receive(:write).at_least(:once).with(defaults).and_call_original
+
+      expect(store.usage_tracking).to be == defaults[:usage_tracking]
+    end
+  end
+
+  describe "#valid_user_tracking_value?" do
+    it "false if not an allowed value" do
+      expect(store.send(:valid_user_tracking_value?, nil)).to be_falsey
+      expect(store.send(:valid_user_tracking_value?, "")).to be_falsey
+      expect(store.send(:valid_user_tracking_value?, "unknown")).to be_falsey
+    end
+
+    it "true if an allowed value" do
+      expect(store.send(:valid_user_tracking_value?, "none")).to be_truthy
+      expect(store.send(:valid_user_tracking_value?, "events")).to be_truthy
+    end
+  end
+
   describe "#write" do
     describe "raises error when" do
       it "is passed nil" do
