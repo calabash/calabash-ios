@@ -19,6 +19,12 @@ describe Calabash::Cucumber::UsageTracker do
     end
   end
 
+  it "#preferences" do
+    prefs = tracker.send(:preferences)
+    expect(prefs).to be_a_kind_of(Calabash::Cucumber::Preferences)
+    expect(prefs).to be == tracker.send(:preferences)
+  end
+
   describe ".xtc?" do
     it "truthy" do
       stub_env({"XAMARIN_TEST_CLOUD" => "1"})

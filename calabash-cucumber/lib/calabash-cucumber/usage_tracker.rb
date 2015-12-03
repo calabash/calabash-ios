@@ -56,6 +56,11 @@ module Calabash
       private
 
       # @!visibility private
+      def preferences
+        @preferences ||= Calabash::Cucumber::Preferences.new
+      end
+
+      # @!visibility private
       def self.track_usage?
         @@track_usage && !self.xtc?
       end
