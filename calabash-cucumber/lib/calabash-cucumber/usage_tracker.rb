@@ -20,7 +20,8 @@ module Calabash
 
       # @!visibility private
       def post_usage
-        if Calabash::Cucumber::UsageTracker.track_usage?
+        if Calabash::Cucumber::UsageTracker.track_usage? &&
+            allowed_to_track != "none"
           begin
             HTTPClient.post(ROUTE, info)
           rescue => _
@@ -63,6 +64,11 @@ module Calabash
       # @!visibility private
       def user_id
         @user_id ||= preferences.user_id
+      end
+
+      # @!visibility private
+      def allowed_to_track
+        @allowed_to_track ||= preferences.usage_tracking
       end
 
       # @!visibility private

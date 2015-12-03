@@ -35,6 +35,16 @@ describe Calabash::Cucumber::UsageTracker do
     expect(tracker.instance_variable_get(:@user_id)).to be == "user id"
   end
 
+  it "#allowed_to_track" do
+    prefs = Calabash::Cucumber::Preferences.new
+    expect(tracker).to receive(:preferences).and_return prefs
+    expect(prefs).to receive(:usage_tracking).and_return "allowed"
+
+    expect(tracker.send(:allowed_to_track)).to be == "allowed"
+    expect(tracker.instance_variable_get(:@allowed_to_track)).to be == "allowed"
+  end
+
+
   describe ".xtc?" do
     it "truthy" do
       stub_env({"XAMARIN_TEST_CLOUD" => "1"})
@@ -47,11 +57,31 @@ describe Calabash::Cucumber::UsageTracker do
     end
   end
 
-  it "#post_usage" do
-    expect(HTTPClient).not_to receive(:post)
-    expect(Calabash::Cucumber::UsageTracker).to receive(:track_usage?).and_return false
+  describe "#post_usage" do
 
-    tracker.post_usage
+    it "posts" do
+      expect(tracker).to receive(:info).and_return({})
+      expect(HTTPClient).to receive(:post)
+      expect(Calabash::Cucumber::UsageTracker).to receive(:track_usage?).and_return true
+      expect(tracker).to receive(:allowed_to_track).and_return "anything by 'none'"
+      tracker.post_usage
+    end
+
+    describe "does not post" do
+      it "track_usage? is false" do
+        expect(HTTPClient).not_to receive(:post)
+        expect(Calabash::Cucumber::UsageTracker).to receive(:track_usage?).and_return false
+        expect(tracker).not_to receive(:allowed_to_track)
+        tracker.post_usage
+      end
+
+      it "allowed_to_track == none" do
+        expect(HTTPClient).not_to receive(:post)
+        expect(Calabash::Cucumber::UsageTracker).to receive(:track_usage?).and_return true
+        expect(tracker).to receive(:allowed_to_track).and_return "none"
+        tracker.post_usage
+      end
+    end
   end
 
   it "#host_os" do
