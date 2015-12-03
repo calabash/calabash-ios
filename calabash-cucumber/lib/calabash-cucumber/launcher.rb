@@ -8,6 +8,7 @@ require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
 require 'calabash/dylibs'
+require "calabash-cucumber/usage_tracker"
 
 # Used to launch apps for testing in iOS Simulator or on iOS Devices.  By default
 # it uses Apple's `instruments` process to launch your app, but has legacy support
@@ -56,6 +57,7 @@ class Calabash::Cucumber::Launcher
   attr_accessor :launch_args
   attr_accessor :simulator_launcher
   attr_reader :xcode
+  attr_reader :usage_tracker
 
   # @!visibility private
   # Generated when calabash cannot launch the app.
@@ -79,6 +81,10 @@ class Calabash::Cucumber::Launcher
 
   def xcode
     @xcode ||= RunLoop::Xcode.new
+  end
+
+  def usage_tracker
+    @usage_tracker ||= Calabash::Cucumber::UsageTracker.new
   end
 
   # @!visibility private
@@ -588,6 +594,8 @@ Remove direct calls to reset_app_sandbox.
         check_server_gem_compatibility
       end
     end
+
+    usage_tracker.post_usage_async
   end
 
   # @!visibility private
