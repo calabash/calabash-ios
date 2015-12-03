@@ -23,6 +23,16 @@ describe Calabash::Cucumber::UsageTracker do
     prefs = tracker.send(:preferences)
     expect(prefs).to be_a_kind_of(Calabash::Cucumber::Preferences)
     expect(prefs).to be == tracker.send(:preferences)
+    expect(tracker.instance_variable_get(:@preferences)).to be == prefs
+  end
+
+  it "#user_id" do
+    prefs = Calabash::Cucumber::Preferences.new
+    expect(tracker).to receive(:preferences).and_return prefs
+    expect(prefs).to receive(:user_id).and_return "user id"
+
+    expect(tracker.send(:user_id)).to be == "user id"
+    expect(tracker.instance_variable_get(:@user_id)).to be == "user id"
   end
 
   describe ".xtc?" do

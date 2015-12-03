@@ -61,6 +61,11 @@ module Calabash
       end
 
       # @!visibility private
+      def user_id
+        @user_id ||= preferences.user_id
+      end
+
+      # @!visibility private
       def self.track_usage?
         @@track_usage && !self.xtc?
       end
