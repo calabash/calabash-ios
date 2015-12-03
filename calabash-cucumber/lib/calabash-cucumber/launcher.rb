@@ -290,6 +290,12 @@ Remove direct calls to reset_app_sandbox.
       raise "Calling 'reset_simulator' when targeting a device is not allowed"
     else
       if device.nil? || device.empty?
+        device_tgt = ENV['DEVICE_TARGET']
+        if device_tgt.nil? || device_tgt.empty?
+          RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(RunLoop::Core.default_simulator))
+        else
+          RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device_tgt))
+        end
         RunLoop::SimControl.new.reset_sim_content_and_settings
       elsif device.is_a? RunLoop::Device
         RunLoop::CoreSimulator.erase(device)
