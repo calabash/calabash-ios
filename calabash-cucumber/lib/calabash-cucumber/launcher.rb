@@ -296,7 +296,6 @@ Remove direct calls to reset_app_sandbox.
         else
           RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device_tgt))
         end
-        RunLoop::SimControl.new.reset_sim_content_and_settings
       elsif device.is_a? RunLoop::Device
         RunLoop::CoreSimulator.erase(device)
       else
