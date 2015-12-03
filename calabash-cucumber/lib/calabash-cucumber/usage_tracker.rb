@@ -147,26 +147,41 @@ module Calabash
       #
       # Collect a hash of usage info.
       def info
-        {
+
+        allowed = allowed_to_track
+
+        return {} if allowed == "none"
+
+        # Events only
+        hash = {
           :event_name => "session",
           :data_version => DATA_VERSION,
-
-          :platform => CALABASH_IOS,
-          :host_os => host_os,
-          :host_os_version => host_os_version,
-          :irb => irb?,
-          :ruby_version => ruby_version,
-          :used_bundle_exec => used_bundle_exec?,
-          :used_cucumber => used_cucumber?,
-
-          :version => Calabash::Cucumber::VERSION,
-
-          :ci => RunLoop::Environment.ci?,
-          :jenkins => RunLoop::Environment.jenkins?,
-          :travis => RunLoop::Environment.travis?,
-          :circle_ci => RunLoop::Environment.circle_ci?,
-          :teamcity => RunLoop::Environment.teamcity?
+          :user_id => user_id
         }
+
+        if allowed == "system_info"
+          hash.merge!(
+            {
+              :platform => CALABASH_IOS,
+              :host_os => host_os,
+              :host_os_version => host_os_version,
+              :irb => irb?,
+              :ruby_version => ruby_version,
+              :used_bundle_exec => used_bundle_exec?,
+              :used_cucumber => used_cucumber?,
+
+              :version => Calabash::Cucumber::VERSION,
+
+              :ci => RunLoop::Environment.ci?,
+              :jenkins => RunLoop::Environment.jenkins?,
+              :travis => RunLoop::Environment.travis?,
+              :circle_ci => RunLoop::Environment.circle_ci?,
+              :teamcity => RunLoop::Environment.teamcity?
+            }
+          )
+        end
+
+        hash
       end
     end
   end

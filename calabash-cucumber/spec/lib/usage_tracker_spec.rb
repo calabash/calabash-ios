@@ -96,9 +96,49 @@ describe Calabash::Cucumber::UsageTracker do
     expect(tracker.instance_variable_get(:@host_os_version)).to be == version
   end
 
-  it "#info" do
-    info = tracker.send(:info)
-    expect(info[:event_name]).to be == "session"
+  describe "#info" do
+    it "returns {} if allowed is none" do
+      expect(tracker).to receive(:allowed_to_track).and_return "none"
+
+      expect(tracker.send(:info)).to be == {}
+    end
+
+    it "returns only events if allowed == events" do
+      expect(tracker).to receive(:allowed_to_track).and_return "events"
+      expect(tracker).to receive(:user_id).and_return "user id"
+
+      hash = tracker.send(:info)
+      expect(hash.count).to be == 3
+      expect(hash[:event_name]).to be == "session"
+      expect(hash[:data_version]).to be_truthy
+      expect(hash[:user_id]).to be == "user id"
+    end
+
+    it "returns events and system info if allowed == system_info" do
+      expect(tracker).to receive(:allowed_to_track).and_return "system_info"
+      expect(tracker).to receive(:user_id).and_return "user id"
+
+      hash = tracker.send(:info)
+
+      expect(hash.count).to be == 16
+      expect(hash[:event_name]).to be == "session"
+      expect(hash[:data_version]).to be_truthy
+      expect(hash[:user_id]).to be == "user id"
+
+      expect(hash[:platform]).to be == "iOS"
+      expect(hash[:host_os]).to be_truthy
+      expect(hash[:host_os_version]).to be_truthy
+      expect(hash[:irb]).to be == false
+      expect(hash[:ruby_version]).to be_truthy
+      expect(hash.has_key?(:used_bundle_exec)).to be_truthy
+      expect(hash[:used_cucumber]).to be == false
+      expect(hash[:version]).to be_truthy
+      expect(hash.has_key?(:ci)).to be_truthy
+      expect(hash.has_key?(:jenkins)).to be_truthy
+      expect(hash.has_key?(:travis)).to be_truthy
+      expect(hash.has_key?(:circle_ci)).to be_truthy
+      expect(hash.has_key?(:teamcity)).to be_truthy
+    end
   end
 
   it "#irb?" do
