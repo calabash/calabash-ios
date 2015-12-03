@@ -76,7 +76,7 @@ module Calabash
       # @param [String] version indicates when the feature was deprecated
       # @param [String] msg deprecation message (possibly suggesting alternatives)
       # @param [Symbol] type { :warn | :pending } - :pending will raise a
-      #   cucumber pending exception
+      #   cucumber pending error
       # @return [void]
       def _deprecated(version, msg, type)
         allowed = [:pending, :warn]
@@ -92,7 +92,7 @@ module Calabash
             stack = Kernel.caller(0, 6)[1..-1].join("\n")
           end
 
-          msg = "deprecated '#{version}' - '#{msg}'\n#{stack}"
+          msg = "deprecated '#{version}' - #{msg}\n#{stack}"
 
           if type.eql?(:pending)
             pending(msg)

@@ -161,7 +161,7 @@ module Calabash
       # If the view is not visible `touch` will fail. If the view is animating
       # `touch` will *silently* fail.
       # By default, taps the center of the view.
-      # @see #wait_tap
+      # @see Calabash::Cucumber::WaitHelpers#wait_tap
       # @see Calabash::Cucumber::Operations#tap_mark
       # @see #tap_point
       # @param {String} uiquery query describing view to tap. Note `nil` is allowed and is interpreted as
@@ -178,7 +178,7 @@ module Calabash
       end
 
       # Performs the `tap` gesture on an absolute coordinate.
-      # @see #wait_tap
+      # @see Calabash::Cucumber::WaitHelpers#wait_tap
       # @see Calabash::Cucumber::Operations#tap_mark
       # @see #touch
       # @param {Numeric} x x-coordinate to tap
@@ -186,33 +186,6 @@ module Calabash
       # @return {Boolean} `true`
       def tap_point(x,y)
         touch(nil, offset: {x:x, y:y})
-      end
-
-      # Performs the `tap` gesture on the (first) view that matches query `uiquery`.
-      #
-      # As opposed to `touch`, `wait_tap` is a high-level method that combines:
-      #
-      # 1. waiting for the view to appear,
-      # 2. waiting for animations to complete on the view (and it's parents) and
-      # 3. actually tapping the view.
-      #
-      # This removes the common boiler-plate trio: `wait_for_element_exists`,
-      # `wait_for_none_animating`, `touch`.
-      #
-      # By default, taps the center of the view.
-      # @see #touch
-      # @see #tap_point
-      # @param {String} uiquery query describing view to tap. Note `nil` is not allowed.
-      # @param {Hash} options option for modifying the details of the touch
-      # @option options {Hash} :offset (nil) optional offset to tap point. Offset has an `:x` and `:y` key
-      #   the tap will be performed on the center of the view plus the offset.
-      # @option options {Hash} :timeout (30) maximum number of seconds to wait for the view to appear
-      # @option options {Hash} :frequency (0.2) polling frequency to for checking if the view is present (>= 0.1)
-      # @return {Array<Hash>} serialized version of the tapped view
-      def wait_tap(uiquery, options={})
-        # noinspection RubyUnusedLocalVariable
-        _uiquery, options = extract_query_and_options(uiquery, options)
-        launcher.actions.wait_tap(options)
       end
 
       # Performs the "double tap" gesture on the (first) view that matches query `uiquery`.
@@ -336,12 +309,27 @@ module Calabash
       # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
       #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @option options {String} :query (nil) if specified, the swipe will be made relative to this query.
+      # @option options [Symbol] :force (nil) Indicates the force of the swipe.
+      #  Valid values are :strong, :normal, :light.
+      #
       # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
       def swipe(dir, options={})
+        merged_options = options.dup
+
+        # I don't understand why the :status_bar_orientation value is being overwritten
         unless uia_available?
-          options = options.merge(:status_bar_orientation => status_bar_orientation)
+          merged_options[:status_bar_orientation] = status_bar_orientation
         end
-        launcher.actions.swipe(dir.to_sym, options)
+
+        force = merged_options[:force]
+        if force
+          unless [:light, :strong, :normal].include?(force)
+            raise ArgumentError,
+              "Expected :force option '#{force}' to be :light, :strong, or :normal"
+          end
+        end
+
+        launcher.actions.swipe(dir.to_sym, merged_options)
       end
 
 
@@ -393,9 +381,17 @@ module Calabash
       # @note this is implemented by calling the Obj-C `setContentOffset:animated:` method and can do things users cant.
       #
       # @param {String} uiquery query describing view scroll (should be  UIScrollView or a web view).
+      # @param [Symbol] direction The direction to scroll. Valid directions are:
+      #   :up, :down, :left, and :right
       def scroll(uiquery, direction)
-        views_touched=map(uiquery, :scroll, direction)
-        msg = "could not find view to scroll: '#{uiquery}', args: #{direction}"
+        allowed_directions = [:up, :down, :left, :right]
+        dir_symbol = direction.to_sym
+        unless allowed_directions.include?(dir_symbol)
+          raise ArgumentError, "Expected '#{direction} to be one of #{allowed_directions}"
+        end
+
+        views_touched=map(uiquery, :scroll, dir_symbol)
+        msg = "could not find view to scroll: '#{uiquery}', args: #{dir_symbol}"
         assert_map_results(views_touched, msg)
         views_touched
       end
@@ -538,10 +534,10 @@ module Calabash
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
-      # @raise [RuntimeException] if the scroll cannot be performed
-      # @raise [RuntimeException] :query finds no collection view
-      # @raise [RuntimeException] the collection view does not contain a cell at item/section
-      # @raise [RuntimeException] :scroll_position is invalid
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] :query finds no collection view
+      # @raise [RuntimeError] the collection view does not contain a cell at item/section
+      # @raise [RuntimeError] :scroll_position is invalid
       def scroll_to_collection_view_item(item, section, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -596,12 +592,12 @@ module Calabash
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
-      # @raise [RuntimeException] if the scroll cannot be performed
-      # @raise [RuntimeException] if the mark is nil
-      # @raise [RuntimeException] :query finds no collection view
-      # @raise [RuntimeException] the collection view does not contain a cell
+      # @raise [RuntimeError] if the scroll cannot be performed
+      # @raise [RuntimeError] if the mark is nil
+      # @raise [RuntimeError] :query finds no collection view
+      # @raise [RuntimeError] the collection view does not contain a cell
       #  with the mark
-      # @raise [RuntimeException] :scroll_position is invalid
+      # @raise [RuntimeError] :scroll_position is invalid
       def scroll_to_collection_view_item_with_mark(mark, opts={})
         default_options = {:query => 'collectionView',
                            :scroll_position => :top,
@@ -630,11 +626,67 @@ module Calabash
         views_touched
       end
 
-      # Sends app to background. Simulates pressing the home button.
-      # @param {Fixnum} secs number of seconds to be in the background
-      #  `should not be more than 60 secs`
-      def send_app_to_background(secs)
-        launcher.actions.send_app_to_background(secs)
+      # Sends the app to the background.
+      #
+      # Sending the app to the background for more than 60 seconds may
+      # cause unpredicatable results.
+      #
+      # @param [Numeric] seconds How long to send the app to the background.
+      # @raise [ArgumentError] if `seconds` argument is < 1.0
+      def send_app_to_background(seconds)
+        if seconds < 1.0
+          raise ArgumentError, "Seconds '#{seconds}' must be >= 1.0"
+        end
+
+        parameters = {
+          :duration => seconds
+        }
+
+        begin
+          body = http({:method => :post, :path => "suspend"}, parameters)
+          result = response_body_to_hash(body)
+        rescue RuntimeError => e
+          raise RuntimeError, e
+        end
+
+        if result["outcome"] != "SUCCESS"
+          raise RuntimeError,
+            %Q{Could not send app to background:
+ reason => '#{result["reason"]}'
+details => '#{result["details"]}'
+            }
+        end
+        result["results"]
+      end
+
+      # Cause the device to shake.
+      #
+      # @param [Numeric] seconds How long to shake the device
+      # @raise [ArgumentError] if `seconds` argument is <= 0.0
+      def shake(seconds)
+        if seconds <= 0.0
+          raise ArgumentError, "Seconds '#{seconds}' must be >= 0.0"
+        end
+
+        parameters = {
+          :duration => seconds
+        }
+
+        begin
+          body = http({:method => :post, :path => "shake"}, parameters)
+          result = response_body_to_hash(body)
+        rescue RuntimeError => e
+          raise RuntimeError, e
+        end
+
+        if result["outcome"] != "SUCCESS"
+          raise RuntimeError,
+%Q{Could not shake the device:
+ reason => '#{result["reason"]}'
+details => '#{result["details"]}'
+            }
+        end
+        result["results"]
       end
 
       # Simulates gps location of the device/simulator.
@@ -775,35 +827,43 @@ module Calabash
 
       # Calls a method on the app's AppDelegate object.
       #
-      # This is an escape hatch for calling an arbitrary hook inside
-      # (the test build) of your app.  Commonly used to "go around" the UI for
-      # speed purposes or reset the app to a good known state.
+      # Use this to call an arbitrary Objective-C or Swift method in your
+      # app's UIApplicationDelegate.
       #
-      # You must create a method on you app delegate of the form:
+      # Commonly used to "go around" the UI speed purposes or reset the app to
+      # a good known state.
       #
-      #     - (NSString *) calabashBackdoor:(NSString *)aIgnorable;
+      # @note For methods that take arguments, don't forget to include the
+      #   trailing ":"
       #
-      # or if you want to pass parameters
-      #
-      #     - (NSString *) calabashBackdoor:(NSDictionary *)params;
-      # @example
-      #   backdoor("calabashBackdoor:", '')
-      # @example
-      #   backdoor("calabashBackdoor:", {example:'param'})
-      # @param {String} sel the selector to perform on the app delegate
-      # @param {Object} arg the argument to pass to the selector
-      # @return {Object} the result of performing the selector with the argument (serialized)
-      def backdoor(sel, arg)
-        json = {
-              :selector => sel,
-              :arg => arg
+      # @param [String] selector the selector to perform on the app delegate
+      # @param [Object] argument the argument to pass to the selector
+      # @return [Object] the result of performing the selector with the argument
+      def backdoor(selector, *arguments)
+        parameters = {
+              :selector => selector,
+              :arguments => arguments
         }
-        res = http({:method => :post, :path => 'backdoor'}, json)
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "backdoor #{json} failed because: #{res['reason']}\n#{res['details']}"
+
+        begin
+          body = http({:method => :post, :path => "backdoor"}, parameters)
+          result = response_body_to_hash(body)
+        rescue RuntimeError => e
+          raise RuntimeError, e
         end
-        res['result']
+
+        if result["outcome"] != "SUCCESS"
+           raise RuntimeError,
+%Q{backdoor call failed:
+ selector => '#{selector}'
+arguments => '#{arguments}'
+   reason => '#{result["reason"]}'
+
+#{result["details"]}
+
+}
+        end
+        result["results"]
       end
 
       # Attempts to shut the app down gracefully by simulating the transition

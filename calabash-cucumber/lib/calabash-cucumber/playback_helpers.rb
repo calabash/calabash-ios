@@ -55,7 +55,17 @@ module Calabash
 
       # @!visibility private
       def load_playback_data(recording_name, options={})
+
         device = options['DEVICE'] || ENV['DEVICE'] || 'iphone'
+
+        # Xcode 7/iOS 9 - Playback file not found for rotation #837
+        # As of iOS 7 and Xcode 5.1.1, the only part of the playback API that
+        # is being used is the rotation API.  We've incorrectly been using
+        # iPhone recordings for iPad rotations.  The iPhone recordings are
+        # working, so I am not inclined to make any dramatic changes.
+        if device != 'iphone' || device != 'ipad'
+          device = 'iphone'
+        end
 
         major = Calabash::Cucumber::Launcher.launcher.ios_major_version
 
@@ -65,7 +75,7 @@ module Calabash
           Most likely you have updated your calabash-cucumber client
           but not your server. Please follow closely:
 
-https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version
+https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version
 
           If you are running version 0.9.120+ then please report this message as a bug.
 EOF
@@ -184,7 +194,7 @@ EOF
           Most likely you have updated your calabash-cucumber client
           but not your server. Please follow closely:
 
-https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version
+https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version
 
           If you are running version 0.9.120+ then please report this message as a bug.
 EOF

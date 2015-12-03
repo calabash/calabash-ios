@@ -66,7 +66,7 @@ module Calabash
         end
 
         def default_simulator_as_device(sim_control)
-          default_sim = RunLoop::Core.default_simulator(sim_control.xctools)
+          default_sim = RunLoop::Core.default_simulator(sim_control.xcode)
           target_simulator = nil
           sim_control.simulators.each do |device|
             instruments_launch_name = "#{device.name} (#{device.version.to_s} Simulator)"

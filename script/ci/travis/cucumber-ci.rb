@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'erb'
-require 'yaml'
-
-require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
+require 'run_loop'
+require 'luffa'
 
 cucumber_args = "#{ARGV.join(' ')}"
 
@@ -12,93 +10,47 @@ working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 # on-simulator tests of features in test/cucumber
 Dir.chdir(working_directory) do
 
-  do_system('rm -rf .bundle')
+  Luffa.unix_command('rm -rf .bundle')
+  Luffa.unix_command('rm -rf Gemfile.lock')
 
-  do_system('bundle install --without=development',
-            {:pass_msg => 'bundled',
-             :fail_msg => 'could not bundle'})
+  Luffa.unix_command('bundle install',
+                     {:pass_msg => 'bundled',
+                      :fail_msg => 'could not bundle'})
 
-  # remove any stale targets
-  do_system('bundle exec calabash-ios sim reset',
-            {:pass_msg => 'reset the simulator',
-             :fail_msg => 'could not reset the simulator'})
+  xcode = RunLoop::Xcode.new
+  xcode_version = xcode.version
+  sim_major = xcode_version.major + 2
+  sim_minor = xcode_version.minor
 
+  sim_version = RunLoop::Version.new("#{sim_major}.#{sim_minor}")
 
-  cucumber_profiles = File.expand_path('config/cucumber.yml')
-  evaled_erb = ERB.new(File.read cucumber_profiles)
-  # noinspection RubyResolve
-  parsed_yaml = YAML.load(evaled_erb.result)
-  simulators_str = parsed_yaml['simulators'].split('=')[1..-1].join(' =').gsub(/=>/, ' => ').gsub!(/\A"|"\Z/, '')
-  hash_ready = simulators_str[1..simulators_str.length-2]
-  tokens = hash_ready.split(',').map { |elm| elm.strip }
-  simulator_profiles = {}
-  tokens.each do |token|
-    key_value = token.split('=>').map { |elm| elm.strip }
-    simulator_profiles[key_value[0].tr(':', '').to_sym] = key_value[1].gsub!(/\A"|"\Z/, '')
-  end
+  devices = {
+    :air => 'iPad Air',
+    :ipad => 'iPad 2',
+    :iphone4s => 'iPhone 4s',
+    :iphone5s => 'iPhone 5s',
+    :iphone6 => 'iPhone 6',
+    :iphone6plus => 'iPhone 6 Plus'
+  }
 
-  if travis_ci?
-    profiles =
-          {
-                #:ipad2 => simulator_profiles[:ipad2],
-                #:ipad2_mid => simulator_profiles[:ipad2_mid],
+  simulators = RunLoop::SimControl.new.simulators
 
-                :air => simulator_profiles[:air],
-                #:air_mid => simulator_profiles[:air_mid],
-
-                #:ipad => simulator_profiles[:ipad],
-                #:ipad_mid => simulator_profiles[:ipad_mid],
-
-                #:iphone4s => simulator_profiles[:iphone4s],
-                #:iphone4s_mid => simulator_profiles[:iphone4s_mid],
-
-                :iphone5s => simulator_profiles[:iphone5s],
-                #:iphone5s_mid => simulator_profiles[:iphone5s_mid],
-
-                #:iphone5 => simulator_profiles[:iphone5],
-                #:iphone5_mid => simulator_profiles[:iphone5_mid],
-
-                :iphone6 => simulator_profiles[:iphone6],
-                :iphone6plus => simulator_profiles[:iphone6plus],
-          }
-  else
-    profiles =
-          {
-                :ipad2 => simulator_profiles[:ipad2],
-                :ipad2_mid => simulator_profiles[:ipad2_mid],
-
-                :air => simulator_profiles[:air],
-                :air_mid => simulator_profiles[:air_mid],
-
-                :ipad => simulator_profiles[:ipad],
-                :ipad_mid => simulator_profiles[:ipad_mid],
-
-                :iphone4s => simulator_profiles[:iphone4s],
-                :iphone4s_mid => simulator_profiles[:iphone4s_mid],
-
-                :iphone5s => simulator_profiles[:iphone5s],
-                :iphone5s_mid => simulator_profiles[:iphone5s_mid],
-
-                :iphone5 => simulator_profiles[:iphone5],
-                :iphone5_mid => simulator_profiles[:iphone5_mid],
-
-                :iphone6 => simulator_profiles[:iphone6],
-                :iphone6plus => simulator_profiles[:iphone6plus],
-          }
-  end
-
-  # noinspection RubyStringKeysInHashInspection
-  env_vars =
-        {
-              'APP_BUNDLE_PATH' => './LPSimpleExample-cal.app',
-        }
+  env_vars = {'APP_BUNDLE_PATH' => './LPSimpleExample-cal.app'}
   passed_sims = []
   failed_sims = []
-  profiles.each do |profile, name|
-    cucumber_cmd = "bundle exec cucumber -p #{profile.to_s} #{cucumber_args}"
+  devices.each do |key, name|
+    cucumber_cmd = "bundle exec cucumber -p simulator #{cucumber_args}"
 
-    exit_code = do_system(cucumber_cmd, {:exit_on_nonzero_status => false,
-                                         :env_vars => env_vars})
+    match = simulators.find do |sim|
+      sim.name == name && sim.version == sim_version
+    end
+
+    Luffa.log_info("Testing: #{match}")
+
+    env_vars = {'DEVICE_TARGET' => match.udid}
+
+    exit_code = Luffa.unix_command(cucumber_cmd, {:exit_on_nonzero_status => false,
+                                                  :env_vars => env_vars})
     if exit_code == 0
       passed_sims << name
     else
@@ -106,37 +58,37 @@ Dir.chdir(working_directory) do
     end
   end
 
-  puts '=== SUMMARY ==='
+  Luffa.log_info '=== SUMMARY ==='
   puts ''
-  puts 'PASSING SIMULATORS'
-  puts "#{passed_sims.join("\n")}"
+  Luffa.log_info 'PASSING SIMULATORS'
+  passed_sims.each { |sim| Luffa.log_info(sim) }
   puts ''
-  puts 'FAILING SIMULATORS'
-  puts "#{failed_sims.join("\n")}"
+  Luffa.log_info 'FAILING SIMULATORS'
+  failed_sims.each { |sim| Luffa.log_info(sim) }
 
-  sims = profiles.count
+  sims = devices.count
   passed = passed_sims.count
   failed = failed_sims.count
 
   puts ''
-  puts "passed on '#{passed}' out of '#{sims}'"
-
+  Luffa.log_info "passed on '#{passed}' out of '#{sims}'"
 
   # if none failed then we have success
   exit 0 if failed == 0
 
   # the travis ci environment is not stable enough to have all tests passing
-  exit failed unless travis_ci?
+  exit failed unless Luffa::Environment.travis_ci?
 
-  # we'll take 50% passing as good indicator of health
-  expected = 50
+  # we'll take 75% passing as good indicator of health
+  expected = 75
   actual = ((passed.to_f/sims.to_f) * 100).to_i
 
   if actual >= expected
-    puts "PASS:  we failed '#{failed}' sims, but passed '#{actual}%' so we say good enough"
+    Luffa.log_pass "We failed '#{failed}' sims, but passed '#{actual}%' so we say good enough"
     exit 0
   else
-    puts "FAIL:  we failed '#{failed}' sims, which is '#{actual}%' and not enough to pass"
+    Luffa.log_fail "We failed '#{failed}' sims, which is '#{actual}%' and not enough to pass"
     exit 1
   end
 end
+

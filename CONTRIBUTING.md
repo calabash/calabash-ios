@@ -17,6 +17,9 @@ If you are pasting code or log output, please use the \`\`\` GitHub code-block f
 
 If you are submitting a pull-request, please read the [Contributing](https://github.com/calabash/calabash-ios/blob/develop/CONTRIBUTING.md#contributing) information below.  Pull-requests without tests or a project to demonstrate the new behavior will probably be rejected.
 
+Please see this [post](http://chris.beams.io/posts/git-commit/) for tips
+on how to make a good commit message.
+
 ### Xamarin Studio, UITest, and Test Cloud
 
 Xamarin has a two additional support channels for you.  If your question or bug report is UITest or Test Cloud related, your best chance of quick, accurate response will be on one of these channels.

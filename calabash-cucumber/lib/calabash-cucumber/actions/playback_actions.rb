@@ -14,11 +14,6 @@ class Calabash::Cucumber::PlaybackActions
   end
 
   # @!visibility private
-  def wait_tap(options)
-    touch(options)
-  end
-
-  # @!visibility private
   def double_tap(options)
     playback('double_tap', options)
   end

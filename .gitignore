@@ -10,14 +10,17 @@ test/tmp
 test/version_tmp
 tmp
 .irb-history
+.pry-history
 
-# CI - occasionally we need to pull down run_loop to test
+# These repos are cloned during CI, which we run locally to test.
 run_loop
+calabash-ios-server
 
 # Documentation cache and generated files:
 .yardoc
 _yardoc
 doc
+!script/doc
 rdoc
 
 # for a library or gem, you might want to ignore these files since the code is
@@ -26,6 +29,9 @@ Gemfile.lock
 .ruby-version
 .ruby-gemset
 .bundle
+
+# rspec
+calabash-cucumber/spec/reports
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
@@ -49,3 +55,6 @@ __MACOSX
 
 # emacs
 (.*/)?\#[^/]*\#$
+
+# vim
+*.swp

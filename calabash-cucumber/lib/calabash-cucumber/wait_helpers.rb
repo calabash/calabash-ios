@@ -48,6 +48,38 @@ module Calabash
             :screenshot_on_error => true
       }
 
+      # Performs the `tap` gesture on the (first) view that matches query `uiquery`.
+      #
+      # As opposed to `touch`, `wait_tap` is a high-level method that combines:
+      #
+      # 1. waiting for the view to appear,
+      # 2. waiting for animations to complete on the view (and it's parents) and
+      # 3. actually tapping the view.
+      #
+      # This replaces the common pattern:
+      #
+      # ```
+      # wait_for_none_animating
+      # wait_for_element_exists("* marked:'log in'")
+      # touch("* marked:'log in'")
+      # ```
+      #
+      # By default, taps the center of the view.
+      # @see Calabash::Cucumber::Core#touch
+      # @see Calabash::Cucumber::Core#touch_point
+      # @param {String} uiquery query describing view to tap. Note `nil` is not allowed.
+      # @param {Hash} options option for modifying the details of the touch
+      # @option options {Hash} :offset (nil) optional offset to tap point. Offset has an `:x` and `:y` key
+      #   the tap will be performed on the center of the view plus the offset.
+      # @option options {Hash} :timeout (30) maximum number of seconds to wait for the view to appear
+      # @option options {Hash} :frequency (0.2) polling frequency to for checking if the view is present (>= 0.1)
+      # @return {Array<Hash>} serialized version of the tapped view
+      def wait_tap(uiquery, options={})
+        wait_for_none_animating
+        wait_for_element_exists(uiquery, options)
+        touch(uiquery, options)
+      end
+
       # Waits for a condition to be true. The condition is specified by a given block that is called repeatedly.
       # If the block returns a 'trueish' value the condition is considered true and
       # `wait_for` immediately returns.
@@ -112,7 +144,7 @@ module Calabash
           else
             raise wait_error(msg)
           end
-        rescue Exception => e
+        rescue => e
           handle_error_with_options(e, nil, screenshot_on_error)
         end
       end
@@ -212,16 +244,17 @@ module Calabash
       #   The same options as {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS} apply.
       # @return [nil] when the condition is satisfied
       # @raise [Calabash::Cucumber::WaitHelpers::WaitError] when the timeout is exceeded
-      def wait_for_element_does_not_exists(element_query, options={})
+      def wait_for_element_does_not_exist(element_query, options={})
         options[:timeout_message] = options[:timeout_message] || "Timeout waiting for element to not exist: #{element_query}"
         wait_for(options) { element_does_not_exist(element_query) }
       end
 
+      alias_method :wait_for_element_does_not_exists, :wait_for_element_does_not_exist
       # Waits for one or more Calabash queries to all return empty results (typically a UI elements to disappear).
       # Uses `wait_for`.
       # @see #wait_for
       # @see #wait_for_element_exists
-      # @see #wait_for_element_does_not_exists
+      # @see #wait_for_element_does_not_exist
       # @see Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS
       #
       # @param [Array<String>] elements_arr an Array of Calabash queries to be empty (i.e. `element_does_not_exist(element_query)`)
@@ -288,8 +321,8 @@ module Calabash
           else
             raise wait_error(msg)
           end
-        rescue Exception => e
-          handle_error_with_options(e,nil, screenshot_on_error)
+        rescue => e
+          handle_error_with_options(e, nil, screenshot_on_error)
         end
       end
 
@@ -406,23 +439,26 @@ module Calabash
       end
 
       # @!visibility private
-      # raises an error by raising a exception and conditionally takes a
-      # screenshot based on the value of +screenshot_on_error+.
-      # @param [Exception,nil] ex an exception to raise
+      # Raises an error by raising a error and conditionally takes a screenshot
+      # based on the value of +screenshot_on_error+.
+      # @param [RuntimeError,nil] error an error to raise
       # @param [String,nil] timeout_message the message of the raise
       # @param [Boolean] screenshot_on_error if true takes a screenshot before
       #  raising an error
       # @return [nil]
-      # @raise RuntimeError based on +ex+ and +timeout_message+
-      def handle_error_with_options(ex, timeout_message, screenshot_on_error)
-        msg = (timeout_message || ex)
-        if ex
-          msg = "#{msg} (#{ex.class})"
+      # @raise [StandardError] If `error`, then that kind of error is raised.
+      #  Otherwise raise a RuntimeError.
+      def handle_error_with_options(error, timeout_message, screenshot_on_error)
+        msg = (timeout_message || error)
+        if error
+          error_class = error.class
+        else
+          error_class = RuntimeError
         end
         if screenshot_on_error
           screenshot_and_raise msg
         else
-          raise msg
+          raise error_class, msg
         end
       end
 

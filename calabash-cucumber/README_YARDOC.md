@@ -59,7 +59,6 @@ The following files have good examples of yard format:
 ```
 lib/calabash-cucumber/utils/plist_buddy.rb
 lib/calabash-cucumber/utils/simulator_accessibility.rb
-lib/calabash-cucumber/utils/xctools.rb
 
 ```
 
@@ -171,7 +170,7 @@ end
 
 ```
 # @!visibility private
-# raises an error by raising a exception and conditionally takes a
+# raises an error by raising an error and conditionally takes a
 # screenshot based on the value of +screenshot_on_error+.
 # ...
 def handle_error_with_options(ex, timeout_message, screenshot_on_error)

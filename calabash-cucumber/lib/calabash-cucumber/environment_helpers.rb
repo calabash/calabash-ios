@@ -78,6 +78,14 @@ module Calabash
         _default_device_or_create.ipod?
       end
 
+      # Is the device under test an iPad Pro
+      #
+      # @raise [RuntimeError] If the server cannot be reached.
+      # @return [Boolean] true if device under test is an iPod.
+      def ipad_pro?
+        _default_device_or_create.ipad_pro?
+      end
+
       # Is the device under test an iPhone or iPod?
       #
       # @raise [RuntimeError] If the server cannot be reached.
@@ -121,6 +129,33 @@ module Calabash
       # @return [Boolean] true if this device is an iPhone 3.5in?
       def iphone_35in?
         _default_device_or_create.iphone_35in?
+      end
+
+      # The iOS version on the device under test.
+      #
+      # @note
+      #  **WARNING:** The `OS` env variable has been deprecated and should
+      #  never be set.
+      #
+      # @raise [RuntimeError] If the server cannot be reached.
+      # @return [RunLoop::Version] The version of the iOS running on the device.
+      def ios_version
+        RunLoop::Version.new(_default_device_or_create.ios_version)
+      end
+
+      # The screen dimensions of the device under test.
+      #
+      # This is a hash of form:
+      #  {
+      #    :sample => 1,
+      #    :height => 1334,
+      #    :width => 750,
+      #    :scale" => 2
+      #  }
+      # @raise [RuntimeError] If the server cannot be reached.
+      # @return [RunLoop::Version] The version of the iOS running on the device.
+      def screen_dimensions
+        _default_device_or_create.screen_dimensions
       end
 
       # Is the device under test running iOS 5?
@@ -178,6 +213,18 @@ module Calabash
       # @return [Boolean] true if device under test is running iOS 8
       def ios8?
        _default_device_or_create.ios8?
+      end
+
+      # Is the device under test running iOS 9?
+      #
+      # @note
+      #  **WARNING:** The `OS` env variable has been deprecated and should
+      #  never be set.
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 9
+      def ios9?
+       _default_device_or_create.ios9?
       end
 
       # Is the app that is being tested an iPhone app emulated on an iPad?

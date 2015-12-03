@@ -6,6 +6,18 @@ require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
+
+
+    # Raised when there is a problem involving a keyboard mode.  There are
+    # three keyboard modes:  docked, split, and undocked.
+    #
+    # All iPads support these keyboard modes, but the user can disable them
+    # in Settings.app.
+    #
+    # The iPhone 6+ family also supports keyboard modes, but Calabash does
+    # support keyboard modes on these devices.
+    class KeyboardModeError < StandardError; ; end
+
     # Collection of methods for interacting with the keyboard.
     #
     # We've gone to great lengths to provide the fastest keyboard entry possible.
@@ -80,36 +92,23 @@ module Calabash
       # @return [Boolean] if a keyboard is visible and docked.
       def docked_keyboard_visible?
         res = query(_qstr_for_keyboard).first
+
         return false if res.nil?
 
         return true if device_family_iphone?
 
-        rect = res['rect']
-        o = status_bar_orientation.to_sym
-        case o
-          when :left
-            if ios8?
-              rect['center_x'] == 512 and rect['center_y'] == 592
-            else
-              rect['center_x'] == 592 and rect['center_y'] == 512
-            end
-          when :right
-            if ios8?
-              rect['center_x'] == 512 and rect['center_y'] == 592
-            else
-              rect['center_x'] == 176 and rect['center_y'] == 512
-            end
-          when :up
-            if ios8?
-              rect['center_x'] == 384 and rect['center_y'] == 892
-            else
-              rect['center_x'] == 384 and rect['center_y'] == 132
-            end
-          when :down
-              rect['center_x'] == 384 and rect['center_y'] == 892
-          else
-            false
+        orientation = status_bar_orientation.to_sym
+        keyboard_height = res['rect']['height']
+        keyboard_y = res['rect']['y']
+        scale = screen_dimensions[:scale]
+
+        if orientation == :left || orientation == :right
+          screen_height = screen_dimensions[:width]/scale
+        else
+          screen_height = screen_dimensions[:height]/scale
         end
+
+        screen_height - keyboard_height == keyboard_y
       end
 
       # Returns true if an undocked keyboard is visible.
@@ -155,7 +154,7 @@ module Calabash
       #
       # @param [Hash] opts controls the `wait_for` behavior
       # @option opts [String] :timeout_message ('keyboard did not appear')
-      #  Controls the message that appears in the exception.
+      #  Controls the message that appears in the error.
       # @option opts [Number] :post_timeout (0.3) Controls how long to wait
       #  _after_ the keyboard has appeared.
       #
@@ -593,10 +592,6 @@ module Calabash
         res = send_uia_command({:command => "#{_query_uia_hide_keyboard_button}.rect()"})
         origin = res['value']['origin']
         {:x => origin['x'], :y => origin['y']}
-
-        # this did not work.
-        #size = res['value']['size']
-        #{:x => (origin['x']  (size['width']/2)), :y => (origin['y']  (size['height']/2))}
       end
 
       # @!visibility private
@@ -700,8 +695,10 @@ module Calabash
           # there are 10 pt btw the key and the popup and each row is 50 pt
           # NB: no amount of offsetting seems to allow touching the top row
           #     when the keyboard is split
+
+          x_offset = 40
           y_offset = 10 + 50 + 25
-          end_pt = {:x => (start_pt[:x] - 40), :y => (start_pt[:y] - y_offset)}
+          end_pt = {:x => (start_pt[:x] - x_offset), :y => (start_pt[:y] - y_offset)}
           uia_pan_offset(start_pt, end_pt, {:duration => 1.0})
         else
           pan(_query_for_keyboard_mode_key, nil, {})
@@ -726,15 +723,23 @@ module Calabash
         return if device_family_iphone?
 
         mode = ipad_keyboard_mode
-        case mode
-          when :split then
-            _touch_bottom_keyboard_mode_row
-          when :undocked then
-            _touch_top_keyboard_mode_row
-          when :docked then
-            # already docked
-          else
-          screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
+
+        return if mode == :docked
+
+        if ios9?
+          raise KeyboardModeError,
+                'Changing keyboard modes is not supported on iOS 9'
+        else
+          case mode
+            when :split then
+              _touch_bottom_keyboard_mode_row
+            when :undocked then
+              _touch_top_keyboard_mode_row
+            when :docked then
+              # already docked
+            else
+              screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
+          end
         end
 
         begin
@@ -747,7 +752,6 @@ module Calabash
           screenshot_and_raise "expected keyboard to be ':docked' but found '#{mode}' in orientation '#{o}'"
         end
       end
-
 
       # Ensures that the iPad keyboard is undocked.
       #
@@ -762,35 +766,42 @@ module Calabash
       # @raise [RuntimeError] if there is no visible keyboard
       # @raise [RuntimeError] an undocked keyboard was not achieved
       def ensure_undocked_keyboard
-        wait_for_keyboard()
+        wait_for_keyboard
 
         return if device_family_iphone?
 
         mode = ipad_keyboard_mode
-        case mode
-          when :split then
-            # keep these condition separate because even though they do the same
-            # thing, the else condition is a hack
-            if ios5?
-              # iOS 5 has no 'Merge' feature in split keyboard, so dock first then
-              # undock from docked mode
-              _touch_bottom_keyboard_mode_row
-              _wait_for_keyboard_in_mode(:docked)
-            else
-              # in iOS > 5, it seems to be impossible consistently touch the
-              # the top keyboard mode popup button, so we punt
-              _touch_bottom_keyboard_mode_row
-              _wait_for_keyboard_in_mode(:docked)
-            end
-            _touch_top_keyboard_mode_row
-          when :undocked then
-            # already undocked
-          when :docked then
-            _touch_top_keyboard_mode_row
-          else
-            screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
-        end
 
+        return if mode == :undocked
+
+        if ios9?
+          raise KeyboardModeError,
+                'Changing keyboard modes is not supported on iOS 9'
+        else
+          case mode
+            when :split then
+              # keep these condition separate because even though they do the same
+              # thing, the else condition is a hack
+              if ios5?
+                # iOS 5 has no 'Merge' feature in split keyboard, so dock first then
+                # undock from docked mode
+                _touch_bottom_keyboard_mode_row
+                _wait_for_keyboard_in_mode(:docked)
+              else
+                # in iOS > 5, it seems to be impossible consistently touch the
+                # the top keyboard mode popup button, so we punt
+                _touch_bottom_keyboard_mode_row
+                _wait_for_keyboard_in_mode(:docked)
+              end
+              _touch_top_keyboard_mode_row
+            when :undocked then
+              # already undocked
+            when :docked then
+              _touch_top_keyboard_mode_row
+            else
+              screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
+          end
+        end
         _wait_for_keyboard_in_mode(:undocked)
       end
 
@@ -814,17 +825,24 @@ module Calabash
         return if device_family_iphone?
 
         mode = ipad_keyboard_mode
-        case mode
-          when :split then
-            # already split
-          when :undocked then
-            _touch_bottom_keyboard_mode_row
-          when :docked then
-            _touch_bottom_keyboard_mode_row
-          else
-            screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
-        end
 
+        return if mode == :split
+
+        if ios9?
+          raise KeyboardModeError,
+                'Changing keyboard modes is not supported on iOS 9'
+        else
+          case mode
+            when :split then
+              # already split
+            when :undocked then
+              _touch_bottom_keyboard_mode_row
+            when :docked then
+              _touch_bottom_keyboard_mode_row
+            else
+              screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
+          end
+        end
         _wait_for_keyboard_in_mode(:split)
       end
 
@@ -896,6 +914,24 @@ module Calabash
         wait_for(opts) do
           uia_keyboard_visible?
         end
+      end
+
+      # Waits for a keyboard to appear and returns the localized name of the
+      # `key_code` signifier
+      #
+      # @param [String] key_code Maps to a specific name in some localization
+      def lookup_key_name(key_code)
+        wait_for_keyboard
+        begin
+          response_json = JSON.parse(http(:path => 'keyboard-language'))
+        rescue JSON::ParserError
+          raise RuntimeError, "Could not parse output of keyboard-language route. Did the app crash?"
+        end
+        if response_json['outcome'] != 'SUCCESS'
+          screenshot_and_raise "failed to retrieve the keyboard localization"
+        end
+        localized_lang = response_json['results']['input_mode']
+        RunLoop::L10N.new.lookup_localization_name(key_code, localized_lang)
       end
 
       # @!visibility private
