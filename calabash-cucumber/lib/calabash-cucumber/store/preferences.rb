@@ -14,6 +14,15 @@ module Calabash
         @path = File.join(dot_dir, "preferences", "preferences.json")
       end
 
+      def to_s
+        puts "Preferences:"
+        ap read
+      end
+
+      def inspect
+        to_s
+      end
+
       # !@visibility private
       def usage_tracking
         preferences = read
