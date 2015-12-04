@@ -2,6 +2,7 @@ module Calabash
   module Cucumber
 
     require "fileutils"
+    require "securerandom"
 
     # Users preferences persisted across runs:
     #
@@ -13,12 +14,78 @@ module Calabash
         @path = File.join(dot_dir, "preferences", "preferences.json")
       end
 
+      # !@visibility private
+      def usage_tracking
+        preferences = read
+
+        unless valid_user_tracking_value?(preferences[:usage_tracking])
+          log_defaults_reset
+          preferences[:usage_tracking] = defaults[:usage_tracking]
+          write(preferences)
+        end
+
+        preferences[:usage_tracking]
+      end
+
+      # !@visibility private
+      def usage_tracking=(value)
+        if !valid_user_tracking_value?(value)
+          raise ArgumentError,
+            "Expected '#{value}' to be one of #{VALID_USAGE_TRACKING_VALUES.join(", ")}"
+        end
+
+        preferences = read
+        preferences[:usage_tracking] = value
+        write(preferences)
+      end
+
+      # !@visibility private
+      def user_id
+        preferences = read
+
+        unless valid_user_id?(preferences[:user_id])
+          preferences[:user_id] = SecureRandom.uuid
+          write(preferences)
+        end
+
+        preferences[:user_id]
+      end
+
+      # !@visibility private
+      def user_id=(value)
+        if !valid_user_id?(value)
+          raise ArgumentError,
+            "Expected '#{value}' to not be nil and not an empty string"
+        end
+
+        preferences = read
+        preferences[:user_id] = value
+        write(preferences)
+      end
+
       private
+
+      # @!visibility private
+      def valid_user_tracking_value?(value)
+        VALID_USAGE_TRACKING_VALUES.include?(value)
+      end
+
+      # @!visibility private
+      def valid_user_id?(value)
+        !value.nil? && value != "" && value.is_a?(String)
+      end
 
       # @!visibility private
       #
       # The preferences version
       VERSION = "1.0"
+
+      # @!visibility private
+      #
+      # Ordered by permissiveness left to right ascending.
+      #
+      # "system_info" implies that "events" are also allowed.
+      VALID_USAGE_TRACKING_VALUES = ["none", "events", "system_info"]
 
       # @!visibility private
       def version
@@ -40,10 +107,8 @@ module Calabash
       def defaults
         {
           :version => VERSION,
-          :usage_tracking =>
-          {
-
-          }
+          :usage_tracking => "system_info",
+          :user_id => SecureRandom.uuid
         }
       end
 

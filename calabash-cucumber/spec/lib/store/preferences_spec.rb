@@ -20,6 +20,102 @@ describe Calabash::Cucumber::Preferences do
     expect(store.send(:version)).to be_truthy
   end
 
+  describe "#usage_tracking" do
+    it "returns valid value" do
+      expect(store).to receive(:read).and_return({:usage_tracking => "none"})
+
+      expect(store.usage_tracking).to be == "none"
+    end
+
+    it "returns default value and resets the store if invalid value" do
+      allow(SecureRandom).to receive(:uuid).and_return("uuid")
+      expect(store).to receive(:valid_user_tracking_value?).and_return false
+
+      defaults = store.send(:defaults)
+      expect(store).to receive(:log_defaults_reset).and_call_original
+      expect(store).to receive(:write).at_least(:once).with(defaults).and_call_original
+
+      expect(store.usage_tracking).to be == defaults[:usage_tracking]
+    end
+  end
+
+  describe "#usage_tracking=" do
+    it "raises an error if value is invalid" do
+      expect do
+        store.usage_tracking = "invalid"
+      end.to raise_error ArgumentError, /Expected 'invalid' to be one of/
+    end
+
+    it "persists the change to disk" do
+      old = store.usage_tracking
+      expect(old).to be == store.send(:defaults)[:usage_tracking]
+      expect(old).not_to be == "none"
+
+      store.usage_tracking = "none"
+
+      expect(store.usage_tracking).to be == "none"
+    end
+  end
+
+  describe "#valid_user_tracking_value?" do
+    it "false if not an allowed value" do
+      expect(store.send(:valid_user_tracking_value?, nil)).to be_falsey
+      expect(store.send(:valid_user_tracking_value?, "")).to be_falsey
+      expect(store.send(:valid_user_tracking_value?, "unknown")).to be_falsey
+    end
+
+    it "true if an allowed value" do
+      expect(store.send(:valid_user_tracking_value?, "none")).to be_truthy
+      expect(store.send(:valid_user_tracking_value?, "events")).to be_truthy
+    end
+  end
+
+  describe "#valid_user_id?" do
+    it "false" do
+      value = "value"
+      expect(value).to receive(:is_a?).with(String).and_return false
+
+      expect(store.send(:valid_user_id?, value)).to be_falsey
+      expect(store.send(:valid_user_id?, nil)).to be_falsey
+      expect(store.send(:valid_user_id?, "")).to be_falsey
+    end
+
+    it "true" do
+      expect(store.send(:valid_user_id?, "valid")).to be_truthy
+    end
+  end
+
+  describe "#user_id" do
+    it "returns valid value" do
+      expect(store).to receive(:read).and_return({:user_id => "valid"})
+
+      expect(store.user_id).to be == "valid"
+    end
+
+    it "returns default value and resets the store if invalid value" do
+      allow(SecureRandom).to receive(:uuid).and_return("uuid")
+      expect(store).to receive(:valid_user_id?).and_return false
+
+      defaults = store.send(:defaults)
+      expect(store).to receive(:write).at_least(:once).with(defaults).and_call_original
+
+      expect(store.user_id).to be == defaults[:user_id]
+    end
+  end
+
+  describe "#user_id=" do
+    it "raises an error if value is invalid" do
+      expect do
+        store.user_id = nil
+      end.to raise_error ArgumentError, /Expected '' to not be nil and not an empty string/
+    end
+
+    it "persists the change to disk" do
+      store.user_id = "clever user"
+      expect(store.user_id).to be == "clever user"
+    end
+  end
+
   describe "#write" do
     describe "raises error when" do
       it "is passed nil" do
@@ -100,6 +196,7 @@ describe Calabash::Cucumber::Preferences do
 
   describe "#read" do
     it "calls write with defaults if file does not exist" do
+      allow(SecureRandom).to receive(:uuid).and_return("uuid")
       expect(File).to receive(:exist?).with(File.dirname(path)).and_return false
       expect(File).to receive(:exist?).with(path).and_return false
       expect(store).to receive(:write).and_call_original
@@ -122,6 +219,8 @@ describe Calabash::Cucumber::Preferences do
 
   describe "#parse_json" do
     it "can always parse JSON generated from defaults" do
+      allow(SecureRandom).to receive(:uuid).and_return("uuid")
+
       string = JSON.pretty_generate(store.send(:defaults))
 
       expect(store).not_to receive(:write_to_log)
