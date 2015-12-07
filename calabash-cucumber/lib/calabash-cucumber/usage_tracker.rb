@@ -21,7 +21,7 @@ module Calabash
       # @!visibility private
       def post_usage
         if Calabash::Cucumber::UsageTracker.track_usage? &&
-            allowed_to_track != "none"
+            info_we_are_allowed_to_track != "none"
           begin
             HTTPClient.post(ROUTE, info)
           rescue => _
@@ -67,7 +67,7 @@ module Calabash
       end
 
       # @!visibility private
-      def allowed_to_track
+      def info_we_are_allowed_to_track
         preferences.usage_tracking
       end
 
@@ -148,7 +148,7 @@ module Calabash
       # Collect a hash of usage info.
       def info
 
-        allowed = allowed_to_track
+        allowed = info_we_are_allowed_to_track
 
         if allowed == "none"
           raise RuntimeError,
