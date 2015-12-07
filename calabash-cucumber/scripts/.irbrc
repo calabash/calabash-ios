@@ -47,7 +47,7 @@ end
 require "calabash-cucumber"
 
 def preferences
-  @preferences ||= Calabash::Cucumber::Preferences.new
+  Calabash::Cucumber::Preferences.new
 end
 
 def disable_usage_tracking
