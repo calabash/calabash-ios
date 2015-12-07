@@ -100,7 +100,10 @@ describe Calabash::Cucumber::UsageTracker do
     it "returns {} if allowed is none" do
       expect(tracker).to receive(:allowed_to_track).and_return "none"
 
-      expect(tracker.send(:info)).to be == {}
+      expect do
+        tracker.send(:info)
+      end.to raise_error RuntimeError,
+      /This method should not be called if the user does not want to be tracked/
     end
 
     it "returns only events if allowed == events" do

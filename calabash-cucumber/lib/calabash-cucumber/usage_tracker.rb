@@ -150,7 +150,10 @@ module Calabash
 
         allowed = allowed_to_track
 
-        return {} if allowed == "none"
+        if allowed == "none"
+          raise RuntimeError,
+            "This method should not be called if the user does not want to be tracked."
+        end
 
         # Events only
         hash = {
