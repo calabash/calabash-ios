@@ -21,9 +21,8 @@ describe Calabash::Cucumber::UsageTracker do
 
   it "#preferences" do
     prefs = tracker.send(:preferences)
+
     expect(prefs).to be_a_kind_of(Calabash::Cucumber::Preferences)
-    expect(prefs).to be == tracker.send(:preferences)
-    expect(tracker.instance_variable_get(:@preferences)).to be == prefs
   end
 
   it "#user_id" do
@@ -32,7 +31,6 @@ describe Calabash::Cucumber::UsageTracker do
     expect(prefs).to receive(:user_id).and_return "user id"
 
     expect(tracker.send(:user_id)).to be == "user id"
-    expect(tracker.instance_variable_get(:@user_id)).to be == "user id"
   end
 
   it "#allowed_to_track" do
@@ -41,7 +39,6 @@ describe Calabash::Cucumber::UsageTracker do
     expect(prefs).to receive(:usage_tracking).and_return "allowed"
 
     expect(tracker.send(:allowed_to_track)).to be == "allowed"
-    expect(tracker.instance_variable_get(:@allowed_to_track)).to be == "allowed"
   end
 
 

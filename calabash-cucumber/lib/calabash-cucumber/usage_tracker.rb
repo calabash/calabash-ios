@@ -58,17 +58,17 @@ module Calabash
 
       # @!visibility private
       def preferences
-        @preferences ||= Calabash::Cucumber::Preferences.new
+        Calabash::Cucumber::Preferences.new
       end
 
       # @!visibility private
       def user_id
-        @user_id ||= preferences.user_id
+        preferences.user_id
       end
 
       # @!visibility private
       def allowed_to_track
-        @allowed_to_track ||= preferences.usage_tracking
+        preferences.usage_tracking
       end
 
       # @!visibility private
