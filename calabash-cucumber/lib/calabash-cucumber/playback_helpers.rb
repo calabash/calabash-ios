@@ -75,7 +75,7 @@ module Calabash
           Most likely you have updated your calabash-cucumber client
           but not your server. Please follow closely:
 
-https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version
+https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version
 
           If you are running version 0.9.120+ then please report this message as a bug.
 EOF
@@ -194,7 +194,7 @@ EOF
           Most likely you have updated your calabash-cucumber client
           but not your server. Please follow closely:
 
-https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version
+https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version
 
           If you are running version 0.9.120+ then please report this message as a bug.
 EOF

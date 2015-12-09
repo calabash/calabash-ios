@@ -3,29 +3,33 @@ language: objective-c
 before_script:
   - gem install luffa --no-document --env-shebang --no-prerelease
   - gem install xcpretty --no-document --env-shebang --no-prerelease
+  - gem install dotenv --no-document --env shebang --no-prerelease
+  - gem install xamarin-test-cloud --no-document --env shebang --no-prerelease
   - luffa authorize
   - script/ci/travis/install-dot-gemrc.rb
   - script/ci/travis/clone-and-install-run-loop.rb
   - script/ci/travis/install-gem-libs.rb
 
 script:
-  # Skip XTC run on all but 2.1.5 to avoid redundant testing. This is just a
+  # Skip XTC run on all but the latest to avoid redundant testing. This is just a
   # smoke test to ensure a job can be validated; the ruby version is immaterial.
-  #- if [[ ( ! -z $XTC_API_TOKEN && ! -z $XTC_USER && `ruby -e 'print RUBY_VERSION'` == '2.1.5' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
+  - if [[ ( ! -z $XTC_API_TOKEN && ! -z $XTC_USER && `ruby -e 'print RUBY_VERSION'` == '2.2.3' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
   - script/ci/travis/bundle-install.rb
   - script/ci/travis/install-gem-ci.rb
   - script/ci/travis/rspec-ci.rb
   - script/ci/travis/cucumber-ci.rb --tags ~@no_ci
 
 rvm:
-  - 1.9.3
   - 2.0.0
-  - 2.1.5
+  - 2.1.7
+  - 2.2.3
 
 notifications:
   email:
     recipients:
       - joshua.moody@xamarin.com
+      - chris.fuentes@xamarin.com
+      - karl.krukow@xamarin.com
     on_success: change
     on_failure: always
 
@@ -36,6 +40,4 @@ env:
     # -r calabash/calabash-ios
     - secure: "Fl27YECPUQ1eK3lcUiG8WgbKvvEBm9KG+sFt3nsUc1TLATwBCeL3jU+CDTFUZYh509G/L0p3k1VfOKoRubwyuKI1NRAg2qr5e1YhiMblA8QdgGuPZS6o5mgmYKCG6wriKsHFLrGETwtJF9gBugwPHs9NGe7AMyqGk+Q3j+zmdJY="
     - secure: "pE7fLQ1ZYSVH3PD700kN8ygwMQcSbRXCthkNXUhp16zGx5mQLBGGffmCz6HhiURHAjSmjRu2XlCvIx95Lg0XKPe/zATYsLiBMyFNdZNwIFHEFSWFLCuaVXEzdXVNuLJOS8vHLBsVi6GFagwk1Qi+0x2FrtbZXz/u2Qk99gtuf18="
-    # -r jmoody/calabash-ios
-    - secure: "QBD8Vf18ZJ1a6SKdkoAaUJ7iBREyhJzeFNObVDnAddl5NoNVc1X3ifcvRn6phSrC5jOesqgvGS9wKPiZpoax2UWJGK360MEJt7m7/9xU1YLfUtQwu5pY4sgSH0JOq0oHnnxREF89H67AQ5gjLHtUptTRgshmjNMORoQwFUVRIjc="
-    - secure: "a9pLFQJjhTq8bXBLB+aSOhsquNADJkIQLoV+nYWe+NBD3pCKUTqYATs+ErcrfhKb4mOei2VjFIGd+X7uQj4rsoUdOA/dcf9vFCREPZBiYFGb5vSxosgOSCE7TQy+GOB4HJ/IVS9Xzjxtw8PWo4EvothAUD+ub2hVImRInhX7BcY="
+

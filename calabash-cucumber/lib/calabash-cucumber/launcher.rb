@@ -8,6 +8,7 @@ require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
 require 'calabash/dylibs'
+require "calabash-cucumber/usage_tracker"
 
 # Used to launch apps for testing in iOS Simulator or on iOS Devices.  By default
 # it uses Apple's `instruments` process to launch your app, but has legacy support
@@ -56,6 +57,7 @@ class Calabash::Cucumber::Launcher
   attr_accessor :launch_args
   attr_accessor :simulator_launcher
   attr_reader :xcode
+  attr_reader :usage_tracker
 
   # @!visibility private
   # Generated when calabash cannot launch the app.
@@ -79,6 +81,10 @@ class Calabash::Cucumber::Launcher
 
   def xcode
     @xcode ||= RunLoop::Xcode.new
+  end
+
+  def usage_tracker
+    @usage_tracker ||= Calabash::Cucumber::UsageTracker.new
   end
 
   # @!visibility private
@@ -147,12 +153,15 @@ class Calabash::Cucumber::Launcher
     self.run_loop = run_loop
     major = self.device.ios_major_version
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
-      puts "\n\n WARNING \n\n"
-      puts 'Warning Trying to connect to simulator that was not launched by Calabash/instruments.'
-      puts 'To fix this you must let Calabash or instruments launch the app.'
-      puts 'Query will work, but gestures will not.'
-      puts "\n\n WARNING \n\n"
-      puts 'Please read: https://github.com/calabash/calabash-ios/wiki/A0-UIAutomation---instruments-problems'
+      puts  %Q{
+
+WARNING
+
+Connected to simulator that was not launched by Calabash.
+
+Queries will work, but gestures will not.
+
+}
     end
     self
   end
@@ -267,56 +276,24 @@ class Calabash::Cucumber::Launcher
   #  `:all` is passed, then the sandboxes for all sdks will be deleted.
   # @option opts [String] :path (nil) path to the application bundle
   def reset_app_sandbox(opts={})
+    calabash_warn(%Q{
+Starting in Calabash 0.17.0, this method does nothing.
 
-    if device_target?
-      calabash_warn("calling 'reset_app_sandbox' when targeting a device.")
-      return
-    end
+You can still control whether or not your app's sandbox is
+reset between Scenarios using RESET_BETWEEN_SCENARIOS=1 or
+by passing :reset => true as a launch option.
 
-    default_opts = {:sdk => nil, :path => nil}
-    merged_opts = default_opts.merge opts
+options = {
+  :reset => true
+}
 
-    sim_control = opts.fetch(:sim_control, RunLoop::SimControl.new)
-    xcode = sim_control.xcode
+launcher.relaunch(options)
 
-    if sim_control.xcode_version_gte_6?
-      default_sim = RunLoop::Core.default_simulator(xcode)
-      name_or_udid = merged_opts[:udid] || ENV['DEVICE_TARGET'] || default_sim
+Please do not ignore this message.
 
-      target_simulator = sim_control.simulators.find do |sim|
-        [name_or_udid == sim.instruments_identifier(xcode),
-         name_or_udid == sim.udid,
-         name_or_udid == sim.name].any?
-      end
+Remove direct calls to reset_app_sandbox.
 
-      if target_simulator.nil?
-        raise "Could not find a simulator that matches '#{name_or_udid}'"
-      end
-
-      sim_control.reset_sim_content_and_settings({:sim_udid => target_simulator.udid})
-    else
-      sdk ||= merged_opts[:sdk] || sdk_version || self.simulator_launcher.sdk_detector.latest_sdk_version
-      path ||= merged_opts[:path] || self.simulator_launcher.app_bundle_or_raise(app_path)
-
-      app = File.basename(path)
-
-      directories_for_sdk_prefix(sdk).each do |sdk_dir|
-        app_dir = File.expand_path("#{sdk_dir}/Applications")
-        next unless File.exists?(app_dir)
-
-        bundle = `find "#{app_dir}" -type d -depth 2 -name "#{app}" | head -n 1`
-
-        next if bundle.empty? # Assuming we're already clean
-
-        if debug_logging?
-          puts "Reset app state for #{bundle}"
-        end
-        sandbox = File.dirname(bundle)
-        ['Library', 'Documents', 'tmp'].each do |content_dir|
-          FileUtils.rm_rf(File.join(sandbox, content_dir))
-        end
-      end
-    end
+})
   end
 
   # Erases the contents and setting for every available simulator.
@@ -503,36 +480,27 @@ class Calabash::Cucumber::Launcher
     end
   end
 
-  # Launches your app on the connected device or simulator. Stops the app if it is already running.
-  # `relaunch` does a lot of error detection and handling to reliably start the app and test. Instruments (particularly the cli)
-  # has stability issues which we workaround by restarting the simulator process and checking that UIAutomation is correctly
-  # attaching.
+  # Launches your app on the connected device or simulator.
   #
-  # Takes optional args to specify details of the launch (e.g. device or simulator, sdk version, target device, launch method...).
-  # @note an important part of relaunch behavior is controlled by environment variables, specified below
+  # `relaunch` does a lot of error detection and handling to reliably start the
+  # app and test. Instruments (particularly the cli) has stability issues which
+  # we workaround by restarting the simulator process and checking that
+  # UIAutomation is correctly attaching to your application.
   #
-  # The two most important environment variables are `DEVICE_TARGET` and `APP_BUNDLE_PATH`.
+  # Use the `args` parameter to to control:
   #
-  # - `DEVICE_TARGET` controls which device you're running on. To see the options run: `instruments -s devices`.
-  #   In addition you can specify `DEVICE_TARGET=device` to run on a (unique) usb-connected device.
-  # - `APP_BUNDLE_PATH` controls which `.app` bundle to launch in simulator (don't use for on-device testing, instead use `BUNDLE_ID`).
-  # - `BUNDLE_ID` used with `DEVICE_TARGET=device` to specify which app to launch on device
-  # - `DEBUG` - set to "1" to obtain debug info (typically used to debug launching, UIAutomation and other issues)
-  # - `DEBUG_HTTP` - set to "1" to show raw HTTP traffic
+  # * `:app` - which app to launch.
+  # * `:device_target` - simulator or device to target.
+  # * `:reset_app_sandbox - reset he app's data (sandbox) before testing
   #
+  # and many other behaviors.
   #
-  # @example Launching on iPad simulator with DEBUG settings
-  #   DEBUG_HTTP=1 DEVICE_TARGET="iPad - Simulator - iOS 7.1" DEBUG=1 APP_BUNDLE_PATH=FieldServiceiOS.app bundle exec calabash-ios console
-  # @param {Hash} args optional args to specify details of the launch (e.g. device or simulator, sdk version,
-  #   target device, launch method...).
-  # @option args {String} :app (detect the location of the bundle from project settings) app bundle path
-  # @option args {String} :bundle_id if launching on device, specify this or env `BUNDLE_ID` to be the bundle identifier
-  #   of the application to launch
-  # @option args {Hash} :privacy_settings preset privacy settings for the, e.g., `{:photos => {:allow => true}}`.
-  #    See {KNOWN_PRIVACY_SETTINGS}
+  # Many of these behaviors can be be controlled by environment variables. The
+  # most important environment variables are `APP`, `DEVICE_TARGET`, and
+  # `DEVICE_ENDPOINT`.
+  #
+  # @param {Hash} args optional arguments to control the how the app is launched
   def relaunch(args={})
-    #TODO stopping is currently broken, but this works anyway because instruments stop the process before relaunching
-    RunLoop.stop(run_loop) if run_loop
 
     # @todo Don't overwrite the _args_ parameter!
     args = default_launch_args.merge(args)
@@ -577,34 +545,11 @@ class Calabash::Cucumber::Launcher
 
     args[:device] ||= detect_device_from_args(args)
 
-    if simulator_target?(args) and args[:reset]
-      # attempt to find the sdk version from the :device_target
-      sdk = sdk_version_for_simulator_target(args)
-
-      # *** LEGACY SUPPORT ***
-      # If DEVICE_TARGET has not been set and is not a device UDID, then
-      # :device_target will be 'simulator'.  In that case, we cannot know what
-      # SDK version of the app sandbox we should reset.  The user _might_ give
-      # us a hint with SDK_VERSION, but we want to deprecate that variable ASAP.
-      #
-      # If passed a nil SDK arg, reset_app_sandbox will reset the _latest_ SDK.
-      # This is not good, because this is probably _not_ the SDK that should be
-      # reset.  Our only option is to reset every sandbox for all SDKs by
-      # passing :sdk => :all to reset_app_sandbox.
-      if sdk.nil? and args[:device_target] == 'simulator'
-        sdk = :all
-      end
-      reset_app_sandbox({:sdk => sdk,
-                         :path => args[:app],
-                         :udid => args[:udid],
-                         :sim_control => args[:sim_control]})
-    end
-
     if args[:privacy_settings]
       if simulator_target?(args)
         update_privacy_settings(args[:bundle_id], args[:privacy_settings])
       else
-        #Not supported on device
+        # Not supported on device
         puts 'Warning: :privacy_settings not supported on device'
       end
     end
@@ -649,6 +594,8 @@ class Calabash::Cucumber::Launcher
         check_server_gem_compatibility
       end
     end
+
+    usage_tracker.post_usage_async
   end
 
   # @!visibility private
@@ -1083,7 +1030,7 @@ class Calabash::Cucumber::Launcher
       msgs = [
             'The server version is not compatible with gem version.',
             'Please update your server.',
-            'https://github.com/calabash/calabash-ios/wiki/B1-Updating-your-Calabash-iOS-version',
+            'https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version',
             "       gem version: '#{gem_version}'",
             "min server version: '#{min_server_version}'",
             "    server version: '#{server_version}'"]

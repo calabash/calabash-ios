@@ -5,8 +5,6 @@ require 'luffa'
 
 cucumber_args = "#{ARGV.join(' ')}"
 
-#require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
-
 working_directory = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'calabash-cucumber/test/cucumber'))
 
 # on-simulator tests of features in test/cucumber
