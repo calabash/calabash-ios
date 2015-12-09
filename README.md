@@ -77,10 +77,7 @@ $ export APP="~/Library/Developer/Xcode/DerivedData/<UDID>/Build/Products/Debug-
 $ bundle exec cucumber
 ```
 
-We recommend using scripts and/or changing the location where Xcode stages build products.
-
-* Tutorial: Build scripts  **WIP**
-* Tutorial: Xcode Location Settings **WIP**
+We recommend using scripts and/or changing the location where Xcode stages build products.  The sample projects use scripts to stage binaries to a `./Products`, even when building from Xcode.  You can use the Xcode > Preferences > Locations settings to do the same.
 
 ### Where to go from here?
 
