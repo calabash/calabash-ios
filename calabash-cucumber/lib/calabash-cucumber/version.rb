@@ -7,6 +7,6 @@ module Calabash
 
     # @!visibility public
     # The minimum required version of the Calabash embedded server.
-    MIN_SERVER_VERSION = "0.16.4"
+    MIN_SERVER_VERSION = "0.17.0"
   end
 end
