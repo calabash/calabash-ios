@@ -151,12 +151,8 @@ module Calabash
       def generate_json(hash)
         begin
           JSON.pretty_generate(hash)
-        rescue TypeError, JSON::UnparserError => e
-          write_to_log(
-%Q{Error generating JSON from:
- hash: #{hash}
-error: #{e}
-})
+        rescue TypeError, JSON::UnparserError => _
+
           log_defaults_reset
 
           # Will always generate valid JSON
@@ -182,23 +178,14 @@ error: #{e}
       def parse_json(string)
         begin
           JSON.parse(string, {:symbolize_names => true})
-        rescue TypeError, JSON::ParserError => e
-          write_to_log(
-%Q{Error parsing JSON from:
-string: #{string}
- error: #{e}
-})
+        rescue TypeError, JSON::ParserError => _
+
           log_defaults_reset
 
           hash = defaults
           write(hash)
           hash
         end
-      end
-
-      # @!visibility private
-      def write_to_log(error_message)
-        # TODO write to a log file?
       end
 
       # @!visibility private
