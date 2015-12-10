@@ -8,6 +8,7 @@ module Calabash
     #
     # ~/.calabash/preferences/preferences.json
     class Preferences
+      require "calabash-cucumber/dot_dir"
 
       def initialize
         dot_dir = Calabash::Cucumber::DotDir.directory
