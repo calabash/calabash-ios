@@ -163,6 +163,29 @@ describe Calabash::Cucumber do
           expect(lines[0]).to be == "stamp Pushing mid"
           expect(lines[1]).to be == "stamp Get over here!"
         end
+
+        it "handles errors by logging when debugging" do
+          allow(RunLoop::Environment).to receive(:debug?).and_return true
+          expect(File).to receive(:open).and_raise StandardError, "Did not get the last hit"
+
+           actual = capture_stdout do
+             Calabash::Cucumber.log_to_file("message")
+           end.string.gsub(/\e\[(\d+)m/, "")
+
+           expected = "DEBUG: Could not write:\n\nmessage\n\nto calabash.log because:\n\nDid not get the last hit\n\n"
+           expect(actual).to be == expected
+        end
+
+        it "handles errors by ignoring them when not debugging" do
+          allow(RunLoop::Environment).to receive(:debug?).and_return false
+          expect(File).to receive(:open).and_raise StandardError, "Did not get the last hit"
+
+           actual = capture_stdout do
+             Calabash::Cucumber.log_to_file("message")
+           end.string.gsub(/\e\[(\d+)m/, "")
+
+           expect(actual).to be == ""
+        end
       end
     end
 

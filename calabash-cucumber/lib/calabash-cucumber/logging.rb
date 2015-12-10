@@ -38,10 +38,23 @@ module Calabash
     def self.log_to_file(message)
       timestamp = self.timestamp
 
-      File.open(self.calabash_log_file, "a:UTF-8") do |file|
-        message.split($-0).each do |line|
-          file.write("#{timestamp} #{line}#{$-0}")
+      begin
+        File.open(self.calabash_log_file, "a:UTF-8") do |file|
+          message.split($-0).each do |line|
+            file.write("#{timestamp} #{line}#{$-0}")
+          end
         end
+      rescue => e
+        message =
+%Q{Could not write:
+
+#{message}
+
+to calabash.log because:
+
+#{e}
+}
+        self.log_debug(message)
       end
     end
 
