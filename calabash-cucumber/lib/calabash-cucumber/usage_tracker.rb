@@ -1,6 +1,7 @@
 module Calabash
   module Cucumber
     class UsageTracker
+      require "calabash-cucumber/store/preferences"
 
       require "httpclient"
       require "run_loop"
