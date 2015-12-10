@@ -1,6 +1,8 @@
 module Calabash
   module Cucumber
+    require "fileutils"
     require "run_loop"
+    require "calabash-cucumber/dot_dir"
 
     # These methods are not part of the API.
     #
@@ -30,6 +32,17 @@ module Calabash
     # red
     def self.log_error(msg)
       puts self.red("ERROR: #{msg}") if msg
+    end
+
+    # !@visibility private
+    def self.log_to_file(message)
+      timestamp = self.timestamp
+
+      File.open(self.calabash_log_file, "a:UTF-8") do |file|
+        message.split($-0).each do |line|
+          file.write("#{timestamp} #{line}#{$-0}")
+        end
+      end
     end
 
     private
@@ -73,6 +86,27 @@ module Calabash
     # @!visibility private
     def self.green(string)
       colorize(string, 32)
+    end
+
+    # @!visibility private
+    def self.timestamp
+      Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    end
+
+    # @!visibility private
+    def self.logs_directory
+      path = File.join(Calabash::Cucumber::DotDir.directory, "logs")
+      FileUtils.mkdir_p(path)
+      path
+    end
+
+    # @!visibility private
+    def self.calabash_log_file
+      path = File.join(self.logs_directory, "calabash.log")
+      if !File.exist?(path)
+        FileUtils.touch(path)
+      end
+      path
     end
   end
 end
