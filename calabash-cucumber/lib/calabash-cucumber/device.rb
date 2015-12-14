@@ -193,7 +193,7 @@ module Calabash
       # @return [Boolean] true if this device is a simulator
       def simulator?
         # Post 0.16.2 server
-        if simulator_details
+        unless simulator_details.nil? || simulator_details.empty?
           true
         else
           system == GESTALT_SIM_SYS
