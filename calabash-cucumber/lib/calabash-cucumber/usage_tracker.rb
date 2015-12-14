@@ -180,7 +180,8 @@ module Calabash
               :jenkins => RunLoop::Environment.jenkins?,
               :travis => RunLoop::Environment.travis?,
               :circle_ci => RunLoop::Environment.circle_ci?,
-              :teamcity => RunLoop::Environment.teamcity?
+              :teamcity => RunLoop::Environment.teamcity?,
+              :gitlab => RunLoop::Environment.gitlab?
             }
           )
         end

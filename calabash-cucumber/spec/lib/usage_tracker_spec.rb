@@ -41,7 +41,6 @@ describe Calabash::Cucumber::UsageTracker do
     expect(tracker.send(:info_we_are_allowed_to_track)).to be == "allowed"
   end
 
-
   describe ".xtc?" do
     it "truthy" do
       stub_env({"XAMARIN_TEST_CLOUD" => "1"})
@@ -133,11 +132,11 @@ describe Calabash::Cucumber::UsageTracker do
       expect(hash.has_key?(:used_bundle_exec)).to be_truthy
       expect(hash[:used_cucumber]).to be == false
       expect(hash[:version]).to be_truthy
-      expect(hash.has_key?(:ci)).to be_truthy
-      expect(hash.has_key?(:jenkins)).to be_truthy
-      expect(hash.has_key?(:travis)).to be_truthy
-      expect(hash.has_key?(:circle_ci)).to be_truthy
-      expect(hash.has_key?(:teamcity)).to be_truthy
+      expect(hash.has_key?(:ci)).to be == true
+      expect(hash.has_key?(:jenkins)).to be == true
+      expect(hash.has_key?(:travis)).to be == true
+      expect(hash.has_key?(:circle_ci)).to be == true
+      expect(hash.has_key?(:teamcity)).to be == true
     end
   end
 
