@@ -83,7 +83,7 @@ module Calabash
       end
 
       # @!visibility private
-      DATA_VERSION = "1.0"
+      DATA_VERSION = "1.1"
 
       # @!visibility private
       WINDOWS = "Windows"
