@@ -140,7 +140,7 @@ describe Calabash::Cucumber::Device do
 
   describe '#simulator?' do
     it '@simulator_details are available' do
-      expect(device).to receive(:simulator_details).and_return 'Core Simulator'
+      expect(device).to receive(:simulator_details).at_least(:once).and_return 'Core Simulator'
 
       expect(device.simulator?).to be_truthy
     end
