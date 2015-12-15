@@ -2,6 +2,7 @@ module Calabash
   module Cucumber
     class UsageTracker
       require "calabash-cucumber/store/preferences"
+      require "calabash-cucumber/logging"
 
       require "httpclient"
       require "run_loop"
@@ -25,9 +26,9 @@ module Calabash
             info_we_are_allowed_to_track != "none"
           begin
             HTTPClient.post(ROUTE, info)
-          rescue => _
-            # do nothing
-            # Perhaps we should log?
+          rescue => e
+            message = %Q{ERROR: Could not post usage tracking information:#{$-0}#{e}}
+            Calabash::Cucumber::log_to_file(message)
           end
         end
       end
