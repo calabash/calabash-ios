@@ -109,48 +109,25 @@ class Calabash::Cucumber::Launcher
   # @see Calabash::Cucumber::Core#console_attach
   def attach(options={})
     default_options = {:max_retry => 1,
-                       :timeout => 10,
-                       :uia_strategy => nil}
+                       :timeout => 10}
     merged_options = default_options.merge(options)
 
     if calabash_no_launch?
-      self.actions= Calabash::Cucumber::PlaybackActions.new
+      self.actions = Calabash::Cucumber::PlaybackActions.new
       return
     end
 
-    # :host is is a special case and requires reading information from a cache.
-    strategy_from_options = merged_options[:uia_strategy]
-    if strategy_from_options == :host
-      self.run_loop = RunLoop::HostCache.default.read
-      return self
-    end
+    self.run_loop = RunLoop::HostCache.default.read
 
     # Sets the device attribute.
     ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
 
-    if strategy_from_options.nil? && xcode.version_gte_7?
-      self.run_loop = RunLoop::HostCache.default.read
-      return self
-    end
-
-    pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
-    pids = pids_str.split(',').map { |pid| pid.to_i }
-    pid = pids.first
-    run_loop = {}
-    if pid
-      run_loop[:pid] = pid
-      self.actions= Calabash::Cucumber::InstrumentsActions.new
+    if self.run_loop[:pid]
+      self.actions = Calabash::Cucumber::InstrumentsActions.new
     else
-      self.actions= Calabash::Cucumber::PlaybackActions.new
+      self.actions = Calabash::Cucumber::PlaybackActions.new
     end
 
-    if strategy_from_options
-      run_loop[:uia_strategy] = merged_options[:uia_strategy]
-    else
-      run_loop[:uia_strategy] = :preferences
-    end
-
-    self.run_loop = run_loop
     major = self.device.ios_major_version
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
       puts  %Q{
