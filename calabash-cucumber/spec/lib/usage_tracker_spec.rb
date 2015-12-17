@@ -119,7 +119,7 @@ describe Calabash::Cucumber::UsageTracker do
 
       hash = tracker.send(:info)
 
-      expect(hash.count).to be == 16
+      expect(hash.count).to be == 17
       expect(hash[:event_name]).to be == "session"
       expect(hash[:data_version]).to be_truthy
       expect(hash[:user_id]).to be == "user id"
