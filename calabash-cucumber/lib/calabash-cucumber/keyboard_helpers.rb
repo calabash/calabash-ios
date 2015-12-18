@@ -323,7 +323,12 @@ module Calabash
             #           on numeric keyboards, it is actually a button on the
             #           keyboard and not a key
             if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
-              uia("uia.keyboard().elements().firstWithName('Delete').tap()")
+              js_tap_delete = "(function() {"\
+                  "var deleteElement = uia.keyboard().elements().firstWithName('Delete');"\
+                  "deleteElement = deleteElement.isValid() ? deleteElement : uia.keyboard().elements().firstWithName('delete');"\
+                  "deleteElement.tap();"\
+                "})();"
+              uia(js_tap_delete)
             else
               uia_type_string_raw(code)
             end
