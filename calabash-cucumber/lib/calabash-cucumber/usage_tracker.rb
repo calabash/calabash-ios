@@ -84,7 +84,7 @@ module Calabash
       end
 
       # @!visibility private
-      DATA_VERSION = "1.0"
+      DATA_VERSION = "1.1"
 
       # @!visibility private
       WINDOWS = "Windows"
@@ -181,7 +181,8 @@ module Calabash
               :jenkins => RunLoop::Environment.jenkins?,
               :travis => RunLoop::Environment.travis?,
               :circle_ci => RunLoop::Environment.circle_ci?,
-              :teamcity => RunLoop::Environment.teamcity?
+              :teamcity => RunLoop::Environment.teamcity?,
+              :gitlab => RunLoop::Environment.gitlab?
             }
           )
         end

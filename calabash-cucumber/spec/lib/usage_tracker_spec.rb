@@ -134,7 +134,7 @@ describe Calabash::Cucumber::UsageTracker do
 
       hash = tracker.send(:info)
 
-      expect(hash.count).to be == 16
+      expect(hash.count).to be == 17
       expect(hash[:event_name]).to be == "session"
       expect(hash[:data_version]).to be_truthy
       expect(hash[:user_id]).to be == "user id"
@@ -147,11 +147,11 @@ describe Calabash::Cucumber::UsageTracker do
       expect(hash.has_key?(:used_bundle_exec)).to be_truthy
       expect(hash[:used_cucumber]).to be == false
       expect(hash[:version]).to be_truthy
-      expect(hash.has_key?(:ci)).to be_truthy
-      expect(hash.has_key?(:jenkins)).to be_truthy
-      expect(hash.has_key?(:travis)).to be_truthy
-      expect(hash.has_key?(:circle_ci)).to be_truthy
-      expect(hash.has_key?(:teamcity)).to be_truthy
+      expect(hash.has_key?(:ci)).to be == true
+      expect(hash.has_key?(:jenkins)).to be == true
+      expect(hash.has_key?(:travis)).to be == true
+      expect(hash.has_key?(:circle_ci)).to be == true
+      expect(hash.has_key?(:teamcity)).to be == true
     end
   end
 
