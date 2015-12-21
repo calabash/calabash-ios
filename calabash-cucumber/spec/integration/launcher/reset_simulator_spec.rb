@@ -1,19 +1,24 @@
-describe 'Launcher:  #reset_simulator' do
+describe Calabash::Cucumber::Launcher do
+
   let(:launcher) { Calabash::Cucumber::Launcher.new }
-  let(:fake_udid) { 'FAKE-UDID' }
-  describe 'reset_simulator' do
-    context 'when running on a device' do
-      it 'raises an error' do
-        stub_env('DEVICE_TARGET', fake_udid)
-        expect {  launcher.reset_simulator  }.to raise_error(RuntimeError)
-      end
+  let(:instruments) { RunLoop::Instruments.new }
+  let(:simulator) { instruments.simulators.sample }
+
+  describe "#reset_simulator" do
+    it "default simulator" do
+      stub_env({'DEVICE_TARGET' => nil})
+      default = RunLoop::Core.default_simulator
+      simulator = RunLoop::Device.device_with_identifier(default)
+
+      actual = launcher.reset_simulator
+      expect(actual.udid).to be == simulator.udid
     end
 
-    context 'when running on the simulator' do
-      it 'successfully resets the simulator' do
-        stub_env({'DEVICE_TARGET' => nil})
-        launcher.reset_simulator
-      end
+    it "can handle a RunLoop::Device" do
+      actual = launcher.reset_simulator(simulator)
+      expected = simulator.udid
+
+      expect(actual.udid).to be == expected
     end
   end
 end
