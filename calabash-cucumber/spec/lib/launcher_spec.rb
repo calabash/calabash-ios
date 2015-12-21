@@ -21,6 +21,27 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  describe "#reset_simulator" do
+    describe "raises an error when" do
+      it "DEVICE_TARGET is a device UDID" do
+        stub_env({"DEVICE_TARGET" => UDID})
+
+        expect(launcher.device_target?).to be_truthy
+        expect do
+          launcher.reset_simulator
+        end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+      end
+
+      it "device is a RunLoop::Device representing a physical device" do
+        expect(launcher).to receive(:device_target?).and_return nil
+
+        expect do
+          launcher.reset_simulator(device)
+        end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+      end
+    end
+  end
+
   describe '#discover_device_target' do
 
     let(:options) do { :device_target => 'OPTION!' } end
