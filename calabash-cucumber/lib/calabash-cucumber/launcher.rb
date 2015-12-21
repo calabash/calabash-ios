@@ -31,6 +31,7 @@ require "calabash-cucumber/usage_tracker"
 class Calabash::Cucumber::Launcher
 
   require "calabash-cucumber/dylibs"
+  require "calabash-cucumber/environment"
 
   include Calabash::Cucumber::Logging
   include Calabash::Cucumber::SimulatorAccessibility
@@ -277,7 +278,8 @@ Remove direct calls to reset_app_sandbox.
   # Erases a simulator. This is the same as touching the Simulator
   # "Reset Content & Settings" menu item.
   #
-  # @param [RunLoop::Device or UDID or human readable name] The simulator to erase.
+  # @param [RunLoop::Device, String] The simulator to erase.  Can be a device
+  #   instance, a simulator UUID, or a human readable simulator name.
   #
   # @raise ArgumentError If the simulator is a physical device
   # @raise RuntimeError If the simulator cannot be shutdown
@@ -287,12 +289,15 @@ Remove direct calls to reset_app_sandbox.
       raise ArgumentError, "Resetting physical devices is not supported."
     end
 
+    simulator = nil
+
     if device.nil? || device == ""
-      device_tgt = ENV['DEVICE_TARGET']
-      if device_tgt.nil? || device_tgt.empty?
-        RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(RunLoop::Core.default_simulator))
+      device_target = Calabash::Cucumber::Environment.device_target
+      if device_target.nil?
+        default_simulator = RunLoop::Core.default_simulator
+        simulator = RunLoop::Device.device_with_identifier(default_simulator)
       else
-        RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device_tgt))
+        simulator = RunLoop::Device.device_with_identifier(device_target)
       end
     elsif device.is_a?(RunLoop::Device)
       if device.physical_device?
@@ -303,11 +308,13 @@ Cannot reset: #{device}.
 Resetting physical devices is not supported.
 }
       end
-
-      RunLoop::CoreSimulator.erase(device)
+      simulator = device
     else
-      RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device))
+      simulator = RunLoop::Device.device_with_identifier(device)
     end
+
+    RunLoop::CoreSimulator.erase(simulator)
+    simulator
   end
 
   # @!visibility private
