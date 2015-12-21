@@ -539,7 +539,7 @@ Remove direct calls to reset_app_sandbox.
         if simulator_target?(args)
           args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_sim_dylib
         else
-          args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_device_dylib
+          raise RuntimeError, "Injecting a dylib is not supported when targetting a device"
         end
       else
         unless File.exist? use_dylib
