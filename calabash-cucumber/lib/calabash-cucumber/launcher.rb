@@ -7,7 +7,6 @@ require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
-require 'calabash/dylibs'
 require "calabash-cucumber/usage_tracker"
 
 # Used to launch apps for testing in iOS Simulator or on iOS Devices.  By default
@@ -30,6 +29,8 @@ require "calabash-cucumber/usage_tracker"
 # * **Pro Tip:** set the `NO_STOP` environmental variable to 1 so calabash does
 #  not exit the simulator when a Scenario fails.
 class Calabash::Cucumber::Launcher
+
+  require "calabash-cucumber/dylibs"
 
   include Calabash::Cucumber::Logging
   include Calabash::Cucumber::SimulatorAccessibility
@@ -536,9 +537,9 @@ Remove direct calls to reset_app_sandbox.
       # User passed a Boolean, not a file.
       if use_dylib.is_a?(TrueClass)
         if simulator_target?(args)
-          args[:inject_dylib] = Calabash::Dylibs.path_to_sim_dylib
+          args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_sim_dylib
         else
-          args[:inject_dylib] = Cucumber::Dylibs.path_to_device_dylib
+          args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_device_dylib
         end
       else
         unless File.exist? use_dylib
