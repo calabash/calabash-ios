@@ -294,29 +294,35 @@ Remove direct calls to reset_app_sandbox.
   # "Reset Content & Settings" menu item.
   #
   # @param [RunLoop::Device or UDID or human readable name] The simulator to erase.
-  # @note
-  #   If no device given every available simulator will be erased.
-
+  #
   # @raise ArgumentError If the simulator is a physical device
   # @raise RuntimeError If the simulator cannot be shutdown
   # @raise RuntimeError If the simulator cannot be erased
-
   def reset_simulator(device=nil)
     if device_target?
-      raise "Calling 'reset_simulator' when targeting a device is not allowed"
-    else
-      if device.nil? || device.empty?
-        device_tgt = ENV['DEVICE_TARGET']
-        if device_tgt.nil? || device_tgt.empty?
-          RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(RunLoop::Core.default_simulator))
-        else
-          RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device_tgt))
-        end
-      elsif device.is_a? RunLoop::Device
-        RunLoop::CoreSimulator.erase(device)
+      raise ArgumentError, "Resetting physical devices is not supported."
+    end
+
+    if device.nil? || device == ""
+      device_tgt = ENV['DEVICE_TARGET']
+      if device_tgt.nil? || device_tgt.empty?
+        RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(RunLoop::Core.default_simulator))
       else
-        RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device))
+        RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device_tgt))
       end
+    elsif device.is_a?(RunLoop::Device)
+      if device.physical_device?
+        raise ArgumentError,
+%Q{
+Cannot reset: #{device}.
+
+Resetting physical devices is not supported.
+}
+      end
+
+      RunLoop::CoreSimulator.erase(device)
+    else
+      RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device))
     end
   end
 
