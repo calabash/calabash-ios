@@ -57,7 +57,8 @@ To exit, type 'exit'.
 
 ### Step 1: Link calabash.framework
 
-To start using Calabash in your project, you need to link an Objective-C framework (calabash.framework) to your application.
+To start using Calabash in your project, you need to link an Objective-C framework (calabash.framework) to your application.  These instructions are compatible with apps
+that are written in Swift.
 
 |Tutorial|Description|
 |:--------:|-----------|
