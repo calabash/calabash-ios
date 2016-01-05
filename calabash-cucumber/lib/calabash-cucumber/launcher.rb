@@ -274,21 +274,35 @@ Remove direct calls to reset_app_sandbox.
 })
   end
 
-  # Erases the contents and setting for every available simulator.
+  # Erases a simulator. This is the same as touching the Simulator
+  # "Reset Content & Settings" menu item.
   #
-  # For Xcode 6, this is equivalent to calling: `$ xcrun simctl erase` on
-  # every available simulator.  For Xcode < 6, it is equivalent to touching
-  # the 'Reset Content & Settings' menu item.
-  #
+  # @param [RunLoop::Device or UDID or human readable name] The simulator to erase.
   # @note
-  #  **WARNING** This is a destructive operation.  You have been warned.
-  #
-  # @raise RuntimeError if called when targeting a physical device
-  def reset_simulator
+  #   If no device given every available simulator will be erased.
+
+  # @raise ArgumentError If the simulator is a physical device
+  # @raise RuntimeError If the simulator cannot be shutdown
+  # @raise RuntimeError If the simulator cannot be erased
+
+  def reset_simulator(device=nil)
     if device_target?
       raise "Calling 'reset_simulator' when targeting a device is not allowed"
+    else
+      if device.nil? || device.empty?
+        device_tgt = ENV['DEVICE_TARGET']
+        if device_tgt.nil? || device_tgt.empty?
+          RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(RunLoop::Core.default_simulator))
+        else
+          RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device_tgt))
+        end
+        RunLoop::SimControl.new.reset_sim_content_and_settings
+      elsif device.is_a? RunLoop::Device
+        RunLoop::CoreSimulator.erase(device)
+      else
+        RunLoop::CoreSimulator.erase(RunLoop::Device.device_with_identifier(device))
+      end
     end
-    RunLoop::SimControl.new.reset_sim_content_and_settings
   end
 
   # @!visibility private
