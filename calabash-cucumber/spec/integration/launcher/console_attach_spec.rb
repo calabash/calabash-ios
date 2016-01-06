@@ -5,27 +5,17 @@ describe 'Launcher:  #console_attach' do
     let(:launcher) { Calabash::Cucumber::Launcher.new }
     let(:other_launcher) { Calabash::Cucumber::Launcher.new }
 
-    let(:sim_control) {
-      obj = RunLoop::SimControl.new
-      obj.reset_sim_content_and_settings
-      obj
-    }
     let(:launch_options) {
       {
-            :app => Resources.shared.app_bundle_path(:lp_simple_example),
+            :app => Resources.shared.app_bundle_path(:cal_smoke_app),
             :device_target => 'simulator',
             :no_stop => true,
-            :sim_control => sim_control,
             :launch_retries => Luffa::Retry.instance.launch_retries
       }
     }
 
-    def calabash_console_with_strategy(strategy=nil)
-      if strategy.nil?
+    def calabash_console_with_strategy(strategy)
         attach_cmd = 'console_attach'
-      else
-        attach_cmd = "console_attach(:#{strategy})"
-      end
 
       # :host strategy is hard to automate.
       #
@@ -46,7 +36,20 @@ describe 'Launcher:  #console_attach' do
       # My best guess is that this has something to do with either:
       # 1. NSLog output crippling UIAutomation.
       # 2. The run_loop repl pipe is somehow blocking.
-      Open3.popen3('bundle', *['exec', 'calabash-ios', 'console']) do |stdin, stdout, stderr, _|
+
+      dotirbrc = lambda do
+        dir = File.expand_path(File.dirname(__FILE__))
+        path = File.expand_path(File.join(dir, "..", "..", "..", "scripts", ".irbrc"))
+
+        if !File.exist?(path)
+          raise path
+        end
+        path
+      end.call
+
+      env = {"CALABASH_IRBRC" => dotirbrc}
+      Open3.popen3(env, "bundle", "exec", "calabash-ios", "console") do |stdin, stdout, stderr, _|
+        stdin.puts "ENV['IRBRC']"
         stdin.puts "launcher = #{attach_cmd}"
         if strategy == :host
           stdin.puts "raise 'Launcher is nil' if launcher.nil?"
@@ -72,6 +75,7 @@ describe 'Launcher:  #console_attach' do
       else
         strategies = [:preferences, :host, :shared_element]
       end
+
       strategies.each do |strategy|
         it strategy do
 
@@ -80,7 +84,7 @@ describe 'Launcher:  #console_attach' do
           launcher.relaunch(launch_options)
           expect(launcher.run_loop).not_to be == nil
 
-          other_launcher.attach({:uia_strategy => strategy})
+          other_launcher.attach
 
           expect(other_launcher.run_loop).not_to be nil
           expect(other_launcher.run_loop[:uia_strategy]).to be == strategy
@@ -94,3 +98,4 @@ describe 'Launcher:  #console_attach' do
     end
   end
 end
+

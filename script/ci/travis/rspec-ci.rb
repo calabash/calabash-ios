@@ -10,4 +10,7 @@ Dir.chdir working_directory do
             {:pass_msg => 'rspec tests passed',
              :fail_msg => 'rspec tests failed'})
 
+  do_system("bundle exec rspec spec/integration/launcher/console_attach_spec.rb",
+            {:pass_msg => 'Console integration rspec tests passed',
+             :fail_msg => 'Console integration rspec tests failed'})
 end

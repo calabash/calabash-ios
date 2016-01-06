@@ -1,6 +1,8 @@
 module Calabash
   module Cucumber
     class UsageTracker
+      require "calabash-cucumber/store/preferences"
+      require "calabash-cucumber/logging"
 
       require "httpclient"
       require "run_loop"
@@ -20,12 +22,13 @@ module Calabash
 
       # @!visibility private
       def post_usage
-        if Calabash::Cucumber::UsageTracker.track_usage?
+        if Calabash::Cucumber::UsageTracker.track_usage? &&
+            info_we_are_allowed_to_track != "none"
           begin
             HTTPClient.post(ROUTE, info)
-          rescue => _
-            # do nothing
-            # Perhaps we should log?
+          rescue => e
+            message = %Q{ERROR: Could not post usage tracking information:#{$-0}#{e}}
+            Calabash::Cucumber::log_to_file(message)
           end
         end
       end
@@ -56,6 +59,21 @@ module Calabash
       private
 
       # @!visibility private
+      def preferences
+        Calabash::Cucumber::Preferences.new
+      end
+
+      # @!visibility private
+      def user_id
+        preferences.user_id
+      end
+
+      # @!visibility private
+      def info_we_are_allowed_to_track
+        preferences.usage_tracking
+      end
+
+      # @!visibility private
       def self.track_usage?
         @@track_usage && !self.xtc?
       end
@@ -66,7 +84,7 @@ module Calabash
       end
 
       # @!visibility private
-      DATA_VERSION = "1.0"
+      DATA_VERSION = "1.1"
 
       # @!visibility private
       WINDOWS = "Windows"
@@ -131,26 +149,45 @@ module Calabash
       #
       # Collect a hash of usage info.
       def info
-        {
+
+        allowed = info_we_are_allowed_to_track
+
+        if allowed == "none"
+          raise RuntimeError,
+            "This method should not be called if the user does not want to be tracked."
+        end
+
+        # Events only
+        hash = {
           :event_name => "session",
           :data_version => DATA_VERSION,
-
-          :platform => CALABASH_IOS,
-          :host_os => host_os,
-          :host_os_version => host_os_version,
-          :irb => irb?,
-          :ruby_version => ruby_version,
-          :used_bundle_exec => used_bundle_exec?,
-          :used_cucumber => used_cucumber?,
-
-          :version => Calabash::Cucumber::VERSION,
-
-          :ci => RunLoop::Environment.ci?,
-          :jenkins => RunLoop::Environment.jenkins?,
-          :travis => RunLoop::Environment.travis?,
-          :circle_ci => RunLoop::Environment.circle_ci?,
-          :teamcity => RunLoop::Environment.teamcity?
+          :user_id => user_id
         }
+
+        if allowed == "system_info"
+          hash.merge!(
+            {
+              :platform => CALABASH_IOS,
+              :host_os => host_os,
+              :host_os_version => host_os_version,
+              :irb => irb?,
+              :ruby_version => ruby_version,
+              :used_bundle_exec => used_bundle_exec?,
+              :used_cucumber => used_cucumber?,
+
+              :version => Calabash::Cucumber::VERSION,
+
+              :ci => RunLoop::Environment.ci?,
+              :jenkins => RunLoop::Environment.jenkins?,
+              :travis => RunLoop::Environment.travis?,
+              :circle_ci => RunLoop::Environment.circle_ci?,
+              :teamcity => RunLoop::Environment.teamcity?,
+              :gitlab => RunLoop::Environment.gitlab?
+            }
+          )
+        end
+
+        hash
       end
     end
   end

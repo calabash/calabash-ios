@@ -7,7 +7,7 @@ require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
-require 'calabash/dylibs'
+require "calabash-cucumber/usage_tracker"
 
 # Used to launch apps for testing in iOS Simulator or on iOS Devices.  By default
 # it uses Apple's `instruments` process to launch your app, but has legacy support
@@ -29,6 +29,8 @@ require 'calabash/dylibs'
 # * **Pro Tip:** set the `NO_STOP` environmental variable to 1 so calabash does
 #  not exit the simulator when a Scenario fails.
 class Calabash::Cucumber::Launcher
+
+  require "calabash-cucumber/dylibs"
 
   include Calabash::Cucumber::Logging
   include Calabash::Cucumber::SimulatorAccessibility
@@ -56,6 +58,7 @@ class Calabash::Cucumber::Launcher
   attr_accessor :launch_args
   attr_accessor :simulator_launcher
   attr_reader :xcode
+  attr_reader :usage_tracker
 
   # @!visibility private
   # Generated when calabash cannot launch the app.
@@ -81,6 +84,10 @@ class Calabash::Cucumber::Launcher
     @xcode ||= RunLoop::Xcode.new
   end
 
+  def usage_tracker
+    @usage_tracker ||= Calabash::Cucumber::UsageTracker.new
+  end
+
   # @!visibility private
   def initialize
     @simulator_launcher = Calabash::Cucumber::SimulatorLauncher.new
@@ -103,48 +110,25 @@ class Calabash::Cucumber::Launcher
   # @see Calabash::Cucumber::Core#console_attach
   def attach(options={})
     default_options = {:max_retry => 1,
-                       :timeout => 10,
-                       :uia_strategy => nil}
+                       :timeout => 10}
     merged_options = default_options.merge(options)
 
     if calabash_no_launch?
-      self.actions= Calabash::Cucumber::PlaybackActions.new
+      self.actions = Calabash::Cucumber::PlaybackActions.new
       return
     end
 
-    # :host is is a special case and requires reading information from a cache.
-    strategy_from_options = merged_options[:uia_strategy]
-    if strategy_from_options == :host
-      self.run_loop = RunLoop::HostCache.default.read
-      return self
-    end
+    self.run_loop = RunLoop::HostCache.default.read
 
     # Sets the device attribute.
     ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
 
-    if strategy_from_options.nil? && xcode.version_gte_7?
-      self.run_loop = RunLoop::HostCache.default.read
-      return self
-    end
-
-    pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
-    pids = pids_str.split(',').map { |pid| pid.to_i }
-    pid = pids.first
-    run_loop = {}
-    if pid
-      run_loop[:pid] = pid
-      self.actions= Calabash::Cucumber::InstrumentsActions.new
+    if self.run_loop[:pid]
+      self.actions = Calabash::Cucumber::InstrumentsActions.new
     else
-      self.actions= Calabash::Cucumber::PlaybackActions.new
+      self.actions = Calabash::Cucumber::PlaybackActions.new
     end
 
-    if strategy_from_options
-      run_loop[:uia_strategy] = merged_options[:uia_strategy]
-    else
-      run_loop[:uia_strategy] = :preferences
-    end
-
-    self.run_loop = run_loop
     major = self.device.ios_major_version
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
       puts  %Q{
@@ -561,9 +545,9 @@ Remove direct calls to reset_app_sandbox.
       # User passed a Boolean, not a file.
       if use_dylib.is_a?(TrueClass)
         if simulator_target?(args)
-          args[:inject_dylib] = Calabash::Dylibs.path_to_sim_dylib
+          args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_sim_dylib
         else
-          args[:inject_dylib] = Cucumber::Dylibs.path_to_device_dylib
+          raise RuntimeError, "Injecting a dylib is not supported when targetting a device"
         end
       else
         unless File.exist? use_dylib
@@ -596,6 +580,8 @@ Remove direct calls to reset_app_sandbox.
         check_server_gem_compatibility
       end
     end
+
+    usage_tracker.post_usage_async
   end
 
   # @!visibility private
