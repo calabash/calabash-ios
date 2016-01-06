@@ -251,8 +251,17 @@ module Calabash
             puts('-'*37)
           end
         else
-          bo_dir = build_output_dir_for_project
-          sim_dirs = Dir.glob(File.join(bo_dir, '*-iphonesimulator', '*.app'))
+          search_dir = build_output_dir_for_project || DERIVED_DATA
+          sim_dirs = ''
+          apps = `find #{search_dir} -name "*.app" | sort -n`.split("\n")
+          apps.each do |app_path|
+            if app_path.split("/")[-2].include('iphonesimulator')
+              path_to_bin = app_path + "/" + app_path.split("/")[-1].split(".")[0]
+              if `xcrun strings "#{path_to_bin}" | grep -E 'CALABASH VERSION'`.include? "CALABASH VERSION"
+                sim_dirs = Dir.glob(app_path)
+              end
+            end
+          end
           
           if sim_dirs.empty?
             msg = ['Unable to auto detect APP_BUNDLE_PATH.']
