@@ -1,3 +1,4 @@
+require "calabash-cucumber/environment"
 require "calabash-cucumber/logging"
 require "calabash-cucumber/dot_dir"
 require "calabash-cucumber/store/preferences"
