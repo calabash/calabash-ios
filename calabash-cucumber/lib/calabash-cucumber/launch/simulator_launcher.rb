@@ -256,7 +256,9 @@ module Calabash
           apps = `find #{search_dir} -name "*.app" | sort -n`.split("\n")
           apps.each do |app_path|
             if app_path.split("/")[-2].include('iphonesimulator')
-              path_to_bin = app_path + "/" + app_path.split("/")[-1].split(".")[0]
+              app =  RunLoop::App.new(app_path)
+              executable_name = app.executable_name
+              path_to_bin = app_path + "/" + executable_name
               if `xcrun strings "#{path_to_bin}" | grep -E 'CALABASH VERSION'`.include? "CALABASH VERSION"
                 sim_dirs = Dir.glob(app_path)
               end
