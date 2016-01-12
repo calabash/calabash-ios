@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
   s.prepare_command = "\t\t\ttar xzf data.tar.gz\n\t\t\tunzip staticlib/calabash.framework.zip\n"
   s.preserve_paths = 'calabash.framework'
   s.source_files = "calabash.framework/Versions/A/Headers/*"
-  s.xcconfig = { "OTHER_LDFLAGS" => "-force_load \"$(PODS_ROOT)/Calabash/calabash.framework/calabash\" -lstdc++" }
+  s.xcconfig = { "OTHER_LDFLAGS" => "-ObjC -force_load \"$(PODS_ROOT)/calabash/calabash.framework/calabash\"" }
   s.ios.framework = 'CFNetwork'
-  s.requires_arc = true
+  s.requires_arc = false
 end
