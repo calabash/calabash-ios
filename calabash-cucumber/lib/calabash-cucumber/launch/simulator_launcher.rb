@@ -255,7 +255,7 @@ module Calabash
           sim_dirs = ''
           apps = `find #{search_dir} -name "*.app" | sort -n`.split("\n")
           apps.each do |app_path|
-            if app_path.split("/")[-2].include('iphonesimulator')
+            if app_path.split("/")[-2].include? 'iphonesimulator'
               app =  RunLoop::App.new(app_path)
               executable_name = app.executable_name
               path_to_bin = app_path + "/" + executable_name
