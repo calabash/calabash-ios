@@ -268,7 +268,7 @@ module Calabash
           if sim_dirs.empty?
             msg = ['Unable to auto detect APP_BUNDLE_PATH.']
             msg << 'Have you built your app for simulator?'
-            msg << "Searched dir: #{bo_dir}"
+            msg << "Searched dir: #{search_dir}"
             msg << 'Please build your app from Xcode'
             msg << 'You should build the -cal target.'
             msg << ''
