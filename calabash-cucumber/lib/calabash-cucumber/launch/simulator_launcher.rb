@@ -263,6 +263,7 @@ module Calabash
               path_to_bin = File.join(app_path, executable_name)
               if `xcrun strings "#{path_to_bin}" | grep -E 'CALABASH VERSION'`.include? "CALABASH VERSION"
                 sim_dirs = Dir.glob(app_path)
+                break
               end
             end
           end
