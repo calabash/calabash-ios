@@ -253,7 +253,7 @@ module Calabash
         else
           search_dir = build_output_dir_for_project || DERIVED_DATA
           sim_dirs = ''
-          apps = `find #{search_dir} -name "*.app" | sort -n`.split("\n")
+          apps = `find #{search_dir} -type d -name "*.app" -exec stat -f "%m %N" {} \\; | sort -rn | cut -d" " -f2`.split("\n")
           apps.each do |app_path|
             lipo = RunLoop::Lipo.new(app_path)
             arches = lipo.info
