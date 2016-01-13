@@ -255,10 +255,12 @@ module Calabash
           sim_dirs = ''
           apps = `find #{search_dir} -name "*.app" | sort -n`.split("\n")
           apps.each do |app_path|
-            if app_path.split("/")[-2].include? 'iphonesimulator'
+            lipo = RunLoop::Lipo.new(app_path)
+            arches = lipo.info
+            if arches.include?("x86_64") || arches.include?("i386")
               app =  RunLoop::App.new(app_path)
               executable_name = app.executable_name
-              path_to_bin = app_path + "/" + executable_name
+              path_to_bin = File.join(app_path, executable_name)
               if `xcrun strings "#{path_to_bin}" | grep -E 'CALABASH VERSION'`.include? "CALABASH VERSION"
                 sim_dirs = Dir.glob(app_path)
               end
