@@ -13,6 +13,7 @@ scrolling in WebViews.
   empty #957 @MikeNicholls
 * Tracker: catch errors and log them to a file #954
 * Tracker: add missing requires to avoid throwing errors #952
+* Use UIAutomation JavaScript to touch keyboard Delete key #942 @MikeNicholls
 
 ### 0.17.0
 
