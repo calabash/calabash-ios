@@ -1,3 +1,19 @@
+### 0.17.1
+
+This release contains a new version of the simulator that fixes
+scrolling in WebViews.
+
+* Launcher#reset\_simulator should call RunLoop::CoreSimulator.erase #975
+  @ark-konopacki
+* Remove the lib/calabash directory and put Dylibs module in
+  Calabash::Cucumber #967
+* Use run loop cache for all strategies when attaching #960
+* Track GitLab CI #958
+* Don't immediately return true for simulator? if simulator\_details is
+  empty #957 @MikeNicholls
+* Tracker: catch errors and log them to a file #954
+* Tracker: add missing requires to avoid throwing errors #952
+
 ### 0.17.0
 
 This release contains several changes that are not backward compatible.
