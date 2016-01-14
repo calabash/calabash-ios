@@ -41,7 +41,6 @@ describe Calabash::Cucumber::UsageTracker do
     expect(tracker.send(:info_we_are_allowed_to_track)).to be == "allowed"
   end
 
-
   describe ".xtc?" do
     it "truthy" do
       stub_env({"XAMARIN_TEST_CLOUD" => "1"})
@@ -60,8 +59,23 @@ describe Calabash::Cucumber::UsageTracker do
       expect(tracker).to receive(:info).and_return({})
       expect(HTTPClient).to receive(:post)
       expect(Calabash::Cucumber::UsageTracker).to receive(:track_usage?).and_return true
-      expect(tracker).to receive(:info_we_are_allowed_to_track).and_return "anything by 'none'"
+      expect(tracker).to receive(:info_we_are_allowed_to_track).and_return "anything but 'none'"
       tracker.post_usage
+    end
+
+    it "logs to calabash.log when error is raised" do
+      expect(HTTPClient).to receive(:post).and_raise StandardError
+      expect(tracker).to receive(:info).and_return({})
+      expect(tracker).to receive(:info_we_are_allowed_to_track).and_return "anything but 'none'"
+      expect(Calabash::Cucumber::UsageTracker).to receive(:track_usage?).and_return true
+
+      expect(Calabash::Cucumber).to receive(:timestamp).and_return("stamp")
+      tracker.post_usage
+      log_file = Calabash::Cucumber.send(:calabash_log_file)
+
+      lines = File.read(log_file).force_encoding("utf-8").split($-0).reverse
+      expect(lines[0]).to be == "stamp StandardError"
+      expect(lines[1]).to be == "stamp ERROR: Could not post usage tracking information:"
     end
 
     describe "does not post" do
@@ -120,7 +134,7 @@ describe Calabash::Cucumber::UsageTracker do
 
       hash = tracker.send(:info)
 
-      expect(hash.count).to be == 16
+      expect(hash.count).to be == 17
       expect(hash[:event_name]).to be == "session"
       expect(hash[:data_version]).to be_truthy
       expect(hash[:user_id]).to be == "user id"
@@ -133,11 +147,11 @@ describe Calabash::Cucumber::UsageTracker do
       expect(hash.has_key?(:used_bundle_exec)).to be_truthy
       expect(hash[:used_cucumber]).to be == false
       expect(hash[:version]).to be_truthy
-      expect(hash.has_key?(:ci)).to be_truthy
-      expect(hash.has_key?(:jenkins)).to be_truthy
-      expect(hash.has_key?(:travis)).to be_truthy
-      expect(hash.has_key?(:circle_ci)).to be_truthy
-      expect(hash.has_key?(:teamcity)).to be_truthy
+      expect(hash.has_key?(:ci)).to be == true
+      expect(hash.has_key?(:jenkins)).to be == true
+      expect(hash.has_key?(:travis)).to be == true
+      expect(hash.has_key?(:circle_ci)).to be == true
+      expect(hash.has_key?(:teamcity)).to be == true
     end
   end
 

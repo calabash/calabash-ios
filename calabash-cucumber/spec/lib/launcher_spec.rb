@@ -21,6 +21,72 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  describe "#reset_simulator" do
+    describe "raises an error when" do
+      it "DEVICE_TARGET is a device UDID" do
+        stub_env({"DEVICE_TARGET" => UDID})
+
+        expect(launcher.device_target?).to be_truthy
+        expect do
+          launcher.reset_simulator
+        end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+      end
+
+      it "device is a RunLoop::Device representing a physical device" do
+        expect(launcher).to receive(:device_target?).and_return nil
+
+        expect do
+          launcher.reset_simulator(device)
+        end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+      end
+    end
+
+    describe "nil or empty arg" do
+      it "DEVICE_TARGET defined" do
+        identifier = "simulator"
+        expect(Calabash::Cucumber::Environment).to receive(:device_target).and_return(identifier)
+        expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier).and_return(simulator)
+        expect(RunLoop::CoreSimulator).to receive(:erase).with(simulator).and_return true
+
+        expect(launcher.reset_simulator).to be == simulator
+      end
+
+      it "DEVICE_TARGET undefined" do
+        identifier = "simulator"
+        expect(Calabash::Cucumber::Environment).to receive(:device_target).and_return(nil)
+        expect(RunLoop::Core).to receive(:default_simulator).and_return(identifier)
+        expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier).and_return(simulator)
+        expect(RunLoop::CoreSimulator).to receive(:erase).with(simulator).and_return true
+
+        expect(launcher.reset_simulator).to be == simulator
+      end
+
+      it "arg is a device instance" do
+        expect(RunLoop::CoreSimulator).to receive(:erase).with(simulator).and_return true
+
+        expect(launcher.reset_simulator(simulator)).to be == simulator
+      end
+
+      describe "arg is a string" do
+        it "RunLoop cannot find a matching simulator" do
+          identifier = "no matching simulator"
+
+          expect do
+            launcher.reset_simulator(identifier)
+          end.to raise_error ArgumentError, /Could not find a device with a UDID or name matching/
+        end
+
+        it "RunLoop can find a matching simulator" do
+           identifier = "simulator"
+           expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier).and_return(simulator)
+           expect(RunLoop::CoreSimulator).to receive(:erase).with(simulator).and_return true
+
+           expect(launcher.reset_simulator(identifier)).to be == simulator
+        end
+      end
+    end
+  end
+
   describe '#discover_device_target' do
 
     let(:options) do { :device_target => 'OPTION!' } end

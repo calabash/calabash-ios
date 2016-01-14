@@ -164,7 +164,6 @@ describe Calabash::Cucumber::Preferences do
   describe "#generate_json" do
 
     it "can always generate JSON from defaults" do
-      expect(store).not_to receive(:write_to_log)
       expect(store).not_to receive(:log_defaults_reset)
 
       expect(store.send(:generate_json, store.send(:defaults))).to be_truthy
@@ -223,7 +222,6 @@ describe Calabash::Cucumber::Preferences do
 
       string = JSON.pretty_generate(store.send(:defaults))
 
-      expect(store).not_to receive(:write_to_log)
       expect(store).not_to receive(:log_defaults_reset)
 
       expect(store.send(:parse_json, string)).to be == store.send(:defaults)

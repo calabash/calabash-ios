@@ -24,7 +24,18 @@ We recommend that you use the most recent released version of Xcode, MacOS, and 
 * iOS Simulators >= 8.0
 * ruby >= 2.0 (latest is preferred)
 
-We recommend that you use a managed ruby (_e.g._ [rbenv](https://github.com/sstephenson/rbenv), [rvm](https://rvm.io/)) or manually manage your gem environment with [this script](http://developer.xamarin.com/guides/testcloud/calabash/configuring/osx/installing-gems/).
+For the best Ruby experience we recommend that you use a managed Ruby
+like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/)).
+
+If you are just getting started or don't want to commit to a managed Ruby, we
+recommend you install and use the [Calabash Sandbox](https://github.com/calabash/install).
+
+```
+# Installs the Calabash Sandbox
+$ curl -sSL https://raw.githubusercontent.com/calabash/install/master/install-osx.sh | bash
+```
+
+Please do *not* install gems with `sudo`
 
 For more information about ruby on MacOS, see these Wiki pages:
 
@@ -35,9 +46,19 @@ For more information about ruby on MacOS, see these Wiki pages:
 
 If you want to see Calabash iOS in action, head over to the [Calabash iOS Smoke Test App](https://github.com/calabash/ios-smoke-test-app) and follow the instructions in the README.  We use this app to document, demonstrate, and test Calabash iOS.  You can use this app to explore Calabash and as an example for how to configure your Xcode project and Calabash workflow.
 
+The examples below assume you are using a managed ruby or are working in the Calabash
+Sandbox:
+
+```
+$ calabash-sandbox
+This terminal is now ready to use with Calabash.
+To exit, type 'exit'.
+```
+
 ### Step 1: Link calabash.framework
 
-To start using Calabash in your project, you need to link an Objective-C framework (calabash.framework) to your application.
+To start using Calabash in your project, you need to link an Objective-C framework (calabash.framework) to your application.  These instructions are compatible with apps
+that are written in Swift.
 
 |Tutorial|Description|
 |:--------:|-----------|

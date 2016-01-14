@@ -7,7 +7,6 @@ require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
-require 'calabash/dylibs'
 require "calabash-cucumber/usage_tracker"
 
 # Used to launch apps for testing in iOS Simulator or on iOS Devices.  By default
@@ -30,6 +29,9 @@ require "calabash-cucumber/usage_tracker"
 # * **Pro Tip:** set the `NO_STOP` environmental variable to 1 so calabash does
 #  not exit the simulator when a Scenario fails.
 class Calabash::Cucumber::Launcher
+
+  require "calabash-cucumber/dylibs"
+  require "calabash-cucumber/environment"
 
   include Calabash::Cucumber::Logging
   include Calabash::Cucumber::SimulatorAccessibility
@@ -109,48 +111,25 @@ class Calabash::Cucumber::Launcher
   # @see Calabash::Cucumber::Core#console_attach
   def attach(options={})
     default_options = {:max_retry => 1,
-                       :timeout => 10,
-                       :uia_strategy => nil}
+                       :timeout => 10}
     merged_options = default_options.merge(options)
 
     if calabash_no_launch?
-      self.actions= Calabash::Cucumber::PlaybackActions.new
+      self.actions = Calabash::Cucumber::PlaybackActions.new
       return
     end
 
-    # :host is is a special case and requires reading information from a cache.
-    strategy_from_options = merged_options[:uia_strategy]
-    if strategy_from_options == :host
-      self.run_loop = RunLoop::HostCache.default.read
-      return self
-    end
+    self.run_loop = RunLoop::HostCache.default.read
 
     # Sets the device attribute.
     ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
 
-    if strategy_from_options.nil? && xcode.version_gte_7?
-      self.run_loop = RunLoop::HostCache.default.read
-      return self
-    end
-
-    pids_str = `ps x -o pid,command | grep -v grep | grep "instruments" | awk '{printf "%s,", $1}'`
-    pids = pids_str.split(',').map { |pid| pid.to_i }
-    pid = pids.first
-    run_loop = {}
-    if pid
-      run_loop[:pid] = pid
-      self.actions= Calabash::Cucumber::InstrumentsActions.new
+    if self.run_loop[:pid]
+      self.actions = Calabash::Cucumber::InstrumentsActions.new
     else
-      self.actions= Calabash::Cucumber::PlaybackActions.new
+      self.actions = Calabash::Cucumber::PlaybackActions.new
     end
 
-    if strategy_from_options
-      run_loop[:uia_strategy] = merged_options[:uia_strategy]
-    else
-      run_loop[:uia_strategy] = :preferences
-    end
-
-    self.run_loop = run_loop
     major = self.device.ios_major_version
     if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
       puts  %Q{
@@ -296,21 +275,46 @@ Remove direct calls to reset_app_sandbox.
 })
   end
 
-  # Erases the contents and setting for every available simulator.
+  # Erases a simulator. This is the same as touching the Simulator
+  # "Reset Content & Settings" menu item.
   #
-  # For Xcode 6, this is equivalent to calling: `$ xcrun simctl erase` on
-  # every available simulator.  For Xcode < 6, it is equivalent to touching
-  # the 'Reset Content & Settings' menu item.
+  # @param [RunLoop::Device, String] The simulator to erase.  Can be a device
+  #   instance, a simulator UUID, or a human readable simulator name.
   #
-  # @note
-  #  **WARNING** This is a destructive operation.  You have been warned.
-  #
-  # @raise RuntimeError if called when targeting a physical device
-  def reset_simulator
+  # @raise ArgumentError If the simulator is a physical device
+  # @raise RuntimeError If the simulator cannot be shutdown
+  # @raise RuntimeError If the simulator cannot be erased
+  def reset_simulator(device=nil)
     if device_target?
-      raise "Calling 'reset_simulator' when targeting a device is not allowed"
+      raise ArgumentError, "Resetting physical devices is not supported."
     end
-    RunLoop::SimControl.new.reset_sim_content_and_settings
+
+    simulator = nil
+
+    if device.nil? || device == ""
+      device_target = Calabash::Cucumber::Environment.device_target
+      if device_target.nil?
+        default_simulator = RunLoop::Core.default_simulator
+        simulator = RunLoop::Device.device_with_identifier(default_simulator)
+      else
+        simulator = RunLoop::Device.device_with_identifier(device_target)
+      end
+    elsif device.is_a?(RunLoop::Device)
+      if device.physical_device?
+        raise ArgumentError,
+%Q{
+Cannot reset: #{device}.
+
+Resetting physical devices is not supported.
+}
+      end
+      simulator = device
+    else
+      simulator = RunLoop::Device.device_with_identifier(device)
+    end
+
+    RunLoop::CoreSimulator.erase(simulator)
+    simulator
   end
 
   # @!visibility private
@@ -559,9 +563,9 @@ Remove direct calls to reset_app_sandbox.
       # User passed a Boolean, not a file.
       if use_dylib.is_a?(TrueClass)
         if simulator_target?(args)
-          args[:inject_dylib] = Calabash::Dylibs.path_to_sim_dylib
+          args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_sim_dylib
         else
-          args[:inject_dylib] = Cucumber::Dylibs.path_to_device_dylib
+          raise RuntimeError, "Injecting a dylib is not supported when targetting a device"
         end
       else
         unless File.exist? use_dylib
