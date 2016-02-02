@@ -54,7 +54,6 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0'
 
   s.add_dependency("cucumber")
-  s.add_dependency('calabash-common', '~> 0.0.2')
   # Avoid 1.0.5 release; has an errant 'binding.pry'.
   s.add_dependency('edn', '>= 1.0.6', '< 2.0')
   # Avoid 0.5 release because it does not contain ios-sim binary.
@@ -65,7 +64,7 @@ Gem::Specification.new do |s|
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
-  s.add_dependency("run_loop", ">= 2.0.3", "< 3.0")
+  s.add_dependency("run_loop", ">= 2.0.5", "< 3.0")
 
   # Shared with run-loop.
   s.add_dependency('json')

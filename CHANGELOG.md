@@ -1,6 +1,14 @@
+### 0.18.0
+
+This release contains a new version of the server that provides
+iframe support for css selectors.
+
+* Fix `sim locale` command line tool #987
+* Added Calabash.podspec #979 @ark-konopacki
+
 ### 0.17.1
 
-This release contains a new version of the simulator that fixes
+This release contains a new version of the server that fixes
 scrolling in WebViews.
 
 * Launcher#reset\_simulator should call RunLoop::CoreSimulator.erase #975
