@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = 'Calabash'
-  s.version      = '0.17.1'
+  s.version      = '0.18.0'
   s.license      = { :type => 'Eclipse Public License 1.0', :text => <<-LICENSE
     Calabash-ios Copyright (2016) Karl Krukow. All rights reserved.
     The use and distribution terms for this software are covered by the
