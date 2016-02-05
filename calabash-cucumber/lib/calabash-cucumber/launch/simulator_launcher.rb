@@ -253,17 +253,18 @@ module Calabash
         else
           search_dir = build_output_dir_for_project || DERIVED_DATA
           sim_dirs = ''
-          apps = `find #{search_dir} -type d -name "*.app" -exec stat -f "%m %N" {} \\; | sort -rn | cut -d" " -f2`.split("\n")
-          apps.each do |app_path|
+          apps = `find #{search_dir} -type d -name "*.app" -exec stat -f "%m %N" {} \\; | sort -rn | cut -d" " -f2`
+                     .encode('UTF-8', 'UTF-8', invalid: :replace, undef: :replace, replace: '')
+                     .chars.select(&:valid_encoding?).join
+                     .split("\n")
+          apps.find do |app_path|
             lipo = RunLoop::Lipo.new(app_path)
             arches = lipo.info
             if arches.include?("x86_64") || arches.include?("i386")
               app =  RunLoop::App.new(app_path)
-              executable_name = app.executable_name
-              path_to_bin = File.join(app_path, executable_name)
-              if `xcrun strings "#{path_to_bin}" | grep -E 'CALABASH VERSION'`.include? "CALABASH VERSION"
+              if !app.calabash_server_version.nil? &&
+                  app.calabash_server_version.is_a?(RunLoop::Version)
                 sim_dirs = Dir.glob(app_path)
-                break
               end
             end
           end
