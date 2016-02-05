@@ -10,3 +10,8 @@ rbenv exec \
   rspec \
   spec/lib
 
+rbenv exec \
+  bundle exec \
+  rspec \
+  spec/bin/calabash_ios_sim_spec.rb
+
