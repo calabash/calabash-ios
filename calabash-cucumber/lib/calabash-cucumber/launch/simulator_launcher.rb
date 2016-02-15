@@ -241,67 +241,32 @@ module Calabash
             msg << "Make sure you build for Simulator and that you're using the Calabash components"
             raise msg.join("\n")
           end
-          if full_console_logging?
-            puts('-'*37)
-            puts "Auto detected APP_BUNDLE_PATH:\n\n"
-
-            puts "APP_BUNDLE_PATH= '#{bundle_path}'\n\n"
-            puts 'Please verify!'
-            puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
-            puts('-'*37)
-          end
         else
           search_dir = build_output_dir_for_project || DERIVED_DATA
-          sim_dirs = ''
-          apps = `find #{search_dir} -type d -name "*.app" -exec stat -f "%m %N" {} \\; | sort -rn | cut -d" " -f2`
-                     .encode('UTF-8', 'UTF-8', invalid: :replace, undef: :replace, replace: '')
-                     .chars.select(&:valid_encoding?).join
-                     .split("\n")
-          apps.find do |app_path|
-            lipo = RunLoop::Lipo.new(app_path)
-            arches = lipo.info
-            if arches.include?("x86_64") || arches.include?("i386")
-              app =  RunLoop::App.new(app_path)
-              if !app.calabash_server_version.nil? &&
-                  app.calabash_server_version.is_a?(RunLoop::Version)
-                sim_dirs = Dir.glob(app_path)
-              end
-            end
-          end
-          
-          if sim_dirs.empty?
-            msg = ['Unable to auto detect APP_BUNDLE_PATH.']
-            msg << 'Have you built your app for simulator?'
-            msg << "Searched dir: #{search_dir}"
-            msg << 'Please build your app from Xcode'
-            msg << 'You should build the -cal target.'
-            msg << ''
-            msg << 'Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb'
-            msg << "This should point to the location of your built app linked with calabash.\n"
-            raise msg.join("\n")
-          end
-          preferred_dir = find_preferred_dir(sim_dirs)
-          if preferred_dir.nil?
-            msg = ['Error... Unable to find APP_BUNDLE_PATH.']
-            msg << 'Cannot find a built app that is linked with calabash.framework'
-            msg << 'Please build your app from Xcode'
-            msg << 'You should build your calabash target.'
-            msg << ''
-            msg << 'Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb'
-            msg << "This should point to the location of your built app linked with calabash.\n"
-            raise msg.join("\n")
-          end
-          if full_console_logging?
-            puts('-'*37)
-            puts "Auto detected APP_BUNDLE_PATH:\n\n"
+          bundle_path = select_most_recent_bundle(search_dir)
 
-            puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
-            puts 'Please verify!'
-            puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
-            puts('-'*37)
+          if bundle_path.nil?
+            raise RuntimeError,
+%Q{
+Unable to auto detect a .app that is linked Calabash.
+
+Searched: #{search_dir}
+
+Have you built your app for simulator?
+
+Please build your app from Xcode
+
+Alternatively, specify APP in features/support/01_launch.rb
+or as an environment variable:
+
+$ APP=/path/to/Your.app bundle exec cucumber
+}
           end
-          bundle_path = sim_dirs[0]
         end
+
+        Calabash::Cucumber.log_debug("Auto detected app at path:")
+        Calabash::Cucumber.log_debug(bundle_path)
+        Calabash::Cucumber.log_debug("If this is incorrect, set the APP variable")
         bundle_path
       end
 
