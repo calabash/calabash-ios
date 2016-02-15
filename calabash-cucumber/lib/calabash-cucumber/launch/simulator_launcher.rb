@@ -607,7 +607,46 @@ module Calabash
         _deprecated('0.9.169', 'check is now done in Launcher', :warn)
         raise(NotImplementedError, 'this method has been deprecated and will be removed')
       end
-    end
 
+      private
+
+      # @!visibility private
+      def app(bundle_path)
+        RunLoop::App.new(bundle_path)
+      end
+
+      # @!visibility private
+      def lipo(bundle_path)
+        RunLoop::Lipo.new(bundle_path)
+      end
+
+      # @!visibility private
+      def collect_app_bundles(base_dir)
+        bundles = []
+
+        Dir.glob("#{base_dir}/**/*.app") do |bundle|
+          next if !RunLoop::App.valid?(bundle)
+
+          lipo = lipo(bundle)
+          arches = lipo.info
+          if arches.include?("x86_64") || arches.include?("i386")
+            app = app(bundle)
+            if app.calabash_server_version
+              bundles << bundle
+            end
+          end
+        end
+
+        bundles
+      end
+
+      # @!visibility private
+      def select_most_recent_bundle(base_dir)
+        bundles = collect_app_bundles(base_dir)
+        bundles.max do |a, b|
+          File.mtime(a) <=> File.mtime(b)
+        end
+      end
+    end
   end
 end
