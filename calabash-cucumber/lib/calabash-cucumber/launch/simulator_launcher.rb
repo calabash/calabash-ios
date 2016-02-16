@@ -241,52 +241,32 @@ module Calabash
             msg << "Make sure you build for Simulator and that you're using the Calabash components"
             raise msg.join("\n")
           end
-          if full_console_logging?
-            puts('-'*37)
-            puts "Auto detected APP_BUNDLE_PATH:\n\n"
-
-            puts "APP_BUNDLE_PATH= '#{bundle_path}'\n\n"
-            puts 'Please verify!'
-            puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
-            puts('-'*37)
-          end
         else
-          bo_dir = build_output_dir_for_project
-          sim_dirs = Dir.glob(File.join(bo_dir, '*-iphonesimulator', '*.app'))
-          
-          if sim_dirs.empty?
-            msg = ['Unable to auto detect APP_BUNDLE_PATH.']
-            msg << 'Have you built your app for simulator?'
-            msg << "Searched dir: #{bo_dir}"
-            msg << 'Please build your app from Xcode'
-            msg << 'You should build the -cal target.'
-            msg << ''
-            msg << 'Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb'
-            msg << "This should point to the location of your built app linked with calabash.\n"
-            raise msg.join("\n")
-          end
-          preferred_dir = find_preferred_dir(sim_dirs)
-          if preferred_dir.nil?
-            msg = ['Error... Unable to find APP_BUNDLE_PATH.']
-            msg << 'Cannot find a built app that is linked with calabash.framework'
-            msg << 'Please build your app from Xcode'
-            msg << 'You should build your calabash target.'
-            msg << ''
-            msg << 'Alternatively, specify APP_BUNDLE_PATH in features/support/01_launch.rb'
-            msg << "This should point to the location of your built app linked with calabash.\n"
-            raise msg.join("\n")
-          end
-          if full_console_logging?
-            puts('-'*37)
-            puts "Auto detected APP_BUNDLE_PATH:\n\n"
+          search_dir = build_output_dir_for_project || DERIVED_DATA
+          bundle_path = select_most_recent_bundle(search_dir)
 
-            puts "APP_BUNDLE_PATH=#{preferred_dir || sim_dirs[0]}\n\n"
-            puts 'Please verify!'
-            puts "If this is wrong please set it as APP_BUNDLE_PATH in features/support/01_launch.rb\n"
-            puts('-'*37)
+          if bundle_path.nil?
+            raise RuntimeError,
+%Q{
+Unable to auto detect a .app that is linked Calabash.
+
+Searched: #{search_dir}
+
+Have you built your app for simulator?
+
+Please build your app from Xcode
+
+Alternatively, specify APP in features/support/01_launch.rb
+or as an environment variable:
+
+$ APP=/path/to/Your.app bundle exec cucumber
+}
           end
-          bundle_path = sim_dirs[0]
         end
+
+        Calabash::Cucumber.log_debug("Auto detected app at path:")
+        Calabash::Cucumber.log_debug(bundle_path)
+        Calabash::Cucumber.log_debug("If this is incorrect, set the APP variable")
         bundle_path
       end
 
@@ -592,7 +572,46 @@ module Calabash
         _deprecated('0.9.169', 'check is now done in Launcher', :warn)
         raise(NotImplementedError, 'this method has been deprecated and will be removed')
       end
-    end
 
+      private
+
+      # @!visibility private
+      def app(bundle_path)
+        RunLoop::App.new(bundle_path)
+      end
+
+      # @!visibility private
+      def lipo(bundle_path)
+        RunLoop::Lipo.new(bundle_path)
+      end
+
+      # @!visibility private
+      def collect_app_bundles(base_dir)
+        bundles = []
+
+        Dir.glob("#{base_dir}/**/*.app") do |bundle|
+          next if !RunLoop::App.valid?(bundle)
+
+          lipo = lipo(bundle)
+          arches = lipo.info
+          if arches.include?("x86_64") || arches.include?("i386")
+            app = app(bundle)
+            if app.calabash_server_version
+              bundles << bundle
+            end
+          end
+        end
+
+        bundles
+      end
+
+      # @!visibility private
+      def select_most_recent_bundle(base_dir)
+        bundles = collect_app_bundles(base_dir)
+        bundles.max do |a, b|
+          File.mtime(a) <=> File.mtime(b)
+        end
+      end
+    end
   end
 end
