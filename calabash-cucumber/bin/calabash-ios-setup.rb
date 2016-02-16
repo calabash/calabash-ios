@@ -229,54 +229,40 @@ def validate_setup(args)
 end
 
 def validate_ipa(ipa)
-  require 'tmpdir'
-  fail = false
-  Dir.mktmpdir do |dir|
-    if not system("unzip -C -K -o -q -d #{dir} #{ipa}")
-      msg("Error") do
-        puts "Unable to unzip ipa: #{ipa}"
-      end
-      Dir
-      fail = true
-    end
-
-    app_dir = Dir.foreach("#{dir}/Payload").find {|d| /\.app$/.match(d)}
-
-    res = `otool "#{File.expand_path(dir)}/Payload/#{app_dir}/"* -o 2> /dev/null | grep CalabashServer`
-    msg("Info") do
-      if /CalabashServer/.match(res)
-        puts "Ipa: #{ipa} *contains* calabash.framework"
-      else
-        puts "Ipa: #{ipa} *does not contain* calabash.framework"
-      end
-    end
-
-  end
-  if fail 
+  begin
+    version = RunLoop::Ipa.new(ipa).calabash_server_version
+  rescue => e
+    $stderr.puts(e.message)
     exit(1)
   end
-  
+
+  if version
+    puts "Ipa: #{ipa} *contains* calabash.framework"
+    puts version.to_s
+    exit(0)
+  else
+    puts "Ipa: #{ipa} *does not contain* calabash.framework"
+    exit(1)
+  end
 end
 
 def validate_app(app)
-  if not File.directory?app
-    msg("Error") do
-      puts "Path: #{app} is not a directory."
-    end
-    exit 1
-  end
-  out = `otool "#{File.expand_path(app)}"/* -o 2> /dev/null | grep CalabashServer`
-
-  msg("Info") do
-    if /CalabashServer/.match(out)
-      puts "App: #{app} *contains* calabash.framework"
-    else
-      puts "App: #{app} *does not contain* calabash.framework"
-    end
+  begin
+    version = RunLoop::App.new(app).calabash_server_version
+  rescue => e
+    $stderr.puts(e.message)
+    exit(1)
   end
 
+  if version
+    puts "App: #{app} *contains* calabash.framework"
+    puts version.to_s
+    exit(0)
+  else
+    puts "App: #{app} *does not contain* calabash.framework"
+    exit(1)
+  end
 end
-
 
 def update(args)
   if args.length > 0
