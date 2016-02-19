@@ -1,3 +1,10 @@
+### 0.18.1
+
+* CLI: use RunLoop::Ipa or RunLoop::App for version check #996
+* Update skeleton support/dry\_run to load predefined steps #995
+* Fix formatter import problem #994
+* SimLauncher: fix autodetection of app bundle #974 @ark-konopacki
+
 ### 0.18.0
 
 This release contains a new version of the server that provides
