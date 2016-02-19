@@ -4,7 +4,7 @@ Pod::Spec.new do |s|
   s.name         = 'Calabash'
   s.version      = '0.18.1'
   s.license      = { :type => 'Eclipse Public License 1.0', :text => <<-LICENSE
-    Calabash-ios Copyright (2016) Karl Krukow. All rights reserved.
+    Calabash-ios Copyright (2016) Xamarin. All rights reserved.
     The use and distribution terms for this software are covered by the
     Eclipse Public License 1.0
     (http://opensource.org/licenses/eclipse-1.0.php) which can be found in
