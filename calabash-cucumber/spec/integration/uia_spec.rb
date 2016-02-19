@@ -22,7 +22,7 @@ describe Calabash::Cucumber::UIA do
     let(:options) {
       options =
             {
-                  :app => Resources.shared.app_bundle_path(:lp_simple_example),
+                  :app => Resources.shared.app_bundle_path(:cal_smoke_app),
                   :device_target =>  'simulator',
                   :sim_control => sim_control,
                   :launch_retries => Luffa::Retry.instance.launch_retries
