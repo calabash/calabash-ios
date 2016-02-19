@@ -9,7 +9,3 @@ require "calabash-cucumber/cucumber"
 # require "calabash-cucumber/wait_helpers"
 # require "calabash-cucumber/operations"
 # World(Calabash::Cucumber::Operations)
-
-# Uncomment this line if you want the Calabash::Formatters::Html formatter.
-# require "calabash-cucumber/formatters/html"
-
