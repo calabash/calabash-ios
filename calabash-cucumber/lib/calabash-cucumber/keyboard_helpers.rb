@@ -469,6 +469,11 @@ module Calabash
       #
       # @raise [RuntimeError] if the text cannot be typed.
       def done
+        _deprecated("0.10.0",
+%Q{Use tap_keyboard_action_key
+
+The `done` method will be removed in 0.19.0
+}, :warn)
         tap_keyboard_action_key
       end
 
