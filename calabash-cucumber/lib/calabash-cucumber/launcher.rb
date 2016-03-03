@@ -718,14 +718,14 @@ Resetting physical devices is not supported.
         return RunLoop.run(args)
       rescue RunLoop::TimeoutError => e
         last_err = e
-        if full_console_logging?
-          puts 'retrying run loop...'
-        end
-        self.simulator_launcher.stop
       end
     end
-    self.simulator_launcher.stop
-    puts "Unable to start. Make sure you've set APP_BUNDLE_PATH to a build supported by this simulator version"
+
+    if simulator_target?(args)
+      puts "Unable to launch app on Simulator."
+    else
+      puts "Unable to launch app on physical device"
+    end
     raise StartError.new(last_err)
   end
 
