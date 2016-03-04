@@ -36,9 +36,6 @@ class Calabash::Cucumber::Launcher
   include Calabash::Cucumber::Logging
   include Calabash::Cucumber::SimulatorAccessibility
 
-  # A hash of known privacy settings that calabash can control.
-  KNOWN_PRIVACY_SETTINGS = {:photos => 'kTCCServicePhotos', :calendar => 'kTCCServiceCalendar', :address_book => 'kTCCServiceAddressBook'}
-
   # noinspection RubyClassVariableUsageInspection
 
   # @!visibility private
@@ -318,78 +315,6 @@ Resetting physical devices is not supported.
   end
 
   # @!visibility private
-  def directories_for_sdk_prefix(sdk)
-    if sdk == :all
-      existing_simulator_support_sdk_dirs
-    else
-      Dir["#{simulator_app_support_dir}/#{sdk}*"]
-    end
-  end
-
-  # Call as `update_privacy_settings('com.my.app', {:photos => {:allow => true}})`
-  # @!visibility private
-  def update_privacy_settings(bundle_id, opts={})
-    if debug_logging?
-      puts "Update privacy settings #{bundle_id}, #{opts}"
-    end
-    unless File.exist?(`which sqlite3`.strip)
-      raise 'Error: Unable to find sqlite3. The binary sqlite3 must be installed and on path.'
-    end
-    opts.each do |setting_name, setting_options|
-
-      setting_name = KNOWN_PRIVACY_SETTINGS[setting_name] || setting_name
-      allow = setting_options[:allow] == false ? false : true
-      sdk = setting_options[:sdk] || self.simulator_launcher.sdk_detector.latest_sdk_version
-
-      dirs = directories_for_sdk_prefix(sdk)
-      if debug_logging?
-        puts "About to update privacy setting #{setting_name} for #{bundle_id}, allow: #{allow} in sdk #{sdk}, #{dirs}"
-      end
-
-      dirs.each do |dir|
-        if debug_logging?
-          puts "Setting access for #{bundle_id} for permission #{setting_name} to allow: #{allow}"
-        end
-        path_to_tcc_db = tcc_database_for_sdk_dir(dir)
-        unless File.exist?(path_to_tcc_db)
-          puts "Warning: No TCC.db in location #{path_to_tcc_db}"
-          next
-        end
-        allowed_as_i = allow ? 1 : 0
-        if privacy_setting(dir, bundle_id,setting_name).nil?
-          sql = %Q['INSERT INTO access (service, client, client_type, allowed, prompt_count) VALUES ("#{setting_name}","#{bundle_id}",0,#{allowed_as_i},1);']
-        else
-          sql = %Q['UPDATE access SET allowed=#{allowed_as_i} where client="#{bundle_id}" AND service="#{setting_name}";']
-        end
-
-        if debug_logging?
-          puts "Executing sql #{sql} on #{path_to_tcc_db}"
-        end
-
-        unless system(%Q[sqlite3 "#{path_to_tcc_db}" #{sql}]) && privacy_setting(dir,bundle_id,setting_name) == allowed_as_i
-          puts "Warning: Error executing sql: #{sql} against #{path_to_tcc_db} (Setting is #{privacy_setting(dir,bundle_id,setting_name)}). Continuing..."
-          next
-        end
-      end
-    end
-  end
-
-  # @!visibility private
-  def tcc_database_for_sdk_dir(dir)
-    File.join(dir,'Library', 'TCC', 'TCC.db')
-  end
-
-  # @!visibility private
-  def privacy_setting(sdk_dir, bundle_id, setting_name)
-    setting_name = KNOWN_PRIVACY_SETTINGS[setting_name] || setting_name
-    path_to_tcc_db = tcc_database_for_sdk_dir(sdk_dir)
-    sql = %Q['SELECT allowed FROM access WHERE client="#{bundle_id}" and service="#{setting_name}";']
-    output = `sqlite3 "#{path_to_tcc_db}" #{sql}`.strip
-
-    (output == '0' || output == '1') ? output.to_i : nil
-  end
-
-  # @!visibility private
   def default_launch_args
     # APP_BUNDLE_PATH
     # BUNDLE_ID
@@ -548,15 +473,6 @@ Resetting physical devices is not supported.
     args[:bundle_id] ||= detect_bundle_id_from_app_bundle(args)
 
     args[:device] ||= detect_device_from_args(args)
-
-    if args[:privacy_settings]
-      if simulator_target?(args)
-        update_privacy_settings(args[:bundle_id], args[:privacy_settings])
-      else
-        # Not supported on device
-        puts 'Warning: :privacy_settings not supported on device'
-      end
-    end
 
     use_dylib = args[:inject_dylib]
     if use_dylib
