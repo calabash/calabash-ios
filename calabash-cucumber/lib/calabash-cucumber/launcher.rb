@@ -571,57 +571,6 @@ Resetting physical devices is not supported.
   end
 
   # @!visibility private
-  def detect_device_from_args(args)
-    if args[:app] && File.directory?(args[:app])
-      # Derive bundle id from bundle_dir
-      plist_as_hash = info_plist_from_bundle_path(args[:app])
-      if plist_as_hash
-        device_family = plist_as_hash['UIDeviceFamily']
-        if device_family
-          first_device = device_family.first
-          if first_device == 2
-            return 'ipad'
-          else
-            return 'iphone'
-          end
-        end
-      end
-    else
-      args[:app]
-    end
-  end
-
-  # @!visibility private
-  def detect_app_bundle_from_args(args)
-    if simulator_target?(args)
-      device_xamarin_build_dir = 'iPhoneSimulator'
-    else
-      device_xamarin_build_dir = 'iPhone'
-    end
-    # is this really only applicable to the Xamarin IDE?
-    self.simulator_launcher.detect_app_bundle(nil, device_xamarin_build_dir)
-  end
-
-  # @!visibility private
-  def detect_bundle_id_from_app_bundle(args)
-    if args[:app] && File.directory?(args[:app])
-      # Derive bundle id from bundle_dir
-      plist_as_hash = info_plist_from_bundle_path(args[:app])
-      if plist_as_hash
-        plist_as_hash['CFBundleIdentifier']
-      end
-    else
-      args[:app]
-    end
-  end
-
-  # @!visibility private
-  def info_plist_from_bundle_path(bundle_path)
-    plist_path = File.join(bundle_path, 'Info.plist')
-    info_plist_as_hash(plist_path) if File.exist?(plist_path)
-  end
-
-  # @!visibility private
   def new_run_loop(args)
 
     last_err = nil
@@ -719,26 +668,6 @@ Resetting physical devices is not supported.
   def calabash_notify(world)
     if world.respond_to?(:on_launch)
       world.on_launch
-    end
-  end
-
-  # @!visibility private
-  def info_plist_as_hash(plist_path)
-    unless File.exist?(plist_path)
-      raise "Unable to find Info.plist: #{plist_path}"
-    end
-    parsedplist = CFPropertyList::List.new(:file => plist_path)
-    CFPropertyList.native_types(parsedplist.value)
-  end
-
-  # @!visibility private
-  def detect_bundle_id
-    begin
-      bundle_path = self.simulator_launcher.app_bundle_or_raise(app_path)
-      plist_path = File.join(bundle_path, 'Info.plist')
-      info_plist_as_hash(plist_path)['CFBundleIdentifier']
-    rescue => e
-      raise "Unable to automatically find bundle id. Please set BUNDLE_ID environment variable. #{e}"
     end
   end
 
