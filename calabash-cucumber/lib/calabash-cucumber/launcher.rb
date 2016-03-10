@@ -446,32 +446,39 @@ Resetting physical devices is not supported.
         raise "Unable to find app bundle at #{args[:app]}. It should be an iOS Simulator build (typically a *.app directory)."
       end
     end
-    args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
+    # User passed {:app => "path/to/my.app"} _and_ it exists.
+    # User defined BUNDLE_ID or passed {:bundle_id => com.example.myapp}
+    # User defined APP or APP_BUNDLE_PATH env vars _or_ APP_BUNDLE_PATH constant.
+    args[:app] = args[:app] || args[:bundle_id] || app_path
 
     if args[:app]
       if File.directory?(args[:app])
         args[:app] = File.expand_path(args[:app])
       else
-        # args[:app] is not a directory so must be a bundle id
-        if simulator_target?(args) ## bundle id set, but simulator target
-          args[:app] = app_path || detect_app_bundle_from_args(args)
+        # args[:app] is not a directory so must be a bundle id.
+        if simulator_target?(args)
+          args[:app] = app_path
         end
       end
     end
 
-    unless args[:app]
-      if simulator_target?(args)
-        device_xamarin_build_dir = 'iPhoneSimulator'
-      else
-        device_xamarin_build_dir = 'iPhone'
-      end
-      args[:app] = self.simulator_launcher.app_bundle_or_raise(app_path, device_xamarin_build_dir)
+    # At this point :app is either nil because we are targeting a simulator
+    # or it is a CFBundleIdentifier.
+    if args[:app]
+      # nothing to do because :bundle_id and :app are the same.
+    else
+      # User gave us no information about where the simulator app is located
+      # so we have to auto detect it.  This RunLoop method raises an error
+      # with a meaningful message based on the environment.  The message
+      # includes suggestions about what to do next.
+      run_loop_app = RunLoop::DetectAUT::Detect.new.app_for_simulator
+
+      # This is not great - RunLoop is going to take this path and create a new
+      # RunLoop::App.  This is the best we can do for now.
+      args[:app] = run_loop_app.path
+      args[:bundle_id] = run_loop_app.bundle_identifier
     end
-
-    args[:bundle_id] ||= detect_bundle_id_from_app_bundle(args)
-
-    args[:device] ||= detect_device_from_args(args)
 
     use_dylib = args[:inject_dylib]
     if use_dylib
