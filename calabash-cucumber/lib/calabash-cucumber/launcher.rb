@@ -330,7 +330,6 @@ Resetting physical devices is not supported.
         :launch_method => default_launch_method,
         :reset => reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
-        :device => device_env,
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
         :sdk_version => sdk_version,
@@ -821,11 +820,6 @@ Resetting physical devices is not supported.
   # @!visibility private
   def reset_between_scenarios?
     ENV['RESET_BETWEEN_SCENARIOS']=="1"
-  end
-
-  # @!visibility private
-  def device_env
-    ENV['DEVICE']
   end
 
   # @!visibility private
