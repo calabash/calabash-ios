@@ -753,7 +753,7 @@ Resetting physical devices is not supported.
 
   # @!visibility private
   def app_path
-    ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH) || ENV['APP']
+    RunLoop::Environment.path_to_app_bundle || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
   end
 
   # @!visibility private
