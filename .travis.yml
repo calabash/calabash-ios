@@ -17,7 +17,6 @@ script:
   - script/ci/travis/bundle-install.rb
   - script/ci/travis/install-gem-ci.rb
   - script/ci/travis/rspec-ci.rb
-  - script/ci/travis/cucumber-ci.rb --tags ~@no_ci
 
 rvm:
   - 2.0.0

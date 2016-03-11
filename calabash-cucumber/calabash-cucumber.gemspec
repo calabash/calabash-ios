@@ -64,7 +64,7 @@ Gem::Specification.new do |s|
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
-  s.add_dependency("run_loop", ">= 2.0.6", "< 3.0")
+  s.add_dependency("run_loop", ">= 2.0.9", "< 3.0")
 
   # Shared with run-loop.
   s.add_dependency('json')
@@ -77,7 +77,8 @@ Gem::Specification.new do |s|
   # Shared with run-loop.
   s.add_development_dependency("rspec_junit_formatter")
   s.add_development_dependency 'luffa', '>= 1.1.0' # Remove ASAP.
-  s.add_development_dependency 'rake'
+  # Rake 11.0 is not compatible with rspec 3.4.* or 3.5.0.beta1
+  s.add_development_dependency 'rake', "~> 10.0"
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
