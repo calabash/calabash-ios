@@ -89,7 +89,7 @@ Dir.chdir xtc_test_dir do
   end
 
   args = ['-c', 'cucumber.yml',
-          '-p', 'ci',
+          '-p', 'default',
           '--series', 'travis-ci-calabash-ios-gem',
           '-d', device_set,
           wait_for_results,
