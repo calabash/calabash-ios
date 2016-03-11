@@ -330,7 +330,6 @@ Resetting physical devices is not supported.
         :launch_method => default_launch_method,
         :reset => reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
-        :device => device_env,
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
         :sdk_version => sdk_version,
@@ -447,32 +446,39 @@ Resetting physical devices is not supported.
         raise "Unable to find app bundle at #{args[:app]}. It should be an iOS Simulator build (typically a *.app directory)."
       end
     end
-    args[:app] = args[:app] || args[:bundle_id] || app_path || detect_app_bundle_from_args(args)
 
+    # User passed {:app => "path/to/my.app"} _and_ it exists.
+    # User defined BUNDLE_ID or passed {:bundle_id => com.example.myapp}
+    # User defined APP or APP_BUNDLE_PATH env vars _or_ APP_BUNDLE_PATH constant.
+    args[:app] = args[:app] || args[:bundle_id] || app_path
 
     if args[:app]
       if File.directory?(args[:app])
         args[:app] = File.expand_path(args[:app])
       else
-        # args[:app] is not a directory so must be a bundle id
-        if simulator_target?(args) ## bundle id set, but simulator target
-          args[:app] = app_path || detect_app_bundle_from_args(args)
+        # args[:app] is not a directory so must be a bundle id.
+        if simulator_target?(args)
+          args[:app] = app_path
         end
       end
     end
 
-    unless args[:app]
-      if simulator_target?(args)
-        device_xamarin_build_dir = 'iPhoneSimulator'
-      else
-        device_xamarin_build_dir = 'iPhone'
-      end
-      args[:app] = self.simulator_launcher.app_bundle_or_raise(app_path, device_xamarin_build_dir)
+    # At this point :app is either nil because we are targeting a simulator
+    # or it is a CFBundleIdentifier.
+    if args[:app]
+      # nothing to do because :bundle_id and :app are the same.
+    else
+      # User gave us no information about where the simulator app is located
+      # so we have to auto detect it.  This RunLoop method raises an error
+      # with a meaningful message based on the environment.  The message
+      # includes suggestions about what to do next.
+      run_loop_app = RunLoop::DetectAUT::Detect.new.app_for_simulator
+
+      # This is not great - RunLoop is going to take this path and create a new
+      # RunLoop::App.  This is the best we can do for now.
+      args[:app] = run_loop_app.path
+      args[:bundle_id] = run_loop_app.bundle_identifier
     end
-
-    args[:bundle_id] ||= detect_bundle_id_from_app_bundle(args)
-
-    args[:device] ||= detect_device_from_args(args)
 
     use_dylib = args[:inject_dylib]
     if use_dylib
@@ -569,57 +575,6 @@ Resetting physical devices is not supported.
         :host
       end
     end
-  end
-
-  # @!visibility private
-  def detect_device_from_args(args)
-    if args[:app] && File.directory?(args[:app])
-      # Derive bundle id from bundle_dir
-      plist_as_hash = info_plist_from_bundle_path(args[:app])
-      if plist_as_hash
-        device_family = plist_as_hash['UIDeviceFamily']
-        if device_family
-          first_device = device_family.first
-          if first_device == 2
-            return 'ipad'
-          else
-            return 'iphone'
-          end
-        end
-      end
-    else
-      args[:app]
-    end
-  end
-
-  # @!visibility private
-  def detect_app_bundle_from_args(args)
-    if simulator_target?(args)
-      device_xamarin_build_dir = 'iPhoneSimulator'
-    else
-      device_xamarin_build_dir = 'iPhone'
-    end
-    # is this really only applicable to the Xamarin IDE?
-    self.simulator_launcher.detect_app_bundle(nil, device_xamarin_build_dir)
-  end
-
-  # @!visibility private
-  def detect_bundle_id_from_app_bundle(args)
-    if args[:app] && File.directory?(args[:app])
-      # Derive bundle id from bundle_dir
-      plist_as_hash = info_plist_from_bundle_path(args[:app])
-      if plist_as_hash
-        plist_as_hash['CFBundleIdentifier']
-      end
-    else
-      args[:app]
-    end
-  end
-
-  # @!visibility private
-  def info_plist_from_bundle_path(bundle_path)
-    plist_path = File.join(bundle_path, 'Info.plist')
-    info_plist_as_hash(plist_path) if File.exist?(plist_path)
   end
 
   # @!visibility private
@@ -724,26 +679,6 @@ Resetting physical devices is not supported.
   end
 
   # @!visibility private
-  def info_plist_as_hash(plist_path)
-    unless File.exist?(plist_path)
-      raise "Unable to find Info.plist: #{plist_path}"
-    end
-    parsedplist = CFPropertyList::List.new(:file => plist_path)
-    CFPropertyList.native_types(parsedplist.value)
-  end
-
-  # @!visibility private
-  def detect_bundle_id
-    begin
-      bundle_path = self.simulator_launcher.app_bundle_or_raise(app_path)
-      plist_path = File.join(bundle_path, 'Info.plist')
-      info_plist_as_hash(plist_path)['CFBundleIdentifier']
-    rescue => e
-      raise "Unable to automatically find bundle id. Please set BUNDLE_ID environment variable. #{e}"
-    end
-  end
-
-  # @!visibility private
   def calabash_no_stop?
     calabash_no_launch? or ENV['NO_STOP']=="1"
   end
@@ -824,13 +759,8 @@ Resetting physical devices is not supported.
   end
 
   # @!visibility private
-  def device_env
-    ENV['DEVICE']
-  end
-
-  # @!visibility private
   def app_path
-    ENV['APP_BUNDLE_PATH'] || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH) || ENV['APP']
+    RunLoop::Environment.path_to_app_bundle || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
   end
 
   # @!visibility private
