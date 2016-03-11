@@ -1,3 +1,11 @@
+### 0.18.2
+
+* Replace automatic .app detection with RunLoop implementation #1011
+* Gem: pin rake to ~> 10.5; rspec 3.4 is not compatible #1010
+* Launcher: remove TCC privacy settings #1009
+* Keyboard: log that #done is going to be removed #1007
+* Launcher: fix error reporting in #new\_run\_loop #1006
+
 ### 0.18.1
 
 * CLI: use RunLoop::Ipa or RunLoop::App for version check #996
