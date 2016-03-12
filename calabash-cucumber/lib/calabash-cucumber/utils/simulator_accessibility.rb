@@ -1,7 +1,6 @@
 require 'calabash-cucumber/utils/xctools'
 require 'calabash-cucumber/utils/plist_buddy'
 require 'calabash-cucumber/utils/logging'
-require 'sim_launcher'
 require 'cfpropertylist'
 require 'run_loop'
 

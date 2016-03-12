@@ -1,5 +1,4 @@
 require 'calabash-cucumber/utils/simulator_accessibility'
-require 'sim_launcher'
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/actions/instruments_actions'
 require 'calabash-cucumber/actions/playback_actions'
@@ -8,9 +7,7 @@ require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
 require "calabash-cucumber/usage_tracker"
 
-# Used to launch apps for testing in iOS Simulator or on iOS Devices.  By default
-# it uses Apple's `instruments` process to launch your app, but has legacy support
-# for using `sim_launcher`.
+# Used to launch apps for testing in iOS Simulator or on iOS Devices.
 #
 # ###  Accessing the current launcher from ruby.
 #
