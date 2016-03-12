@@ -6,20 +6,6 @@ module Calabash
     module Logging
 
       # @!visibility private
-      # Has full console logging been enabled?
-      #
-      # The return value is controlled by the `CALABASH_FULL_CONSOLE_OUTPUT`
-      # environment variable.
-      #
-      # This is considered one level above debug logging - maybe we should call
-      # the info log level.
-      #
-      # @return [Boolean] Returns `true` if full logging has been enabled.
-      def full_console_logging?
-        ENV['CALABASH_FULL_CONSOLE_OUTPUT'] == '1'
-      end
-
-      # @!visibility private
       # Has debug logging been enabled?
       #
       # The return value is controlled by the `DEBUG` environment variable.

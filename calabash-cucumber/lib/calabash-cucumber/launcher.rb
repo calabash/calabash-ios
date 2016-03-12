@@ -573,9 +573,7 @@ Resetting physical devices is not supported.
       timeout = (ENV['CONNECT_TIMEOUT'] || timeout).to_i
       retry_count = 0
       connected = false
-      if full_console_logging?
-        puts 'Waiting for App to be ready'
-      end
+
       until connected do
         if retry_count == max_retry_count
           raise "Timed out connecting to Calabash server after #{max_retry_count} retries. Make sure it is linked and App isn't crashing"
@@ -588,20 +586,16 @@ Resetting physical devices is not supported.
                 connected = (ping_app == '200')
                 break if connected
               rescue StandardError => e
-                if full_console_logging?
-                  puts "Could not connect. #{e.message}"
-                  puts "Will retry ..."
-                end
+                RunLoop.log_debug("Could not connect. #{e.message}")
+                RunLoop.log_debug("Will retry ...")
               ensure
                 sleep 1 unless connected
               end
             end
           end
         rescue CalabashLauncherTimeoutErr => e
-          if full_console_logging?
-            puts "Timed out after #{timeout} secs, trying to connect to Calabash server..."
-            puts "Will retry #{max_retry_count - retry_count}"
-          end
+          RunLoop.log_debug("Timed out after #{timeout} secs, trying to connect to Calabash server...")
+          RunLoop.log_debug("Will retry #{max_retry_count - retry_count}")
         end
       end
     rescue RuntimeError => e
@@ -851,12 +845,7 @@ Resetting physical devices is not supported.
             "min server version: '#{min_server_version}'",
             "    server version: '#{server_version}'"]
       calabash_warn("#{msgs.join("\n")}")
-    else
-      if full_console_logging?
-        calabash_info("gem #{gem_version} is compat with '#{server_version}'")
-      end
     end
     nil
   end
-
 end

@@ -88,9 +88,7 @@ EOF
         data = find_compatible_recording(recording_name, os, rec_dir, device, candidates)
 
         if data.nil? and device=='ipad'
-          if full_console_logging?
-            puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
-          end
+          puts "Unable to find recording for #{os} and #{device}. Trying with #{os} iphone"
           data = find_compatible_recording(recording_name, os, rec_dir, 'iphone', candidates)
         end
 
@@ -209,9 +207,7 @@ EOF
 
         rec_dir = ENV['PLAYBACK_DIR'] || "#{Dir.pwd}/features/playback"
         unless File.directory?(rec_dir)
-          if full_console_logging?
-            puts "creating playback directory at '#{rec_dir}'"
-          end
+          puts "creating playback directory at '#{rec_dir}'"
           system("mkdir -p #{rec_dir}")
         end
 
