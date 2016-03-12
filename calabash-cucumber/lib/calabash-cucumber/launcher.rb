@@ -474,21 +474,15 @@ Resetting physical devices is not supported.
       end
     end
 
-    if run_with_instruments?(args)
-      # Patch for bug in Xcode 6 GM + iOS 8 device testing.
-      # http://openradar.appspot.com/radar?id=5891145586442240
-      uia_strategy = default_uia_strategy(args, args[:sim_control], args[:instruments])
-      args[:uia_strategy] ||= uia_strategy
-      calabash_info "Using uia strategy: '#{args[:uia_strategy]}'" if debug_logging?
+    # Patch for bug in Xcode 6 GM + iOS 8 device testing.
+    # http://openradar.appspot.com/radar?id=5891145586442240
+    uia_strategy = default_uia_strategy(args, args[:sim_control], args[:instruments])
+    args[:uia_strategy] ||= uia_strategy
+    calabash_info "Using uia strategy: '#{args[:uia_strategy]}'" if debug_logging?
 
-      self.run_loop = new_run_loop(args)
-      self.actions= Calabash::Cucumber::InstrumentsActions.new
-    else
-      # run with sim launcher
-      self.actions= Calabash::Cucumber::PlaybackActions.new
-      # why not just pass args - AFAICT args[:app] == app_path?
-      self.simulator_launcher.relaunch(app_path, sdk_version(), args)
-    end
+    self.run_loop = new_run_loop(args)
+    self.actions= Calabash::Cucumber::InstrumentsActions.new
+
     self.launch_args = args
 
     unless args[:calabash_lite]
