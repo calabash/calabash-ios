@@ -4,17 +4,6 @@ require 'calabash-cucumber/utils/logging'
 module Calabash
   module Cucumber
 
-    include Calabash::Cucumber::Logging
-
-    # @!visibility private
-    def self.const_missing(const_name)
-      if const_name == :FRAMEWORK_VERSION
-        _deprecated('0.9.169', 'FRAMEWORK_VERSION has been deprecated - there is no replacement', :warn)
-        return nil
-      end
-      raise(NameError, "uninitialized constant Calabash::Cucumber::#{const_name}")
-    end
-
     # A model of a release version that can be used to compare two version.
     #
     # Calabash tries very hard to comply with Semantic Versioning rules. However,
