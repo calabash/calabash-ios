@@ -1,4 +1,3 @@
-require 'calabash-cucumber/launch/simulator_launcher'
 require 'calabash-cucumber/utils/simulator_accessibility'
 require 'sim_launcher'
 require 'calabash-cucumber/device'
@@ -54,7 +53,6 @@ class Calabash::Cucumber::Launcher
   attr_accessor :device
   attr_accessor :actions
   attr_accessor :launch_args
-  attr_accessor :simulator_launcher
   attr_reader :xcode
   attr_reader :usage_tracker
 
@@ -88,7 +86,6 @@ class Calabash::Cucumber::Launcher
 
   # @!visibility private
   def initialize
-    @simulator_launcher = Calabash::Cucumber::SimulatorLauncher.new
     @@launcher = self
   end
 
