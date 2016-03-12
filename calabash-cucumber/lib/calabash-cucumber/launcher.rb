@@ -383,29 +383,7 @@ Resetting physical devices is not supported.
 
   # @!visibility private
   def default_launch_method
-    sdk = sdk_version
-    major = nil
-    if sdk && !sdk.strip.empty?
-      major = sdk.split('.')[0]
-      begin
-        major = major.to_i
-      rescue
-        calabash_warn("SDK_VERSION invalid #{sdk_version} - ignoring...")
-      end
-    end
-    return :instruments if major && major >= 7 # Only instruments supported for iOS7+
-    return :sim_launcher if major # and then we have <= 6
-
-    if RunLoop::Xcode.new.version_gte_51?
-      return use_sim_launcher_env? ? :sim_launcher : :instruments
-    end
-
-    available = self.simulator_launcher.sdk_detector.available_sdk_versions.reject { |v| v.start_with?('7') }
-    if available.include?(sdk_version)
-      :sim_launcher
-    else
-      :instruments
-    end
+    :instruments
   end
 
   # Launches your app on the connected device or simulator.
