@@ -31,12 +31,6 @@ elsif cmd == 'gen'
 elsif cmd == 'console'
   console
   exit 0
-elsif cmd == 'build'
-  build
-  exit 0
-elsif cmd == 'run'
-  run
-  exit 0
 elsif cmd == 'download'
   calabash_download(ARGV)
   exit 0
@@ -45,9 +39,6 @@ elsif cmd == 'setup'
   exit 0
 elsif cmd == 'check'
   validate_setup(ARGV)
-  exit 0
-elsif cmd == 'submit'
-  calabash_submit(ARGV)
   exit 0
 elsif cmd == 'version'
   require 'calabash-cucumber'
@@ -76,5 +67,3 @@ elsif cmd == 'sim'
 else
   print_usage
 end
-
-
