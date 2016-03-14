@@ -18,7 +18,7 @@ staticlib = %w(staticlib/calabash.framework.zip staticlib/libFrankCalabash.a)
 dylibs = %w(dylibs/libCalabashDyn.dylib dylibs/libCalabashDynSim.dylib)
 
 # files in script
-scripts = %w(scripts/.irbrc scripts/launch.rb scripts/calabash.xcconfig.erb)
+scripts = %w(scripts/calabash.xcconfig.erb)
 
 # files in script/data
 scripts_data = Dir.glob('scripts/data/*.plist')
