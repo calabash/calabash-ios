@@ -168,13 +168,6 @@ module Calabash
         end
       end
 
-      # @deprecated 0.9.163 replaced with `wait_for_keyboard`
-      # @see #wait_for_keyboard
-      def await_keyboard
-        _deprecated('0.9.163', "use 'wait_for_keyboard' instead", :warn)
-        wait_for_keyboard
-      end
-
       # @!visibility private
       # returns an array of possible ipad keyboard modes
       def _ipad_keyboard_modes
