@@ -79,16 +79,6 @@ def calabash_download(args)
   download_calabash(File.expand_path("."))
 end
 
-# @todo eval for deprecation - has no callers.
-def has_proxy?
-  ENV['http_proxy'] ? true : false
-end
-
-def proxy
-  url_parts = URI.split(ENV['http_proxy'])
-  [url_parts[2], url_parts[3]]
-end
-
 def download_calabash(project_path)
   file = 'calabash.framework'
   ##Download calabash.framework
