@@ -314,7 +314,6 @@ Resetting physical devices is not supported.
     # BUNDLE_ID
     # APP (unifies APP_BUNDLE_PATH, BUNDLE_ID)
     # DEVICE_TARGET
-    # SDK_VERSION
     # RESET_BETWEEN_SCENARIOS
     # DEVICE
     # NO_LAUNCH
@@ -326,7 +325,6 @@ Resetting physical devices is not supported.
         :bundle_id => ENV['BUNDLE_ID'],
         :no_stop => calabash_no_stop?,
         :no_launch => calabash_no_launch?,
-        :sdk_version => sdk_version,
         :relaunch_simulator => true,
         # Do not advertise this to users!
         # For example, don't include documentation about this option.
@@ -679,11 +677,6 @@ Resetting physical devices is not supported.
     else
       false
     end
-  end
-
-  # @!visibility private
-  def sdk_version
-    ENV['SDK_VERSION']
   end
 
   # @!visibility private
