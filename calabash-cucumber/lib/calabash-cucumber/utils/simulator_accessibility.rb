@@ -1,4 +1,3 @@
-require 'calabash-cucumber/utils/xctools'
 require 'calabash-cucumber/utils/plist_buddy'
 require 'calabash-cucumber/utils/logging'
 require 'cfpropertylist'
@@ -12,7 +11,6 @@ module Calabash
     # enabling accessibility on the simulator.
     module SimulatorAccessibility
 
-      include Calabash::Cucumber::XcodeTools
       include Calabash::Cucumber::PlistBuddy
 
       # Quits the iOS Simulator.
