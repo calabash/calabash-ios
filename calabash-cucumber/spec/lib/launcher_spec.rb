@@ -1,5 +1,4 @@
 require 'calabash-cucumber/launcher'
-require 'calabash-cucumber/utils/simulator_accessibility'
 
 describe 'Calabash Launcher' do
 

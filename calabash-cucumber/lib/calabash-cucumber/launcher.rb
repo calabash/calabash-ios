@@ -1,4 +1,3 @@
-require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/actions/instruments_actions'
 require 'calabash-cucumber/actions/playback_actions'
@@ -31,7 +30,6 @@ class Calabash::Cucumber::Launcher
   require "calabash-cucumber/environment"
 
   include Calabash::Cucumber::Logging
-  include Calabash::Cucumber::SimulatorAccessibility
 
   # noinspection RubyClassVariableUsageInspection
 

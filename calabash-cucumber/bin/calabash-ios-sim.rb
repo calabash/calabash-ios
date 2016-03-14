@@ -1,4 +1,3 @@
-require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/utils/logging'
 require "calabash-cucumber/environment"
 require 'run_loop'
