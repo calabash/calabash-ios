@@ -168,13 +168,6 @@ module Calabash
         end
       end
 
-      # @deprecated 0.9.163 replaced with `wait_for_keyboard`
-      # @see #wait_for_keyboard
-      def await_keyboard
-        _deprecated('0.9.163', "use 'wait_for_keyboard' instead", :warn)
-        wait_for_keyboard
-      end
-
       # @!visibility private
       # returns an array of possible ipad keyboard modes
       def _ipad_keyboard_modes
@@ -448,33 +441,6 @@ module Calabash
       # @raise [RuntimeError] if the text cannot be typed.
       def tap_keyboard_action_key
         keyboard_enter_char 'Return'
-      end
-
-      # @deprecated 0.10.0 replaced with `tap_keyboard_action_key`
-      # @see #tap_keyboard_action_key
-      #
-      # Touches the keyboard action key.
-      #
-      # The action key depends on the keyboard.  Some examples include:
-      #
-      # * Return
-      # * Next
-      # * Go
-      # * Join
-      # * Search
-      #
-      # @note
-      #  Not all keyboards have an action key.  For example, numeric keyboards
-      #  do not have an action key.
-      #
-      # @raise [RuntimeError] if the text cannot be typed.
-      def done
-        _deprecated("0.10.0",
-%Q{Use tap_keyboard_action_key
-
-The `done` method will be removed in 0.19.0
-}, :warn)
-        tap_keyboard_action_key
       end
 
       # @!visibility private
