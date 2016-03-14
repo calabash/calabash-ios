@@ -34,9 +34,6 @@ elsif cmd == 'console'
 elsif cmd == 'build'
   build
   exit 0
-elsif cmd == 'update'
-  update(ARGV)
-  exit 0
 elsif cmd == 'run'
   run
   exit 0

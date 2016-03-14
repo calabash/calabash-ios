@@ -44,9 +44,6 @@ Usage: calabash-ios <command-name> [parameters]
         If something goes wrong. Close Xcode and copy project.pbxproj.bak
         to project.pbxproj inside your .xcodeproj folder.
 
-  update [target]
-        updates one of the following targets: hooks
-
   download [opt_path]?
         copies current compatible version of calabash.framework to your project.
         It should be run from a directory containing an Xcode project,
