@@ -59,8 +59,6 @@ elsif cmd == 'sim'
       calabash_sim_location(ARGV)
   elsif subcmd == 'locale'
     calabash_sim_locale(ARGV)
-  elsif subcmd == 'device'
-    calabash_sim_device(ARGV)
   else
     print_usage
   end

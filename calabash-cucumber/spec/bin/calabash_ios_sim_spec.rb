@@ -1,6 +1,5 @@
 require File.expand_path(File.join(__FILE__, '..', '..', 'spec_helper'))
 require File.expand_path(File.join(__FILE__, '..', '..', '..', 'bin', 'calabash-ios-sim'))
-require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/wait_helpers'
 require 'run_loop'
 

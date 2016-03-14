@@ -34,8 +34,6 @@ def print_usage
       reset content and settings in all iOS Simulators
     sim acc
       enable accessibility in all iOS Simulators
-    sim device {iPad|iPad_Retina|iPhone|iPhone_Retina|iPhone_Retina_4inch}
-      change the default iOS Simulator device.
 EOF
 end
 

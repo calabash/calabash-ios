@@ -1,10 +1,8 @@
-require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/utils/logging'
 require "calabash-cucumber/environment"
 require 'run_loop'
 
 include Calabash::Cucumber::Logging
-include Calabash::Cucumber::SimulatorAccessibility
 
 def quit_sim
   RunLoop::SimControl.new.quit_sim
@@ -156,36 +154,4 @@ Examples:
 SUCCESS!
 }
   true
-end
-
-
-def calabash_sim_device(args)
-  quit_simulator
-  options = ["iPad", "iPad_Retina", "iPhone", "iPhone_Retina", "iPhone_Retina_4inch"]
-  if args.length != 1 or not options.find { |x| x == args[0] }
-    print_usage
-    puts "Unrecognized args: #{args}"
-    puts "should be one of #{options.inspect}"
-    exit(0)
-  end
-  path =File.join(File.expand_path("~/Library"), "Preferences", "com.apple.iphonesimulator.plist")
-  plist = CFPropertyList::List.new(:file => path)
-  hash = CFPropertyList.native_types(plist.value)
-
-  device = case args[0]
-             when "iPad_Retina"
-               "iPad (Retina)"
-             when "iPhone_Retina"
-               "iPhone (Retina 3.5-inch)"
-             when "iPhone_Retina_4inch"
-               "iPhone (Retina 4-inch)"
-             else
-               args[0]
-           end
-  if device
-    hash['SimulateDevice'] = device
-    plist.value = CFPropertyList.guess(hash)
-    plist.save(path, CFPropertyList::List::FORMAT_BINARY)
-  end
-
 end
