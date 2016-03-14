@@ -1,7 +1,6 @@
 require 'calabash-cucumber/utils/simulator_accessibility'
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/actions/instruments_actions'
-require 'calabash-cucumber/actions/playback_actions'
 require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
@@ -114,12 +113,7 @@ class Calabash::Cucumber::Launcher
     if self.run_loop[:pid]
       self.actions = Calabash::Cucumber::InstrumentsActions.new
     else
-      self.actions = Calabash::Cucumber::PlaybackActions.new
-    end
-
-    major = self.device.ios_major_version
-    if major.to_i >= 7 && self.actions.is_a?(Calabash::Cucumber::PlaybackActions)
-      puts  %Q{
+      calabash_warn(%Q{
 
 WARNING
 
@@ -127,8 +121,9 @@ Connected to simulator that was not launched by Calabash.
 
 Queries will work, but gestures will not.
 
-}
+})
     end
+
     self
   end
 
