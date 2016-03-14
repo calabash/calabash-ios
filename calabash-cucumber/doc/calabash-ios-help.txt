@@ -8,10 +8,7 @@ Usage: calabash-ios <command-name> [parameters]
     sim locale [lang] [regional]?
     sim reset
     sim acc
-    sim device {iPad,iPad_Retina,iPhone,iPhone_Retina,iPhone_Retina_4inch}
     sim location {on|off} <bundleid>
-
-
 
   Commands:
   gen creates a skeleton features dir. This is usually used once when
@@ -78,5 +75,3 @@ Usage: calabash-ios <command-name> [parameters]
   sim reset (EXPERIMENTAL) Will select "Reset Content and Settings"
       in the iOS Simulators using AppleScript.
 
-  sim device [device] Will set the default iOS Simulator device.
-      [device] can be one of iPad iPad_Retina iPhone iPhone_Retina iPhone_Retina_4inch
