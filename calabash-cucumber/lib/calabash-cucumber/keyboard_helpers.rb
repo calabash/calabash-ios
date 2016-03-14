@@ -443,33 +443,6 @@ module Calabash
         keyboard_enter_char 'Return'
       end
 
-      # @deprecated 0.10.0 replaced with `tap_keyboard_action_key`
-      # @see #tap_keyboard_action_key
-      #
-      # Touches the keyboard action key.
-      #
-      # The action key depends on the keyboard.  Some examples include:
-      #
-      # * Return
-      # * Next
-      # * Go
-      # * Join
-      # * Search
-      #
-      # @note
-      #  Not all keyboards have an action key.  For example, numeric keyboards
-      #  do not have an action key.
-      #
-      # @raise [RuntimeError] if the text cannot be typed.
-      def done
-        _deprecated("0.10.0",
-%Q{Use tap_keyboard_action_key
-
-The `done` method will be removed in 0.19.0
-}, :warn)
-        tap_keyboard_action_key
-      end
-
       # @!visibility private
       # Returns the current keyplane.
       def _current_keyplane
