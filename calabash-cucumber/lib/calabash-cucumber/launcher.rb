@@ -12,9 +12,10 @@ require "calabash-cucumber/usage_tracker"
 # ###  Accessing the current launcher from ruby.
 #
 # If you need a reference to the current launcher in your ruby code.
-# This is usually not required, but might be useful in `support/01_launch.rb`.
 #
 # `Calabash::Cucumber::Launcher.launcher`
+#
+# This is usually not required, but might be useful in `support/01_launch.rb`.
 #
 # ### Attaching to the current launcher in a console
 #
@@ -104,11 +105,6 @@ class Calabash::Cucumber::Launcher
     default_options = {:max_retry => 1,
                        :timeout => 10}
     merged_options = default_options.merge(options)
-
-    if calabash_no_launch?
-      self.actions = Calabash::Cucumber::PlaybackActions.new
-      return
-    end
 
     self.run_loop = RunLoop::HostCache.default.read
 
@@ -316,7 +312,6 @@ Resetting physical devices is not supported.
     # DEVICE_TARGET
     # RESET_BETWEEN_SCENARIOS
     # DEVICE
-    # NO_LAUNCH
     # NO_STOP
 
     args = {
@@ -324,7 +319,6 @@ Resetting physical devices is not supported.
         :reset => reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
         :no_stop => calabash_no_stop?,
-        :no_launch => calabash_no_launch?,
         :relaunch_simulator => true,
         # Do not advertise this to users!
         # For example, don't include documentation about this option.
@@ -638,12 +632,18 @@ Resetting physical devices is not supported.
 
   # @!visibility private
   def calabash_no_stop?
-    calabash_no_launch? or ENV['NO_STOP']=="1"
+    ENV['NO_STOP']=="1"
   end
 
+  # @deprecated 0.19.0
   # @!visibility private
   def calabash_no_launch?
-    ENV['NO_LAUNCH']=='1'
+    RunLoop.log_warn(%Q[
+Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
+environment variable has been removed from Calabash.  This always returns
+true.  Please remove this method call from your hooks.
+])
+    true
   end
 
   # @!visibility private
