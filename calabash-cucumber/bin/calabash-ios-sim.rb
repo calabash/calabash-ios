@@ -3,7 +3,6 @@ require "calabash-cucumber/environment"
 require 'run_loop'
 
 include Calabash::Cucumber::Logging
-include Calabash::Cucumber::SimulatorAccessibility
 
 def quit_sim
   RunLoop::SimControl.new.quit_sim
