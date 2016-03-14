@@ -1,6 +1,5 @@
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
-require 'calabash-cucumber/playback_helpers'
 require 'calabash-cucumber/environment_helpers'
 require 'calabash-cucumber/utils/logging'
 

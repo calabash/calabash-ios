@@ -6,7 +6,6 @@ require 'calabash-cucumber/environment_helpers'
 require 'calabash-cucumber/connection'
 require 'calabash-cucumber/connection_helpers'
 require 'calabash-cucumber/query_helpers'
-require 'calabash-cucumber/playback_helpers'
 require 'calabash-cucumber/failure_helpers'
 require 'calabash-cucumber/status_bar_helpers'
 require 'calabash-cucumber/rotation_helpers'
@@ -28,7 +27,6 @@ module Calabash
       include Calabash::Cucumber::UIA
       include Calabash::Cucumber::StatusBarHelpers
       include Calabash::Cucumber::RotationHelpers
-      include Calabash::Cucumber::PlaybackHelpers
 
       # @!visibility private
       # @deprecated Use Cucumber's step method (avoid this: using step is not considered best practice).
