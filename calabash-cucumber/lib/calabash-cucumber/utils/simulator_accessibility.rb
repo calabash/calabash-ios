@@ -1,4 +1,3 @@
-require 'calabash-cucumber/utils/plist_buddy'
 require 'calabash-cucumber/utils/logging'
 require 'cfpropertylist'
 require 'run_loop'
@@ -10,8 +9,6 @@ module Calabash
     # Public methods for common simulator tasks and private methods for
     # enabling accessibility on the simulator.
     module SimulatorAccessibility
-
-      include Calabash::Cucumber::PlistBuddy
 
       # Quits the iOS Simulator.
       #
