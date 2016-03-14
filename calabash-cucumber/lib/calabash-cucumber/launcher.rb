@@ -680,16 +680,6 @@ Resetting physical devices is not supported.
   end
 
   # @!visibility private
-  def use_instruments_env?
-    ENV['LAUNCH_VIA'] == 'instruments'
-  end
-
-  # @!visibility private
-  def use_sim_launcher_env?
-    ENV['LAUNCH_VIA'] == 'sim_launcher'
-  end
-
-  # @!visibility private
   def reset_between_scenarios?
     ENV['RESET_BETWEEN_SCENARIOS']=="1"
   end
