@@ -8,28 +8,16 @@ The behavior of a variable might differ from across Xcode or iOS versions.  Plea
 
 New versions of Xcode and iOS often require new environment variables or require that existing environment variables become deprecated.  Please note your Xcode and iOS versions and read the following deprecated variables section carefully.
 
-### Deprecated Xcode 6.0
+The following variables are no longer used by Calabash.
 
+* `NO_LAUNCH`
+* `CALABASH_NO_DEPRECATION`
 * `CALABASH_FULL_CONSOLE_OUTPUT`
 * `DETECT_CONNECTED_DEVICE`
-
-### Deprecated Xcode 5.1
-
 * `SDK_VERSION`
 * Setting `DEVICE_TARGET` to `device` or `simulator` has been deprecated.
-
-**Note** The `NO_LAUNCH` variable is still supported in Xcode >= 5.1, but it is almost never correct to set this variable.  See the docs below.
-
-### Deprecated Xcode 4.6.3
-
 * `LAUNCH_VIA`
-
-### Deprecated iOS > 5
-
 * `OS`
-
-### Deprecated LessPainful (pre April 2013)
-
 * `NO_DOWNLOAD`
 * `NO_BUILD`
 * `NO_GEN`
@@ -114,12 +102,6 @@ If your app is a iPhone app that is emulated on an iPad, you should use `DEVICE=
 DEVICE=iphone
 DEVICE=ipad
 ```
-
-### `CALABASH_FULL_CONSOLE_OUTPUT`
-
-Use this variable to enable more verbose logging.
-
-This variable will be deprecated in Xcode 6.0 / Calabash 0.11.0.
 
 ### `CALABASH_IRBRC`
 
@@ -280,18 +262,6 @@ instruments -s devices
 #### Pro Tip: Device UDIDs should be private.
 
 Device UDIDs should be private.  When posting debug output on the web, do not post un-obscured device UDIDs.
-
-### `NO_LAUNCH`
-
-***It is almost always incorrect to set NO_LAUNCH=1.***
-
-Use this to control whether or not calabash launches your app.
-
-If you are testing against iOS >= 7, **you must not set this to 1**; calabash must be allowed to launch your app with instruments to have access to the UIAutomation API.
-
-As of Xcode >= 5.1 there is almost never a good reason to use this variable.  It is only _necessary_ for testing against iOS 5.1.1 which cannot be targeted by instruments.
-
-Once iOS 5.1.1 support is dropped, this variable _will be deprecated._
 
 ### `NO_STOP`
 

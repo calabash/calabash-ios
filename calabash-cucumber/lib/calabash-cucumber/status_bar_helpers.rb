@@ -28,10 +28,8 @@ module Calabash
         res = map(nil, :orientation, :device).first
 
         if ['face up', 'face down'].include?(res)
-          if full_console_logging?
-            if force_down
-              puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
-            end
+          if force_down
+            puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
           end
 
           return res unless force_down

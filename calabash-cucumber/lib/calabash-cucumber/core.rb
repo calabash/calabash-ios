@@ -740,15 +740,7 @@ details => '#{result["details"]}'
 
         raise 'Wheel index must be non negative' if wheel < 0
         raise "Only up and down supported :dir (#{dir})" unless [:up, :down].include?(dir)
-
-        if ENV['OS'] == 'ios4'
-          playback "wheel_#{dir}", :query => "#{q} pickerTable index:#{wheel}"
-        elsif ios7?
-          raise NotImplementedError
-        else
-          playback "wheel_#{dir}", :query => "#{q} pickerTableView index:#{wheel}"
-        end
-
+        raise NotImplementedError
       end
 
       # @!visibility private

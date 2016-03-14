@@ -133,10 +133,6 @@ module Calabash
 
       # The iOS version on the device under test.
       #
-      # @note
-      #  **WARNING:** The `OS` env variable has been deprecated and should
-      #  never be set.
-      #
       # @raise [RuntimeError] If the server cannot be reached.
       # @return [RunLoop::Version] The version of the iOS running on the device.
       def ios_version
@@ -160,54 +156,29 @@ module Calabash
 
       # Is the device under test running iOS 5?
       #
-      # @note
-      #  **WARNING:** The `OS` env variable has been deprecated and should
-      #  never be set.
-      #
-      # @note
-      #  **WARNING:* Setting the `OS` env variable will override the value returned
-      #  by querying the device.
       # @raise [RuntimeError] if the server cannot be reached
       # @return [Boolean] true if device under test is running iOS 5
       def ios5?
-        _OS_ENV.eql?(_canonical_os_version(:ios5)) || _default_device_or_create().ios5?
+         _default_device_or_create.ios5?
       end
 
       # Is the device under test running iOS 6?
       #
-      # @note
-      #  **WARNING:** The `OS` env variable has been deprecated and should
-      #  never be set.
-      #
-      # @note
-      #  **WARNING:* Setting the `OS` env variable will override the value returned
-      #  by querying the device.
       # @raise [RuntimeError] if the server cannot be reached
       # @return [Boolean] true if device under test is running iOS 6
       def ios6?
-        _OS_ENV.eql?(_canonical_os_version(:ios6)) || _default_device_or_create().ios6?
+        _default_device_or_create.ios6?
       end
 
       # Is the device under test running iOS 7?
       #
-      # @note
-      #  **WARNING:** The `OS` env variable has been deprecated and should
-      #  never be set.
-      #
-      # @note
-      #  **WARNING:* Setting the `OS` env variable will override the value returned
-      #  by querying the device.
       # @raise [RuntimeError] if the server cannot be reached
       # @return [Boolean] true if device under test is running iOS 7
       def ios7?
-        _OS_ENV.eql?(_canonical_os_version(:ios7)) || _default_device_or_create().ios7?
+        _default_device_or_create.ios7?
       end
 
       # Is the device under test running iOS 8?
-      #
-      # @note
-      #  **WARNING:** The `OS` env variable has been deprecated and should
-      #  never be set.
       #
       # @raise [RuntimeError] if the server cannot be reached
       # @return [Boolean] true if device under test is running iOS 8
@@ -216,10 +187,6 @@ module Calabash
       end
 
       # Is the device under test running iOS 9?
-      #
-      # @note
-      #  **WARNING:** The `OS` env variable has been deprecated and should
-      #  never be set.
       #
       # @raise [RuntimeError] if the server cannot be reached
       # @return [Boolean] true if device under test is running iOS 9
@@ -256,28 +223,9 @@ module Calabash
       def _default_device_or_create
         device = default_device
         if device.nil?
-          device = Calabash::Cucumber::Device.new(nil, server_version())
+          device = Calabash::Cucumber::Device.new(nil, server_version)
         end
         device
-      end
-
-      # Returns the value of the environmental variable OS.
-      #
-      # @note
-      #  The `OS` env has been deprecated for some time.  It should never be set.
-      def _OS_ENV
-        ENV['OS']
-      end
-
-      # @!visibility private
-      CANONICAL_IOS_VERSIONS = {:ios5 => 'ios5',
-                                :ios6 => 'ios6',
-                                :ios7 => 'ios7'}
-
-
-      # Returns the canonical value iOS versions as strings.
-      def _canonical_os_version(key)
-        CANONICAL_IOS_VERSIONS[key]
       end
     end
   end

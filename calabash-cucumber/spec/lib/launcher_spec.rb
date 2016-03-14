@@ -309,34 +309,6 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe 'resetting application content and settings' do
-    describe 'should be able to detect the base simulator sdk from the launch args' do
-      it 'should return nil if the test targets a device' do
-        expect(launcher).to receive(:device_target?).and_return(true)
-        expect(launcher.sdk_version_for_simulator_target({})).to be nil
-      end
-
-      it 'should return nil if :device_target is nil' do
-        expect(launcher.sdk_version_for_simulator_target({})).to be nil
-      end
-
-      it 'should return nil if :device_target is not a simulator' do
-        launch_args = {:device_target => UDID}
-        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be nil
-      end
-
-      it "should return nil if :device_target is 'simulator'" do
-        launch_args = {:device_target => 'simulator'}
-        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be nil
-      end
-
-      it 'should return an SDK if :device_target is an Xcode 5.1+ simulator string' do
-        launch_args = {:device_target => 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'}
-        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be == '7.0'
-      end
-    end
-  end
-
   describe 'checking server/gem compatibility' do
 
     before(:example) do

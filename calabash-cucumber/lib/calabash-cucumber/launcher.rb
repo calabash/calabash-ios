@@ -12,9 +12,10 @@ require "calabash-cucumber/usage_tracker"
 # ###  Accessing the current launcher from ruby.
 #
 # If you need a reference to the current launcher in your ruby code.
-# This is usually not required, but might be useful in `support/01_launch.rb`.
 #
 # `Calabash::Cucumber::Launcher.launcher`
+#
+# This is usually not required, but might be useful in `support/01_launch.rb`.
 #
 # ### Attaching to the current launcher in a console
 #
@@ -104,11 +105,6 @@ class Calabash::Cucumber::Launcher
     default_options = {:max_retry => 1,
                        :timeout => 10}
     merged_options = default_options.merge(options)
-
-    if calabash_no_launch?
-      self.actions = Calabash::Cucumber::PlaybackActions.new
-      return
-    end
 
     self.run_loop = RunLoop::HostCache.default.read
 
@@ -314,10 +310,8 @@ Resetting physical devices is not supported.
     # BUNDLE_ID
     # APP (unifies APP_BUNDLE_PATH, BUNDLE_ID)
     # DEVICE_TARGET
-    # SDK_VERSION
     # RESET_BETWEEN_SCENARIOS
     # DEVICE
-    # NO_LAUNCH
     # NO_STOP
 
     args = {
@@ -325,8 +319,6 @@ Resetting physical devices is not supported.
         :reset => reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
         :no_stop => calabash_no_stop?,
-        :no_launch => calabash_no_launch?,
-        :sdk_version => sdk_version,
         :relaunch_simulator => true,
         # Do not advertise this to users!
         # For example, don't include documentation about this option.
@@ -573,9 +565,7 @@ Resetting physical devices is not supported.
       timeout = (ENV['CONNECT_TIMEOUT'] || timeout).to_i
       retry_count = 0
       connected = false
-      if full_console_logging?
-        puts 'Waiting for App to be ready'
-      end
+
       until connected do
         if retry_count == max_retry_count
           raise "Timed out connecting to Calabash server after #{max_retry_count} retries. Make sure it is linked and App isn't crashing"
@@ -588,20 +578,16 @@ Resetting physical devices is not supported.
                 connected = (ping_app == '200')
                 break if connected
               rescue StandardError => e
-                if full_console_logging?
-                  puts "Could not connect. #{e.message}"
-                  puts "Will retry ..."
-                end
+                RunLoop.log_debug("Could not connect. #{e.message}")
+                RunLoop.log_debug("Will retry ...")
               ensure
                 sleep 1 unless connected
               end
             end
           end
         rescue CalabashLauncherTimeoutErr => e
-          if full_console_logging?
-            puts "Timed out after #{timeout} secs, trying to connect to Calabash server..."
-            puts "Will retry #{max_retry_count - retry_count}"
-          end
+          RunLoop.log_debug("Timed out after #{timeout} secs, trying to connect to Calabash server...")
+          RunLoop.log_debug("Will retry #{max_retry_count - retry_count}")
         end
       end
     rescue RuntimeError => e
@@ -646,12 +632,18 @@ Resetting physical devices is not supported.
 
   # @!visibility private
   def calabash_no_stop?
-    calabash_no_launch? or ENV['NO_STOP']=="1"
+    ENV['NO_STOP']=="1"
   end
 
+  # @deprecated 0.19.0
   # @!visibility private
   def calabash_no_launch?
-    ENV['NO_LAUNCH']=='1'
+    RunLoop.log_warn(%Q[
+Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
+environment variable has been removed from Calabash.  This always returns
+true.  Please remove this method call from your hooks.
+])
+    true
   end
 
   # @!visibility private
@@ -685,38 +677,6 @@ Resetting physical devices is not supported.
     else
       false
     end
-  end
-
-  # @!visibility private
-  def sdk_version
-    ENV['SDK_VERSION']
-  end
-
-  # @!visibility private
-  def sdk_version_for_simulator_target(launch_args)
-    return nil if device_target?
-    value = launch_args[:device_target]
-    return nil if value.nil?
-    return nil unless value.downcase.include?('simulator')
-    # we have a string like:
-    # iPhone Retina (4-inch) - Simulator - iOS 7.1
-    # iPad Retina - Simulator - iOS 6.1
-    # iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0
-    sdk = value.split(' ').last
-
-    # legacy support for DEVICE_TARGET=simulator
-    return nil if sdk == 'simulator'
-    sdk
-  end
-
-  # @!visibility private
-  def use_instruments_env?
-    ENV['LAUNCH_VIA'] == 'instruments'
-  end
-
-  # @!visibility private
-  def use_sim_launcher_env?
-    ENV['LAUNCH_VIA'] == 'sim_launcher'
   end
 
   # @!visibility private
@@ -851,12 +811,7 @@ Resetting physical devices is not supported.
             "min server version: '#{min_server_version}'",
             "    server version: '#{server_version}'"]
       calabash_warn("#{msgs.join("\n")}")
-    else
-      if full_console_logging?
-        calabash_info("gem #{gem_version} is compat with '#{server_version}'")
-      end
     end
     nil
   end
-
 end
