@@ -218,7 +218,6 @@ Resetting physical devices is not supported.
     # NO_STOP
 
     args = {
-        :launch_method => default_launch_method,
         :reset => reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
         :no_stop => calabash_no_stop?,
@@ -268,11 +267,6 @@ Resetting physical devices is not supported.
     end
 
     return false
-  end
-
-  # @!visibility private
-  def default_launch_method
-    :instruments
   end
 
   # Launches your app on the connected device or simulator.
@@ -354,7 +348,7 @@ Resetting physical devices is not supported.
         if simulator_target?(args)
           args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_sim_dylib
         else
-          raise RuntimeError, "Injecting a dylib is not supported when targetting a device"
+          raise RuntimeError, "Injecting a dylib is not supported when targeting a device"
         end
       else
         unless File.exist? use_dylib

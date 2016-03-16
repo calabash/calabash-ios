@@ -468,11 +468,6 @@ describe 'Calabash Launcher' do
 
     describe 'running with instruments' do
 
-      it 'should be running against instruments' do
-        args = launcher.default_launch_args
-        expect(args[:launch_method]).to be == :instruments
-      end
-
       describe 'running against devices' do
         describe 'when DEVICE_TARGET = < udid >' do
           it 'it should return udid if DEVICE_TARGET is a udid' do
