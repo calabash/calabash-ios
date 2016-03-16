@@ -314,17 +314,6 @@ module Calabash
         iphone_app_emulated_on_ipad
       end
 
-      # @deprecated 0.13.1 - Call `iphone_4in?` instead.
-      #
-      # @see #iphone_4in?
-      #
-      # @note Deprecated after introducing new `form_factor` behavior.
-      # @return [Boolean] true if this device is an iPhone 5 or 5s
-      def iphone_4in
-        _deprecated('0.13.1', "use 'iphone_4in?' instead", :warn)
-        @iphone_4in
-      end
-
       # @deprecated 0.16.2 No replacement.
       #
       # @example
@@ -341,13 +330,6 @@ module Calabash
       # @return [String] The model of this device.
       #  this device.
       attr_reader :system
-
-      # @deprecated 0.13.1 no replacement
-      #
-      # Indicates whether or not this device has a 4in screen.
-      # @attribute [r] iphone_4in
-      # @return [Boolean] `true` if this device has a 4in screen.
-      attr_reader :iphone_4in
 
       # @deprecated 0.10.0 no replacement
       #
