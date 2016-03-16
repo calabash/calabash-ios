@@ -85,6 +85,17 @@ class Calabash::Cucumber::Launcher
   end
 
   # @!visibility private
+  def inspect
+    msg = ["#{self.class}"]
+    if self.run_loop
+      msg << "Log file: #{self.run_loop[:log_file]}"
+    else
+      msg << "Not attached to instruments; run `console_attach`"
+    end
+    msg.join("\n")
+  end
+
+  # @!visibility private
   def actions
     attach if @actions.nil?
     @actions
@@ -132,6 +143,16 @@ Queries will work, but gestures will not.
     l = launcher_if_used
     return false unless l
     l.instruments?
+  end
+
+  # @!visibility private
+  def instruments?
+    !!(active? && run_loop[:pid])
+  end
+
+  # @!visibility private
+  def active?
+    not run_loop.nil?
   end
 
   # Get a reference to the current launcher (instantiates a new one if needed). Usually we use a singleton launcher throughout a test run.
@@ -582,27 +603,6 @@ true.  Please remove this method call from your hooks.
   # @!visibility private
   def app_path
     RunLoop::Environment.path_to_app_bundle || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
-  end
-
-  # @!visibility private
-  def active?
-    not run_loop.nil?
-  end
-
-  # @!visibility private
-  def instruments?
-    !!(active? && run_loop[:pid])
-  end
-
-  # @!visibility private
-  def inspect
-    msg = ["#{self.class}"]
-    if self.run_loop
-      msg << "Log file: #{self.run_loop[:log_file]}"
-    else
-      msg << "Not attached to instruments; run `console_attach`"
-    end
-    msg.join("\n")
   end
 
   # @!visibility private
