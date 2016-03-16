@@ -314,18 +314,6 @@ module Calabash
         iphone_app_emulated_on_ipad
       end
 
-      # @deprecated 0.9.168 replaced with iphone_4in?
-      #
-      # @see #iphone_4in?
-      #
-      # Is this device an iPhone 5?
-      # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
-      # @return [Boolean] true if this device is an iPhone 5
-      def iphone_5?
-        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
-        iphone_4in?
-      end
-
       # @deprecated 0.13.1 - Call `iphone_4in?` instead.
       #
       # @see #iphone_4in?
