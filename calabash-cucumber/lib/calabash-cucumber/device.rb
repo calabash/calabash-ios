@@ -314,19 +314,6 @@ module Calabash
         iphone_app_emulated_on_ipad
       end
 
-      # @deprecated 0.9.169 replaced with `server_version`
-      #
-      # @see #server_version
-      #
-      # The version of the embedded Calabash server running in the app under
-      # test on this device.
-      # @see #server_version
-      # @return [String] the version of the embedded Calabash server
-      def framework_version
-        _deprecated('0.9.169', "use 'server_version', instead", :warn)
-        @server_version
-      end
-
       # @deprecated 0.10.0 no replacement
       def udid
         _deprecated('0.10.0', 'no replacement', :warn)
