@@ -314,23 +314,6 @@ module Calabash
         iphone_app_emulated_on_ipad
       end
 
-      # @deprecated 0.16.2 No replacement.
-      #
-      # @example
-      #  # simulator
-      #  i386
-      #  x86_64
-      #
-      # @example
-      #  # examples from physical devices
-      #  iPhone7,1
-      #  iPhone5,2
-      #
-      # @attribute [r] system
-      # @return [String] The model of this device.
-      #  this device.
-      attr_reader :system
-
       # @deprecated 0.10.0 no replacement
       #
       # @!attribute [rw] udid
