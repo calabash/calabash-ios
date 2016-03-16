@@ -314,18 +314,6 @@ module Calabash
         iphone_app_emulated_on_ipad
       end
 
-      # @deprecated 0.10.0 no replacement
-      def udid
-        _deprecated('0.10.0', 'no replacement', :warn)
-        @udid
-      end
-
-      # @deprecated 0.10.0 no replacement
-      def udid=(value)
-        _deprecated('0.10.0', 'no replacement', :warn)
-        @udid = value
-      end
-
       # @deprecated 0.9.168 replaced with iphone_4in?
       #
       # @see #iphone_4in?
