@@ -980,23 +980,6 @@ arguments => '#{arguments}'
         tap_mark(label, *args)
       end
 
-      # taps a view with mark `hash_or_string`
-      # @deprecated In later Calabash versions we will change the semantics of `tap` to take a general query
-      #   (instead of a 'mark' now). We're deprecating this now to prepare people for a breaking change.
-      # @param {String} hash_or_string mark to pass to call `tap_mark(hash_or_string)`.
-      # @return {Array<Hash>} array containing the serialized version of the tapped view.
-      def tap(hash_or_string, *args)
-        deprecation_msg = 'Use tap_mark instead. In later Calabash versions we will change the semantics of `tap` to take a general query.'
-        _deprecated('0.10.0', deprecation_msg, :warn)
-        if hash_or_string.is_a?(String)
-          tap_mark(hash_or_string, *args)
-        elsif hash_or_string.respond_to?(:[])
-          wait_tap(hash_or_string[:query], hash_or_string)
-        else
-          raise(ArgumentError, "first parameter to tap must be a string or a hash. Was: #{hash_or_string.class}, #{hash_or_string}")
-        end
-      end
-
       # taps a view with mark `label`. Equivalent to `touch("* marked:'#{label}'")`
       # @param {String} label the mark of the view to tap
       # @param {Array} args optional additional arguments to pass to `touch`.
