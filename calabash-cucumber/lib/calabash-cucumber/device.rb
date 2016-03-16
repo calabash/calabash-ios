@@ -192,18 +192,18 @@ module Calabash
       # Is this device a simulator or physical device?
       # @return [Boolean] true if this device is a simulator
       def simulator?
-        # Post 0.16.2 server
-        unless simulator_details.nil? || simulator_details.empty?
-          true
+        details = simulator_details
+        if details
+          details != ""
         else
-          system == GESTALT_SIM_SYS
+          false
         end
       end
 
       # Is this device a device or simulator?
       # @return [Boolean] true if this device is a physical device
       def device?
-        not simulator?
+        !simulator?
       end
 
       # Is this device an iPhone?
