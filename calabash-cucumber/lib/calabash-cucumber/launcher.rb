@@ -84,15 +84,22 @@ class Calabash::Cucumber::Launcher
     @@launcher = self
   end
 
-  # @!visibility private
-  def inspect
+  # @!visibilit private
+  def to_s
     msg = ["#{self.class}"]
     if self.run_loop
       msg << "Log file: #{self.run_loop[:log_file]}"
     else
-      msg << "Not attached to instruments; run `console_attach`"
+      msg << "Not attached to instruments."
+      msg << "Start your app with `start_test_server_in_background`"
+      msg << "If you app is already running, try `console_attach`"
     end
     msg.join("\n")
+  end
+
+  # @!visibility private
+  def inspect
+    to_s
   end
 
   # @!visibility private
