@@ -314,12 +314,6 @@ module Calabash
         iphone_app_emulated_on_ipad
       end
 
-      # @deprecated 0.10.0 no replacement
-      #
-      # @!attribute [rw] udid
-      # @return [String] The udid of this device.
-      attr_accessor :udid
-
       private
 
       # @!visibility private
