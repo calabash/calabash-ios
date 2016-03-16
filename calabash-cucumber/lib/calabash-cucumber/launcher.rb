@@ -258,8 +258,9 @@ Remove direct calls to reset_app_sandbox.
   # Erases a simulator. This is the same as touching the Simulator
   # "Reset Content & Settings" menu item.
   #
-  # @param [RunLoop::Device, String] The simulator to erase.  Can be a device
-  #   instance, a simulator UUID, or a human readable simulator name.
+  # @param [RunLoop::Device, String] device The simulator to erase.  Can be a
+  #  RunLoop::Device instance, a simulator UUID, or a human readable simulator
+  #  name.
   #
   # @raise ArgumentError If the simulator is a physical device
   # @raise RuntimeError If the simulator cannot be shutdown
