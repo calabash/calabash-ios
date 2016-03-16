@@ -138,16 +138,6 @@ module Calabash
         Calabash::Cucumber::VERSION
       end
 
-      # Queries all views in view hierarchy, even if not visible.
-      # @deprecated use the 'all' or 'visible' modifier in query syntax
-      def query_all(uiquery, *args)
-        msg0 = "use the 'all' or 'visible' query language feature"
-        msg1 = 'see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax'
-        msg = "#{msg0}\n#{msg1}"
-        _deprecated('0.9.133', msg, :warn)
-        map("all #{uiquery}", :query, *args)
-      end
-
       # Performs the `tap` gesture on the (first) view that matches
       # query `uiquery`. Note that `touch` assumes the view is visible and not animating.
       # If the view is not visible `touch` will fail. If the view is animating
