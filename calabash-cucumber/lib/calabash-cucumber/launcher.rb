@@ -229,18 +229,16 @@ Resetting physical devices is not supported.
     }
 
     device_tgt = ENV['DEVICE_TARGET']
-    if run_with_instruments?(args)
-      if simulator_target?
-        args[:device_target] = device_tgt
-        args[:udid] = nil
-      else
-        if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
-          device_tgt = RunLoop::Core.detect_connected_device
-        end
+    if simulator_target?
+      args[:device_target] = device_tgt
+      args[:udid] = nil
+    else
+      if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
+        device_tgt = RunLoop::Core.detect_connected_device
+      end
 
-        if device_tgt
-          args[:device_target] = args[:udid] = device_tgt
-        end
+      if device_tgt
+        args[:device_target] = args[:udid] = device_tgt
       end
     end
 
@@ -587,11 +585,6 @@ true.  Please remove this method call from your hooks.
   end
 
   # @!visibility private
-  def run_with_instruments?(args)
-    args && args[:launch_method] == :instruments
-  end
-
-  # @!visibility private
   def active?
     not run_loop.nil?
   end
@@ -603,9 +596,11 @@ true.  Please remove this method call from your hooks.
 
   # @!visibility private
   def inspect
-    msg = ["#{self.class}: Launch Method #{launch_args && launch_args[:launch_method]}"]
-    if run_with_instruments?(self.launch_args) && self.run_loop
+    msg = ["#{self.class}"]
+    if self.run_loop
       msg << "Log file: #{self.run_loop[:log_file]}"
+    else
+      msg << "Not attached to instruments; run `console_attach`"
     end
     msg.join("\n")
   end
