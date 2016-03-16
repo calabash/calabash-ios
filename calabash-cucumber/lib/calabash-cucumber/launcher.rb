@@ -164,14 +164,6 @@ Queries will work, but gestures will not.
     device.ios_version
   end
 
-  # @deprecated 0.10.0 Replaced with {#reset_app_sandbox}.
-  # Reset the app sandbox for a device.
-  def reset_app_jail(sdk=nil, path=nil)
-    # will be deprecated in a future version
-    #_deprecated('0.10.0', 'use reset_app_sandbox instead', :warn)
-    reset_app_sandbox({:sdk => sdk, :path => path})
-  end
-
   # Resets the app's content and settings by deleting the following directories
   # from application sandbox:
   #
