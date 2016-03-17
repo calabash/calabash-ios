@@ -23,6 +23,7 @@ The following variables are no longer used by Calabash.
 * `NO_GEN`
 * `SUBMIT_URL`
 * `http_proxy`
+* `CALABASH_VERSION_PATH`
 
 ## Conventions
 
@@ -448,14 +449,6 @@ $ cd calabash-ios/calabash-cucumber
 $ tree -d -L 1 ../../calabash-ios-server
 ../../calabash-ios-server
 ```
-
-### `CALABASH_VERSION_PATH`
-
-This variable should be deprecated.
-
-The http 'version' route.
-
-Unless you are gem or server dev, don't set this.
 
 ### `CONNECT_TIMEOUT` and `MAX_CONNECT_RETRY`
 
