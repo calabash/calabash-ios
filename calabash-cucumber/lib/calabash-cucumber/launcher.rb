@@ -84,6 +84,24 @@ class Calabash::Cucumber::Launcher
     @@launcher = self
   end
 
+  # @!visibilit private
+  def to_s
+    msg = ["#{self.class}"]
+    if self.run_loop
+      msg << "Log file: #{self.run_loop[:log_file]}"
+    else
+      msg << "Not attached to instruments."
+      msg << "Start your app with `start_test_server_in_background`"
+      msg << "If you app is already running, try `console_attach`"
+    end
+    msg.join("\n")
+  end
+
+  # @!visibility private
+  def inspect
+    to_s
+  end
+
   # @!visibility private
   def actions
     attach if @actions.nil?
@@ -134,6 +152,16 @@ Queries will work, but gestures will not.
     l.instruments?
   end
 
+  # @!visibility private
+  def instruments?
+    !!(active? && run_loop[:pid])
+  end
+
+  # @!visibility private
+  def active?
+    not run_loop.nil?
+  end
+
   # Get a reference to the current launcher (instantiates a new one if needed). Usually we use a singleton launcher throughout a test run.
   # @return {Calabash::Cucumber::Launcher} the current launcher
   def self.launcher
@@ -162,97 +190,6 @@ Queries will work, but gestures will not.
   def ios_version
     return nil if device.nil?
     device.ios_version
-  end
-
-  # @deprecated 0.10.0 Replaced with {#reset_app_sandbox}.
-  # Reset the app sandbox for a device.
-  def reset_app_jail(sdk=nil, path=nil)
-    # will be deprecated in a future version
-    #_deprecated('0.10.0', 'use reset_app_sandbox instead', :warn)
-    reset_app_sandbox({:sdk => sdk, :path => path})
-  end
-
-  # Resets the app's content and settings by deleting the following directories
-  # from application sandbox:
-  #
-  # * Library
-  # * Documents
-  # * tmp
-  #
-  # @note It is not recommended that you call this method directly.  See the
-  #  examples below for how use the `RESET_BETWEEN_SCENARIOS` environmental
-  #  variable to reset the app sandbox.
-  #
-  # @note This method is only available for the iOS Simulator.
-  #
-  # @note Generates a warning if called when targeting a physical device and
-  #  otherwise has no effect.
-  #
-  # @note When testing against the Xamarin Test Cloud, this method is never
-  #  called.  Use the `RESET_BETWEEN_SCENARIOS` environmental variable.
-  #  See the examples.
-  #
-  # @example Use `RESET_BETWEEN_SCENARIOS` to reset the app sandbox before every Scenario.
-  #  When testing devices outside the Xamarin Test Cloud this has no effect.
-  #
-  #  On the Xamarin Test Cloud, the app sandbox will be reset, but this method
-  #  will not be called; the resetting is done via an alternative mechanism.
-  #
-  #  When testing simulators, this method will be called.
-  #
-  #  Launch cucumber with RESET_BETWEEN_SCENARIOS=1
-  #
-  #  $ RESET_BETWEEN_SCENARIOS=1 bundle exec cucumber
-  #
-  # @example Use tags and a Before hook to reset the app sandbox before specific Scenarios.
-  #  # in your .feature file
-  #
-  #  @reset_app_before_hook
-  #  Scenario:  some scenario that requires the app be reset
-  #
-  #  # in your support/01_launch.rb file
-  #  #
-  #  # 1. add a Before hook
-  #  Before('@reset_app_before_hook') do
-  #    ENV['RESET_BETWEEN_SCENARIOS'] = '1'
-  #  end
-  #
-  #  # 2. after launching, revert the env var value
-  #  Before do |scenario|
-  #    # launch the app
-  #    launcher = Calabash::Cucumber::Launcher.new
-  #    unless launcher.calabash_no_launch?
-  #      launcher.relaunch
-  #      launcher.calabash_notify(self)
-  #    end
-  #    # disable resetting between Scenarios
-  #    ENV['RESET_BETWEEN_SCENARIOS'] = ''
-  #  end
-  #
-  # @param [Hash] opts can pass the target sdk or the path to the application bundle
-  # @option opts [String, Symbol] :sdk (nil) The target sdk.  If nil is
-  #  passed, then only app sandbox for the latest sdk will be deleted.  If
-  #  `:all` is passed, then the sandboxes for all sdks will be deleted.
-  # @option opts [String] :path (nil) path to the application bundle
-  def reset_app_sandbox(opts={})
-    calabash_warn(%Q{
-Starting in Calabash 0.17.0, this method does nothing.
-
-You can still control whether or not your app's sandbox is
-reset between Scenarios using RESET_BETWEEN_SCENARIOS=1 or
-by passing :reset => true as a launch option.
-
-options = {
-  :reset => true
-}
-
-launcher.relaunch(options)
-
-Please do not ignore this message.
-
-Remove direct calls to reset_app_sandbox.
-
-})
   end
 
   # Erases a simulator. This is the same as touching the Simulator
@@ -309,7 +246,6 @@ Resetting physical devices is not supported.
     # NO_STOP
 
     args = {
-        :launch_method => default_launch_method,
         :reset => reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
         :no_stop => calabash_no_stop?,
@@ -321,18 +257,16 @@ Resetting physical devices is not supported.
     }
 
     device_tgt = ENV['DEVICE_TARGET']
-    if run_with_instruments?(args)
-      if simulator_target?
-        args[:device_target] = device_tgt
-        args[:udid] = nil
-      else
-        if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
-          device_tgt = RunLoop::Core.detect_connected_device
-        end
+    if simulator_target?
+      args[:device_target] = device_tgt
+      args[:udid] = nil
+    else
+      if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
+        device_tgt = RunLoop::Core.detect_connected_device
+      end
 
-        if device_tgt
-          args[:device_target] = args[:udid] = device_tgt
-        end
+      if device_tgt
+        args[:device_target] = args[:udid] = device_tgt
       end
     end
 
@@ -359,11 +293,6 @@ Resetting physical devices is not supported.
     end
 
     return false
-  end
-
-  # @!visibility private
-  def default_launch_method
-    :instruments
   end
 
   # Launches your app on the connected device or simulator.
@@ -445,7 +374,7 @@ Resetting physical devices is not supported.
         if simulator_target?(args)
           args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_sim_dylib
         else
-          raise RuntimeError, "Injecting a dylib is not supported when targetting a device"
+          raise RuntimeError, "Injecting a dylib is not supported when targeting a device"
         end
       else
         unless File.exist? use_dylib
@@ -681,30 +610,6 @@ true.  Please remove this method call from your hooks.
   # @!visibility private
   def app_path
     RunLoop::Environment.path_to_app_bundle || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
-  end
-
-  # @!visibility private
-  def run_with_instruments?(args)
-    args && args[:launch_method] == :instruments
-  end
-
-  # @!visibility private
-  def active?
-    not run_loop.nil?
-  end
-
-  # @!visibility private
-  def instruments?
-    !!(active? && run_loop[:pid])
-  end
-
-  # @!visibility private
-  def inspect
-    msg = ["#{self.class}: Launch Method #{launch_args && launch_args[:launch_method]}"]
-    if run_with_instruments?(self.launch_args) && self.run_loop
-      msg << "Log file: #{self.run_loop[:log_file]}"
-    end
-    msg.join("\n")
   end
 
   # @!visibility private
