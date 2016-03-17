@@ -3,6 +3,14 @@ module Calabash
     module Environment
 
       # @!visibility private
+      DEFAULTS = {
+        # The endpoint of the app under test
+        :aut_endpoint => "http://127.0.0.1:37265/",
+        :http_connection_retries => 10,
+        :http_connection_timeout => 30
+      }
+
+      # @!visibility private
       def self.xtc?
         RunLoop::Environment.xtc?
       end
@@ -49,12 +57,27 @@ module Calabash
         if value
           value
         else
-          DEFAULT_AUT_ENDPOINT
+          DEFAULTS[:aut_endpoint]
         end
       end
 
-      # @!visibility private
-      DEFAULT_AUT_ENDPOINT = "http://127.0.0.1:37265/"
+      def self.http_connection_retries
+        value = ENV["MAX_CONNECT_RETRIES"]
+        if value && value != ""
+          value.to_i
+        else
+          DEFAULTS[:http_connection_retries]
+        end
+      end
+
+      def self.http_connection_timeout
+        value = ENV["CONNECTION_TIMEOUT"]
+        if value && value != ""
+          value.to_i
+        else
+          DEFAULTS[:http_connection_timeout]
+        end
+      end
     end
   end
 end

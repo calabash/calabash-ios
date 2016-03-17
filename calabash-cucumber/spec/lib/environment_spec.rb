@@ -1,6 +1,8 @@
 
 describe Calabash::Cucumber::Environment do
 
+  let(:defaults) { Calabash::Cucumber::Environment::DEFAULTS }
+
   describe ".xcode" do
     it "XTC returns nil" do
       expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
@@ -102,7 +104,45 @@ describe Calabash::Cucumber::Environment do
       expect(RunLoop::Environment).to receive(:device_endpoint).and_return(nil)
 
       actual = Calabash::Cucumber::Environment.device_endpoint
-      expect(actual).to be == Calabash::Cucumber::Environment::DEFAULT_AUT_ENDPOINT
+      expect(actual).to be == defaults[:aut_endpoint]
+    end
+  end
+
+  describe ".http_connection_retries" do
+    it "respects MAX_CONNECT_RETRIES" do
+      stub_env({"MAX_CONNECT_RETRIES" => 5})
+
+      actual = Calabash::Cucumber::Environment.http_connection_retries
+      expect(actual).to be == 5
+    end
+
+    it "fails back to the defaults" do
+      stub_env({"MAX_CONNECT_RETRIES" => nil})
+      actual = Calabash::Cucumber::Environment.http_connection_retries
+      expect(actual).to be == defaults[:http_connection_retries]
+
+      stub_env({"MAX_CONNECT_RETRIES" => ""})
+      actual = Calabash::Cucumber::Environment.http_connection_retries
+      expect(actual).to be == defaults[:http_connection_retries]
+    end
+  end
+
+  describe ".http_connection_timeout" do
+    it "respects CONNECTION_TIMEOUT" do
+      stub_env({"CONNECTION_TIMEOUT" => 5})
+
+      actual = Calabash::Cucumber::Environment.http_connection_timeout
+      expect(actual).to be == 5
+    end
+
+    it "falls back to defaults" do
+      stub_env({"CONNECTION_TIMEOUT" => nil})
+      actual = Calabash::Cucumber::Environment.http_connection_timeout
+      expect(actual).to be == defaults[:http_connection_timeout]
+
+      stub_env({"CONNECTION_TIMEOUT" => ""})
+      actual = Calabash::Cucumber::Environment.http_connection_timeout
+      expect(actual).to be == defaults[:http_connection_timeout]
     end
   end
 end
