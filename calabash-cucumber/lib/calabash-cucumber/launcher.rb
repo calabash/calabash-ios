@@ -130,14 +130,14 @@ class Calabash::Cucumber::Launcher
 
   # @see Calabash::Cucumber::Core#console_attach
   def attach(options={})
-    default_options = {:max_retry => 1,
-                       :timeout => 10}
+    default_options = {:http_connection_retry => 1,
+                       :http_connection_timeout => 10}
     merged_options = default_options.merge(options)
 
     self.run_loop = RunLoop::HostCache.default.read
 
-    # Sets the device attribute.
-    ensure_connectivity(merged_options[:max_retry], merged_options[:timeout])
+    # Sets this Launcher#device attribute.
+    ensure_connectivity(merged_options)
 
     if self.run_loop[:pid]
       self.actions = Calabash::Cucumber::InstrumentsActions.new
@@ -495,43 +495,56 @@ Resetting physical devices is not supported.
   end
 
   # @!visibility private
-  def ensure_connectivity(max_retry=10, timeout=30)
-    begin
-      max_retry_count = (ENV['MAX_CONNECT_RETRY'] || max_retry).to_i
-      timeout = (ENV['CONNECT_TIMEOUT'] || timeout).to_i
-      retry_count = 0
-      connected = false
+  def ensure_connectivity(options={})
 
-      until connected do
-        if retry_count == max_retry_count
-          raise "Timed out connecting to Calabash server after #{max_retry_count} retries. Make sure it is linked and App isn't crashing"
-        end
-        retry_count += 1
-        begin
-          Timeout::timeout(timeout, CalabashLauncherTimeoutErr) do
-            until connected
-              begin
-                connected = (ping_app == '200')
-                break if connected
-              rescue StandardError => e
-                RunLoop.log_debug("Could not connect. #{e.message}")
-                RunLoop.log_debug("Will retry ...")
-              ensure
-                sleep 1 unless connected
-              end
-            end
-          end
-        rescue CalabashLauncherTimeoutErr => e
-          RunLoop.log_debug("Timed out after #{timeout} secs, trying to connect to Calabash server...")
-          RunLoop.log_debug("Will retry #{max_retry_count - retry_count}")
-        end
+    default_options = {
+      :http_connection_retry => Calabash::Cucumber::Environment.http_connection_retries,
+      :http_connection_timeout => Calabash::Cucumber::Environment.http_connection_timeout
+    }
+
+    merged_options = default_options.merge(options)
+
+    max_retry_count = merged_options[:http_connection_retry]
+    timeout = merged_options[:http_connection_timeout]
+
+    start_time = Time.now
+
+    max_retry_count.times do |try|
+      RunLoop.log_debug("Trying to connect to Calabash Server: #{try + 1} of #{max_retry_count}")
+
+      # Subtract the aggregate time we've spent thus far to make sure we're
+      # not exceeding the request timeout across retries.
+      time_diff = start_time + timeout - Time.now
+
+      if time_diff <= 0
+        break
       end
-    rescue RuntimeError => e
-      p e
-      msg = "Unable to make connection to Calabash Server at #{device_endpoint}\n"
-      msg << "Make sure you don't have a firewall blocking traffic to #{device_endpoint}.\n"
-      raise msg
+
+      begin
+        http_status = ping_app
+        return true if http_status == "200"
+      rescue => _
+
+      ensure
+        sleep(1)
+      end
     end
+
+    raise RuntimeError,
+%Q[Could not connect to the Calabash Server @ #{device_endpoint}.
+
+See these two guides for help.
+
+* https://github.com/calabash/calabash-ios/wiki/Testing-on-Physical-Devices
+* https://github.com/calabash/calabash-ios/wiki/Testing-on-iOS-Simulators
+
+1. Make sure your application is linked with Calabash.
+2. Make sure there is not a firewall blocking traffic on #{device_endpoint}.
+3. Make sure #{device_endpoint} is correct.
+
+If your app is crashing at launch, find a crash report to determine the cause.
+
+]
   end
 
   # @!visibility private

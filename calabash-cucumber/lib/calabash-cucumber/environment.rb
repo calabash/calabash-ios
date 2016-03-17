@@ -7,7 +7,7 @@ module Calabash
         # The endpoint of the app under test
         :aut_endpoint => "http://127.0.0.1:37265/",
         :http_connection_retries => 10,
-        :http_connection_timeout => 30
+        :http_connection_timeout => 60
       }
 
       # @!visibility private
