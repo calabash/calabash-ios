@@ -20,6 +20,19 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  it "#device_endpoint" do
+    expect(Calabash::Cucumber::Environment).to receive(:device_endpoint).and_return("endpoint")
+
+    expect(launcher.device_endpoint).to be == "endpoint"
+    expect(launcher.instance_variable_get(:@device_endpoint)).to be == "endpoint"
+  end
+
+  it "#usage_tracker" do
+    actual = launcher.usage_tracker
+    expect(actual).to be_a_kind_of(Calabash::Cucumber::UsageTracker)
+    expect(launcher.instance_variable_get(:@usage_tracker)).to be == actual
+  end
+
   describe "#reset_simulator" do
     describe "raises an error when" do
       it "DEVICE_TARGET is a device UDID" do

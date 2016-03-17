@@ -68,6 +68,7 @@ class Calabash::Cucumber::Launcher
   attr_accessor :launch_args
   attr_reader :xcode
   attr_reader :usage_tracker
+  attr_reader :device_endpoint
 
 
   def xcode
@@ -76,6 +77,10 @@ class Calabash::Cucumber::Launcher
 
   def usage_tracker
     @usage_tracker ||= Calabash::Cucumber::UsageTracker.new
+  end
+
+  def device_endpoint
+    @device_endpoint ||= Calabash::Cucumber::Environment.device_endpoint
   end
 
   # @!visibility private
@@ -514,15 +519,15 @@ Resetting physical devices is not supported.
       end
     rescue RuntimeError => e
       p e
-      msg = "Unable to make connection to Calabash Server at #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}\n"
-      msg << "Make sure you don't have a firewall blocking traffic to #{ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/"}.\n"
+      msg = "Unable to make connection to Calabash Server at #{device_endpoint}\n"
+      msg << "Make sure you don't have a firewall blocking traffic to #{device_endpoint}.\n"
       raise msg
     end
   end
 
   # @!visibility private
   def ping_app
-    url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265/")
+    url = URI.parse(device_endpoint)
 
     http = Net::HTTP.new(url.host, url.port)
     res = http.start do |sess|
