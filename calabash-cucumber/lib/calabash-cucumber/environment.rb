@@ -3,6 +3,29 @@ module Calabash
     module Environment
 
       # @!visibility private
+      def self.xtc?
+        RunLoop::Environment.xtc?
+      end
+
+      # @!visibility private
+      def self.xcode
+        return nil if self.xtc?
+        @@xcode ||= RunLoop::Xcode.new
+      end
+
+      # @!visibility private
+      def self.simctl
+        return nil if self.xtc?
+        @@simctl ||= RunLoop::SimControl.new
+      end
+
+      # @!visibility private
+      def self.instruments
+        return nil if self.xtc?
+        @@instruments ||= RunLoop::Instruments.new
+      end
+
+      # @!visibility private
       def self.device_target
         value = RunLoop::Environment.device_target
         if value

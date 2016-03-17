@@ -1,6 +1,62 @@
 
 describe Calabash::Cucumber::Environment do
 
+  describe ".xcode" do
+    it "XTC returns nil" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      expect(Calabash::Cucumber::Environment.xcode).to be == nil
+    end
+
+    it "set class variable" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+
+      actual = Calabash::Cucumber::Environment.xcode
+      expect(actual).to be_a_kind_of(RunLoop::Xcode)
+      expect(Calabash::Cucumber::Environment.class_variable_get(:@@xcode)).to be == actual
+    end
+  end
+
+  describe ".simctl" do
+    it "XTC returns nil" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      expect(Calabash::Cucumber::Environment.simctl).to be == nil
+    end
+
+    it "set class variable" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+
+      actual = Calabash::Cucumber::Environment.simctl
+      expect(actual).to be_a_kind_of(RunLoop::SimControl)
+      expect(Calabash::Cucumber::Environment.class_variable_get(:@@simctl)).to be == actual
+    end
+  end
+
+  describe ".instruments" do
+    it "XTC returns nil" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      expect(Calabash::Cucumber::Environment.instruments).to be == nil
+    end
+
+    it "set class variable" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+
+      actual = Calabash::Cucumber::Environment.instruments
+      expect(actual).to be_a_kind_of(RunLoop::Instruments)
+      expect(Calabash::Cucumber::Environment.class_variable_get(:@@instruments)).to be == actual
+    end
+  end
+
+  it ".xtc?" do
+    expect(RunLoop::Environment).to receive(:xtc?).and_return(true)
+    expect(Calabash::Cucumber::Environment.xtc?).to be_truthy
+
+    expect(RunLoop::Environment).to receive(:xtc?).and_return(false)
+    expect(Calabash::Cucumber::Environment.xtc?).to be_falsey
+  end
+
   describe ".device_target" do
     describe "DEVICE_TARGET is defined" do
       it "simulator" do
