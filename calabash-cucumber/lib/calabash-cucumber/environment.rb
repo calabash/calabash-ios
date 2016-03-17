@@ -18,6 +18,18 @@ module Calabash
 
         identifier
       end
+
+      def self.device_endpoint
+        value = RunLoop::Environment.device_endpoint
+        if value
+          value
+        else
+          DEFAULT_AUT_ENDPOINT
+        end
+      end
+
+      # @!visibility private
+      DEFAULT_AUT_ENDPOINT = "http://127.0.0.1:37265/"
     end
   end
 end
