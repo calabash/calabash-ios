@@ -138,28 +138,27 @@ describe Calabash::Cucumber::Device do
     end
   end
 
-  describe '#simulator?' do
-    it '@simulator_details are available' do
-      expect(device).to receive(:simulator_details).at_least(:once).and_return 'Core Simulator'
+  describe "#simulator?" do
+    it "returns true" do
+      expect(device).to receive(:simulator_details).and_return("Core Simulator")
 
       expect(device.simulator?).to be_truthy
     end
 
-    describe '@simulator_details are not available' do
-      it 'true if system is x86_64' do
-        version_data['system'] = 'x86_64'
-        expect(device).to receive(:simulator_details).and_return nil
+    describe "returns false" do
+      it "simulator_details are nil" do
+        expect(device).to receive(:simulator_details).and_return(nil)
 
-        expect(device.simulator?).to be_truthy
+        expect(device.simulator?).to be_falsey
       end
 
-      it 'false if system is not x86_64' do
-        version_data['system'] = 'anything else'
-        expect(device).to receive(:simulator_details).and_return nil
+      it "simulator_details are the empty string" do
+        expect(device).to receive(:simulator_details).and_return("")
 
         expect(device.simulator?).to be_falsey
       end
     end
+
   end
 
   describe 'iOS version' do

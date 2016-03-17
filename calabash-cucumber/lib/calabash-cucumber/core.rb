@@ -138,16 +138,6 @@ module Calabash
         Calabash::Cucumber::VERSION
       end
 
-      # Queries all views in view hierarchy, even if not visible.
-      # @deprecated use the 'all' or 'visible' modifier in query syntax
-      def query_all(uiquery, *args)
-        msg0 = "use the 'all' or 'visible' query language feature"
-        msg1 = 'see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax'
-        msg = "#{msg0}\n#{msg1}"
-        _deprecated('0.9.133', msg, :warn)
-        map("all #{uiquery}", :query, *args)
-      end
-
       # Performs the `tap` gesture on the (first) view that matches
       # query `uiquery`. Note that `touch` assumes the view is visible and not animating.
       # If the view is not visible `touch` will fail. If the view is animating
@@ -988,23 +978,6 @@ arguments => '#{arguments}'
       # @deprecated use `tap_mark`
       def simple_touch(label, *args)
         tap_mark(label, *args)
-      end
-
-      # taps a view with mark `hash_or_string`
-      # @deprecated In later Calabash versions we will change the semantics of `tap` to take a general query
-      #   (instead of a 'mark' now). We're deprecating this now to prepare people for a breaking change.
-      # @param {String} hash_or_string mark to pass to call `tap_mark(hash_or_string)`.
-      # @return {Array<Hash>} array containing the serialized version of the tapped view.
-      def tap(hash_or_string, *args)
-        deprecation_msg = 'Use tap_mark instead. In later Calabash versions we will change the semantics of `tap` to take a general query.'
-        _deprecated('0.10.0', deprecation_msg, :warn)
-        if hash_or_string.is_a?(String)
-          tap_mark(hash_or_string, *args)
-        elsif hash_or_string.respond_to?(:[])
-          wait_tap(hash_or_string[:query], hash_or_string)
-        else
-          raise(ArgumentError, "first parameter to tap must be a string or a hash. Was: #{hash_or_string.class}, #{hash_or_string}")
-        end
       end
 
       # taps a view with mark `label`. Equivalent to `touch("* marked:'#{label}'")`

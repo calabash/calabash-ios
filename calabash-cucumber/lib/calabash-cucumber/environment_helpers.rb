@@ -204,13 +204,6 @@ module Calabash
         _default_device_or_create.iphone_app_emulated_on_ipad?
       end
 
-      # @deprecated 0.9.168 replaced with `iphone_4in?`
-      # @see #iphone_4in?
-      def iphone_5?
-        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
-        iphone_4in?
-      end
-
       private
       # @!visibility private
       # Returns the device that is currently being tested against.

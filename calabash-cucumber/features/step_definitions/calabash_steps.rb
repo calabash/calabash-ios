@@ -138,12 +138,6 @@ Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field n
   sleep(STEP_PAUSE)
 end
 
-When /^I clear "([^\"]*)"$/ do |name|
-  msg = "When I clear <name>' will be deprecated because it is ambiguous - what should be cleared?"
-  _deprecated('0.9.151', msg, :warn)
-  clear_text("textField marked: '#{name}'")
-end
-
 Then /^I clear (?:input|text) field number (\d+)$/ do |index|
   index = index.to_i
   screenshot_and_raise("Index should be positive (was: #{index})") if index <= 0
