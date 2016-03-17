@@ -259,7 +259,7 @@ Resetting physical devices is not supported.
     # NO_STOP
 
     args = {
-        :reset => reset_between_scenarios?,
+        :reset => Calabash::Cucumber::Environment.reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
         :no_stop => calabash_no_stop?,
         :relaunch_simulator => true,
@@ -626,11 +626,6 @@ true.  Please remove this method call from your hooks.
     else
       false
     end
-  end
-
-  # @!visibility private
-  def reset_between_scenarios?
-    ENV['RESET_BETWEEN_SCENARIOS']=="1"
   end
 
   # @!visibility private
