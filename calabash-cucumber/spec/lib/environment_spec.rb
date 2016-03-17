@@ -161,4 +161,32 @@ describe Calabash::Cucumber::Environment do
       expect(Calabash::Cucumber::Environment.reset_between_scenarios?).to be_falsey
     end
   end
+
+  describe ".run_loop_device" do
+    let(:identifier) { "some device id" }
+
+    before do
+      allow(Calabash::Cucumber::Environment).to receive(:device_target).and_return(identifier)
+    end
+
+    it "returns nil on the XTC" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      actual = Calabash::Cucumber::Environment.run_loop_device
+      expect(actual).to be == nil
+    end
+
+    it "returns a RunLoop::Device instance" do
+      allow(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+      options = {
+        :sim_control => Calabash::Cucumber::Environment.simctl,
+        :instruments => Calabash::Cucumber::Environment.instruments
+      }
+      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_return(:device)
+
+
+      actual = Calabash::Cucumber::Environment.run_loop_device
+      expect(actual).to be == :device
+    end
+  end
 end

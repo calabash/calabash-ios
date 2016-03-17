@@ -52,6 +52,19 @@ module Calabash
       end
 
       # @!visibility private
+      def self.run_loop_device
+        return nil if self.xtc?
+
+        identifier = self.device_target
+
+        options = {
+          :sim_control => self.simctl,
+          :instruments => self.instruments
+        }
+        RunLoop::Device.device_with_identifier(identifier, options)
+      end
+
+      # @!visibility private
       def self.device_endpoint
         value = RunLoop::Environment.device_endpoint
         if value
