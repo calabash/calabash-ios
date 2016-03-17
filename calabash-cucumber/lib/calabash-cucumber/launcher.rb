@@ -46,16 +46,10 @@ class Calabash::Cucumber::Launcher
   end
 
   # @!visibility private
-  # Generated when calabash cannot communicate with the app.
-  class CalabashLauncherTimeoutErr < Timeout::Error
-  end
-
-  # @!visibility private
   @@launcher = nil
 
   # @!visibility private
   SERVER_VERSION_NOT_AVAILABLE = '0.0.0'
-  # noinspection RubyClassVariableUsageInspection
 
   # @!visibility private
   # Class variable for caching the embedded server version so we only need to
