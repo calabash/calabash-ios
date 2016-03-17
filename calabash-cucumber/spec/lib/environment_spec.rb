@@ -2,24 +2,36 @@
 describe Calabash::Cucumber::Environment do
 
   describe ".device_target" do
-    describe "returns nil" do
-      it "DEVICE_TARGET is not defined" do
-        stub_env({"DEVICE_TARGET" => nil})
 
-        expect(Calabash::Cucumber::Environment.device_target).to be_falsey
+    describe "DEVICE_TARGET is defined" do
+      it "simulator" do
+        expect(RunLoop::Environment).to receive(:device_target).and_return("simulator")
+        expect(RunLoop::Core).to receive(:default_simulator).and_return("Default Simulator")
+
+        actual = Calabash::Cucumber::Environment.device_target
+        expect(actual).to be == "Default Simulator"
       end
 
-      it "DEVICE_TARGET is the empty string" do
-        stub_env({"DEVICE_TARGET" => ""})
+      it "device" do
+        expect(RunLoop::Environment).to receive(:device_target).and_return("device")
+        expect(RunLoop::Core).to receive(:detect_connected_device).and_return("a udid")
 
-        expect(Calabash::Cucumber::Environment.device_target).to be_falsey
+        actual = Calabash::Cucumber::Environment.device_target
+        expect(actual).to be == "a udid"
+      end
+
+      it "anything else" do
+        expect(RunLoop::Environment).to receive(:device_target).and_return("a")
+        expect(Calabash::Cucumber::Environment.device_target).to be == "a"
       end
     end
 
-    it "returns the value of DEVICE_TARGET" do
-      stub_env({"DEVICE_TARGET" => "anything"})
+    it "DEVICE_TARGET is not defined" do
+      expect(RunLoop::Environment).to receive(:device_target).and_return(nil)
+      expect(RunLoop::Core).to receive(:default_simulator).and_return("Default Simulator")
 
-      expect(Calabash::Cucumber::Environment.device_target).to be == "anything"
+      actual = Calabash::Cucumber::Environment.device_target
+      expect(actual).to be == "Default Simulator"
     end
   end
 end

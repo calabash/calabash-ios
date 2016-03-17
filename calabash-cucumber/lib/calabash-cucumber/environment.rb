@@ -3,13 +3,20 @@ module Calabash
     module Environment
 
       def self.device_target
-        value = ENV["DEVICE_TARGET"]
-
-        if value.nil? || value == ""
-          nil
+        value = RunLoop::Environment.device_target
+        if value
+          if value == "simulator"
+            identifier = RunLoop::Core.default_simulator
+          elsif value == "device"
+            identifier = RunLoop::Core.detect_connected_device
+          else
+            identifier = value
+          end
         else
-          value
+          identifier = RunLoop::Core.default_simulator
         end
+
+        identifier
       end
     end
   end
