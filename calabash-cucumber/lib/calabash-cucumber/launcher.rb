@@ -553,7 +553,7 @@ If your app is crashing at launch, find a crash report to determine the cause.
 
         http = Net::HTTP.new(url.host, url.port)
         res = http.start do |sess|
-          sess.request Net::HTTP::Get.new(ENV['CALABASH_VERSION_PATH'] || "version")
+          sess.request Net::HTTP::Get.new("version")
         end
         status = res.code
 
