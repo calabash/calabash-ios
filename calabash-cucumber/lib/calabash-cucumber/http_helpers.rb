@@ -6,6 +6,8 @@ module Calabash
     # @!visibility private
     module HTTPHelpers
 
+      require "calabash-cucumber/environment"
+
       # @!visibility private
       CAL_HTTP_RETRY_COUNT=3
 
@@ -33,7 +35,7 @@ module Calabash
 
       # @!visibility private
       def url_for(verb)
-        url = URI.parse(ENV['DEVICE_ENDPOINT']|| "http://localhost:37265")
+        url = URI.parse(Calabash::Cucumber::Environment.device_endpoint)
         path = url.path
         if path.end_with? "/"
           path = "#{path}#{verb}"
