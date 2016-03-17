@@ -58,33 +58,24 @@ class Calabash::Cucumber::Launcher
 
   # @!visibility private
   attr_accessor :run_loop
+
   # @!visibility private
   attr_accessor :device
+
   # @!visibility private
   attr_accessor :actions
+
   # @!visibility private
   attr_accessor :launch_args
+
   # @!visibility private
   attr_reader :xcode
+
   # @!visibility private
   attr_reader :usage_tracker
+
   # @!visibility private
   attr_reader :device_endpoint
-
-  # @!visibility private
-  def xcode
-    @xcode ||= RunLoop::Xcode.new
-  end
-
-  # @!visibility private
-  def usage_tracker
-    @usage_tracker ||= Calabash::Cucumber::UsageTracker.new
-  end
-
-  # @!visibility private
-  def device_endpoint
-    @device_endpoint ||= Calabash::Cucumber::Environment.device_endpoint
-  end
 
   # @!visibility private
   def initialize
@@ -107,6 +98,21 @@ class Calabash::Cucumber::Launcher
   # @!visibility private
   def inspect
     to_s
+  end
+
+  # @!visibility private
+  def xcode
+    @xcode ||= RunLoop::Xcode.new
+  end
+
+  # @!visibility private
+  def usage_tracker
+    @usage_tracker ||= Calabash::Cucumber::UsageTracker.new
+  end
+
+  # @!visibility private
+  def device_endpoint
+    @device_endpoint ||= Calabash::Cucumber::Environment.device_endpoint
   end
 
   # @!visibility private
