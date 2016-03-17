@@ -2,6 +2,7 @@ module Calabash
   module Cucumber
     module Environment
 
+      # @!visibility private
       def self.device_target
         value = RunLoop::Environment.device_target
         if value
@@ -19,6 +20,7 @@ module Calabash
         identifier
       end
 
+      # @!visibility private
       def self.device_endpoint
         value = RunLoop::Environment.device_endpoint
         if value
