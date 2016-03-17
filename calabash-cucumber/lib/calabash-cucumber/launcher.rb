@@ -30,7 +30,25 @@ class Calabash::Cucumber::Launcher
 
   include Calabash::Cucumber::Logging
 
-  # noinspection RubyClassVariableUsageInspection
+  # @!visibility private
+  # Generated when calabash cannot launch the app.
+  class StartError < RuntimeError
+    attr_accessor :error
+
+    def initialize(err)
+      self.error= err
+    end
+
+    # @!visibility private
+    def to_s
+      "#{super.to_s}: #{error}"
+    end
+  end
+
+  # @!visibility private
+  # Generated when calabash cannot communicate with the app.
+  class CalabashLauncherTimeoutErr < Timeout::Error
+  end
 
   # @!visibility private
   @@launcher = nil
@@ -51,25 +69,6 @@ class Calabash::Cucumber::Launcher
   attr_reader :xcode
   attr_reader :usage_tracker
 
-  # @!visibility private
-  # Generated when calabash cannot launch the app.
-  class StartError < RuntimeError
-    attr_accessor :error
-
-    def initialize(err)
-      self.error= err
-    end
-
-    # @!visibility private
-    def to_s
-      "#{super.to_s}: #{error}"
-    end
-  end
-
-  # @!visibility private
-  # Generated when calabash cannot communicate with the app.
-  class CalabashLauncherTimeoutErr < Timeout::Error
-  end
 
   def xcode
     @xcode ||= RunLoop::Xcode.new
