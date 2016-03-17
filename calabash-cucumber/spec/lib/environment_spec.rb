@@ -145,4 +145,20 @@ describe Calabash::Cucumber::Environment do
       expect(actual).to be == defaults[:http_connection_timeout]
     end
   end
+
+  describe ".reset_between_scenarios?" do
+    it "returns true" do
+      stub_env({"RESET_BETWEEN_SCENARIOS" => "1"})
+
+      expect(Calabash::Cucumber::Environment.reset_between_scenarios?).to be_truthy
+    end
+
+    it "returns false" do
+      stub_env({"RESET_BETWEEN_SCENARIOS" => nil})
+      expect(Calabash::Cucumber::Environment.reset_between_scenarios?).to be_falsey
+
+      stub_env({"RESET_BETWEEN_SCENARIOS" => 1})
+      expect(Calabash::Cucumber::Environment.reset_between_scenarios?).to be_falsey
+    end
+  end
 end

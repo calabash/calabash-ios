@@ -61,6 +61,7 @@ module Calabash
         end
       end
 
+      # @!visibility private
       def self.http_connection_retries
         value = ENV["MAX_CONNECT_RETRIES"]
         if value && value != ""
@@ -70,6 +71,7 @@ module Calabash
         end
       end
 
+      # @!visibility private
       def self.http_connection_timeout
         value = ENV["CONNECTION_TIMEOUT"]
         if value && value != ""
@@ -77,6 +79,11 @@ module Calabash
         else
           DEFAULTS[:http_connection_timeout]
         end
+      end
+
+      # @!visibility private
+      def self.reset_between_scenarios?
+        ENV["RESET_BETWEEN_SCENARIOS"] == "1"
       end
     end
   end
