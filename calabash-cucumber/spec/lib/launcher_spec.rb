@@ -35,10 +35,13 @@ describe 'Calabash Launcher' do
 
   describe "#quit_app_after_scenario?" do
     it "#calabash_no_stop?" do
-      expect(launcher).to receive(:quit_app_after_scenario?).and_return(:value)
-
+      expect(launcher).to receive(:quit_app_after_scenario?).and_return(false)
       expect(RunLoop).not_to receive(:deprecated).and_call_original
-      expect(launcher.calabash_no_stop?).to be == :value
+      expect(launcher.calabash_no_stop?).to be_truthy
+
+      expect(launcher).to receive(:quit_app_after_scenario?).and_return(true)
+      expect(RunLoop).not_to receive(:deprecated).and_call_original
+      expect(launcher.calabash_no_stop?).to be_falsey
     end
 
     it "calls out to Environment" do

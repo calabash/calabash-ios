@@ -37,7 +37,7 @@ After do |scenario|
   #
   # http://calabashapi.xamarin.com/ios/file.ENVIRONMENT_VARIABLES.html#label-QUIT_APP_AFTER_SCENARIO
   # http://calabashapi.xamarin.com/ios/Calabash/Cucumber/Core.html#console_attach-instance_method
-  unless launcher.quit_app_after_scenario?
+  if launcher.quit_app_after_scenario?
     calabash_exit
   end
 end

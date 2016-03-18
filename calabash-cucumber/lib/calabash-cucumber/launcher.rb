@@ -582,7 +582,7 @@ If your app is crashing at launch, find a crash report to determine the cause.
   def calabash_no_stop?
     # Not yet.  Save for 0.20.0.
     # RunLoop.deprecated("0.19.0", "replaced with quit_app_after_scenario")
-    quit_app_after_scenario?
+    !quit_app_after_scenario?
   end
 
   # Should Calabash quit the app under test after each Scenario?
