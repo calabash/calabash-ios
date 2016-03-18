@@ -18,6 +18,16 @@ describe Calabash::Cucumber::Core do
     end.new
   end
 
+  describe "logging" do
+    it "#calabash_warn" do
+      actual = capture_stdout do
+        world.calabash_warn("You have been warned")
+      end.string.gsub(/\e\[(\d+)m/, "")
+
+      expect(actual).to be == "WARN: You have been warned\n"
+    end
+  end
+
   describe '#scroll' do
     describe 'handling direction argument' do
       describe 'raises error if invalid' do

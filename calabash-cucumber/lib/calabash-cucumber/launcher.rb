@@ -1,6 +1,5 @@
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/actions/instruments_actions'
-require 'run_loop'
 require 'cfpropertylist'
 require 'calabash-cucumber/utils/logging'
 require "calabash-cucumber/usage_tracker"
@@ -27,6 +26,7 @@ class Calabash::Cucumber::Launcher
 
   require "calabash-cucumber/dylibs"
   require "calabash-cucumber/environment"
+  require "run_loop"
 
   include Calabash::Cucumber::Logging
 
@@ -142,7 +142,7 @@ class Calabash::Cucumber::Launcher
     if self.run_loop[:pid]
       self.actions = Calabash::Cucumber::InstrumentsActions.new
     else
-      calabash_warn(%Q{
+      RunLoop.log_warn(%Q{
 
 WARNING
 
@@ -659,7 +659,7 @@ true.  Please remove this method call from your hooks.
     end
 
     if exe_paths.empty?
-      calabash_warn "could not find executable in '#{app_bundle_path}'"
+      RunLoop.log_warn("Could not find executable in '#{app_bundle_path}'")
 
       @@server_version = SERVER_VERSION_NOT_AVAILABLE
       return @@server_version
@@ -675,7 +675,7 @@ true.  Please remove this method call from your hooks.
     end
 
     unless server_version
-      calabash_warn('could not find server version by inspecting the binary strings table')
+      RunLoop.log_warn("Could not find server version by inspecting the binary strings table")
 
       @@server_version = SERVER_VERSION_NOT_AVAILABLE
       return @@server_version
@@ -714,7 +714,7 @@ true.  Please remove this method call from your hooks.
     end
 
     if server_version == SERVER_VERSION_NOT_AVAILABLE
-      calabash_warn('server version could not be found - skipping compatibility check')
+      RunLoop.log_warn("Server version could not be found - skipping compatibility check")
       return nil
     end
 
@@ -730,7 +730,7 @@ true.  Please remove this method call from your hooks.
             "       gem version: '#{gem_version}'",
             "min server version: '#{min_server_version}'",
             "    server version: '#{server_version}'"]
-      calabash_warn("#{msgs.join("\n")}")
+      RunLoop.log_warn("#{msgs.join("\n")}")
     end
     nil
   end

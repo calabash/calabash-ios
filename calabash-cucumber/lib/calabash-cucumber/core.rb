@@ -40,6 +40,14 @@ module Calabash
         end
       end
 
+      # Prints a blue warning message.
+      # @param [String] msg the message to print
+      # @return [void]
+      def calabash_warn(msg)
+        require "run_loop/logging"
+        RunLoop.log_warn(msg)
+      end
+
       # The core method for querying into the current visible view
       # of the app under test. The query method takes as first parameter
       # a String `:uiquery`. This string must follow the query syntax

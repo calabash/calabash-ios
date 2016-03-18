@@ -5,16 +5,6 @@ module Calabash
     # Internal logging methods for the calabash-ios gem.
     module Logging
 
-      # Prints a blue warning message.
-      # @param [String] msg the message to print
-      # @return [void]
-      def calabash_warn(msg)
-        begin
-          warn "\033[34m\nWARN: #{msg}\033[0m"
-        rescue
-          warn "\nWARN: #{msg}"
-        end
-      end
 
       # Prints a green info message.
       # @param [String] msg the message to print

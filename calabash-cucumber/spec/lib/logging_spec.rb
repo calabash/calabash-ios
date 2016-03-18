@@ -12,14 +12,6 @@ describe 'calabash logging' do
     expect(out.string).to be == "\e[32m\nINFO: #{info_msg}\e[0m\n"
   end
 
-  it 'should output warning messages' do
-    warn_msg = 'this is a warning message'
-    out = capture_stderr do
-      calabash_warn(warn_msg)
-    end
-    expect(out.string).to be == "\e[34m\nWARN: #{warn_msg}\e[0m\n"
-  end
-
   it 'should output deprecated messages' do
     version = '0.9.169'
     dep_msg = 'this is a deprecation message'
@@ -31,10 +23,9 @@ describe 'calabash logging' do
     expect(tokens.count).to be > 5
     expect(tokens.count).to be < 9
   end
-
 end
 
-describe Calabash do
+describe Calabash::Cucumber do
 
   describe "file logging" do
     let(:now) { Time.now }
