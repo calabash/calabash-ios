@@ -447,9 +447,7 @@ module Calabash
         # TODO formally deprecate send_uia_command with _deprecated function
         #cmd = opts[:command]
         #new_opts = cmd.select{|x| x != :command}
-        #_deprecated('0.9.163',
-        #            "use 'uia(#{cmd}, #{new_opts})' instead",
-        #            :warn)
+        #RunLoop.deprecated("0.9.163", "Use 'uia(#{cmd}, #{new_opts})' instead")
 
         uia(opts[:command], opts)
       end

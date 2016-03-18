@@ -283,12 +283,6 @@ module Calabash
       # @option opts [Float] :wait_after_char ('POST_ENTER_KEYBOARD' or 0.05)
       #  how long to wait after a character is typed.
       def keyboard_enter_char(chr, opts={})
-        unless opts.is_a?(Hash)
-         msg = "you should no longer pass a boolean as the second arg; pass {:should_screenshot => '#{opts}'}  hash instead"
-         _deprecated('0.9.163', msg, :warn)
-         opts = {:should_screenshot => opts}
-        end
-
         default_opts = {:should_screenshot => true,
                         # introduce a small wait to avoid skipping characters
                         # keep this as short as possible

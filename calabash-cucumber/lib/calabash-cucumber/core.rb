@@ -56,6 +56,30 @@ module Calabash
         RunLoop.log_info2(msg)
       end
 
+      # Prints a deprecated message that includes the line number.
+      #
+      # @param [String] version indicates when the feature was deprecated
+      # @param [String] msg deprecation message (possibly suggesting alternatives)
+      # @param [Symbol] type { :warn | :pending } - :pending will raise a
+      #   cucumber pending error
+      # @return [void]
+      def deprecated(version, msg, type)
+        allowed = [:pending, :warn]
+        unless allowed.include?(type)
+          raise ArgumentError, "Expected type '#{type}' to be one of #{allowed.join(", ")}"
+        end
+
+        stack = Kernel.caller(0, 6)[1..-1].join("\n")
+
+        msg = "deprecated '#{version}' - #{msg}\n#{stack}"
+
+        if type.eql?(:pending)
+          pending(msg)
+        else
+          calabash_warn(msg)
+        end
+      end
+
       # The core method for querying into the current visible view
       # of the app under test. The query method takes as first parameter
       # a String `:uiquery`. This string must follow the query syntax
@@ -1041,7 +1065,7 @@ arguments => '#{arguments}'
                 "  - use 'clear_text'",
                 'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API']
         msg = msgs.join("\n")
-        _deprecated('0.9.145', msg, :warn)
+        RunLoop.deprecated("0.9.145", msg)
 
         text_fields_modified = map(uiquery, :setText, txt)
 

@@ -36,6 +36,20 @@ describe Calabash::Cucumber::Core do
       # space in RunLoop.log_info2.
       expect(actual).to be == "INFO: You have been info'd"
     end
+
+    it "#deprecated" do
+      version = '0.9.169'
+      dep_msg = 'this is a deprecation message'
+      out = capture_stdout do
+        world.deprecated(version, dep_msg, :warn)
+      end.string.gsub(/\e\[(\d+)m/, "")
+
+      tokens = out.split($-0)
+      message = tokens[0]
+      expect(message).to be == "WARN: deprecated '#{version}' - #{dep_msg}"
+      expect(tokens.count).to be > 5
+      expect(tokens.count).to be < 9
+    end
   end
 
   describe '#scroll' do
