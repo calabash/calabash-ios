@@ -124,23 +124,6 @@ Calling `calabash-ios console` sets the `IRBRC` environment variable.
 $ CALABASH_IRBRC="~/.irbrc-calabash" calabash-ios console
 ```
 
-### `CALABASH_NO_DEPRECATION`
-
-Calabash deprecation warnings getting you down?  Use this variable to turn off deprecation warnings.
-
-It is not recommended that you turn off deprecation warnings. One morning you will wake up and find that everything is broken; it will make you grumpy.
-
-#### Example
-
-```
-CALABASH_NO_DEPRECATION=1 cucumber
-```
-
-#### Pro Tip: Read the deprecation warnings.
-
-Read the deprecation warnings for the replacement API.
-
-
 ### `DEBUG`
 
 Set this variable to `1` to enable verbose logging.
