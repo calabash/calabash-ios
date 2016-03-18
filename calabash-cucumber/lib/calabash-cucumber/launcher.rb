@@ -244,36 +244,29 @@ Queries will work, but gestures will not.
       # @raise RuntimeError If the simulator cannot be shutdown
       # @raise RuntimeError If the simulator cannot be erased
       def reset_simulator(device=nil)
-        if device_target?
-          raise ArgumentError, "Resetting physical devices is not supported."
+        if device.nil? || device == ""
+          device_target = ensure_device_target
+        elsif device.is_a?(RunLoop::Device)
+          device_target = device
+        else
+          options = {
+            :sim_control => Calabash::Cucumber::Environment.simctl,
+            :instruments => Calabash::Cucumber::Environment.instruments
+          }
+          device_target = RunLoop::Device.device_with_identifier(device, options)
         end
 
-        simulator = nil
-
-        if device.nil? || device == ""
-          device_target = Calabash::Cucumber::Environment.device_target
-          if device_target.nil?
-            default_simulator = RunLoop::Core.default_simulator
-            simulator = RunLoop::Device.device_with_identifier(default_simulator)
-          else
-            simulator = RunLoop::Device.device_with_identifier(device_target)
-          end
-        elsif device.is_a?(RunLoop::Device)
-          if device.physical_device?
-            raise ArgumentError,
-                  %Q{
-Cannot reset: #{device}.
+        if device_target.physical_device?
+          raise ArgumentError,
+%Q{
+Cannot reset: #{device_target}.
 
 Resetting physical devices is not supported.
 }
-          end
-          simulator = device
-        else
-          simulator = RunLoop::Device.device_with_identifier(device)
         end
 
-        RunLoop::CoreSimulator.erase(simulator)
-        simulator
+        RunLoop::CoreSimulator.erase(device_target)
+        device_target
       end
 
       # @!visibility private
