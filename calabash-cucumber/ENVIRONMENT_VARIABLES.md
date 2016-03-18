@@ -24,6 +24,10 @@ The following variables are no longer used by Calabash.
 * `http_proxy`
 * `CALABASH_VERSION_PATH`
 
+### 0.19.0
+
+* `NO_STOP` - replaced with QUIT_APP_AFTER_SCENARIO
+
 ## Conventions
 
 Variables that take boolean values should be passed as `0` or `1`, _not_ as `true` or `false`.
@@ -232,7 +236,7 @@ instruments -s devices
 
 Device UDIDs should be private.  When posting debug output on the web, do not post un-obscured device UDIDs.
 
-### `NO_STOP`
+### `QUIT_APP_AFTER_SCENARIO`
 
 Use this to control whether or not calabash will exit your application after the cucumber tests have completed.
 
@@ -241,23 +245,22 @@ Here is an example Cucumber After hook.
 ```
 After do |scenario|
   launcher = Calabash::Cucumber::Launcher.new
-  unless launcher.calabash_no_stop?
+  unless launcher.quit_app_after_scenario?
     calabash_exit
-    launcher.stop
   end
 end
 ```
 
-If `NO_STOP=1`, then `calabash_exit` and `launcher.stop` will _not_ be called and your application will remain running after Cucumber finishes.  This variable is commonly used with {Calabash::Cucumber::Core#console_attach} to debug failing Scenarios.
+If `QUIT_APP_AFTER_SCENARIO=0`, then `calabash_exit` will _not_ be called and your application will remain running after Cucumber finishes.  This variable is commonly used with {Calabash::Cucumber::Core#console_attach} to debug failing Scenarios.
 
-#### Pro Tip:  Use NO_STOP=1, console_attach, and the @wip tag to debug failing Scenarios.
+#### Pro Tip:  Use QUIT_APP_AFTER_SCENARIO=0, console_attach, and the @wip tag to debug failing Scenarios.
 
-When debugging a failing Scenario, use `NO_STOP=1` to prohibit calabash from exiting your application, open a console, call `console_attach`, and explore your application from the command line.
+When debugging a failing Scenario, use `QUIT_APP_AFTER_SCENARIO=1` to prohibit calabash from exiting your application, open a console, call `console_attach`, and explore your application from the command line.
 
 ```
 1. Tag your failing Scenario with @wip (Work in Progress).
 2. Run just that Scenario.
-   $ NO_STOP=1 bundle exec cucumber -t @wip
+   $ QUIT_APP_AFTER_SCENARIO=0 bundle exec cucumber -t @wip
 3. When it fails, the application will remain open.
 4. Open a console and call console_attach
    $ bundle exec calabash-ios console

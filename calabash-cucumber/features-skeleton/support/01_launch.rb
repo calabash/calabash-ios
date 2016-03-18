@@ -33,11 +33,11 @@ After do |scenario|
   # in the UIApplicationDelegate.  This is really nice for CI environments, but
   # not so good for local development.
   #
-  # See the documentation for NO_STOP for a nice debugging workflow
+  # See the documentation for QUIT_APP_AFTER_SCENARIO for a nice debugging workflow
   #
-  # http://calabashapi.xamarin.com/ios/file.ENVIRONMENT_VARIABLES.html#label-NO_STOP
+  # http://calabashapi.xamarin.com/ios/file.ENVIRONMENT_VARIABLES.html#label-QUIT_APP_AFTER_SCENARIO
   # http://calabashapi.xamarin.com/ios/Calabash/Cucumber/Core.html#console_attach-instance_method
-  unless launcher.calabash_no_stop?
+  if launcher.quit_app_after_scenario?
     calabash_exit
   end
 end

@@ -19,8 +19,8 @@ require "calabash-cucumber/usage_tracker"
 # use `console_attach`.  This is useful when a cucumber Scenario has failed and
 # you want to query the current state of the app.
 #
-# * **Pro Tip:** set the `NO_STOP` environmental variable to 1 so calabash does
-#  not exit the simulator when a Scenario fails.
+# * **Pro Tip:** Set the `QUIT_APP_AFTER_SCENARIO=0` env variable so calabash
+# does not quit your application after a failed Scenario.
 class Calabash::Cucumber::Launcher
 
   require "calabash-cucumber/dylibs"
@@ -253,12 +253,13 @@ Resetting physical devices is not supported.
     # DEVICE_TARGET
     # RESET_BETWEEN_SCENARIOS
     # DEVICE
-    # NO_STOP
+    # QUIT_APP_AFTER_SCENARIO
 
     args = {
         :reset => Calabash::Cucumber::Environment.reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
-        :no_stop => calabash_no_stop?,
+        # TODO: Deprecate this key.  Use :quit_app_after_scenario.
+        :no_stop => quit_app_after_scenario?,
         :relaunch_simulator => true,
         # Do not advertise this to users!
         # For example, don't include documentation about this option.
@@ -576,9 +577,19 @@ If your app is crashing at launch, find a crash report to determine the cause.
     end
   end
 
+  # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
   # @!visibility private
   def calabash_no_stop?
-    ENV['NO_STOP']=="1"
+    # Not yet.  Save for 0.20.0.
+    # RunLoop.deprecated("0.19.0", "replaced with quit_app_after_scenario")
+    !quit_app_after_scenario?
+  end
+
+  # Should Calabash quit the app under test after each Scenario?
+  #
+  # Control this behavior using the QUIT_APP_AFTER_SCENARIO variable.
+  def quit_app_after_scenario?
+    Calabash::Cucumber::Environment.quit_app_after_scenario?
   end
 
   # @deprecated 0.19.0

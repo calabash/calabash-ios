@@ -33,6 +33,24 @@ describe 'Calabash Launcher' do
     expect(launcher.instance_variable_get(:@usage_tracker)).to be == actual
   end
 
+  describe "#quit_app_after_scenario?" do
+    it "#calabash_no_stop?" do
+      expect(launcher).to receive(:quit_app_after_scenario?).and_return(false)
+      expect(RunLoop).not_to receive(:deprecated).and_call_original
+      expect(launcher.calabash_no_stop?).to be_truthy
+
+      expect(launcher).to receive(:quit_app_after_scenario?).and_return(true)
+      expect(RunLoop).not_to receive(:deprecated).and_call_original
+      expect(launcher.calabash_no_stop?).to be_falsey
+    end
+
+    it "calls out to Environment" do
+      expect(Calabash::Cucumber::Environment).to receive(:quit_app_after_scenario?).and_return(:value)
+
+      expect(launcher.quit_app_after_scenario?).to be == :value
+    end
+  end
+
   describe "#reset_simulator" do
     describe "raises an error when" do
       it "DEVICE_TARGET is a device UDID" do
