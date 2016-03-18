@@ -1,11 +1,9 @@
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/environment_helpers'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
-
 
     # Raised when there is a problem involving a keyboard mode.  There are
     # three keyboard modes:  docked, split, and undocked.
@@ -51,7 +49,6 @@ module Calabash
     module KeyboardHelpers
 
       include Calabash::Cucumber::TestsHelpers
-      include Calabash::Cucumber::Logging
 
       # @!visibility private
       KEYPLANE_NAMES = {

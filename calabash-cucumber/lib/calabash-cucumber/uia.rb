@@ -1,6 +1,5 @@
 require 'edn'
 require 'json'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
@@ -8,8 +7,6 @@ module Calabash
     # See also {https://developer.apple.com/library/ios/documentation/ToolsLanguages/Reference/UIAElementClassReference/UIAElement/UIAElement.html}
     # Typically used to interact with System or remote views.
     module UIA
-
-      include Calabash::Cucumber::Logging
 
       # Executes raw JavaScript in the UIAutomation environment (using `eval`).
       # @param {String} command the JavaScript snippet to execute

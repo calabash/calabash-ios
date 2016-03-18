@@ -1,7 +1,6 @@
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/actions/instruments_actions'
 require 'cfpropertylist'
-require 'calabash-cucumber/utils/logging'
 require "calabash-cucumber/usage_tracker"
 
 # Used to launch apps for testing in iOS Simulator or on iOS Devices.
@@ -27,8 +26,6 @@ class Calabash::Cucumber::Launcher
   require "calabash-cucumber/dylibs"
   require "calabash-cucumber/environment"
   require "run_loop"
-
-  include Calabash::Cucumber::Logging
 
   # @!visibility private
   # Generated when calabash cannot launch the app.

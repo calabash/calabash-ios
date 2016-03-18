@@ -1,5 +1,4 @@
 require 'calabash-cucumber'
-require 'calabash-cucumber/utils/logging'
 require 'awesome_print'
 require 'fileutils'
 require 'tmpdir'
@@ -7,8 +6,6 @@ require 'resources'
 require 'stub_env'
 require 'pry'
 require 'luffa'
-
-include Calabash::Cucumber::Logging
 
 # Don't post usage stats during rspec tests
 Calabash::Cucumber::UsageTracker.disable_usage_tracking

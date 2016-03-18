@@ -10,7 +10,6 @@ require 'calabash-cucumber/failure_helpers'
 require 'calabash-cucumber/status_bar_helpers'
 require 'calabash-cucumber/rotation_helpers'
 require 'calabash-cucumber/map'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
@@ -18,7 +17,6 @@ module Calabash
     # A collection of methods that provide the core calabash behaviors.
     module Core
 
-      include Calabash::Cucumber::Logging
       include Calabash::Cucumber::EnvironmentHelpers
       include Calabash::Cucumber::ConnectionHelpers
       include Calabash::Cucumber::QueryHelpers

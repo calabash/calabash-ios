@@ -1,5 +1,3 @@
-require 'calabash-cucumber/utils/logging'
-
 module Calabash
   module Cucumber
 
@@ -8,7 +6,6 @@ module Calabash
     module RotationHelpers
 
       require "run_loop"
-      include Calabash::Cucumber::Logging
 
       # @!visibility private
       # @deprecated 0.16.1
