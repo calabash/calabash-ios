@@ -230,6 +230,7 @@ describe Calabash::Cucumber::Environment do
         end
       end
     end
+
     describe ".no_stop?" do
       describe "NO_STOP is defined" do
         it "is 1" do

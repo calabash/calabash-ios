@@ -258,7 +258,8 @@ Resetting physical devices is not supported.
     args = {
         :reset => Calabash::Cucumber::Environment.reset_between_scenarios?,
         :bundle_id => ENV['BUNDLE_ID'],
-        :no_stop => calabash_no_stop?,
+        # TODO: Deprecate this key.  Use :quit_app_after_scenario.
+        :no_stop => quit_app_after_scenario?,
         :relaunch_simulator => true,
         # Do not advertise this to users!
         # For example, don't include documentation about this option.
@@ -576,9 +577,18 @@ If your app is crashing at launch, find a crash report to determine the cause.
     end
   end
 
+  # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
   # @!visibility private
   def calabash_no_stop?
-    ENV['NO_STOP']=="1"
+    RunLoop.deprecated("0.19.0", "replaced with quit_app_after_scenario")
+    quit_app_after_scenario?
+  end
+
+  # Should Calabash quit the app under test after each Scenario?
+  #
+  # Control this behavior using the QUIT_APP_AFTER_SCENARIO variable.
+  def quit_app_after_scenario?
+    Calabash::Cucumber::Environment.quit_app_after_scenario?
   end
 
   # @deprecated 0.19.0
