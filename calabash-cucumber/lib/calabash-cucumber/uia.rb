@@ -392,7 +392,7 @@ module Calabash
                      end
         end
         command = "#{js_cmd}.#{js_args.join('.')}"
-        if debug_logging?
+        if RunLoop::Environment.debug?
           puts 'Sending UIA command'
           puts command
         end
@@ -404,7 +404,7 @@ module Calabash
       # @!visibility private
       def uia_handle_command(cmd, *query_args)
         command = uia_serialize_command(cmd, *query_args)
-        if debug_logging?
+        if RunLoop::Environment.debug?
           puts 'Sending UIA command'
           puts command
         end
@@ -466,7 +466,7 @@ module Calabash
       end
 
       def uia_result(s)
-        if debug_logging?
+        if RunLoop::Environment.debug?
           puts 'Result'
           p s
         end

@@ -5,16 +5,6 @@ module Calabash
     # Internal logging methods for the calabash-ios gem.
     module Logging
 
-      # @!visibility private
-      # Has debug logging been enabled?
-      #
-      # The return value is controlled by the `DEBUG` environment variable.
-      #
-      # @return [Boolean] Returns `true` if debug logging has been enabled.
-      def debug_logging?
-        ENV['DEBUG'] == '1'
-      end
-
       # Prints a blue warning message.
       # @param [String] msg the message to print
       # @return [void]
