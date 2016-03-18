@@ -19,8 +19,8 @@ require "calabash-cucumber/usage_tracker"
 # use `console_attach`.  This is useful when a cucumber Scenario has failed and
 # you want to query the current state of the app.
 #
-# * **Pro Tip:** set the `NO_STOP` environmental variable to 1 so calabash does
-#  not exit the simulator when a Scenario fails.
+# * **Pro Tip:** Set the `QUIT_APP_AFTER_SCENARIO=0` env variable so calabash
+# does not quit your application after a failed Scenario.
 class Calabash::Cucumber::Launcher
 
   require "calabash-cucumber/dylibs"
@@ -253,7 +253,7 @@ Resetting physical devices is not supported.
     # DEVICE_TARGET
     # RESET_BETWEEN_SCENARIOS
     # DEVICE
-    # NO_STOP
+    # QUIT_APP_AFTER_SCENARIO
 
     args = {
         :reset => Calabash::Cucumber::Environment.reset_between_scenarios?,
