@@ -83,13 +83,6 @@ describe Calabash::Cucumber::RotationHelpers do
     expect(helper.send(:rotate_with_uia, :left, :down)).to be == :result
   end
 
-  it '#rotate_with_playback' do
-    expect(helper).to receive(:recording_name).and_return 'recording name'
-    expect(helper).to receive(:playback).with('recording name').and_return :result
-
-    expect(helper.send(:rotate_with_playback, :left, :down)).to be == :result
-  end
-
   describe '#uia_orientation_key' do
     describe ':left' do
       it ':down' do helper.send(:uia_orientation_key, :left, :down) == :landscape_right end
@@ -103,44 +96,6 @@ describe Calabash::Cucumber::RotationHelpers do
       it ':right' do helper.send(:uia_orientation_key, :right, :right) == :upside_down end
       it ':left' do helper.send(:uia_orientation_key, :right, :left) == :portrait end
       it ':up' do helper.send(:uia_orientation_key, :right, :up) == :landscape_right end
-    end
-  end
-
-  describe '#recording_name' do
-    describe ':left' do
-      it ':down' do
-        helper.send(:recording_name, :left, :down) == 'rotate_left_home_down'
-      end
-
-      it ':right' do
-        helper.send(:recording_name, :left, :right) == 'rotate_left_home_right'
-      end
-
-      it ':left' do
-        helper.send(:recording_name, :left, :left) == 'rotate_left_home_left'
-      end
-
-      it ':up' do
-        helper.send(:recording_name, :left, :up) == 'rotate_left_home_up'
-      end
-    end
-
-    describe ':right' do
-      it ':down' do
-        helper.send(:recording_name, :left, :down) == 'rotate_right_home_down'
-      end
-
-      it ':right' do
-        helper.send(:recording_name, :left, :right) == 'rotate_right_home_right'
-      end
-
-      it ':left' do
-        helper.send(:recording_name, :left, :left) == 'rotate_right_home_left'
-      end
-
-      it ':up' do
-        helper.send(:recording_name, :left, :up) == 'rotate_right_home_up'
-      end
     end
   end
 
@@ -211,28 +166,6 @@ describe Calabash::Cucumber::RotationHelpers do
       it ':bottom' do
         expect(helper.send(:ensure_valid_rotate_home_to_arg, :bottom)).to be == :down
       end
-    end
-  end
-
-  describe '#rotate_home_button_to_position_with_playback' do
-    let(:method_name) { :rotate_home_button_to_position_with_playback }
-
-    it 'returns :down if rotation cannot be performed' do
-      expect(helper).to receive(:rotation_candidates).and_return([])
-
-      expect(helper.send(method_name, :any_arg)).to be == :down
-    end
-
-    let(:candidates) { [:a, :b, :c, :left] }
-
-    it 'calls playback with candidates' do
-      expect(helper).to receive(:playback).exactly(4).times.and_return nil
-      expect(helper).to receive(:sleep).exactly(4).times.and_return nil
-      expect(helper).to receive(:recalibrate_after_rotation).exactly(4).times.and_call_original
-      expect(helper).to receive(:status_bar_orientation).and_return(*candidates)
-      expect(helper).to receive(:rotation_candidates).and_return candidates
-
-      expect(helper.send(method_name, :left)).to be == :left
     end
   end
 end
