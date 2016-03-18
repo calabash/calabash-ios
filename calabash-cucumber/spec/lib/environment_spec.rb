@@ -189,4 +189,70 @@ describe Calabash::Cucumber::Environment do
       expect(actual).to be == :device
     end
   end
+
+  describe "Quitting the app after each Scenario" do
+    describe ".quit_app_after_scenario?" do
+      it "QUIT_APP_AFTER_SCENARIO=0" do
+        stub_env({"QUIT_APP_AFTER_SCENARIO" => "0"})
+
+        expect(Calabash::Cucumber::Environment.quit_app_after_scenario?).to be_falsey
+      end
+
+      it "QUIT_APP_AFTER_SCENARIO=1" do
+        stub_env({"QUIT_APP_AFTER_SCENARIO" => "1"})
+
+        expect(Calabash::Cucumber::Environment.quit_app_after_scenario?).to be_truthy
+      end
+
+      describe "QUIT_APP_AFTER_SCENARIO vs NO_STOP" do
+        before do
+          stub_env({"QUIT_APP_AFTER_SCENARIO" => nil})
+        end
+
+        it "NO_STOP=1" do
+          stub_env({"NO_STOP" => "1"})
+
+          expect(Calabash::Cucumber::Environment.quit_app_after_scenario?).to be_falsey
+        end
+
+        it "NO_STOP=0" do
+          stub_env({"NO_STOP" => "0"})
+
+          expect(Calabash::Cucumber::Environment.quit_app_after_scenario?).to be_truthy
+        end
+
+        it "NO_STOP is undefined" do
+          stub_env({"NO_STOP" => ""})
+          expect(Calabash::Cucumber::Environment.quit_app_after_scenario?).to be_truthy
+
+          stub_env({"NO_STOP" => nil})
+          expect(Calabash::Cucumber::Environment.quit_app_after_scenario?).to be_truthy
+        end
+      end
+    end
+    describe ".no_stop?" do
+      describe "NO_STOP is defined" do
+        it "is 1" do
+          stub_env({"NO_STOP" => "1"})
+          expect(RunLoop).to receive(:deprecated).and_call_original
+
+          expect(Calabash::Cucumber::Environment.send(:no_stop?)).to be_truthy
+        end
+
+        it "is not 1" do
+          stub_env({"NO_STOP" => "0"})
+          expect(RunLoop).to receive(:deprecated).and_call_original
+
+          expect(Calabash::Cucumber::Environment.send(:no_stop?)).to be_falsey
+        end
+      end
+
+      it "NO_STOP is undefined" do
+        stub_env({"NO_STOP" => nil})
+        expect(RunLoop).not_to receive(:deprecated)
+
+        expect(Calabash::Cucumber::Environment.send(:no_stop?)).to be_falsey
+      end
+    end
+  end
 end

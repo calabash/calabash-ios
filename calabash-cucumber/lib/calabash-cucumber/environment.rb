@@ -2,6 +2,8 @@ module Calabash
   module Cucumber
     module Environment
 
+      require "run_loop"
+
       # @!visibility private
       DEFAULTS = {
         # The endpoint of the app under test
@@ -97,6 +99,49 @@ module Calabash
       # @!visibility private
       def self.reset_between_scenarios?
         ENV["RESET_BETWEEN_SCENARIOS"] == "1"
+      end
+
+      # @!visibility private
+      def self.quit_app_after_scenario?
+        value = ENV["QUIT_APP_AFTER_SCENARIO"]
+
+        if value == "0"
+          false
+        elsif value == "1"
+          true
+        else
+          !self.no_stop?
+        end
+      end
+
+      private
+
+      # @visibility private
+      # @deprecated 0.19.0 - replaced with QUIT_APP_AFTER_SCENARIO
+      def self.no_stop?
+        value = ENV["NO_STOP"]
+        if value
+          return_value = value == "1"
+
+          if return_value
+            replacement = "$ QUIT_APP_AFTER_SCENARIO=0"
+          else
+            replacement = "$ QUIT_APP_AFTER_SCENARIO=1"
+          end
+          RunLoop.deprecated("0.19.0",
+%Q{The 'NO_STOP' env variable has been been replaced with: QUIT_APP_AFTER_SCENARIO
+
+Please replace NO_STOP with QUIT_APP_AFTER_SCENARIO.
+
+#{replacement}
+
+The default behavior is to quit the app after each scenario.
+})
+
+          return_value
+        else
+          false
+        end
       end
     end
   end
