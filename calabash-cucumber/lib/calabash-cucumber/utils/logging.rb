@@ -5,18 +5,6 @@ module Calabash
     # Internal logging methods for the calabash-ios gem.
     module Logging
 
-
-      # Prints a green info message.
-      # @param [String] msg the message to print
-      # @return [void]
-      def calabash_info(msg)
-        begin
-          puts "\033[32m\nINFO: #{msg}\033[0m"
-        rescue
-          puts "\nINFO: #{msg}"
-        end
-      end
-
       # @!visibility private
       # Prints a deprecated message that includes the line number.
       #

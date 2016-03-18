@@ -4,14 +4,6 @@ describe 'calabash logging' do
 
   include Calabash::Cucumber::Logging
 
-  it 'should output info messages' do
-    info_msg = 'this is an info message'
-    out = capture_stdout do
-      calabash_info(info_msg)
-    end
-    expect(out.string).to be == "\e[32m\nINFO: #{info_msg}\e[0m\n"
-  end
-
   it 'should output deprecated messages' do
     version = '0.9.169'
     dep_msg = 'this is a deprecation message'

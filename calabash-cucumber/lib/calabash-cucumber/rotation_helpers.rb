@@ -143,7 +143,7 @@ module Calabash
 
         rotation_candidates.each do |candidate|
           if RunLoop::Environment.debug?
-            calabash_info "Trying to rotate Home Button to '#{home_button_position}' using '#{candidate}'"
+            RunLoop.log_info2("Trying to rotate Home Button to '#{home_button_position}' using '#{candidate}'")
           end
 
           playback(candidate)

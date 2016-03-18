@@ -26,6 +26,16 @@ describe Calabash::Cucumber::Core do
 
       expect(actual).to be == "WARN: You have been warned\n"
     end
+
+    it "#calabash_info" do
+      actual = capture_stdout do
+        world.calabash_info("You have been info'd")
+      end.string.gsub(/\e\[(\d+)m/, "").strip
+
+      # The .strip above future proofs against changes to the silly leading
+      # space in RunLoop.log_info2.
+      expect(actual).to be == "INFO: You have been info'd"
+    end
   end
 
   describe '#scroll' do
