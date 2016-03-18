@@ -166,27 +166,10 @@ module Calabash
           end
         end
 
-        # Deprecated 0.16.2 server
-        @system = version_data['system']
-
-        # 0.16.2 server adds 'device_family' key.
-        unless @device_family
-          # Deprecated 0.16.2 server
-          simulator_device = version_data['simulator_device']
-          if @system == GESTALT_SIM_SYS
-            @device_family = simulator_device
-          else
-            @device_family = @system.split(/[\d,.]/).first
-          end
-        end
-
         # 0.16.2 server adds 'ios_version' key
         unless @ios_version
           @ios_version = version_data['iOS_version']
         end
-
-        # Deprecated 0.13.0
-        @iphone_4in = version_data['4inch']
       end
 
       # Is this device a simulator or physical device?
@@ -288,19 +271,6 @@ module Calabash
       # @return [Boolean] true if the major version of the OS is 5
       def ios5?
         ios_version_object.major == 5
-      end
-
-      # @deprecated 0.11.2 Replaced with screen_dimensions.
-      #
-      # The screen size of the device.
-      #
-      # @return [Hash] representation of the screen size
-      def screen_size
-        _deprecated('0.11.2', 'Replaced with screen_dimensions', :warn)
-        return screen_dimensions if screen_dimensions
-        return { :width => 768, :height => 1024 } if ipad?
-        return { :width => 320, :height => 568 } if iphone_4in?
-        { :width => 320, :height => 480 }
       end
 
       # Is the app that is running an iPhone-only app emulated on an iPad?
