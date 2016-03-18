@@ -19,6 +19,22 @@
 # does not quit your application after a failed Scenario.
 module Calabash
   module Cucumber
+
+    # @!visibility private
+    # Generated when calabash cannot launch the app.
+    class LaunchError < RuntimeError
+      attr_accessor :error
+
+      def initialize(err)
+        self.error= err
+      end
+
+      # @!visibility private
+      def to_s
+        "#{super.to_s}: #{error}"
+      end
+    end
+
     class Launcher
 
       require "calabash-cucumber/device"
@@ -27,21 +43,6 @@ module Calabash
       require "calabash-cucumber/dylibs"
       require "calabash-cucumber/environment"
       require "run_loop"
-
-      # @!visibility private
-      # Generated when calabash cannot launch the app.
-      class StartError < RuntimeError
-        attr_accessor :error
-
-        def initialize(err)
-          self.error= err
-        end
-
-        # @!visibility private
-        def to_s
-          "#{super.to_s}: #{error}"
-        end
-      end
 
       # @!visibility private
       @@launcher = nil
@@ -490,7 +491,7 @@ Resetting physical devices is not supported.
         else
           puts "Unable to launch app on physical device"
         end
-        raise StartError.new(last_err)
+        raise Calabash::Cucumber::LaunchError.new(last_err)
       end
 
       # @!visibility private
