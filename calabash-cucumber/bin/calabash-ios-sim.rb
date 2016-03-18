@@ -1,8 +1,5 @@
-require 'calabash-cucumber/utils/logging'
 require "calabash-cucumber/environment"
 require 'run_loop'
-
-include Calabash::Cucumber::Logging
 
 def quit_sim
   RunLoop::SimControl.new.quit_sim

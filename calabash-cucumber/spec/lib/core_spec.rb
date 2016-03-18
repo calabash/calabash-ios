@@ -18,6 +18,40 @@ describe Calabash::Cucumber::Core do
     end.new
   end
 
+  describe "logging" do
+    it "#calabash_warn" do
+      actual = capture_stdout do
+        world.calabash_warn("You have been warned")
+      end.string.gsub(/\e\[(\d+)m/, "")
+
+      expect(actual).to be == "WARN: You have been warned\n"
+    end
+
+    it "#calabash_info" do
+      actual = capture_stdout do
+        world.calabash_info("You have been info'd")
+      end.string.gsub(/\e\[(\d+)m/, "").strip
+
+      # The .strip above future proofs against changes to the silly leading
+      # space in RunLoop.log_info2.
+      expect(actual).to be == "INFO: You have been info'd"
+    end
+
+    it "#deprecated" do
+      version = '0.9.169'
+      dep_msg = 'this is a deprecation message'
+      out = capture_stdout do
+        world.deprecated(version, dep_msg, :warn)
+      end.string.gsub(/\e\[(\d+)m/, "")
+
+      tokens = out.split($-0)
+      message = tokens[0]
+      expect(message).to be == "WARN: deprecated '#{version}' - #{dep_msg}"
+      expect(tokens.count).to be > 5
+      expect(tokens.count).to be < 9
+    end
+  end
+
   describe '#scroll' do
     describe 'handling direction argument' do
       describe 'raises error if invalid' do

@@ -1,5 +1,3 @@
-require 'calabash-cucumber/utils/logging'
-
 module Calabash
   module Cucumber
 
@@ -7,7 +5,7 @@ module Calabash
     # orientation.
     module RotationHelpers
 
-      include Calabash::Cucumber::Logging
+      require "run_loop"
 
       # @!visibility private
       # @deprecated 0.16.1
@@ -98,7 +96,7 @@ module Calabash
 
         recalibrate_after_rotation
 
-        ap result if debug_logging?
+        ap result if RunLoop::Environment.debug?
 
         status_bar_orientation
       end
@@ -141,8 +139,8 @@ module Calabash
       def rotate_home_button_to_position_with_playback(home_button_position)
 
         rotation_candidates.each do |candidate|
-          if debug_logging?
-            calabash_info "Trying to rotate Home Button to '#{home_button_position}' using '#{candidate}'"
+          if RunLoop::Environment.debug?
+            RunLoop.log_info2("Trying to rotate Home Button to '#{home_button_position}' using '#{candidate}'")
           end
 
           playback(candidate)
@@ -155,8 +153,8 @@ module Calabash
           end
         end
 
-        if debug_logging?
-          calabash_warn %Q{
+        if RunLoop::Environment.debug?
+          RunLoop.log_warn %Q{
 Could not rotate Home Button to '#{home_button_position}'."
 Is rotation enabled for this controller?}
         end
@@ -256,7 +254,7 @@ Is rotation enabled for this controller?}
       def rotate_with_playback(direction, current_orientation)
         name = recording_name(direction, current_orientation)
 
-        if debug_logging?
+        if RunLoop::Environment.debug?
           puts "Could not rotate device '#{direction}' given '#{current_orientation}'; nothing to do."
         end
 

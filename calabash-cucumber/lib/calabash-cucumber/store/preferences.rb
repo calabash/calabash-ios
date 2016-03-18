@@ -3,6 +3,7 @@ module Calabash
 
     require "fileutils"
     require "securerandom"
+    require "run_loop"
 
     # Users preferences persisted across runs:
     #
@@ -190,7 +191,7 @@ module Calabash
 
       # @!visibility private
       def log_defaults_reset
-        Calabash::Cucumber.log_warn(
+        RunLoop.log_warn(
 %q{An error occurred while accessing your user preferences.
 
 We have reset the preferences to the default settings.

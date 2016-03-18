@@ -410,7 +410,7 @@ describe 'Calabash Launcher' do
             launcher.launch_args = {:app => app}
             min_server_version = '0.0.1'
             expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
-            out = capture_stderr do
+            out = capture_stdout do
               launcher.check_server_gem_compatibility
             end
             expect(out.string).not_to be == nil
@@ -421,7 +421,7 @@ describe 'Calabash Launcher' do
             launcher.launch_args = {:app => app}
             min_server_version = Calabash::Cucumber::Launcher::SERVER_VERSION_NOT_AVAILABLE
             expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
-            out = capture_stderr do
+            out = capture_stdout do
               launcher.check_server_gem_compatibility
             end
             expect(out.string).not_to be == nil
@@ -438,7 +438,7 @@ describe 'Calabash Launcher' do
             launcher.launch_args = {:app => app}
             min_server_version = Calabash::Cucumber::MIN_SERVER_VERSION
             expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stderr do
+            out = capture_stdout do
               launcher.check_server_gem_compatibility
             end
             expect(out.string).to be == ''
@@ -448,7 +448,7 @@ describe 'Calabash Launcher' do
             launcher.launch_args = {:app => app}
             min_server_version = '0.0.1'
             expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stderr do
+            out = capture_stdout do
               launcher.check_server_gem_compatibility
             end
             expect(out.string).not_to be == nil
@@ -459,7 +459,7 @@ describe 'Calabash Launcher' do
             launcher.launch_args = {:app => app}
             min_server_version = Calabash::Cucumber::Launcher::SERVER_VERSION_NOT_AVAILABLE
             expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stderr do
+            out = capture_stdout do
               launcher.check_server_gem_compatibility
             end
             expect(out.string).not_to be == nil

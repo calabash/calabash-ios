@@ -1,6 +1,5 @@
 require 'calabash-cucumber/device'
 require 'calabash-cucumber/launcher'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
@@ -12,8 +11,6 @@ module Calabash
     #  The `OS` environmental variable has been deprecated.  It should never
     #  be set.
     module EnvironmentHelpers
-
-      include Calabash::Cucumber::Logging
 
       # Are the uia* methods available?
       #

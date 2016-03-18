@@ -1,6 +1,5 @@
 require 'edn'
 require 'json'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
@@ -8,8 +7,6 @@ module Calabash
     # See also {https://developer.apple.com/library/ios/documentation/ToolsLanguages/Reference/UIAElementClassReference/UIAElement/UIAElement.html}
     # Typically used to interact with System or remote views.
     module UIA
-
-      include Calabash::Cucumber::Logging
 
       # Executes raw JavaScript in the UIAutomation environment (using `eval`).
       # @param {String} command the JavaScript snippet to execute
@@ -392,7 +389,7 @@ module Calabash
                      end
         end
         command = "#{js_cmd}.#{js_args.join('.')}"
-        if debug_logging?
+        if RunLoop::Environment.debug?
           puts 'Sending UIA command'
           puts command
         end
@@ -404,7 +401,7 @@ module Calabash
       # @!visibility private
       def uia_handle_command(cmd, *query_args)
         command = uia_serialize_command(cmd, *query_args)
-        if debug_logging?
+        if RunLoop::Environment.debug?
           puts 'Sending UIA command'
           puts command
         end
@@ -447,9 +444,7 @@ module Calabash
         # TODO formally deprecate send_uia_command with _deprecated function
         #cmd = opts[:command]
         #new_opts = cmd.select{|x| x != :command}
-        #_deprecated('0.9.163',
-        #            "use 'uia(#{cmd}, #{new_opts})' instead",
-        #            :warn)
+        #RunLoop.deprecated("0.9.163", "Use 'uia(#{cmd}, #{new_opts})' instead")
 
         uia(opts[:command], opts)
       end
@@ -466,7 +461,7 @@ module Calabash
       end
 
       def uia_result(s)
-        if debug_logging?
+        if RunLoop::Environment.debug?
           puts 'Result'
           p s
         end

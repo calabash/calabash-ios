@@ -10,7 +10,6 @@ require 'set'
 require 'calabash-cucumber/version'
 require 'calabash-cucumber/date_picker'
 require 'calabash-cucumber/ipad_1x_2x'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
@@ -18,7 +17,6 @@ module Calabash
     # A module for wrapping the public APIs of this gem.
     module Operations
 
-      include Calabash::Cucumber::Logging
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
       include Calabash::Cucumber::WaitHelpers

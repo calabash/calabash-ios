@@ -10,7 +10,6 @@ require 'calabash-cucumber/failure_helpers'
 require 'calabash-cucumber/status_bar_helpers'
 require 'calabash-cucumber/rotation_helpers'
 require 'calabash-cucumber/map'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
@@ -18,7 +17,6 @@ module Calabash
     # A collection of methods that provide the core calabash behaviors.
     module Core
 
-      include Calabash::Cucumber::Logging
       include Calabash::Cucumber::EnvironmentHelpers
       include Calabash::Cucumber::ConnectionHelpers
       include Calabash::Cucumber::QueryHelpers
@@ -37,6 +35,46 @@ module Calabash
           step(txt)
         else
           Then txt
+        end
+      end
+
+      # Prints a blue warning message.
+      # @param [String] msg the message to print
+      # @return [void]
+      def calabash_warn(msg)
+        require "run_loop/logging"
+        RunLoop.log_warn(msg)
+      end
+
+      # Prints a green info message.
+      # @param [String] msg the message to print
+      # @return [void]
+      def calabash_info(msg)
+        require "run_loop/logging"
+        RunLoop.log_info2(msg)
+      end
+
+      # Prints a deprecated message that includes the line number.
+      #
+      # @param [String] version indicates when the feature was deprecated
+      # @param [String] msg deprecation message (possibly suggesting alternatives)
+      # @param [Symbol] type { :warn | :pending } - :pending will raise a
+      #   cucumber pending error
+      # @return [void]
+      def deprecated(version, msg, type)
+        allowed = [:pending, :warn]
+        unless allowed.include?(type)
+          raise ArgumentError, "Expected type '#{type}' to be one of #{allowed.join(", ")}"
+        end
+
+        stack = Kernel.caller(0, 6)[1..-1].join("\n")
+
+        msg = "deprecated '#{version}' - #{msg}\n#{stack}"
+
+        if type.eql?(:pending)
+          pending(msg)
+        else
+          calabash_warn(msg)
         end
       end
 
@@ -1025,7 +1063,7 @@ arguments => '#{arguments}'
                 "  - use 'clear_text'",
                 'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API']
         msg = msgs.join("\n")
-        _deprecated('0.9.145', msg, :warn)
+        RunLoop.deprecated("0.9.145", msg)
 
         text_fields_modified = map(uiquery, :setText, txt)
 

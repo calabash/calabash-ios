@@ -1,6 +1,3 @@
-require 'json'
-require 'calabash-cucumber/utils/logging'
-
 module Calabash
   module Cucumber
 
@@ -8,8 +5,6 @@ module Calabash
     # app is running on.  It also includes the following information about the
     # app that is running on the current device.
     class Device
-
-      include Calabash::Cucumber::Logging
 
       # @!visibility private
       GESTALT_IPHONE = 'iPhone'

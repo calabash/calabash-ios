@@ -1,12 +1,8 @@
-require 'calabash-cucumber/utils/logging'
-
 module Calabash
   module Cucumber
 
     # Contains methods for interacting with the status bar.
     module StatusBarHelpers
-
-      include Calabash::Cucumber::Logging
 
       # Returns the device orientation as reported by `[[UIDevice currentDevice] orientation]`.
       #
