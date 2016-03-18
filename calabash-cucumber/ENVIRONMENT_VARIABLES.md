@@ -15,7 +15,6 @@ The following variables are no longer used by Calabash.
 * `CALABASH_FULL_CONSOLE_OUTPUT`
 * `DETECT_CONNECTED_DEVICE`
 * `SDK_VERSION`
-* Setting `DEVICE_TARGET` to `device` or `simulator` has been deprecated.
 * `LAUNCH_VIA`
 * `OS`
 * `NO_DOWNLOAD`
@@ -188,56 +187,42 @@ DEVICE_ENDPOINT=http://saturn.local:37265
 
 ### `DEVICE_TARGET`
 
-A device UDID, simulator name, or CoreSimulator UDID.
+A device UDID, device name, simulator name, or CoreSimulator UDID.
 
-When testing against a device this is a _required_ variable.
-
-When testing against simulators on Xcode >= 5.1, use this variable to indicate which simulator to launch.
-
-If the `DEVICE_TARGET` is not set, calabash will attempt to discover whether or not you are trying to target a device or a simulator.
-
-#### Defaults: Simulator
-
-If `APP_BUNDLE_PATH` is set, the target is assumed to be a simulator.  These are the default simulators based on the Xcode version:
+Examples:
 
 ```
-       Xcode > 6.0  ==> 'iPhone 5 (8.0 Simulator)'
-5.1 <= Xcode < 6.0  ==> 'iPhone Retina (4-inch) - Simulator - iOS 7.1'
-       Xcode < 5.1  ==>  the last simulator that was opened
+# Launches the default simulator
+$ cucumber
+
+# Launches the default simulator
+$ DEVICE_TARGET=simulator
+
+# Launches against a connected device.  Calabash will auto-detect the device UDID.
+# Raises an error if there is more than one device connected or no device is connected.
+$ DEVICE_TARGET=device
+
+# Launches the device named "denis"
+$ DEVICE_TARGET=denis
+
+# Launches the device with UDID
+$ DEVICE_TARGET=193688939205dc7fb48d603c558ede91aad8dd0d
+
+# Launches an iOS Simulator by logical name
+$ DEVICE_TARGET="iPad Air (9.3)"
+
+# Launches an iOS Simulator by UDID
+$ DEVICE_TARGET="B372A68F-02E2-4406-A224-BA2E8A30FAFE"
+
+# Launches a custom iOS Simulator by name
+$ DEVICE_TARGET=MyCustomSimulator
 ```
 
 #### Defaults: Devices
 
 If `BUNDLE_ID` is set, the target is assumed to be a device.  Calabash will try to discover a connected device.  If you have more than one device connected, you _must_ use the `DEVICE_TARGET` to tell calabash which device to target.
 
-**Note:** Even if you only have one device connected, we recommend that you _always_ set this variable when targeting a device.
-
-#### Special
-
-On Xcode < 5.1, this variable was only used when testing against physical devices.
-
-#### Example: Targeting a device.
-
-```
-DEVICE_TARGET=6c3ed5431b5dfc29758f8a35644b35bd435bdfe2 cucumber
-```
-
-#### Example: Targeting a simulator.
-
-```
-# Xcode > 6.0 - using a simulator name
-DEVICE_TARGET='iPhone 5s (8.0 Simulator)' cucumber
-
-# Xcode > 6.0 - using a simulator UDID
-DEVICE_TARGET='D619B029-17F3-476C-8ADE-507DD356A27F' cucumber
-
-# 5.1 <= Xcode < 6.0
-DEVICE_TARGET='iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.1' cucumber
-```
-
 #### Pro Tip: Available devices.
-
-On Xcode >= 5.1, you can find the available simulators and devices using the `instruments` program.
 
 ```
 instruments -s devices
