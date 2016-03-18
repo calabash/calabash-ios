@@ -71,6 +71,81 @@ describe 'Calabash Launcher' do
     end
   end
 
+  describe "#set_device_target_after_attach" do
+    let(:options) do
+      {
+        :sim_control => Calabash::Cucumber::Environment.simctl,
+        :instruments => Calabash::Cucumber::Environment.instruments
+      }
+    end
+
+    let(:run_loop) {  { :udid => RunLoop::Core.default_simulator } }
+    let(:identifier) { run_loop[:udid] }
+
+    it "swallows errors" do
+      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_raise(ArgumentError)
+
+      actual = launcher.send(:set_device_target_after_attach, run_loop)
+      expect(actual).to be == nil
+      expect(launcher.instance_variable_get(:@run_loop_device)).to be == nil
+    end
+
+    it "sets the @run_loop_device" do
+      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_call_original
+
+      actual = launcher.send(:set_device_target_after_attach, run_loop)
+      expect(actual).to be_a_kind_of(RunLoop::Device)
+      expect(launcher.instance_variable_get(:@run_loop_device)).to be == actual
+    end
+  end
+
+  describe "#attach" do
+    let(:run_loop) do
+      {
+        :udid => "identifier",
+        :pid => 1
+      }
+    end
+
+    let(:cache) do
+      Class.new do
+        def read ; end
+      end.new
+    end
+
+    before do
+      allow(RunLoop::HostCache).to receive(:default).and_return(cache)
+      allow(cache).to receive(:read).and_return(run_loop)
+      allow(launcher).to receive(:set_device_target_after_attach).with(run_loop).and_return(:device)
+    end
+
+    it "the happy path" do
+      expect(launcher).to receive(:ensure_connectivity).and_return(true)
+
+      actual = launcher.attach
+
+      expect(launcher.actions).to be_a_kind_of(Calabash::Cucumber::InstrumentsActions)
+      expect(actual).to be == launcher
+    end
+
+    it "cannot connect to http server" do
+      expect(launcher).to receive(:ensure_connectivity).and_raise(Calabash::Cucumber::ServerNotRespondingError)
+
+      actual = launcher.attach
+
+      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(actual).to be_falsey
+    end
+
+    it "cannot establish communication with instruments" do
+      run_loop[:pid] = nil
+
+      expect(launcher).to receive(:ensure_connectivity).and_return(true)
+
+      actual = launcher.attach
+
+      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(actual).to be == launcher
     end
   end
 

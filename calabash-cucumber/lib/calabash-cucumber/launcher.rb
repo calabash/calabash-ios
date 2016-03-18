@@ -1,27 +1,7 @@
-
-# Used to launch apps for testing in iOS Simulator or on iOS Devices.
-#
-# ###  Accessing the current launcher from ruby.
-#
-# If you need a reference to the current launcher in your ruby code.
-#
-# `Calabash::Cucumber::Launcher.launcher`
-#
-# This is usually not required, but might be useful in `support/01_launch.rb`.
-#
-# ### Attaching to the current launcher in a console
-#
-# If Calabash already running and you want to attach to the current launcher,
-# use `console_attach`.  This is useful when a cucumber Scenario has failed and
-# you want to query the current state of the app.
-#
-# * **Pro Tip:** Set the `QUIT_APP_AFTER_SCENARIO=0` env variable so calabash
-# does not quit your application after a failed Scenario.
 module Calabash
   module Cucumber
 
-    # @!visibility private
-    # Generated when calabash cannot launch the app.
+    # Raised when calabash cannot launch the app.
     class LaunchError < RuntimeError
       attr_accessor :error
 
@@ -35,10 +15,30 @@ module Calabash
       end
     end
 
-    # @!visibility private
-    # Generated when Calabash cannot find a device based on DEVICE_TARGET
+    # Raised when Calabash cannot find a device based on DEVICE_TARGET
     class DeviceNotFoundError < RuntimeError ; end
 
+    # Raised when a connection to the embedded server cannot be made.
+    class ServerNotRespondingError < RuntimeError; end
+
+    # Launch apps on iOS Simulators and physical devices.
+    #
+    # ###  Accessing the current launcher from ruby.
+    #
+    # If you need a reference to the current launcher in your ruby code.
+    #
+    # `Calabash::Cucumber::Launcher.launcher`
+    #
+    # This is usually not required, but might be useful in `support/01_launch.rb`.
+    #
+    # ### Attaching to the current launcher in a console
+    #
+    # If Calabash already running and you want to attach to the current launcher,
+    # use `console_attach`.  This is useful when a cucumber Scenario has failed and
+    # you want to query the current state of the app.
+    #
+    # * **Pro Tip:** Set the `QUIT_APP_AFTER_SCENARIO=0` env variable so calabash
+    # does not quit your application after a failed Scenario.
     class Launcher
 
       require "calabash-cucumber/device"
@@ -127,6 +127,7 @@ module Calabash
         @actions
       end
 
+      # @!visibility private
       # @see Calabash::Cucumber::Core#console_attach
       def self.attach
         l = launcher
@@ -134,6 +135,7 @@ module Calabash
         l.attach
       end
 
+      # @!visibility private
       # @see Calabash::Cucumber::Core#console_attach
       def attach(options={})
         default_options = {:http_connection_retry => 1,
@@ -142,21 +144,42 @@ module Calabash
 
         self.run_loop = RunLoop::HostCache.default.read
 
+        set_device_target_after_attach(self.run_loop)
+
         # Sets this Launcher#device attribute.
-        ensure_connectivity(merged_options)
+        begin
+          ensure_connectivity(merged_options)
+        rescue Calabash::Cucumber::ServerNotRespondingError => _
+          RunLoop.log_warn(
+%Q[
+
+Could not connect to Calabash Server @ #{device_endpoint}.
+
+If your app is running, check that you have set the DEVICE_ENDPOINT correctly.
+
+If your app is not running, it was a mistake to call this method.
+
+http://calabashapi.xamarin.com/ios/Calabash/Cucumber/Core.html#console_attach-instance_method
+
+Try `start_test_server_in_background`
+
+])
+
+          # Nothing to do except log the problem and exit early.
+          return false
+        end
 
         if self.run_loop[:pid]
           self.actions = Calabash::Cucumber::InstrumentsActions.new
         else
-          RunLoop.log_warn(%Q{
+          RunLoop.log_warn(
+%Q[
 
-WARNING
-
-Connected to simulator that was not launched by Calabash.
+Connected to an app that was not launched by Calabash using instruments.
 
 Queries will work, but gestures will not.
 
-})
+])
         end
 
         self
@@ -181,14 +204,13 @@ Queries will work, but gestures will not.
         not run_loop.nil?
       end
 
-      # Get a reference to the current launcher (instantiates a new one if needed). Usually we use a singleton launcher throughout a test run.
+      # A reference to the current launcher (instantiates a new one if needed).
       # @return {Calabash::Cucumber::Launcher} the current launcher
       def self.launcher
         @@launcher ||= Calabash::Cucumber::Launcher.new
       end
 
       # Get a reference to the current launcher (does not instantiate a new one if unset).
-      # Usually we use a singleton launcher throughout a test run.
       # @return {Calabash::Cucumber::Launcher} the current launcher or nil
       def self.launcher_if_used
         @@launcher
@@ -537,8 +559,8 @@ Resetting physical devices is not supported.
           end
         end
 
-        raise RuntimeError,
-              %Q[Could not connect to the Calabash Server @ #{device_endpoint}.
+        raise Calabash::Cucumber::ServerNotRespondingError,
+%Q[Could not connect to the Calabash Server @ #{device_endpoint}.
 
 See these two guides for help.
 
@@ -770,6 +792,27 @@ To see what devices are available on your machine, use instruments:
 $ xcrun instruments -s devices
 
 ]
+        end
+      end
+
+      # @!visibility private
+      #
+      # Called from the World.console_attach => #attach method to populate
+      # the instance variable because `relaunch` is not called.
+      def set_device_target_after_attach(run_loop_hash)
+        identifier = run_loop_hash[:udid]
+
+        options = {
+          :sim_control => Calabash::Cucumber::Environment.simctl,
+          :instruments => Calabash::Cucumber::Environment.instruments
+        }
+
+        begin
+           @run_loop_device = RunLoop::Device.device_with_identifier(identifier, options)
+        rescue ArgumentError => _
+          # For now we will swallow any error - it is not clear yet if it will be
+          # important to make this connection.
+          @run_loop_device = nil
         end
       end
     end
