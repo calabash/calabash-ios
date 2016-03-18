@@ -118,11 +118,14 @@ module Calabash
 
       # @visibility private
       # @deprecated 0.19.0 - replaced with QUIT_APP_AFTER_SCENARIO
+      #
+      # Silently deprecated.  Deprecate in 0.20.0.
       def self.no_stop?
         value = ENV["NO_STOP"]
         if value
           return_value = value == "1"
 
+=begin
           if return_value
             replacement = "$ QUIT_APP_AFTER_SCENARIO=0"
           else
@@ -137,7 +140,7 @@ Please replace NO_STOP with QUIT_APP_AFTER_SCENARIO.
 
 The default behavior is to quit the app after each scenario.
 })
-
+=end
           return_value
         else
           false

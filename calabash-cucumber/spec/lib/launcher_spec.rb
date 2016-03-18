@@ -37,7 +37,7 @@ describe 'Calabash Launcher' do
     it "#calabash_no_stop?" do
       expect(launcher).to receive(:quit_app_after_scenario?).and_return(:value)
 
-      expect(RunLoop).to receive(:deprecated).and_call_original
+      expect(RunLoop).not_to receive(:deprecated).and_call_original
       expect(launcher.calabash_no_stop?).to be == :value
     end
 

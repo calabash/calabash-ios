@@ -235,14 +235,14 @@ describe Calabash::Cucumber::Environment do
       describe "NO_STOP is defined" do
         it "is 1" do
           stub_env({"NO_STOP" => "1"})
-          expect(RunLoop).to receive(:deprecated).and_call_original
+          expect(RunLoop).not_to receive(:deprecated).and_call_original
 
           expect(Calabash::Cucumber::Environment.send(:no_stop?)).to be_truthy
         end
 
         it "is not 1" do
           stub_env({"NO_STOP" => "0"})
-          expect(RunLoop).to receive(:deprecated).and_call_original
+          expect(RunLoop).not_to receive(:deprecated).and_call_original
 
           expect(Calabash::Cucumber::Environment.send(:no_stop?)).to be_falsey
         end
