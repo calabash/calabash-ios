@@ -273,19 +273,6 @@ module Calabash
         ios_version_object.major == 5
       end
 
-      # @deprecated 0.11.2 Replaced with screen_dimensions.
-      #
-      # The screen size of the device.
-      #
-      # @return [Hash] representation of the screen size
-      def screen_size
-        _deprecated('0.11.2', 'Replaced with screen_dimensions', :warn)
-        return screen_dimensions if screen_dimensions
-        return { :width => 768, :height => 1024 } if ipad?
-        return { :width => 320, :height => 568 } if iphone_4in?
-        { :width => 320, :height => 480 }
-      end
-
       # Is the app that is running an iPhone-only app emulated on an iPad?
       #
       # @note If the app is running in emulation mode, there will be a 1x or 2x
