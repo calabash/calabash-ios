@@ -166,27 +166,10 @@ module Calabash
           end
         end
 
-        # Deprecated 0.16.2 server
-        @system = version_data['system']
-
-        # 0.16.2 server adds 'device_family' key.
-        unless @device_family
-          # Deprecated 0.16.2 server
-          simulator_device = version_data['simulator_device']
-          if @system == GESTALT_SIM_SYS
-            @device_family = simulator_device
-          else
-            @device_family = @system.split(/[\d,.]/).first
-          end
-        end
-
         # 0.16.2 server adds 'ios_version' key
         unless @ios_version
           @ios_version = version_data['iOS_version']
         end
-
-        # Deprecated 0.13.0
-        @iphone_4in = version_data['4inch']
       end
 
       # Is this device a simulator or physical device?

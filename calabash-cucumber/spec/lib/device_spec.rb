@@ -70,16 +70,6 @@ describe Calabash::Cucumber::Device do
       expect(device.instance_variable_get(:@form_factor)).to be == 'form'
     end
 
-    it 'sets @system # deprecated' do
-      expect(device.instance_variable_get(:@system)).to be == ''
-    end
-
-    it 'sets @iphone_4in # deprecated' do
-      version_data['4inch'] = 'deprecated'
-
-      expect(device.instance_variable_get(:@iphone_4in)).to be == 'deprecated'
-    end
-
     describe 'sets @device_family' do
       it "uses 'device_family' if it is available" do
         version_data['device_family'] = 'first element only'
@@ -87,28 +77,6 @@ describe Calabash::Cucumber::Device do
 
         expect(device.device_family).to be == 'first'
         expect(device.instance_variable_get(:@device_family)).to be == 'first'
-      end
-
-      describe "parses 'system' if it is not available # deprecated" do
-        it 'is a simulator' do
-          # deprecated key
-          version_data['simulator_device'] = 'iPhone'
-          version_data['device_family'] = nil
-          version_data['system'] = 'x86_64'
-
-          expect(device.device_family).to be == 'iPhone'
-          expect(device.instance_variable_get(:@device_family)).to be == 'iPhone'
-        end
-
-        it 'is a device' do
-          # deprecated key
-          version_data['simulator_device'] = nil
-          version_data['device_family'] = nil
-          version_data['system'] = 'iPad5,4'
-
-          expect(device.device_family).to be == 'iPad'
-          expect(device.instance_variable_get(:@device_family)).to be == 'iPad'
-        end
       end
     end
 
