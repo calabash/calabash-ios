@@ -35,6 +35,10 @@ module Calabash
       end
     end
 
+    # @!visibility private
+    # Generated when Calabash cannot find a device based on DEVICE_TARGET
+    class DeviceNotFoundError < RuntimeError ; end
+
     class Launcher
 
       require "calabash-cucumber/device"
@@ -43,6 +47,9 @@ module Calabash
       require "calabash-cucumber/dylibs"
       require "calabash-cucumber/environment"
       require "run_loop"
+
+      # @!visibility private
+      @@launcher = nil
 
       # @!visibility private
       @@launcher = nil
@@ -743,6 +750,27 @@ true.  Please remove this method call from your hooks.
           RunLoop.log_warn("#{msgs.join("\n")}")
         end
         nil
+      end
+
+      private
+
+      # @!visibility private
+      # @return [RunLoop::Device] A RunLoop::Device instance.
+      def ensure_device_target
+        begin
+          @run_loop_device ||= Calabash::Cucumber::Environment.run_loop_device
+        rescue ArgumentError => e
+          raise Calabash::Cucumber::DeviceNotFoundError,
+                %Q[Could not find a matching device in your environment.
+
+#{e.message}
+
+To see what devices are available on your machine, use instruments:
+
+$ xcrun instruments -s devices
+
+]
+        end
       end
     end
   end
