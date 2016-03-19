@@ -433,7 +433,7 @@ describe 'Calabash Launcher' do
         # We can't stand up the server, so we'll create a device and ask for
         # its version.  It is the best we can do for now.
         device = Resources.shared.device_for_mocking
-        launcher.device = device
+        launcher.instance_variable_set(:@device, device)
         actual = launcher.server_version_from_server
         expect(actual).not_to be == nil
         expect(RunLoop::Version.new(actual).to_s).to be == '0.10.0'

@@ -64,9 +64,6 @@ module Calabash
       attr_accessor :run_loop
 
       # @!visibility private
-      attr_accessor :device
-
-      # @!visibility private
       attr_accessor :actions
 
       # @!visibility private
@@ -109,6 +106,31 @@ module Calabash
       # @raise Raises an error if the server does not respond.
       def ping_app
         Calabash::Cucumber::HTTP.ping_app
+      end
+
+      # @!visibility private
+      #
+      # This Calabash::Cucumber::Device instance is required because we cannot
+      # determine the iOS version of physical devices.
+      #
+      # This device instance can only be created _if the server is running_.
+      #
+      # We need this instance because we need to know at runtime whether or
+      # not to translate touch coordinates in the client or on the server. For
+      # iOS >= 8.0 translation is done on the server.  Further, we need a
+      # Device instance for iOS < 8 so we can perform the necessary
+      # coordinate normalization - based on the device attributes.
+      #
+      # We also need this information to determine the default uia strategy.
+      #
+      # +1 for tools to ask physical devices about attributes.
+      def device
+        @device ||= lambda do
+          _, body = Calabash::Cucumber::HTTP.ensure_connectivity
+          response = JSON.parse(body)
+          endpoint = Calabash::Cucumber::Environment.device_endpoint
+          Calabash::Cucumber::Device.new(endpoint, response)
+        end.call
       end
 
       # @!visibility private
