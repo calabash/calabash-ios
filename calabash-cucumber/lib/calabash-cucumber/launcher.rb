@@ -18,9 +18,6 @@ module Calabash
     # Raised when Calabash cannot find a device based on DEVICE_TARGET
     class DeviceNotFoundError < RuntimeError ; end
 
-    # Raised when a connection to the embedded server cannot be made.
-    class ServerNotRespondingError < RuntimeError; end
-
     # Launch apps on iOS Simulators and physical devices.
     #
     # ###  Accessing the current launcher from ruby.
@@ -46,6 +43,7 @@ module Calabash
       require "calabash-cucumber/usage_tracker"
       require "calabash-cucumber/dylibs"
       require "calabash-cucumber/environment"
+      require "calabash-cucumber/http/http"
       require "run_loop"
 
       # @!visibility private
@@ -81,9 +79,6 @@ module Calabash
       attr_reader :usage_tracker
 
       # @!visibility private
-      attr_reader :device_endpoint
-
-      # @!visibility private
       def initialize
         @@launcher = self
       end
@@ -107,6 +102,16 @@ module Calabash
       end
 
       # @!visibility private
+      #
+      # Use this method to see if your app is already running.  This is helpful
+      # if you have Scenarios that don't require an app relaunch.
+      #
+      # @raise Raises an error if the server does not respond.
+      def ping_app
+        Calabash::Cucumber::HTTP.ping_app
+      end
+
+      # @!visibility private
       def xcode
         @xcode ||= RunLoop::Xcode.new
       end
@@ -114,11 +119,6 @@ module Calabash
       # @!visibility private
       def usage_tracker
         @usage_tracker ||= Calabash::Cucumber::UsageTracker.new
-      end
-
-      # @!visibility private
-      def device_endpoint
-        @device_endpoint ||= Calabash::Cucumber::Environment.device_endpoint
       end
 
       # @!visibility private
@@ -146,10 +146,10 @@ module Calabash
 
         set_device_target_after_attach(self.run_loop)
 
-        # Sets this Launcher#device attribute.
         begin
-          ensure_connectivity(merged_options)
+          Calabash::Cucumber::HTTP.ensure_connectivity(merged_options)
         rescue Calabash::Cucumber::ServerNotRespondingError => _
+          device_endpoint = Calabash::Cucumber::Environment.device_endpoint
           RunLoop.log_warn(
 %Q[
 
@@ -430,7 +430,7 @@ Resetting physical devices is not supported.
         self.launch_args = args
 
         unless args[:calabash_lite]
-          ensure_connectivity
+          Calabash::Cucumber::HTTP.ensure_connectivity
           # skip compatibility check if injecting dylib
           unless args.fetch(:inject_dylib, false)
             check_server_gem_compatibility
@@ -514,79 +514,6 @@ Resetting physical devices is not supported.
           puts "Unable to launch app on physical device"
         end
         raise Calabash::Cucumber::LaunchError.new(last_err)
-      end
-
-      # @!visibility private
-      def ensure_connectivity(options={})
-
-        default_options = {
-          :http_connection_retry => Calabash::Cucumber::Environment.http_connection_retries,
-          :http_connection_timeout => Calabash::Cucumber::Environment.http_connection_timeout
-        }
-
-        merged_options = default_options.merge(options)
-
-        max_retry_count = merged_options[:http_connection_retry]
-        timeout = merged_options[:http_connection_timeout]
-
-        start_time = Time.now
-
-        max_retry_count.times do |try|
-          RunLoop.log_debug("Trying to connect to Calabash Server: #{try + 1} of #{max_retry_count}")
-
-          # Subtract the aggregate time we've spent thus far to make sure we're
-          # not exceeding the request timeout across retries.
-          time_diff = start_time + timeout - Time.now
-
-          if time_diff <= 0
-            break
-          end
-
-          begin
-            http_status = ping_app
-            return true if http_status == "200"
-          rescue => _
-
-          ensure
-            sleep(1)
-          end
-        end
-
-        raise Calabash::Cucumber::ServerNotRespondingError,
-%Q[Could not connect to the Calabash Server @ #{device_endpoint}.
-
-See these two guides for help.
-
-* https://github.com/calabash/calabash-ios/wiki/Testing-on-Physical-Devices
-* https://github.com/calabash/calabash-ios/wiki/Testing-on-iOS-Simulators
-
-1. Make sure your application is linked with Calabash.
-2. Make sure there is not a firewall blocking traffic on #{device_endpoint}.
-3. Make sure #{device_endpoint} is correct.
-
-If your app is crashing at launch, find a crash report to determine the cause.
-
-]
-      end
-
-      # @!visibility private
-      def ping_app
-        url = URI.parse(device_endpoint)
-
-        http = Net::HTTP.new(url.host, url.port)
-        res = http.start do |sess|
-          sess.request Net::HTTP::Get.new("version")
-        end
-        status = res.code
-
-        http.finish if http and http.started?
-
-        if status == '200'
-          version_body = JSON.parse(res.body)
-          self.device = Calabash::Cucumber::Device.new(url, version_body)
-        end
-
-        status
       end
 
       # @!visibility private
