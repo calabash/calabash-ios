@@ -56,11 +56,10 @@ describe 'Launcher:  #console_attach' do
           stdin.puts "raise 'Launcher run_loop is nil' if launcher.run_loop.nil?"
           stdin.puts "raise 'Launcher pid is nil' if launcher.run_loop[:pid].nil?"
           stdin.puts "raise 'Launcher index is not 1' if launcher.run_loop[:index] != 1"
-        else
-          stdin.puts "touch 'textField'"
         end
+        stdin.puts "touch 'textField'"
         stdin.close
-        yield stdout, stderr
+        yield stdout.read.strip, stderr.read.strip
       end
     end
 
@@ -90,8 +89,10 @@ describe 'Launcher:  #console_attach' do
           expect(other_launcher.run_loop[:uia_strategy]).to be == strategy
 
           calabash_console_with_strategy(strategy) do |stdout, stderr|
-            expect(stdout.read.strip[/Error/,0]).to be == nil
-            expect(stderr.read.strip).to be == ''
+            puts "stdout => #{stdout}"
+            puts "stderr => #{stderr}"
+            expect(stdout[/Error/,0]).to be == nil
+            expect(stderr).to be == ''
           end
         end
       end

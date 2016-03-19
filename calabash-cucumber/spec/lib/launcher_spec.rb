@@ -20,13 +20,6 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
-  it "#device_endpoint" do
-    expect(Calabash::Cucumber::Environment).to receive(:device_endpoint).and_return("endpoint")
-
-    expect(launcher.device_endpoint).to be == "endpoint"
-    expect(launcher.instance_variable_get(:@device_endpoint)).to be == "endpoint"
-  end
-
   it "#usage_tracker" do
     actual = launcher.usage_tracker
     expect(actual).to be_a_kind_of(Calabash::Cucumber::UsageTracker)
@@ -120,7 +113,7 @@ describe 'Calabash Launcher' do
     end
 
     it "the happy path" do
-      expect(launcher).to receive(:ensure_connectivity).and_return(true)
+      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
 
       actual = launcher.attach
 
@@ -129,7 +122,7 @@ describe 'Calabash Launcher' do
     end
 
     it "cannot connect to http server" do
-      expect(launcher).to receive(:ensure_connectivity).and_raise(Calabash::Cucumber::ServerNotRespondingError)
+      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_raise(Calabash::Cucumber::ServerNotRespondingError)
 
       actual = launcher.attach
 
@@ -140,7 +133,7 @@ describe 'Calabash Launcher' do
     it "cannot establish communication with instruments" do
       run_loop[:pid] = nil
 
-      expect(launcher).to receive(:ensure_connectivity).and_return(true)
+      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
 
       actual = launcher.attach
 
@@ -440,7 +433,7 @@ describe 'Calabash Launcher' do
         # We can't stand up the server, so we'll create a device and ask for
         # its version.  It is the best we can do for now.
         device = Resources.shared.device_for_mocking
-        launcher.device = device
+        launcher.instance_variable_set(:@device, device)
         actual = launcher.server_version_from_server
         expect(actual).not_to be == nil
         expect(RunLoop::Version.new(actual).to_s).to be == '0.10.0'

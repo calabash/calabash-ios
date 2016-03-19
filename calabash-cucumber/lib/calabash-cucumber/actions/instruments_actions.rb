@@ -116,17 +116,16 @@ class Calabash::Cucumber::InstrumentsActions
   def normalize_rect_for_orientation!(orientation, rect)
     orientation = orientation.to_sym
     launcher = Calabash::Cucumber::Launcher.launcher
+    device = launcher.device
 
     # Coordinate translations for orientation is handled in the server for iOS 8+
-    # https://developer.apple.com/library/ios/documentation/UIKit/Reference/UICoordinateSpace_protocol/index.html
-    if launcher.ios_major_version.to_i >= 8
+    if device.ios_major_version.to_i >= 8
       return
     end
 
     # We cannot use Device#screen_dimensions here because on iPads the height
     # and width are the opposite of what we expect.
     # @todo Move all coordinate/orientation translation into the server.
-    device = launcher.device
     if device.ipad?
       screen_size = { :width => 768, :height => 1024 }
     elsif device.iphone_4in?
