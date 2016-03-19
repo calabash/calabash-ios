@@ -609,9 +609,11 @@ If your app is crashing at launch, find a crash report to determine the cause.
         !quit_app_after_scenario?
       end
 
-      # Should Calabash quit the app under test after each Scenario?
+      # Should Calabash quit the app under test after a Scenario?
       #
       # Control this behavior using the QUIT_APP_AFTER_SCENARIO variable.
+      #
+      # The default behavior is to quit after every Scenario.
       def quit_app_after_scenario?
         Calabash::Cucumber::Environment.quit_app_after_scenario?
       end
