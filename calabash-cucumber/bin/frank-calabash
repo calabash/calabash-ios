@@ -67,7 +67,6 @@ def console
   require 'frank-calabash'
   require 'calabash-cucumber/operations'
   require 'pry'
-  ENV['CALABASH_VERSION_PATH']='calabash_version'
   console = Frank::Console.new
   console.extend ::Frank::Calabash
 
