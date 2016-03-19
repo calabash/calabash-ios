@@ -238,23 +238,6 @@ Queries will work, but gestures will not.
         @@launcher
       end
 
-      # "Major" component of the current iOS version of the device
-      # @return {String} the "major" component, e.g., "7" for "7.1.1"
-      def ios_major_version
-        # pinging the app will set self.device
-        ping_app if self.device.nil?
-        # guard against Runtime errors
-        return nil if device.nil? or device.ios_version.nil?
-        device.ios_major_version
-      end
-
-      # the current iOS version of the device
-      # @return {String} the current iOS version of the device
-      def ios_version
-        return nil if device.nil?
-        device.ios_version
-      end
-
       # Erases a simulator. This is the same as touching the Simulator
       # "Reset Content & Settings" menu item.
       #
