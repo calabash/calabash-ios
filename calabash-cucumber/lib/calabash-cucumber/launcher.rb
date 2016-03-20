@@ -166,6 +166,10 @@ module Calabash
       # @!visibility private
       # @see Calabash::Cucumber::Core#console_attach
       def attach(options={})
+        if Calabash::Cucumber::Environment.xtc?
+          raise "This method is not available on the Xamarin Test Cloud"
+        end
+
         default_options = {:http_connection_retry => 1,
                            :http_connection_timeout => 10}
         merged_options = default_options.merge(options)

@@ -169,6 +169,15 @@ describe 'Calabash Launcher' do
       expect(launcher.instance_variable_get(:@actions)).to be == nil
       expect(actual).to be == launcher
     end
+
+    it "raises an error on the XTC" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      expect do
+        launcher.attach
+      end.to raise_error RuntimeError,
+        /This method is not available on the Xamarin Test Cloud/
+    end
   end
 
   describe "#reset_simulator" do
