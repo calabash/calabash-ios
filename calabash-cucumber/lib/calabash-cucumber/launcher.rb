@@ -133,6 +133,13 @@ module Calabash
       end
 
       # @!visibility private
+      #
+      # Legacy API. This is a required method.  Do not remove
+      def device=(new_device)
+        @device = new_device
+      end
+
+      # @!visibility private
       def xcode
         @xcode ||= RunLoop::Xcode.new
       end
