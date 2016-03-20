@@ -121,7 +121,7 @@ module Calabash
       # Device instance for iOS < 8 so we can perform the necessary
       # coordinate normalization - based on the device attributes.
       #
-      # We also need this information to determine the default uia strategy.
+      # We also need this instance to determine the default uia strategy.
       #
       # +1 for tools to ask physical devices about attributes.
       def device
