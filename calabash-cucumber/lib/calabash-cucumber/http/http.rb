@@ -7,6 +7,7 @@ module Calabash
     # @!visibility private
     class HTTP
 
+      require "json"
       require "calabash-cucumber/environment"
       require "run_loop"
 
@@ -23,7 +24,12 @@ module Calabash
         body = nil
         success = response.is_a?(Net::HTTPSuccess)
         if success
-          body = response.body
+          json = response.body
+          begin
+            body = JSON.parse(json)
+          rescue TypeError, JSON::ParserError => _
+            success = false
+          end
         end
 
         http.finish if http and http.started?

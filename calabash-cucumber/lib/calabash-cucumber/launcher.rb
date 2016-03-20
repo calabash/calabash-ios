@@ -127,9 +127,8 @@ module Calabash
       def device
         @device ||= lambda do
           _, body = Calabash::Cucumber::HTTP.ensure_connectivity
-          response = JSON.parse(body)
           endpoint = Calabash::Cucumber::Environment.device_endpoint
-          Calabash::Cucumber::Device.new(endpoint, response)
+          Calabash::Cucumber::Device.new(endpoint, body)
         end.call
       end
 
