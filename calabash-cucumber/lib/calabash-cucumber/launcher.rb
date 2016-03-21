@@ -460,10 +460,6 @@ true.  Please remove this method call from your hooks.
         (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
       end
 
-      # @!visibility private
-      def discover_device_target(launch_args)
-        ENV['DEVICE_TARGET'] || launch_args[:device_target]
-      end
 
       # @!visibility private
       def simulator_target?(launch_args={})
@@ -626,6 +622,12 @@ true.  Please remove this method call from your hooks.
       def default_launch_args
         RunLoop.deprecated("0.19.0", "No replacement")
         {}
+      end
+
+      # @!visibility private
+      # deprecated 0.19.0 - no replacement
+      def discover_device_target(launch_args)
+        nil
       end
 
       private
