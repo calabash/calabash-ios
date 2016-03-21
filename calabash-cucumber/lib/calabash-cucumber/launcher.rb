@@ -423,12 +423,6 @@ Resetting physical devices is not supported.
           end
         end
 
-        # Patch for bug in Xcode 6 GM + iOS 8 device testing.
-        # http://openradar.appspot.com/radar?id=5891145586442240
-        uia_strategy = default_uia_strategy(args, args[:sim_control], args[:instruments])
-        args[:uia_strategy] ||= uia_strategy
-        RunLoop.log_info2("Using uia strategy: '#{args[:uia_strategy]}'")
-
         self.run_loop = new_run_loop(args)
         self.actions= Calabash::Cucumber::InstrumentsActions.new
 
