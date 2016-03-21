@@ -408,12 +408,12 @@ Resetting physical devices is not supported.
       end
 
       # @!visibility private
+      # TODO deprecate and roll this into relaunch
       def calabash_notify(world)
         if world.respond_to?(:on_launch)
           world.on_launch
         end
       end
-
 
       # Should Calabash quit the app under test after a Scenario?
       #
@@ -423,7 +423,6 @@ Resetting physical devices is not supported.
       def quit_app_after_scenario?
         Calabash::Cucumber::Environment.quit_app_after_scenario?
       end
-
 
       # @!visibility private
       # Extracts server version from the app binary at `app_bundle_path` by
