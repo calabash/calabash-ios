@@ -93,34 +93,6 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe "#set_device_target_after_attach" do
-    let(:options) do
-      {
-        :sim_control => Calabash::Cucumber::Environment.simctl,
-        :instruments => Calabash::Cucumber::Environment.instruments
-      }
-    end
-
-    let(:run_loop) {  { :udid => RunLoop::Core.default_simulator } }
-    let(:identifier) { run_loop[:udid] }
-
-    it "swallows errors" do
-      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_raise(ArgumentError)
-
-      actual = launcher.send(:set_device_target_after_attach, run_loop)
-      expect(actual).to be == nil
-      expect(launcher.instance_variable_get(:@run_loop_device)).to be == nil
-    end
-
-    it "sets the @run_loop_device" do
-      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_call_original
-
-      actual = launcher.send(:set_device_target_after_attach, run_loop)
-      expect(actual).to be_a_kind_of(RunLoop::Device)
-      expect(launcher.instance_variable_get(:@run_loop_device)).to be == actual
-    end
-  end
-
   describe "#attach" do
     let(:run_loop) do
       {
@@ -138,7 +110,6 @@ describe 'Calabash Launcher' do
     before do
       allow(RunLoop::HostCache).to receive(:default).and_return(cache)
       allow(cache).to receive(:read).and_return(run_loop)
-      allow(launcher).to receive(:set_device_target_after_attach).with(run_loop).and_return(:device)
     end
 
     it "the happy path" do

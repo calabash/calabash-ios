@@ -173,8 +173,6 @@ module Calabash
 
         self.run_loop = RunLoop::HostCache.default.read
 
-        set_device_target_after_attach(self.run_loop)
-
         begin
           Calabash::Cucumber::HTTP.ensure_connectivity(merged_options)
         rescue Calabash::Cucumber::ServerNotRespondingError => _
@@ -639,27 +637,6 @@ To see what devices are available on your machine, use instruments:
 $ xcrun instruments -s devices
 
 ]
-        end
-      end
-
-      # @!visibility private
-      #
-      # Called from the World.console_attach => #attach method to populate
-      # the instance variable because `relaunch` is not called.
-      def set_device_target_after_attach(run_loop_hash)
-        identifier = run_loop_hash[:udid]
-
-        options = {
-          :sim_control => Calabash::Cucumber::Environment.simctl,
-          :instruments => Calabash::Cucumber::Environment.instruments
-        }
-
-        begin
-           @run_loop_device = RunLoop::Device.device_with_identifier(identifier, options)
-        rescue ArgumentError => _
-          # For now we will swallow any error - it is not clear yet if it will be
-          # important to make this connection.
-          @run_loop_device = nil
         end
       end
     end
