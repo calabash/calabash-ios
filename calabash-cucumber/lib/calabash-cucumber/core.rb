@@ -1177,7 +1177,13 @@ arguments => '#{arguments}'
       #   when starting the console.
       # @return [Calabash::Cucumber::Launcher,nil] the currently active
       #  calabash launcher
+      #
+      # @raise [RuntimeError] This method is not available on the Xamarin Test
+      #  Cloud
       def console_attach(uia_strategy = nil)
+        if Calabash::Cucumber::Environment.xtc?
+          raise "This method is not available on the Xamarin Test Cloud"
+        end
         # setting the @calabash_launcher here for backward compatibility
         @calabash_launcher = launcher.attach({:uia_strategy => uia_strategy})
       end

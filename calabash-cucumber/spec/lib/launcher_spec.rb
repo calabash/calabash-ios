@@ -20,6 +20,35 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  describe "device attribute" do
+
+    # Legacy API. This is a required method.  Do not remove.
+    it "#device=" do
+      launcher.device = :device
+      expect(launcher.device).to be == :device
+      expect(launcher.instance_variable_get(:@device)).to be == :device
+    end
+
+    describe "#device" do
+      it "is lazy eval'd" do
+        launcher.instance_variable_set(:@device, :device)
+        expect(launcher.device).to be == :device
+      end
+
+      it "calls out to the LPServer" do
+        connected = [
+          true,
+          {"device_name"  => "denis" }
+          ]
+        expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(connected)
+        device = launcher.device
+
+        expect(device).to be_a_kind_of(Calabash::Cucumber::Device)
+        expect(device.device_name).to be == "denis"
+      end
+    end
+  end
+
   it "#usage_tracker" do
     actual = launcher.usage_tracker
     expect(actual).to be_a_kind_of(Calabash::Cucumber::UsageTracker)
@@ -139,6 +168,15 @@ describe 'Calabash Launcher' do
 
       expect(launcher.instance_variable_get(:@actions)).to be == nil
       expect(actual).to be == launcher
+    end
+
+    it "raises an error on the XTC" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      expect do
+        launcher.attach
+      end.to raise_error RuntimeError,
+        /This method is not available on the Xamarin Test Cloud/
     end
   end
 

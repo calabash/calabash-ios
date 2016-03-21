@@ -304,6 +304,28 @@ describe Calabash::Cucumber::Core do
     end
   end
 
+  describe "console_attach" do
+    it "raises an error on the XTC" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      expect do
+        world.console_attach
+      end.to raise_error RuntimeError,
+      /This method is not available on the Xamarin Test Cloud/
+    end
+
+    it "calls launcher#attach" do
+      launcher = Calabash::Cucumber::Launcher.new
+      strategy = :host
+      options = { :uia_strategy => strategy }
+      expect(launcher).to receive(:attach).with(options).and_return(launcher)
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+
+      actual = world.console_attach(strategy)
+      expect(actual).to be == launcher
+    end
+  end
+
   describe "shake" do
     describe "raises errors" do
 

@@ -121,16 +121,22 @@ module Calabash
       # Device instance for iOS < 8 so we can perform the necessary
       # coordinate normalization - based on the device attributes.
       #
-      # We also need this information to determine the default uia strategy.
+      # We also need this instance to determine the default uia strategy.
       #
       # +1 for tools to ask physical devices about attributes.
       def device
         @device ||= lambda do
           _, body = Calabash::Cucumber::HTTP.ensure_connectivity
-          response = JSON.parse(body)
           endpoint = Calabash::Cucumber::Environment.device_endpoint
-          Calabash::Cucumber::Device.new(endpoint, response)
+          Calabash::Cucumber::Device.new(endpoint, body)
         end.call
+      end
+
+      # @!visibility private
+      #
+      # Legacy API. This is a required method.  Do not remove
+      def device=(new_device)
+        @device = new_device
       end
 
       # @!visibility private
@@ -160,6 +166,10 @@ module Calabash
       # @!visibility private
       # @see Calabash::Cucumber::Core#console_attach
       def attach(options={})
+        if Calabash::Cucumber::Environment.xtc?
+          raise "This method is not available on the Xamarin Test Cloud"
+        end
+
         default_options = {:http_connection_retry => 1,
                            :http_connection_timeout => 10}
         merged_options = default_options.merge(options)

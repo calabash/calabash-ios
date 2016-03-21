@@ -7,6 +7,7 @@ module Calabash
     # @!visibility private
     class HTTP
 
+      require "json"
       require "calabash-cucumber/environment"
       require "run_loop"
 
@@ -23,7 +24,12 @@ module Calabash
         body = nil
         success = response.is_a?(Net::HTTPSuccess)
         if success
-          body = response.body
+          json = response.body
+          begin
+            body = JSON.parse(json)
+          rescue TypeError, JSON::ParserError => _
+            success = false
+          end
         end
 
         http.finish if http and http.started?
@@ -45,6 +51,7 @@ module Calabash
         timeout = merged_options[:http_connection_timeout]
 
         start_time = Time.now
+        last_error = nil
 
         max_retry_count.times do |try|
           RunLoop.log_debug("Trying to connect to Calabash Server: #{try + 1} of #{max_retry_count}")
@@ -60,17 +67,31 @@ module Calabash
           begin
             success, body = self.ping_app
             return success, body if success
-          rescue => _
-
+          rescue => e
+            last_error = e
           ensure
             sleep(1)
           end
         end
 
-        endpoint = Calabash::Cucumber::Environment.device_endpoint
+        self.raise_on_no_connectivity(last_error)
+      end
 
-        raise Calabash::Cucumber::ServerNotRespondingError,
-              %Q[Could not connect to the Calabash Server @ #{endpoint}.
+      private
+
+      def self.raise_on_no_connectivity(last_error)
+        if Calabash::Cucumber::Environment.xtc?
+          raise Calabash::Cucumber::ServerNotRespondingError,
+%Q[Could not connect to the Calabash Server.
+
+#{last_error}
+
+Please contact: testcloud-support@xamarin.com
+]
+        else
+          endpoint = Calabash::Cucumber::Environment.device_endpoint
+          raise Calabash::Cucumber::ServerNotRespondingError,
+%Q[Could not connect to the Calabash Server @ #{endpoint}.
 
 See these two guides for help.
 
@@ -84,6 +105,8 @@ See these two guides for help.
 If your app is crashing at launch, find a crash report to determine the cause.
 
 ]
+        end
+
       end
     end
   end
