@@ -439,10 +439,6 @@ Resetting physical devices is not supported.
 
 
       # @!visibility private
-      def device_target?
-        (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
-      end
-
       # @!visibility private
       def app_path
         RunLoop::Environment.path_to_app_bundle || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
@@ -603,13 +599,22 @@ true.  Please remove this method call from your hooks.
       end
 
       # @!visibility private
-      # deprecated 0.19.0 - no replacement
+      # @deprecated 0.19.0 - no replacement
       def discover_device_target(launch_args)
+        RunLoop.deprecated("0.19.0", "No replacement")
         nil
       end
 
       # @!visibility private
-      # deprecated 0.19.0 - no replacement
+      # @deprecated 0.19.0 - no replacement
+      # TODO Call out to RunLoop::Device.detect_device
+      def device_target?
+        RunLoop.deprecated("0.19.0", "No replacement")
+        false
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
       # TODO Call out to RunLoop::Device.detect_device
       def simulator_target?(launch_args={})
         RunLoop.deprecated("0.19.0", "No replacement")

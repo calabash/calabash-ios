@@ -249,6 +249,10 @@ describe 'Calabash Launcher' do
     expect(launcher.calabash_no_stop?).to be == false
   end
 
+  it "#device_target? - deprecated" do
+    expect(launcher.device_target?).to be == false
+  end
+
   describe 'checking server/gem compatibility' do
 
     before(:example) do
