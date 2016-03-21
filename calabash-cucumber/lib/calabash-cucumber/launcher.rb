@@ -433,11 +433,10 @@ Resetting physical devices is not supported.
           end
         end
 
-        # Patch for bug in Xcode 6 GM + iOS 8 device testing.
-        # http://openradar.appspot.com/radar?id=5891145586442240
-        uia_strategy = default_uia_strategy(args, args[:sim_control], args[:instruments])
-        args[:uia_strategy] ||= uia_strategy
-        RunLoop.log_info2("Using uia strategy: '#{args[:uia_strategy]}'")
+        # Patch until RunLoop >= 2.0.10 is released
+        if !args[:uia_strategy]
+          args[:uia_strategy] = :host
+        end
 
         self.run_loop = new_run_loop(args)
         self.actions= Calabash::Cucumber::InstrumentsActions.new
@@ -453,59 +452,6 @@ Resetting physical devices is not supported.
         end
 
         usage_tracker.post_usage_async
-      end
-
-      # @!visibility private
-      #
-      # Choose the appropriate default UIA strategy based on the test target.
-      #
-      # This is a temporary (I hope) fix for a UIAApplication bug in
-      # setPreferencesValueForKey on iOS 8 devices in Xcode 6 GM.
-      #
-      # rdar://18296714
-      # http://openradar.appspot.com/radar?id=5891145586442240
-      #
-      # @param [Hash] launch_args The launch arguments.
-      # @param [RunLoop::SimControl] sim_control Used to find simulators.
-      # @param [RunLoop::Instruments] instruments Used to find physical devices.
-      def default_uia_strategy(launch_args, sim_control, instruments)
-
-        xcode = sim_control.xcode
-        if xcode.version_gte_7?
-          :host
-        else
-          udid_or_name = launch_args[:device_target]
-
-          # Can't make a determination, so return :host because it works everywhere.
-          return :host if udid_or_name == nil || udid_or_name == ''
-
-          # The default.
-          # No DEVICE_TARGET is set and no option was passed to relaunch.
-          return :preferences if udid_or_name.downcase.include?('simulator')
-
-          simulator = sim_control.simulators.find do |sim|
-            sim.instruments_identifier(xcode) == udid_or_name ||
-              sim.udid == udid_or_name
-          end
-
-          return :preferences if simulator
-
-          physical_device = instruments.physical_devices.find do |device|
-            device.name == udid_or_name ||
-              device.udid == udid_or_name
-          end
-
-          if physical_device
-            if physical_device.version < RunLoop::Version.new('8.0')
-              :preferences
-            else
-              :host
-            end
-          else
-            # Return host because it works everywhere.
-            :host
-          end
-        end
       end
 
       # @!visibility private
@@ -709,6 +655,25 @@ true.  Please remove this method call from your hooks.
           RunLoop.log_warn("#{msgs.join("\n")}")
         end
         nil
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement.
+      #
+      # Choose the appropriate default UIA strategy based on the test target.
+      #
+      # This is a temporary (I hope) fix for a UIAApplication bug in
+      # setPreferencesValueForKey on iOS 8 devices in Xcode 6 GM.
+      #
+      # rdar://18296714
+      # http://openradar.appspot.com/radar?id=5891145586442240
+      #
+      # @param [Hash] launch_args The launch arguments.
+      # @param [RunLoop::SimControl] sim_control Used to find simulators.
+      # @param [RunLoop::Instruments] instruments Used to find physical devices.
+      def default_uia_strategy(launch_args, sim_control, instruments)
+        RunLoop::deprecated("0.19.0", "This method has been removed.")
+        :host
       end
 
       private
