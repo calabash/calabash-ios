@@ -439,12 +439,6 @@ Resetting physical devices is not supported.
 
 
       # @!visibility private
-      # @!visibility private
-      def app_path
-        RunLoop::Environment.path_to_app_bundle || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
-      end
-
-      # @!visibility private
       # Extracts server version from the app binary at `app_bundle_path` by
       # inspecting the binary's strings table.
       #
@@ -619,6 +613,13 @@ true.  Please remove this method call from your hooks.
       def simulator_target?(launch_args={})
         RunLoop.deprecated("0.19.0", "No replacement")
         false
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def app_path
+        RunLoop.deprecated("0.19.0", "No replacement")
+        nil
       end
 
       private

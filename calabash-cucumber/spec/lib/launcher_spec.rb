@@ -253,6 +253,10 @@ describe 'Calabash Launcher' do
     expect(launcher.device_target?).to be == false
   end
 
+  it "#app_path - deprecated" do
+    expect(launcher.app_path).to be == nil
+  end
+
   describe 'checking server/gem compatibility' do
 
     before(:example) do
