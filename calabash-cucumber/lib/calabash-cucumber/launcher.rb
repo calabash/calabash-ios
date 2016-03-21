@@ -75,9 +75,6 @@ module Calabash
       attr_accessor :launch_args
 
       # @!visibility private
-      attr_reader :xcode
-
-      # @!visibility private
       attr_reader :usage_tracker
 
       # @!visibility private
@@ -142,11 +139,6 @@ module Calabash
       # Legacy API. This is a required method.  Do not remove
       def device=(new_device)
         @device = new_device
-      end
-
-      # @!visibility private
-      def xcode
-        @xcode ||= RunLoop::Xcode.new
       end
 
       # @!visibility private
@@ -620,6 +612,12 @@ true.  Please remove this method call from your hooks.
       def app_path
         RunLoop.deprecated("0.19.0", "No replacement")
         nil
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def xcode
+        Calabash::Cucumber::Environment.xcode
       end
 
       private
