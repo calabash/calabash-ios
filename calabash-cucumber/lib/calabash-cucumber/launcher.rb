@@ -306,23 +306,6 @@ Resetting physical devices is not supported.
           :launch_retries => 5
         }
 
-        device_tgt = ENV['DEVICE_TARGET']
-        if simulator_target?
-          args[:device_target] = device_tgt
-          args[:udid] = nil
-        else
-          if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
-            device_tgt = RunLoop::Core.detect_connected_device
-          end
-
-          if device_tgt
-            args[:device_target] = args[:udid] = device_tgt
-          end
-        end
-
-        if args[:device_target].nil?
-          args[:device_target] = device_tgt || 'simulator'
-        end
         args
       end
 
