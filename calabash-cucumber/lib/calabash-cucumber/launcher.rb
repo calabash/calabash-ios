@@ -423,6 +423,11 @@ Resetting physical devices is not supported.
           end
         end
 
+        # Patch until RunLoop >= 2.0.10 is released
+        if !args[:uia_strategy]
+          args[:uia_strategy] = :host
+        end
+
         self.run_loop = new_run_loop(args)
         self.actions= Calabash::Cucumber::InstrumentsActions.new
 
