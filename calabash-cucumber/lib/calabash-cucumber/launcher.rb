@@ -47,6 +47,11 @@ module Calabash
       require "run_loop"
 
       # @!visibility private
+      DEFAULTS = {
+        :launch_retries => 5
+      }
+
+      # @!visibility private
       @@launcher = nil
 
       # @!visibility private
@@ -284,31 +289,6 @@ Resetting physical devices is not supported.
         device_target
       end
 
-      # @!visibility private
-      def default_launch_args
-        # APP_BUNDLE_PATH
-        # BUNDLE_ID
-        # APP (unifies APP_BUNDLE_PATH, BUNDLE_ID)
-        # DEVICE_TARGET
-        # RESET_BETWEEN_SCENARIOS
-        # DEVICE
-        # QUIT_APP_AFTER_SCENARIO
-
-        args = {
-          :reset => Calabash::Cucumber::Environment.reset_between_scenarios?,
-          :bundle_id => ENV['BUNDLE_ID'],
-          # TODO: Deprecate this key.  Use :quit_app_after_scenario.
-          :no_stop => quit_app_after_scenario?,
-          :relaunch_simulator => true,
-          # Do not advertise this to users!
-          # For example, don't include documentation about this option.
-          # This is used to instrument internal testing (failing fast).
-          :launch_retries => 5
-        }
-
-        args
-      end
-
       # Launches your app on the connected device or simulator.
       #
       # `relaunch` does a lot of error detection and handling to reliably start the
@@ -319,8 +299,8 @@ Resetting physical devices is not supported.
       # Use the `args` parameter to to control:
       #
       # * `:app` - which app to launch.
-      # * `:device_target` - simulator or device to target.
-      # * `:reset_app_sandbox - reset he app's data (sandbox) before testing
+      # * `:device` - simulator or device to target.
+      # * `:reset_app_sandbox - reset the app's data (sandbox) before testing
       #
       # and many other behaviors.
       #
@@ -330,9 +310,6 @@ Resetting physical devices is not supported.
       #
       # @param {Hash} args optional arguments to control the how the app is launched
       def relaunch(args={})
-
-        # @todo Don't overwrite the _args_ parameter!
-        args = default_launch_args.merge(args)
 
         # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
         # of the Xcode tool calls, like instruments -s templates, take a long time
@@ -420,11 +397,8 @@ Resetting physical devices is not supported.
 
       # @!visibility private
       def new_run_loop(args)
-
         last_err = nil
-
-        num_retries = args[:launch_retries] || 5
-
+        num_retries = args[:launch_retries] || DEFAULTS[:launch_retries]
         num_retries.times do
           begin
             return RunLoop.run(args)
@@ -644,8 +618,15 @@ true.  Please remove this method call from your hooks.
       # @deprecated 0.19.0 - no replacement
       def detect_connected_device?
         RunLoop.deprecated("0.19.0", "No replacement")
+        false
       end
 
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def default_launch_args
+        RunLoop.deprecated("0.19.0", "No replacement")
+        {}
+      end
 
       private
 

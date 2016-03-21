@@ -233,27 +233,8 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe '#discover_device_target' do
-
-    let(:options) do { :device_target => 'OPTION!' } end
-
-    it 'respects the DEVICE_TARGET' do
-      stub_env('DEVICE_TARGET', 'TARGET!')
-
-      expect(launcher.discover_device_target(options)).to be == 'TARGET!'
-    end
-
-    it 'uses :device_target option' do
-      stub_env({'DEVICE_TARGET' => nil})
-
-      expect(launcher.discover_device_target(options)).to be == 'OPTION!'
-    end
-
-    it 'returns nil if neither is defined' do
-      stub_env({'DEVICE_TARGET' => nil})
-
-      expect(launcher.discover_device_target({})).to be == nil
-    end
+  it "#discover_device_target - deprecated" do
+    expect(launcher.discover_device_target(nil)).to be == nil
   end
 
   it ".default_uia_strategy - deprecated" do
@@ -495,62 +476,11 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe 'default launch args should respect DEVICE_TARGET' do
+  it "#default_launch_args - deprecated" do
+    expect(launcher.default_launch_args).to be == {}
+  end
 
-    let(:fake_udid) { 'FAKE-UDID' }
-
-    it "should return 'simulator' if DEVICE_TARGET nil" do
-      args = launcher.default_launch_args
-      expect(args[:device_target]).to be == 'simulator'
-    end
-
-    describe 'running with instruments' do
-
-      describe 'running against devices' do
-        describe 'when DEVICE_TARGET = < udid >' do
-          it 'it should return udid if DEVICE_TARGET is a udid' do
-            stub_env('DEVICE_TARGET', fake_udid)
-            args = launcher.default_launch_args
-            expect(args[:device_target]).to be == fake_udid
-            expect(args[:udid]).to be == fake_udid
-          end
-        end
-
-        describe 'when DEVICE_TARGET = device' do
-
-          before(:example) do
-            stub_env('DEVICE_TARGET', 'device')
-          end
-
-          describe 'detecting connected devices' do
-            describe "when DETECT_CONNECTED_DEVICE == '1'" do
-              it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                stub_env('DETECT_CONNECTED_DEVICE', '1')
-                args = launcher.default_launch_args
-                target = args[:device_target]
-                detected = RunLoop::Core.detect_connected_device
-
-                if detected
-                  expect(target).to be == detected
-                  expect(args[:udid]).to be == detected
-                else
-                  #pending('this behavior is needs verification')
-                  expect(target).to be == 'simulator'
-                end
-              end
-
-              context "when DETECT_CONNECTED_DEVICE != '1'" do
-                it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                  args = launcher.default_launch_args
-                  target = args[:device_target]
-                  expect(target).to be == 'device'
-                  expect(args[:udid]).to be == 'device'
-                end
-              end
-            end
-          end
-        end
-      end
-    end
+  it "#detect_connected_device? - deprecated" do
+    expect(launcher.detect_connected_device?).to be_falsey
   end
 end
