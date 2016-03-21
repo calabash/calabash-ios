@@ -399,11 +399,6 @@ Resetting physical devices is not supported.
           end
         end
 
-        if simulator_target?(args)
-          puts "Unable to launch app on Simulator."
-        else
-          puts "Unable to launch app on physical device"
-        end
         raise Calabash::Cucumber::LaunchError.new(last_err)
       end
 
