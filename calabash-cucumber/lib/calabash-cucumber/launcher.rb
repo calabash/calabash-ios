@@ -299,87 +299,36 @@ Resetting physical devices is not supported.
       # most important environment variables are `APP`, `DEVICE_TARGET`, and
       # `DEVICE_ENDPOINT`.
       #
-      # @param {Hash} args optional arguments to control the how the app is launched
-      def relaunch(args={})
+      # @param {Hash} launch_options optional arguments to control the how the app is launched
+      def relaunch(launch_options={})
+        simctl = launch_options[:simctl] || launch_options[:sim_control]
+        instruments = launch_options[:instruments]
+        xcode = launch_options[:xcode]
 
-        # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
-        # of the Xcode tool calls, like instruments -s templates, take a long time
-        # to execute.
-        # @todo Use SimControl in Launcher in place of methods like simulator_target?
-        args[:sim_control] = RunLoop::SimControl.new
-        args[:instruments] = RunLoop::Instruments.new
-        args[:xcode] = xcode
+        options = launch_options.clone
 
-        if args[:app]
-          if !File.exist?(args[:app])
-            raise "Unable to find app bundle at #{args[:app]}. It should be an iOS Simulator build (typically a *.app directory)."
-          end
+        # Reusing SimControl, Instruments, and Xcode can speed up launches.
+        options[:simctl] = simctl || Calabash::Cucumber::Environment.simctl
+        options[:instruments] = instruments || Calabash::Cucumber::Environment.instruments
+        options[:xcode] = xcode || Calabash::Cucumber::Environment.xcode
+
+        # Patch until RunLoop >= 2.1.0 is released
+        if !options[:uia_strategy]
+          options[:uia_strategy] = :host
         end
 
-        # User passed {:app => "path/to/my.app"} _and_ it exists.
-        # User defined BUNDLE_ID or passed {:bundle_id => com.example.myapp}
-        # User defined APP or APP_BUNDLE_PATH env vars _or_ APP_BUNDLE_PATH constant.
-        args[:app] = args[:app] || args[:bundle_id] || app_path
+        self.launch_args = options
 
-        if args[:app]
-          if File.directory?(args[:app])
-            args[:app] = File.expand_path(args[:app])
-          else
-            # args[:app] is not a directory so must be a bundle id.
-            if simulator_target?(args)
-              args[:app] = app_path
-            end
-          end
-        end
-
-        # At this point :app is either nil because we are targeting a simulator
-        # or it is a CFBundleIdentifier.
-        if args[:app]
-          # nothing to do because :bundle_id and :app are the same.
-        else
-          # User gave us no information about where the simulator app is located
-          # so we have to auto detect it.  This RunLoop method raises an error
-          # with a meaningful message based on the environment.  The message
-          # includes suggestions about what to do next.
-          run_loop_app = RunLoop::DetectAUT::Detect.new.app_for_simulator
-
-          # This is not great - RunLoop is going to take this path and create a new
-          # RunLoop::App.  This is the best we can do for now.
-          args[:app] = run_loop_app.path
-          args[:bundle_id] = run_loop_app.bundle_identifier
-        end
-
-        use_dylib = args[:inject_dylib]
-        if use_dylib
-          # User passed a Boolean, not a file.
-          if use_dylib.is_a?(TrueClass)
-            if simulator_target?(args)
-              args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_sim_dylib
-            else
-              raise RuntimeError, "Injecting a dylib is not supported when targeting a device"
-            end
-          else
-            unless File.exist? use_dylib
-              raise "Dylib does not exist at path: '#{use_dylib}'"
-            end
-          end
-        end
-
-        # Patch until RunLoop >= 2.0.10 is released
-        if !args[:uia_strategy]
-          args[:uia_strategy] = :host
-        end
-
-        self.run_loop = new_run_loop(args)
+        self.run_loop = new_run_loop(options)
         self.actions= Calabash::Cucumber::InstrumentsActions.new
 
-        self.launch_args = args
-
-        unless args[:calabash_lite]
+        if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
           # skip compatibility check if injecting dylib
-          unless args.fetch(:inject_dylib, false)
-            check_server_gem_compatibility
+          if !options[:inject_dylib]
+            # Don't check until method is rewritten.
+            # TODO Enable
+            # check_server_gem_compatibility
           end
         end
 
