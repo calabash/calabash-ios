@@ -241,8 +241,12 @@ describe 'Calabash Launcher' do
     expect(launcher.default_uia_strategy(nil, nil, nil)).to be == :host
   end
 
-  it "#simulator_target?" do
+  it "#simulator_target? - deprecated" do
     expect(launcher.simulator_target?).to be == false
+  end
+
+  it "#calabash_no_launch? - deprecated" do
+    expect(launcher.calabash_no_stop?).to be == false
   end
 
   describe 'checking server/gem compatibility' do

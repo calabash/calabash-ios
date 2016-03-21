@@ -427,13 +427,6 @@ Resetting physical devices is not supported.
         end
       end
 
-      # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
-      # @!visibility private
-      def calabash_no_stop?
-        # Not yet.  Save for 0.20.0.
-        # RunLoop.deprecated("0.19.0", "replaced with quit_app_after_scenario")
-        !quit_app_after_scenario?
-      end
 
       # Should Calabash quit the app under test after a Scenario?
       #
@@ -444,23 +437,11 @@ Resetting physical devices is not supported.
         Calabash::Cucumber::Environment.quit_app_after_scenario?
       end
 
-      # @deprecated 0.19.0
-      # @!visibility private
-      def calabash_no_launch?
-        RunLoop.log_warn(%Q[
-Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
-environment variable has been removed from Calabash.  This always returns
-true.  Please remove this method call from your hooks.
-])
-        true
-      end
 
       # @!visibility private
       def device_target?
         (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
       end
-
-
 
       # @!visibility private
       def app_path
@@ -567,6 +548,25 @@ true.  Please remove this method call from your hooks.
           RunLoop.log_warn("#{msgs.join("\n")}")
         end
         nil
+      end
+
+      # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
+      # @!visibility private
+      def calabash_no_stop?
+        # Not yet.  Save for 0.20.0.
+        # RunLoop.deprecated("0.19.0", "replaced with quit_app_after_scenario")
+        !quit_app_after_scenario?
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def calabash_no_launch?
+        RunLoop.log_warn(%Q[
+Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
+environment variable has been removed from Calabash.  This always returns
+true.  Please remove this method call from your hooks.
+])
+        false
       end
 
       # @!visibility private
