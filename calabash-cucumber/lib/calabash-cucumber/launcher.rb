@@ -326,25 +326,6 @@ Resetting physical devices is not supported.
         args
       end
 
-      # @!visibility private
-      def detect_connected_device?
-        if ENV['DETECT_CONNECTED_DEVICE'] == '1'
-          return true
-        end
-
-        if ENV['BUNDLE_ID'].nil? && ENV['DETECT_CONNECTED_DEVICE'].nil?
-          return false
-        end
-        if ENV['BUNDLE_ID'] && ENV['DETECT_CONNECTED_DEVICE'].nil?
-          return true
-        end
-        if ENV['DETECT_CONNECTED_DEVICE']
-          return ENV['DETECT_CONNECTED_DEVICE'] != '0'
-        end
-
-        return false
-      end
-
       # Launches your app on the connected device or simulator.
       #
       # `relaunch` does a lot of error detection and handling to reliably start the
@@ -675,6 +656,13 @@ true.  Please remove this method call from your hooks.
         RunLoop::deprecated("0.19.0", "This method has been removed.")
         :host
       end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def detect_connected_device?
+        RunLoop.deprecated("0.19.0", "No replacement")
+      end
+
 
       private
 
