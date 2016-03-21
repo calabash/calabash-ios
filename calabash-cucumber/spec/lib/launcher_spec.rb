@@ -257,6 +257,11 @@ describe 'Calabash Launcher' do
     expect(launcher.app_path).to be == nil
   end
 
+  it "#ensure_connectivity - deprecated" do
+    expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
+    expect(launcher.ensure_connectivity).to be_truthy
+  end
+
   describe 'checking server/gem compatibility' do
 
     before(:example) do

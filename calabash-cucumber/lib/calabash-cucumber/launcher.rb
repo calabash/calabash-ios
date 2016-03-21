@@ -620,6 +620,13 @@ true.  Please remove this method call from your hooks.
         Calabash::Cucumber::Environment.xcode
       end
 
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def ensure_connectivity
+        RunLoop.deprecated("0.19.0", "No replacement")
+        Calabash::Cucumber::HTTP.ensure_connectivity
+      end
+
       private
 
       # @!visibility private
