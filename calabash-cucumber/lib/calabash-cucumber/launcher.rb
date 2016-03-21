@@ -255,6 +255,7 @@ Queries will work, but gestures will not.
       # @raise RuntimeError If the simulator cannot be erased
       def reset_simulator(device=nil)
         if device.nil? || device == ""
+          # TODO Replace this call with RunLoop::Device.detect_device
           device_target = ensure_device_target
         elsif device.is_a?(RunLoop::Device)
           device_target = device
@@ -623,6 +624,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @return [RunLoop::Device] A RunLoop::Device instance.
+      # TODO Remove
       def ensure_device_target
         begin
           @run_loop_device ||= Calabash::Cucumber::Environment.run_loop_device
