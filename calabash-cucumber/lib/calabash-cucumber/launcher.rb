@@ -304,12 +304,7 @@ Resetting physical devices is not supported.
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
-          # skip compatibility check if injecting dylib
-          if !options[:inject_dylib]
-            # Don't check until method is rewritten.
-            # TODO Enable
-            # check_server_gem_compatibility
-          end
+          check_server_gem_compatibility
         end
 
         usage_tracker.post_usage_async
