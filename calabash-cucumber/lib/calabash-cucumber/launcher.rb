@@ -58,14 +58,6 @@ module Calabash
       @@launcher = nil
 
       # @!visibility private
-      SERVER_VERSION_NOT_AVAILABLE = '0.0.0'
-
-      # @!visibility private
-      # Class variable for caching the embedded server version so we only need to
-      # check the server version one time.
-      @@server_version = nil
-
-      # @!visibility private
       attr_accessor :run_loop
 
       # @!visibility private
@@ -563,6 +555,9 @@ true.  Please remove this method call from your hooks.
         instruments = Calabash::Cucumber::Environment.instruments
         RunLoop::Device.detect_device(options, xcode, simctl, instruments)
       end
+
+      # The version of the embedded LPServer
+      attr_reader :server_version
 
       # @!visibility private
       # @return [RunLoop::Device] A RunLoop::Device instance.
