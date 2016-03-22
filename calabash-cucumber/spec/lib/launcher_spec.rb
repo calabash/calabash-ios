@@ -152,52 +152,34 @@ describe 'Calabash Launcher' do
   end
 
   describe "#reset_simulator" do
-    let(:options) do
-      {
-        :sim_control => Calabash::Cucumber::Environment.simctl,
-        :instruments => Calabash::Cucumber::Environment.instruments
-      }
-    end
-    describe "happy path" do
-      before do
-        allow(RunLoop::CoreSimulator).to receive(:erase).and_return(true)
-      end
 
-      describe "arg is nil or empty string" do
-        it "nil" do
-          expect(launcher).to receive(:ensure_device_target).and_return(simulator)
-
-          actual = launcher.reset_simulator
-          expect(actual).to be == simulator
-        end
-
-        it "empty string" do
-          expect(launcher).to receive(:ensure_device_target).and_return(simulator)
-
-          actual = launcher.reset_simulator("")
-          expect(actual).to be == simulator
-        end
-      end
-
-      it "arg is a RunLoop::Device" do
-        actual = launcher.reset_simulator(simulator)
-        expect(actual).to be == simulator
-      end
-
-      it "args is an simulator identifier" do
-        identifier = simulator.udid
-        expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_return(simulator)
-
-        actual = launcher.reset_simulator(identifier)
-        expect(actual).to be == simulator
-      end
+    before do
+      allow(RunLoop::CoreSimulator).to receive(:erase).and_return(true)
     end
 
-    it "a physical device is detected or passed" do
-      identifier = device.name
-      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_return(device)
+    it "device arg is a RunLoop::Device (simulator)" do
+      actual = launcher.reset_simulator(simulator)
+      expect(actual).to be == simulator
+    end
 
+    it "device arg is a RunLoop::Device (physical device)" do
+      expect do
+        launcher.reset_simulator(device)
+      end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+    end
 
+    it "device arg is something else (simulator)" do
+      identifier = simulator.udid
+      options = { :device => identifier }
+      expect(launcher).to receive(:detect_device).with(options).and_return(simulator)
+      actual = launcher.reset_simulator(identifier)
+      expect(actual).to be == simulator
+    end
+
+    it "device arg is something else (physical device)" do
+      identifier = device.udid
+      options = { :device => identifier }
+      expect(launcher).to receive(:detect_device).with(options).and_return(device)
       expect do
         launcher.reset_simulator(identifier)
       end.to raise_error ArgumentError, /Resetting physical devices is not supported/
@@ -213,7 +195,11 @@ describe 'Calabash Launcher' do
   end
 
   it "#simulator_target? - deprecated" do
-    expect(launcher.simulator_target?).to be == false
+    expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
+    expect(launcher.simulator_target?).to be_truthy
+
+    expect(launcher).to receive(:detect_device).with({}).and_return(device)
+    expect(launcher.simulator_target?).to be_falsey
   end
 
   it "#calabash_no_launch? - deprecated" do
@@ -221,7 +207,11 @@ describe 'Calabash Launcher' do
   end
 
   it "#device_target? - deprecated" do
-    expect(launcher.device_target?).to be == false
+    expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
+    expect(launcher.device_target?).to be_falsey
+
+    expect(launcher).to receive(:detect_device).with({}).and_return(device)
+    expect(launcher.device_target?).to be_truthy
   end
 
   it "#app_path - deprecated" do
@@ -392,5 +382,20 @@ describe 'Calabash Launcher' do
 
   it "#detect_connected_device? - deprecated" do
     expect(launcher.detect_connected_device?).to be_falsey
+  end
+
+  it "#detect_device" do
+    simctl = Resources.shared.sim_control
+    xcode = Resources.shared.xcode
+    instruments = Resources.shared.instruments
+    expect(Calabash::Cucumber::Environment).to receive(:simctl).and_return(simctl)
+    expect(Calabash::Cucumber::Environment).to receive(:xcode).and_return(xcode)
+    expect(Calabash::Cucumber::Environment).to receive(:instruments).and_return(instruments)
+
+    options = { :device => simulator.udid }
+    args = [options, xcode, simctl, instruments]
+    expect(RunLoop::Device).to receive(:detect_device).with(*args).and_return(simulator)
+
+    expect(launcher.send(:detect_device, options)).to be == simulator
   end
 end

@@ -254,17 +254,10 @@ Queries will work, but gestures will not.
       # @raise RuntimeError If the simulator cannot be shutdown
       # @raise RuntimeError If the simulator cannot be erased
       def reset_simulator(device=nil)
-        if device.nil? || device == ""
-          # TODO Replace this call with RunLoop::Device.detect_device
-          device_target = ensure_device_target
-        elsif device.is_a?(RunLoop::Device)
+        if device.is_a?(RunLoop::Device)
           device_target = device
         else
-          options = {
-            :sim_control => Calabash::Cucumber::Environment.simctl,
-            :instruments => Calabash::Cucumber::Environment.instruments
-          }
-          device_target = RunLoop::Device.device_with_identifier(device, options)
+          device_target = detect_device(:device => device)
         end
 
         if device_target.physical_device?
@@ -311,11 +304,6 @@ Resetting physical devices is not supported.
         options[:simctl] = simctl || Calabash::Cucumber::Environment.simctl
         options[:instruments] = instruments || Calabash::Cucumber::Environment.instruments
         options[:xcode] = xcode || Calabash::Cucumber::Environment.xcode
-
-        # Patch until RunLoop >= 2.1.0 is released
-        if !options[:uia_strategy]
-          options[:uia_strategy] = :host
-        end
 
         self.launch_args = options
 
@@ -534,18 +522,16 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
-      # TODO Call out to RunLoop::Device.detect_device
-      def device_target?
+      def device_target?(options={})
         RunLoop.deprecated("0.19.0", "No replacement")
-        false
+        detect_device(options).physical_device?
       end
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
-      # TODO Call out to RunLoop::Device.detect_device
-      def simulator_target?(launch_args={})
+      def simulator_target?(options={})
         RunLoop.deprecated("0.19.0", "No replacement")
-        false
+        detect_device(options).simulator?
       end
 
       # @!visibility private
@@ -579,6 +565,16 @@ true.  Please remove this method call from your hooks.
       end
 
       private
+
+      # @!visibility private
+      #
+      # A convenience wrapper around RunLoop::Device.detect_device
+      def detect_device(options)
+        xcode = Calabash::Cucumber::Environment.xcode
+        simctl = Calabash::Cucumber::Environment.simctl
+        instruments = Calabash::Cucumber::Environment.instruments
+        RunLoop::Device.detect_device(options, xcode, simctl, instruments)
+      end
 
       # @!visibility private
       # @return [RunLoop::Device] A RunLoop::Device instance.
