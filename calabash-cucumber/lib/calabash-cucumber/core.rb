@@ -951,9 +951,9 @@ arguments => '#{arguments}'
       # @return {Calabash::Cucumber::Launcher} the launcher object in use
       def start_test_server_in_background(args={})
         stop_test_server
-        @calabash_launcher = Calabash::Cucumber::Launcher.new()
-        @calabash_launcher.relaunch(args)
-        @calabash_launcher
+        launcher = Calabash::Cucumber::Launcher.new
+        launcher.relaunch(args)
+        launcher
       end
 
       # Helper method to easily create page object instances from a cucumber execution context.
@@ -1145,8 +1145,8 @@ arguments => '#{arguments}'
       # @!visibility private
       # @todo broken currently
       def stop_test_server
-        l = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
-        l.stop if l
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        launcher.stop if launcher
       end
 
       # @!visibility private
@@ -1181,14 +1181,12 @@ arguments => '#{arguments}'
         if Calabash::Cucumber::Environment.xtc?
           raise "This method is not available on the Xamarin Test Cloud"
         end
-        # setting the @calabash_launcher here for backward compatibility
-        @calabash_launcher = launcher.attach({:uia_strategy => uia_strategy})
+        launcher.attach({:uia_strategy => uia_strategy})
       end
 
       # @!visibility private
       def launcher
-        # setting the @calabash_launcher here for backward compatibility
-        @calabash_launcher = Calabash::Cucumber::Launcher.launcher
+        Calabash::Cucumber::Launcher.launcher
       end
 
       # @!visibility private
