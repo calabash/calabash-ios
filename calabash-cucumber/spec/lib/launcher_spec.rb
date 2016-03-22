@@ -152,52 +152,34 @@ describe 'Calabash Launcher' do
   end
 
   describe "#reset_simulator" do
-    let(:options) do
-      {
-        :sim_control => Calabash::Cucumber::Environment.simctl,
-        :instruments => Calabash::Cucumber::Environment.instruments
-      }
-    end
-    describe "happy path" do
-      before do
-        allow(RunLoop::CoreSimulator).to receive(:erase).and_return(true)
-      end
 
-      describe "arg is nil or empty string" do
-        it "nil" do
-          expect(launcher).to receive(:ensure_device_target).and_return(simulator)
-
-          actual = launcher.reset_simulator
-          expect(actual).to be == simulator
-        end
-
-        it "empty string" do
-          expect(launcher).to receive(:ensure_device_target).and_return(simulator)
-
-          actual = launcher.reset_simulator("")
-          expect(actual).to be == simulator
-        end
-      end
-
-      it "arg is a RunLoop::Device" do
-        actual = launcher.reset_simulator(simulator)
-        expect(actual).to be == simulator
-      end
-
-      it "args is an simulator identifier" do
-        identifier = simulator.udid
-        expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_return(simulator)
-
-        actual = launcher.reset_simulator(identifier)
-        expect(actual).to be == simulator
-      end
+    before do
+      allow(RunLoop::CoreSimulator).to receive(:erase).and_return(true)
     end
 
-    it "a physical device is detected or passed" do
-      identifier = device.name
-      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_return(device)
+    it "device arg is a RunLoop::Device (simulator)" do
+      actual = launcher.reset_simulator(simulator)
+      expect(actual).to be == simulator
+    end
 
+    it "device arg is a RunLoop::Device (physical device)" do
+      expect do
+        launcher.reset_simulator(device)
+      end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+    end
 
+    it "device arg is something else (simulator)" do
+      identifier = simulator.udid
+      options = { :device => identifier }
+      expect(launcher).to receive(:detect_device).with(options).and_return(simulator)
+      actual = launcher.reset_simulator(identifier)
+      expect(actual).to be == simulator
+    end
+
+    it "device arg is something else (physical device)" do
+      identifier = device.udid
+      options = { :device => identifier }
+      expect(launcher).to receive(:detect_device).with(options).and_return(device)
       expect do
         launcher.reset_simulator(identifier)
       end.to raise_error ArgumentError, /Resetting physical devices is not supported/

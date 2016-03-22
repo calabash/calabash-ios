@@ -254,17 +254,10 @@ Queries will work, but gestures will not.
       # @raise RuntimeError If the simulator cannot be shutdown
       # @raise RuntimeError If the simulator cannot be erased
       def reset_simulator(device=nil)
-        if device.nil? || device == ""
-          # TODO Replace this call with RunLoop::Device.detect_device
-          device_target = ensure_device_target
-        elsif device.is_a?(RunLoop::Device)
+        if device.is_a?(RunLoop::Device)
           device_target = device
         else
-          options = {
-            :sim_control => Calabash::Cucumber::Environment.simctl,
-            :instruments => Calabash::Cucumber::Environment.instruments
-          }
-          device_target = RunLoop::Device.device_with_identifier(device, options)
+          device_target = detect_device(:device => device)
         end
 
         if device_target.physical_device?
