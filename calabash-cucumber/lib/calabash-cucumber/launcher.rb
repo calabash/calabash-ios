@@ -402,18 +402,6 @@ Resetting physical devices is not supported.
         @@server_version = server_version
       end
 
-      # queries the server for its version.
-      #
-      # SPECIAL: sets the +@@server_version+ class variable to cache the server
-      # version because the server version will never change during runtime.
-      #
-      # @return [String] the server version
-      # @raise [RuntimeError] if the server cannot be reached
-      def server_version_from_server
-        return @@server_version unless @@server_version.nil?
-        ensure_connectivity if self.device == nil
-        @@server_version = self.device.server_version
-      end
 
       # @!visibility private
       # Checks the server and gem version compatibility and generates a warning if
@@ -542,6 +530,13 @@ true.  Please remove this method call from your hooks.
       # * Cucumber responds to :on_launch.
       def calabash_notify(_)
         false
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0
+      def server_version_from_server
+        RunLoop.deprecated("0.19.0", "No replacement")
+        server_version
       end
 
       private

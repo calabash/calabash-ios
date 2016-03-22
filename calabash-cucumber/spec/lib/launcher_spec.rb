@@ -227,6 +227,10 @@ describe 'Calabash Launcher' do
     expect(launcher.calabash_notify(nil)).to be == false
   end
 
+  it "#server_version_from_server - deprecated" do
+    expect(launcher).to receive(:server_version).and_return("0.19.0")
+    expect(launcher.server_version_from_server).to be == "0.19.0"
+  end
   describe 'checking server/gem compatibility' do
 
     before(:example) do
@@ -235,26 +239,6 @@ describe 'Calabash Launcher' do
 
     after(:example) do
       Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
-    end
-
-    describe '#server_version_from_server' do
-
-      it 'returns a version by asking the running server' do
-        # We can't stand up the server, so we'll create a device and ask for
-        # its version.  It is the best we can do for now.
-        device = Resources.shared.device_for_mocking
-        launcher.instance_variable_set(:@device, device)
-        actual = launcher.server_version_from_server
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '0.10.0'
-      end
-
-      it "returns '@@server_version' if it is not nil" do
-        Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, '1.0.0')
-        actual = launcher.server_version_from_server
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
-      end
     end
 
     describe '#server_version_from_bundle' do
