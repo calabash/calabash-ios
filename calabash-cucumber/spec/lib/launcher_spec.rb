@@ -232,6 +232,23 @@ describe 'Calabash Launcher' do
     expect(launcher.server_version_from_server).to be == "0.19.0"
   end
 
+  it "#server_version_from_bundle - deprecated" do
+    version = RunLoop::Version.new("2.0")
+    path = Resources.shared.app_bundle_path(:cal_smoke_app)
+    app = RunLoop::App.new(path)
+
+    hash = {
+      :app => app,
+      :bundle_id => app.bundle_identifier,
+      :is_ipa => false
+    }
+    options = {:app => path }
+    expect(RunLoop::DetectAUT).to receive(:detect_app_under_test).with(options).and_return(hash)
+    expect(app).to receive(:calabash_server_version).and_return(version)
+
+    expect(launcher.server_version_from_bundle(path)).to be == version
+  end
+
   describe "#check_server_gem_compatibility" do
 
     let(:cal_device) { Resources.shared.device_for_mocking }

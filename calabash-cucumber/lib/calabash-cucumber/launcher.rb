@@ -352,57 +352,6 @@ Resetting physical devices is not supported.
       end
 
       # @!visibility private
-      # Extracts server version from the app binary at `app_bundle_path` by
-      # inspecting the binary's strings table.
-      #
-      # @note
-      #  SPECIAL: sets the `@@server_version` class variable to cache the server
-      #  version because the server version will never change during runtime.
-      #
-      # @return [String] the server version
-      # @param [String] app_bundle_path file path (usually) to the application bundle
-      # @raise [RuntimeError] if there is no executable at `app_bundle_path`
-      # @raise [RuntimeError] if the server version cannot be extracted from any
-      #   binary at `app_bundle_path`
-      def server_version_from_bundle(app_bundle_path)
-        return @@server_version unless @@server_version.nil?
-        exe_paths = []
-        Dir.foreach(app_bundle_path) do |item|
-          next if item == '.' or item == '..'
-
-          full_path = File.join(app_bundle_path, item)
-          if File.executable?(full_path) and not File.directory?(full_path)
-            exe_paths << full_path
-          end
-        end
-
-        if exe_paths.empty?
-          RunLoop.log_warn("Could not find executable in '#{app_bundle_path}'")
-
-          @@server_version = SERVER_VERSION_NOT_AVAILABLE
-          return @@server_version
-        end
-
-        server_version = nil
-        exe_paths.each do |path|
-          server_version_string = `xcrun strings "#{path}" | grep -E 'CALABASH VERSION'`.chomp!
-          if server_version_string
-            server_version = server_version_string.split(' ').last
-            break
-          end
-        end
-
-        unless server_version
-          RunLoop.log_warn("Could not find server version by inspecting the binary strings table")
-
-          @@server_version = SERVER_VERSION_NOT_AVAILABLE
-          return @@server_version
-        end
-
-        @@server_version = server_version
-      end
-
-      # @!visibility private
       # Checks the server and gem version compatibility and generates a warning if
       # the server and gem are not compatible.
       #
@@ -529,6 +478,21 @@ true.  Please remove this method call from your hooks.
       def server_version_from_server
         RunLoop.deprecated("0.19.0", "No replacement")
         server_version
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def server_version_from_bundle(app_bundle_path)
+        RunLoop.deprecated("0.19.0", "No replacement")
+        options = {:app => app_bundle_path }
+        app_details = RunLoop::DetectAUT.detect_app_under_test(options)
+        app = app_details[:app]
+
+        if app.respond_to?(:calabash_server_version)
+          app.calabash_server_version
+        else
+          nil
+        end
       end
 
       private
