@@ -482,18 +482,6 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement.
-      #
-      # Choose the appropriate default UIA strategy based on the test target.
-      #
-      # This is a temporary (I hope) fix for a UIAApplication bug in
-      # setPreferencesValueForKey on iOS 8 devices in Xcode 6 GM.
-      #
-      # rdar://18296714
-      # http://openradar.appspot.com/radar?id=5891145586442240
-      #
-      # @param [Hash] launch_args The launch arguments.
-      # @param [RunLoop::SimControl] sim_control Used to find simulators.
-      # @param [RunLoop::Instruments] instruments Used to find physical devices.
       def default_uia_strategy(launch_args, sim_control, instruments)
         RunLoop::deprecated("0.19.0", "This method has been removed.")
         :host
