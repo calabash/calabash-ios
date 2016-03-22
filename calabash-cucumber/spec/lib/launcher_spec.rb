@@ -233,6 +233,10 @@ describe 'Calabash Launcher' do
     expect(launcher.ensure_connectivity).to be_truthy
   end
 
+  it "#calabash_notify - deprecated" do
+    expect(launcher.calabash_notify(nil)).to be == false
+  end
+
   describe 'checking server/gem compatibility' do
 
     before(:example) do

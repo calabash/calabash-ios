@@ -333,6 +333,13 @@ Resetting physical devices is not supported.
         end
 
         usage_tracker.post_usage_async
+
+        # :on_launch to the Cucumber World if:
+        # * the Launcher is part of the World (it is not by default).
+        # * Cucumber responds to :on_launch.
+        self.send(:on_launch) if self.respond_to?(:on_launch)
+
+        self
       end
 
       # @!visibility private
@@ -353,14 +360,6 @@ Resetting physical devices is not supported.
       # @!visibility private
       def stop
         RunLoop.stop(run_loop) if run_loop && run_loop[:pid]
-      end
-
-      # @!visibility private
-      # TODO deprecate and roll this into relaunch
-      def calabash_notify(world)
-        if world.respond_to?(:on_launch)
-          world.on_launch
-        end
       end
 
       # Should Calabash quit the app under test after a Scenario?
@@ -567,6 +566,16 @@ true.  Please remove this method call from your hooks.
       def ensure_connectivity
         RunLoop.deprecated("0.19.0", "No replacement")
         Calabash::Cucumber::HTTP.ensure_connectivity
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement - this method is a no op
+      #
+      # #relaunch will now send ":on_launch" to the Cucumber World if:
+      # * the Launcher is part of the World (it is not by default).
+      # * Cucumber responds to :on_launch.
+      def calabash_notify(_)
+        false
       end
 
       private
