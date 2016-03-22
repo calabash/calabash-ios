@@ -393,4 +393,19 @@ describe 'Calabash Launcher' do
   it "#detect_connected_device? - deprecated" do
     expect(launcher.detect_connected_device?).to be_falsey
   end
+
+  it "#detect_device" do
+    simctl = Resources.shared.sim_control
+    xcode = Resources.shared.xcode
+    instruments = Resources.shared.instruments
+    expect(Calabash::Cucumber::Environment).to receive(:simctl).and_return(simctl)
+    expect(Calabash::Cucumber::Environment).to receive(:xcode).and_return(xcode)
+    expect(Calabash::Cucumber::Environment).to receive(:instruments).and_return(instruments)
+
+    options = { :device => simulator.udid }
+    args = [options, xcode, simctl, instruments]
+    expect(RunLoop::Device).to receive(:detect_device).with(*args).and_return(simulator)
+
+    expect(launcher.send(:detect_device, options)).to be == simulator
+  end
 end

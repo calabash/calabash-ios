@@ -581,6 +581,16 @@ true.  Please remove this method call from your hooks.
       private
 
       # @!visibility private
+      #
+      # A convenience wrapper around RunLoop::Device.detect_device
+      def detect_device(options)
+        xcode = Calabash::Cucumber::Environment.xcode
+        simctl = Calabash::Cucumber::Environment.simctl
+        instruments = Calabash::Cucumber::Environment.instruments
+        RunLoop::Device.detect_device(options, xcode, simctl, instruments)
+      end
+
+      # @!visibility private
       # @return [RunLoop::Device] A RunLoop::Device instance.
       # TODO Remove
       def ensure_device_target
