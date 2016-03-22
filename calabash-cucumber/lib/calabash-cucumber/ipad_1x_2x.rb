@@ -206,13 +206,11 @@ module Calabash
       #
       # @example Here is an example of how to use this function in your `Before` launch hooks.
       #  Before do |scenario|
-      #    @calabash_launcher = Calabash::Cucumber::Launcher.new
-      #    unless @calabash_launcher.calabash_no_launch?
-      #      @calabash_launcher.relaunch
-      #      @calabash_launcher.calabash_notify(self)
-      #      # ensure emulated apps are at 1x
-      #      ensure_ipad_emulation_1x
-      #    end
+      #    launcher = Calabash::Cucumber::Launcher.new
+      #    launcher.relaunch
+      #    # ensure emulated apps are at 1x
+      #    ensure_ipad_emulation_1x
+      #
       #    # do other stuff to prepare the test environment
       #  end
       #
