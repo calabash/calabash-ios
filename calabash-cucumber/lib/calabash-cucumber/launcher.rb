@@ -402,7 +402,6 @@ Resetting physical devices is not supported.
         @@server_version = server_version
       end
 
-
       # @!visibility private
       # Checks the server and gem version compatibility and generates a warning if
       # the server and gem are not compatible.
@@ -412,33 +411,26 @@ Resetting physical devices is not supported.
       #
       # @return [nil] nothing to return
       def check_server_gem_compatibility
-        app_bundle_path = self.launch_args[:app]
-        if File.directory?(app_bundle_path)
-          server_version = server_version_from_bundle(app_bundle_path)
-        else
-          server_version = server_version_from_server
-        end
+        # Only check once.
+        return server_version if server_version
 
-        if server_version == SERVER_VERSION_NOT_AVAILABLE
-          RunLoop.log_warn("Server version could not be found - skipping compatibility check")
-          return nil
-        end
+        version_string = self.device.server_version
 
-        server_version = RunLoop::Version.new(server_version)
+        @server_version = RunLoop::Version.new(version_string)
         gem_version = RunLoop::Version.new(Calabash::Cucumber::VERSION)
         min_server_version = RunLoop::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
 
-        if server_version < min_server_version
+        if @server_version < min_server_version
           msgs = [
-            'The server version is not compatible with gem version.',
-            'Please update your server.',
-            'https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version',
+            "The server version is not compatible with gem version.",
+            "Please update your server.",
+            "https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version",
             "       gem version: '#{gem_version}'",
             "min server version: '#{min_server_version}'",
-            "    server version: '#{server_version}'"]
+            "    server version: '#{@server_version}'"]
           RunLoop.log_warn("#{msgs.join("\n")}")
         end
-        nil
+        @server_version
       end
 
       # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
@@ -533,7 +525,7 @@ true.  Please remove this method call from your hooks.
       end
 
       # @!visibility private
-      # @deprecated 0.19.0
+      # @deprecated 0.19.0  - no replacement.
       def server_version_from_server
         RunLoop.deprecated("0.19.0", "No replacement")
         server_version
@@ -552,6 +544,7 @@ true.  Please remove this method call from your hooks.
       end
 
       # The version of the embedded LPServer
+      # @return RunLoop::Version
       attr_reader :server_version
 
       # @!visibility private
