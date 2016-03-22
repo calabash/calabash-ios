@@ -25,7 +25,6 @@ Before do |scenario|
   }
 
   launcher.relaunch(options)
-  launcher.calabash_notify(self)
 end
 
 After do |scenario|
