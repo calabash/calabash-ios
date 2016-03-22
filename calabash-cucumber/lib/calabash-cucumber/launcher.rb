@@ -305,11 +305,6 @@ Resetting physical devices is not supported.
         options[:instruments] = instruments || Calabash::Cucumber::Environment.instruments
         options[:xcode] = xcode || Calabash::Cucumber::Environment.xcode
 
-        # Patch until RunLoop >= 2.1.0 is released
-        if !options[:uia_strategy]
-          options[:uia_strategy] = :host
-        end
-
         self.launch_args = options
 
         self.run_loop = new_run_loop(options)
