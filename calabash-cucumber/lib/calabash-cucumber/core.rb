@@ -1033,38 +1033,48 @@ arguments => '#{arguments}'
         query(q).map { |e| e['html'] }
       end
 
-      # sets the text value of the views matched by +uiquery+ to +txt+
+      # Sets the text value of the views matched by +uiquery+ to +txt+.
       #
-      # @deprecated since 0.9.145
+      # You should always try to enter text "like the user would" using the
+      # `keyboard_enter_text` method.  There are cases, however, when this does
+      # not work or is very slow.
       #
-      # we have stopped testing this method.  you have been warned.
+      # Please note that if you use this method, the UITextFieldDelegate and
+      # UITextViewDelegate methods ***will not be called*** if you use this
+      # method of text entry.  This means that if you have UI elements that
+      # respond to text changes, they ***will not be updated***.
       #
-      # * to enter text using the native keyboard use 'keyboard_enter_text'
-      # * to delete text use 'keyboard_enter_text('Delete')"
-      # * to clear a text field or text view:
-      #   - RECOMMENDED: use queries and touches to replicate what the user would do
-      #     - for text fields, implement a clear text button and touch it
-      #     - for text views, use touches to reveal text editing popup
-      #       see https://github.com/calabash/calabash-ios/issues/151
-      #   - use 'clear_text'
-      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
+      # UIAutomation's keyboard.typeString is incredibly buggy.  Calabash goes
+      # to great lengths to provide a stable typing interface.  However, there
+      # are cases where our patches cause problems.  If your app crashes or
+      # hangs when calling `keyboard_enter_text` there are a couple of options.
       #
-      # raises an error if the +uiquery+ finds no matching queries or finds
+      # 1. Try `fast_enter_text`.  This may or may not cause delegate methods
+      #    to be called (see the note above).
+      # 2. Call `keyboard.typeString` directly.  This will bypass the Calabash
+      #    fixes (which sometimes cause hanging and/or crashes).
+      #
+      # ```
+      # touch(" < touch a text field or text view > ")
+      # wait_for_keyboard
+      # uia("UIATarget.localTarget().frontMostApp().keyboard().typeString('your string')")
+      # ```
+      #
+      # Please be aware that keyboard.typeString is prone to errors.  We
+      # recommend using `keyboard_enter_text` or `fast_enter_text` whenever
+      # possible.
+      #
+      # One valid use of this method is on WebViews.  Find examples in the
+      # [CalWebApp features/steps/set_text_steps.rb](https://github.com/calabash/ios-webview-test-app/blob/master/CalWebViewApp/features/steps/set_text_steps.rb).
+      #
+      # @param [String] uiquery used to find the text input views
+      # @param [String] txt the new text
+      #
+      # @raise[RuntimeError] If the +uiquery+ finds no matching queries or finds
       # a view that does not respond to the objc selector 'setText'
+      #
+      # @return [Array<String>] The text fields that were modified.
       def set_text(uiquery, txt)
-        msgs = ["'set_text' is deprecated and its behavior is now unpredictable",
-                "* to enter text using the native keyboard use 'keyboard_enter_text'",
-                "* to delete text use 'keyboard_enter_text('Delete')",
-                '* to clear a text field or text view:',
-                '  - RECOMMENDED: use queries and touches to replicate what the user would do',
-                '    * for text fields, implement a clear text button and touch it',
-                '    * for text views, use touches to reveal text editing popup',
-                '    see https://github.com/calabash/calabash-ios/issues/151',
-                "  - use 'clear_text'",
-                'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API']
-        msg = msgs.join("\n")
-        RunLoop.deprecated("0.9.145", msg)
-
         text_fields_modified = map(uiquery, :setText, txt)
 
         msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
@@ -1072,37 +1082,24 @@ arguments => '#{arguments}'
         text_fields_modified
       end
 
-      # sets the text value of the views matched by +uiquery+ to <tt>''</tt>
+      # Sets the text value of the views matched by +uiquery+ to <tt>''</tt>
       # (the empty string)
       #
-      # using this sparingly and with caution
+      # Using this sparingly and with caution.  We recommend using queries and
+      # touches to replicate what the _user would do_.
       #
+      # @param [String] uiquery used to find the text input views
       #
-      # it is recommended that you instead do some combination of the following
+      # @raise[RuntimeError] If the +uiquery+ finds no matching queries or finds
+      # a view that does not respond to the objc selector 'setText'
       #
-      # * use queries and touches to replicate with the user would
-      #   - for text fields, implement a clear text button and touch it
-      #   - for text views, use touches to reveal text editing popup
-      #   see https://github.com/calabash/calabash-ios/issues/151
-      #
-      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
-      #
-      # raises an error if the +uiquery+ finds no matching queries or finds
-      # a _single_ view that does not respond to the objc selector 'setText'
-      #
-      # IMPORTANT
-      # calling:
-      #
-      #     > clear_text("view")
-      #
-      # will clear the text on _all_ visible views that respond to 'setText'
+      # @return [Array<String>] The text fields that were modified.
       def clear_text(uiquery)
         views_modified = map(uiquery, :setText, '')
         msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
         assert_map_results(views_modified, msg)
         views_modified
       end
-
 
       # Sets user preference (NSUserDefaults) value of key `key` to `val`.
       # @example
