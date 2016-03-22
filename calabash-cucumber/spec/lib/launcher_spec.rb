@@ -195,7 +195,11 @@ describe 'Calabash Launcher' do
   end
 
   it "#simulator_target? - deprecated" do
-    expect(launcher.simulator_target?).to be == false
+    expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
+    expect(launcher.simulator_target?).to be_truthy
+
+    expect(launcher).to receive(:detect_device).with({}).and_return(device)
+    expect(launcher.simulator_target?).to be_falsey
   end
 
   it "#calabash_no_launch? - deprecated" do
@@ -203,7 +207,11 @@ describe 'Calabash Launcher' do
   end
 
   it "#device_target? - deprecated" do
-    expect(launcher.device_target?).to be == false
+    expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
+    expect(launcher.device_target?).to be_falsey
+
+    expect(launcher).to receive(:detect_device).with({}).and_return(device)
+    expect(launcher.device_target?).to be_truthy
   end
 
   it "#app_path - deprecated" do

@@ -522,18 +522,16 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
-      # TODO Call out to RunLoop::Device.detect_device
-      def device_target?
+      def device_target?(options={})
         RunLoop.deprecated("0.19.0", "No replacement")
-        false
+        detect_device(options).physical_device?
       end
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
-      # TODO Call out to RunLoop::Device.detect_device
-      def simulator_target?(launch_args={})
+      def simulator_target?(options={})
         RunLoop.deprecated("0.19.0", "No replacement")
-        false
+        detect_device(options).simulator?
       end
 
       # @!visibility private
