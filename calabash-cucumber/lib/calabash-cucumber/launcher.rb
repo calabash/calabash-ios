@@ -47,6 +47,11 @@ module Calabash
       require "run_loop"
 
       # @!visibility private
+      DEFAULTS = {
+        :launch_retries => 5
+      }
+
+      # @!visibility private
       @@launcher = nil
 
       # @!visibility private
@@ -68,9 +73,6 @@ module Calabash
 
       # @!visibility private
       attr_accessor :launch_args
-
-      # @!visibility private
-      attr_reader :xcode
 
       # @!visibility private
       attr_reader :usage_tracker
@@ -140,11 +142,6 @@ module Calabash
       end
 
       # @!visibility private
-      def xcode
-        @xcode ||= RunLoop::Xcode.new
-      end
-
-      # @!visibility private
       def usage_tracker
         @usage_tracker ||= Calabash::Cucumber::UsageTracker.new
       end
@@ -175,8 +172,6 @@ module Calabash
         merged_options = default_options.merge(options)
 
         self.run_loop = RunLoop::HostCache.default.read
-
-        set_device_target_after_attach(self.run_loop)
 
         begin
           Calabash::Cucumber::HTTP.ensure_connectivity(merged_options)
@@ -260,6 +255,7 @@ Queries will work, but gestures will not.
       # @raise RuntimeError If the simulator cannot be erased
       def reset_simulator(device=nil)
         if device.nil? || device == ""
+          # TODO Replace this call with RunLoop::Device.detect_device
           device_target = ensure_device_target
         elsif device.is_a?(RunLoop::Device)
           device_target = device
@@ -284,67 +280,6 @@ Resetting physical devices is not supported.
         device_target
       end
 
-      # @!visibility private
-      def default_launch_args
-        # APP_BUNDLE_PATH
-        # BUNDLE_ID
-        # APP (unifies APP_BUNDLE_PATH, BUNDLE_ID)
-        # DEVICE_TARGET
-        # RESET_BETWEEN_SCENARIOS
-        # DEVICE
-        # QUIT_APP_AFTER_SCENARIO
-
-        args = {
-          :reset => Calabash::Cucumber::Environment.reset_between_scenarios?,
-          :bundle_id => ENV['BUNDLE_ID'],
-          # TODO: Deprecate this key.  Use :quit_app_after_scenario.
-          :no_stop => quit_app_after_scenario?,
-          :relaunch_simulator => true,
-          # Do not advertise this to users!
-          # For example, don't include documentation about this option.
-          # This is used to instrument internal testing (failing fast).
-          :launch_retries => 5
-        }
-
-        device_tgt = ENV['DEVICE_TARGET']
-        if simulator_target?
-          args[:device_target] = device_tgt
-          args[:udid] = nil
-        else
-          if detect_connected_device? && (device_tgt.nil? || device_tgt.downcase == 'device')
-            device_tgt = RunLoop::Core.detect_connected_device
-          end
-
-          if device_tgt
-            args[:device_target] = args[:udid] = device_tgt
-          end
-        end
-
-        if args[:device_target].nil?
-          args[:device_target] = device_tgt || 'simulator'
-        end
-        args
-      end
-
-      # @!visibility private
-      def detect_connected_device?
-        if ENV['DETECT_CONNECTED_DEVICE'] == '1'
-          return true
-        end
-
-        if ENV['BUNDLE_ID'].nil? && ENV['DETECT_CONNECTED_DEVICE'].nil?
-          return false
-        end
-        if ENV['BUNDLE_ID'] && ENV['DETECT_CONNECTED_DEVICE'].nil?
-          return true
-        end
-        if ENV['DETECT_CONNECTED_DEVICE']
-          return ENV['DETECT_CONNECTED_DEVICE'] != '0'
-        end
-
-        return false
-      end
-
       # Launches your app on the connected device or simulator.
       #
       # `relaunch` does a lot of error detection and handling to reliably start the
@@ -355,8 +290,8 @@ Resetting physical devices is not supported.
       # Use the `args` parameter to to control:
       #
       # * `:app` - which app to launch.
-      # * `:device_target` - simulator or device to target.
-      # * `:reset_app_sandbox - reset he app's data (sandbox) before testing
+      # * `:device` - simulator or device to target.
+      # * `:reset_app_sandbox - reset the app's data (sandbox) before testing
       #
       # and many other behaviors.
       #
@@ -364,90 +299,36 @@ Resetting physical devices is not supported.
       # most important environment variables are `APP`, `DEVICE_TARGET`, and
       # `DEVICE_ENDPOINT`.
       #
-      # @param {Hash} args optional arguments to control the how the app is launched
-      def relaunch(args={})
+      # @param {Hash} launch_options optional arguments to control the how the app is launched
+      def relaunch(launch_options={})
+        simctl = launch_options[:simctl] || launch_options[:sim_control]
+        instruments = launch_options[:instruments]
+        xcode = launch_options[:xcode]
 
-        # @todo Don't overwrite the _args_ parameter!
-        args = default_launch_args.merge(args)
+        options = launch_options.clone
 
-        # RunLoop::Core.run_with_options can reuse the SimControl instance.  Many
-        # of the Xcode tool calls, like instruments -s templates, take a long time
-        # to execute.
-        # @todo Use SimControl in Launcher in place of methods like simulator_target?
-        args[:sim_control] = RunLoop::SimControl.new
-        args[:instruments] = RunLoop::Instruments.new
-        args[:xcode] = xcode
+        # Reusing SimControl, Instruments, and Xcode can speed up launches.
+        options[:simctl] = simctl || Calabash::Cucumber::Environment.simctl
+        options[:instruments] = instruments || Calabash::Cucumber::Environment.instruments
+        options[:xcode] = xcode || Calabash::Cucumber::Environment.xcode
 
-        if args[:app]
-          if !File.exist?(args[:app])
-            raise "Unable to find app bundle at #{args[:app]}. It should be an iOS Simulator build (typically a *.app directory)."
-          end
+        # Patch until RunLoop >= 2.1.0 is released
+        if !options[:uia_strategy]
+          options[:uia_strategy] = :host
         end
 
-        # User passed {:app => "path/to/my.app"} _and_ it exists.
-        # User defined BUNDLE_ID or passed {:bundle_id => com.example.myapp}
-        # User defined APP or APP_BUNDLE_PATH env vars _or_ APP_BUNDLE_PATH constant.
-        args[:app] = args[:app] || args[:bundle_id] || app_path
+        self.launch_args = options
 
-        if args[:app]
-          if File.directory?(args[:app])
-            args[:app] = File.expand_path(args[:app])
-          else
-            # args[:app] is not a directory so must be a bundle id.
-            if simulator_target?(args)
-              args[:app] = app_path
-            end
-          end
-        end
-
-        # At this point :app is either nil because we are targeting a simulator
-        # or it is a CFBundleIdentifier.
-        if args[:app]
-          # nothing to do because :bundle_id and :app are the same.
-        else
-          # User gave us no information about where the simulator app is located
-          # so we have to auto detect it.  This RunLoop method raises an error
-          # with a meaningful message based on the environment.  The message
-          # includes suggestions about what to do next.
-          run_loop_app = RunLoop::DetectAUT::Detect.new.app_for_simulator
-
-          # This is not great - RunLoop is going to take this path and create a new
-          # RunLoop::App.  This is the best we can do for now.
-          args[:app] = run_loop_app.path
-          args[:bundle_id] = run_loop_app.bundle_identifier
-        end
-
-        use_dylib = args[:inject_dylib]
-        if use_dylib
-          # User passed a Boolean, not a file.
-          if use_dylib.is_a?(TrueClass)
-            if simulator_target?(args)
-              args[:inject_dylib] = Calabash::Cucumber::Dylibs.path_to_sim_dylib
-            else
-              raise RuntimeError, "Injecting a dylib is not supported when targeting a device"
-            end
-          else
-            unless File.exist? use_dylib
-              raise "Dylib does not exist at path: '#{use_dylib}'"
-            end
-          end
-        end
-
-        # Patch until RunLoop >= 2.0.10 is released
-        if !args[:uia_strategy]
-          args[:uia_strategy] = :host
-        end
-
-        self.run_loop = new_run_loop(args)
+        self.run_loop = new_run_loop(options)
         self.actions= Calabash::Cucumber::InstrumentsActions.new
 
-        self.launch_args = args
-
-        unless args[:calabash_lite]
+        if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
           # skip compatibility check if injecting dylib
-          unless args.fetch(:inject_dylib, false)
-            check_server_gem_compatibility
+          if !options[:inject_dylib]
+            # Don't check until method is rewritten.
+            # TODO Enable
+            # check_server_gem_compatibility
           end
         end
 
@@ -456,11 +337,8 @@ Resetting physical devices is not supported.
 
       # @!visibility private
       def new_run_loop(args)
-
         last_err = nil
-
-        num_retries = args[:launch_retries] || 5
-
+        num_retries = args[:launch_retries] || DEFAULTS[:launch_retries]
         num_retries.times do
           begin
             return RunLoop.run(args)
@@ -469,11 +347,6 @@ Resetting physical devices is not supported.
           end
         end
 
-        if simulator_target?(args)
-          puts "Unable to launch app on Simulator."
-        else
-          puts "Unable to launch app on physical device"
-        end
         raise Calabash::Cucumber::LaunchError.new(last_err)
       end
 
@@ -483,18 +356,11 @@ Resetting physical devices is not supported.
       end
 
       # @!visibility private
+      # TODO deprecate and roll this into relaunch
       def calabash_notify(world)
         if world.respond_to?(:on_launch)
           world.on_launch
         end
-      end
-
-      # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
-      # @!visibility private
-      def calabash_no_stop?
-        # Not yet.  Save for 0.20.0.
-        # RunLoop.deprecated("0.19.0", "replaced with quit_app_after_scenario")
-        !quit_app_after_scenario?
       end
 
       # Should Calabash quit the app under test after a Scenario?
@@ -504,55 +370,6 @@ Resetting physical devices is not supported.
       # The default behavior is to quit after every Scenario.
       def quit_app_after_scenario?
         Calabash::Cucumber::Environment.quit_app_after_scenario?
-      end
-
-      # @deprecated 0.19.0
-      # @!visibility private
-      def calabash_no_launch?
-        RunLoop.log_warn(%Q[
-Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
-environment variable has been removed from Calabash.  This always returns
-true.  Please remove this method call from your hooks.
-])
-        true
-      end
-
-      # @!visibility private
-      def device_target?
-        (ENV['DEVICE_TARGET'] != nil) && (not simulator_target?)
-      end
-
-      # @!visibility private
-      def discover_device_target(launch_args)
-        ENV['DEVICE_TARGET'] || launch_args[:device_target]
-      end
-
-      # @!visibility private
-      def simulator_target?(launch_args={})
-        udid_or_name = discover_device_target(launch_args)
-
-        return false if udid_or_name.nil? || udid_or_name == ''
-
-        return true if udid_or_name.downcase.include?('simulator')
-
-        return false if udid_or_name[RunLoop::Regex::DEVICE_UDID_REGEX, 0] != nil
-
-        if xcode.version_gte_6?
-          sim_control = launch_args[:sim_control] || RunLoop::SimControl.new
-          simulator = sim_control.simulators.find do |sim|
-            sim.instruments_identifier(xcode) == udid_or_name ||
-              sim.udid == udid_or_name
-          end
-
-          !simulator.nil?
-        else
-          false
-        end
-      end
-
-      # @!visibility private
-      def app_path
-        RunLoop::Environment.path_to_app_bundle || (defined?(APP_BUNDLE_PATH) && APP_BUNDLE_PATH)
       end
 
       # @!visibility private
@@ -657,6 +474,25 @@ true.  Please remove this method call from your hooks.
         nil
       end
 
+      # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
+      # @!visibility private
+      def calabash_no_stop?
+        # Not yet.  Save for 0.20.0.
+        # RunLoop.deprecated("0.19.0", "replaced with quit_app_after_scenario")
+        !quit_app_after_scenario?
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def calabash_no_launch?
+        RunLoop.log_warn(%Q[
+Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
+environment variable has been removed from Calabash.  This always returns
+true.  Please remove this method call from your hooks.
+])
+        false
+      end
+
       # @!visibility private
       # @deprecated 0.19.0 - no replacement.
       #
@@ -676,10 +512,68 @@ true.  Please remove this method call from your hooks.
         :host
       end
 
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def detect_connected_device?
+        RunLoop.deprecated("0.19.0", "No replacement")
+        false
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def default_launch_args
+        RunLoop.deprecated("0.19.0", "No replacement")
+        {}
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def discover_device_target(launch_args)
+        RunLoop.deprecated("0.19.0", "No replacement")
+        nil
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      # TODO Call out to RunLoop::Device.detect_device
+      def device_target?
+        RunLoop.deprecated("0.19.0", "No replacement")
+        false
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      # TODO Call out to RunLoop::Device.detect_device
+      def simulator_target?(launch_args={})
+        RunLoop.deprecated("0.19.0", "No replacement")
+        false
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def app_path
+        RunLoop.deprecated("0.19.0", "No replacement")
+        nil
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def xcode
+        Calabash::Cucumber::Environment.xcode
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def ensure_connectivity
+        RunLoop.deprecated("0.19.0", "No replacement")
+        Calabash::Cucumber::HTTP.ensure_connectivity
+      end
+
       private
 
       # @!visibility private
       # @return [RunLoop::Device] A RunLoop::Device instance.
+      # TODO Remove
       def ensure_device_target
         begin
           @run_loop_device ||= Calabash::Cucumber::Environment.run_loop_device
@@ -694,27 +588,6 @@ To see what devices are available on your machine, use instruments:
 $ xcrun instruments -s devices
 
 ]
-        end
-      end
-
-      # @!visibility private
-      #
-      # Called from the World.console_attach => #attach method to populate
-      # the instance variable because `relaunch` is not called.
-      def set_device_target_after_attach(run_loop_hash)
-        identifier = run_loop_hash[:udid]
-
-        options = {
-          :sim_control => Calabash::Cucumber::Environment.simctl,
-          :instruments => Calabash::Cucumber::Environment.instruments
-        }
-
-        begin
-           @run_loop_device = RunLoop::Device.device_with_identifier(identifier, options)
-        rescue ArgumentError => _
-          # For now we will swallow any error - it is not clear yet if it will be
-          # important to make this connection.
-          @run_loop_device = nil
         end
       end
     end

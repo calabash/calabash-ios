@@ -93,34 +93,6 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe "#set_device_target_after_attach" do
-    let(:options) do
-      {
-        :sim_control => Calabash::Cucumber::Environment.simctl,
-        :instruments => Calabash::Cucumber::Environment.instruments
-      }
-    end
-
-    let(:run_loop) {  { :udid => RunLoop::Core.default_simulator } }
-    let(:identifier) { run_loop[:udid] }
-
-    it "swallows errors" do
-      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_raise(ArgumentError)
-
-      actual = launcher.send(:set_device_target_after_attach, run_loop)
-      expect(actual).to be == nil
-      expect(launcher.instance_variable_get(:@run_loop_device)).to be == nil
-    end
-
-    it "sets the @run_loop_device" do
-      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_call_original
-
-      actual = launcher.send(:set_device_target_after_attach, run_loop)
-      expect(actual).to be_a_kind_of(RunLoop::Device)
-      expect(launcher.instance_variable_get(:@run_loop_device)).to be == actual
-    end
-  end
-
   describe "#attach" do
     let(:run_loop) do
       {
@@ -138,7 +110,6 @@ describe 'Calabash Launcher' do
     before do
       allow(RunLoop::HostCache).to receive(:default).and_return(cache)
       allow(cache).to receive(:read).and_return(run_loop)
-      allow(launcher).to receive(:set_device_target_after_attach).with(run_loop).and_return(:device)
     end
 
     it "the happy path" do
@@ -233,117 +204,33 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe '#discover_device_target' do
-
-    let(:options) do { :device_target => 'OPTION!' } end
-
-    it 'respects the DEVICE_TARGET' do
-      stub_env('DEVICE_TARGET', 'TARGET!')
-
-      expect(launcher.discover_device_target(options)).to be == 'TARGET!'
-    end
-
-    it 'uses :device_target option' do
-      stub_env({'DEVICE_TARGET' => nil})
-
-      expect(launcher.discover_device_target(options)).to be == 'OPTION!'
-    end
-
-    it 'returns nil if neither is defined' do
-      stub_env({'DEVICE_TARGET' => nil})
-
-      expect(launcher.discover_device_target({})).to be == nil
-    end
+  it "#discover_device_target - deprecated" do
+    expect(launcher.discover_device_target(nil)).to be == nil
   end
 
   it ".default_uia_strategy - deprecated" do
     expect(launcher.default_uia_strategy(nil, nil, nil)).to be == :host
   end
 
-  describe '#simulator_target?' do
+  it "#simulator_target? - deprecated" do
+    expect(launcher.simulator_target?).to be == false
+  end
 
-    it ':device_target is nil' do
-      options = { :device_target => nil }
+  it "#calabash_no_launch? - deprecated" do
+    expect(launcher.calabash_no_stop?).to be == false
+  end
 
-      expect(launcher.simulator_target?(options)).to be_falsey
-    end
+  it "#device_target? - deprecated" do
+    expect(launcher.device_target?).to be == false
+  end
 
-    it ':device_target is the empty string' do
-      options = { :device_target => '' }
+  it "#app_path - deprecated" do
+    expect(launcher.app_path).to be == nil
+  end
 
-      expect(launcher.simulator_target?(options)).to be_falsey
-    end
-
-    it ":device_target is 'simulator'" do
-      options = { :device_target => 'simulator' }
-
-      expect(launcher.simulator_target?(options)).to be_truthy
-    end
-
-    it ':device_target is a Xcode 5 Simulator' do
-      options = { :device_target => 'iPhone Retina (4-inch) - Simulator - iOS 7.1' }
-
-      expect(launcher.simulator_target?(options)).to be_truthy
-    end
-
-    it ':device_target is a Xcode 6 CoreSimulator' do
-      options = { :device_target => 'iPhone 5s (8.4 Simulator)' }
-
-      expect(launcher.simulator_target?(options)).to be_truthy
-    end
-
-    it ':device_target is a UDID' do
-      options = { :device_target => UDID }
-
-      expect(launcher.simulator_target?(options)).to be_falsey
-    end
-
-    it 'not a CoreSimulator environment' do
-      expect(launcher.xcode).to receive(:version_gte_6?).and_return false
-      options = { :device_target => 'some name' }
-
-      expect(launcher.simulator_target?(options)).to be_falsey
-    end
-
-    describe 'CoreSimulator' do
-
-      before do
-        expect(launcher.xcode).to receive(:version_gte_6?).at_least(:once).and_return true
-      end
-
-      let(:sim_control) { RunLoop::SimControl.new }
-
-      describe 'matches a simulator' do
-
-        let(:options) do { :sim_control => sim_control } end
-
-        before do
-          expect(sim_control).to receive(:simulators).and_return [simulator]
-        end
-
-        it 'by instruments identifier' do
-          # Xcode 7 CoreSimulator - does not contain 'Simulator' in the name.
-          expect(simulator).to receive(:instruments_identifier).and_return 'iPhone 5s (9.0)'
-          options[:device_target] = 'iPhone 5s (9.0)'
-
-          expect(launcher.simulator_target?(options)).to be_truthy
-        end
-
-        it 'by sim udid' do
-          options[:device_target] = simulator.udid
-
-          expect(launcher.simulator_target?(options)).to be_truthy
-        end
-      end
-
-      it 'matches no simulator' do
-        expect(sim_control).to receive(:simulators).and_return []
-        options = { :device_target => 'some name',
-                    :sim_control => sim_control }
-
-        expect(launcher.simulator_target?(options)).to be_falsey
-      end
-    end
+  it "#ensure_connectivity - deprecated" do
+    expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
+    expect(launcher.ensure_connectivity).to be_truthy
   end
 
   describe 'checking server/gem compatibility' do
@@ -495,62 +382,11 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe 'default launch args should respect DEVICE_TARGET' do
+  it "#default_launch_args - deprecated" do
+    expect(launcher.default_launch_args).to be == {}
+  end
 
-    let(:fake_udid) { 'FAKE-UDID' }
-
-    it "should return 'simulator' if DEVICE_TARGET nil" do
-      args = launcher.default_launch_args
-      expect(args[:device_target]).to be == 'simulator'
-    end
-
-    describe 'running with instruments' do
-
-      describe 'running against devices' do
-        describe 'when DEVICE_TARGET = < udid >' do
-          it 'it should return udid if DEVICE_TARGET is a udid' do
-            stub_env('DEVICE_TARGET', fake_udid)
-            args = launcher.default_launch_args
-            expect(args[:device_target]).to be == fake_udid
-            expect(args[:udid]).to be == fake_udid
-          end
-        end
-
-        describe 'when DEVICE_TARGET = device' do
-
-          before(:example) do
-            stub_env('DEVICE_TARGET', 'device')
-          end
-
-          describe 'detecting connected devices' do
-            describe "when DETECT_CONNECTED_DEVICE == '1'" do
-              it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                stub_env('DETECT_CONNECTED_DEVICE', '1')
-                args = launcher.default_launch_args
-                target = args[:device_target]
-                detected = RunLoop::Core.detect_connected_device
-
-                if detected
-                  expect(target).to be == detected
-                  expect(args[:udid]).to be == detected
-                else
-                  #pending('this behavior is needs verification')
-                  expect(target).to be == 'simulator'
-                end
-              end
-
-              context "when DETECT_CONNECTED_DEVICE != '1'" do
-                it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                  args = launcher.default_launch_args
-                  target = args[:device_target]
-                  expect(target).to be == 'device'
-                  expect(args[:udid]).to be == 'device'
-                end
-              end
-            end
-          end
-        end
-      end
-    end
+  it "#detect_connected_device? - deprecated" do
+    expect(launcher.detect_connected_device?).to be_falsey
   end
 end
