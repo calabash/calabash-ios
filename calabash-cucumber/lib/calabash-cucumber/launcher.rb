@@ -333,6 +333,7 @@ Resetting physical devices is not supported.
       end
 
       # @!visibility private
+      # TODO Should call calabash exit route to shutdown the server.
       def stop
         RunLoop.stop(run_loop) if run_loop && run_loop[:pid]
       end
