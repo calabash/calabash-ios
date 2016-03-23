@@ -507,26 +507,6 @@ true.  Please remove this method call from your hooks.
       # The version of the embedded LPServer
       # @return RunLoop::Version
       attr_reader :server_version
-
-      # @!visibility private
-      # @return [RunLoop::Device] A RunLoop::Device instance.
-      # TODO Remove
-      def ensure_device_target
-        begin
-          @run_loop_device ||= Calabash::Cucumber::Environment.run_loop_device
-        rescue ArgumentError => e
-          raise Calabash::Cucumber::DeviceNotFoundError,
-                %Q[Could not find a matching device in your environment.
-
-#{e.message}
-
-To see what devices are available on your machine, use instruments:
-
-$ xcrun instruments -s devices
-
-]
-        end
-      end
     end
   end
 end

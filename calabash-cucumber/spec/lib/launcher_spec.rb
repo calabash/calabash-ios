@@ -73,26 +73,6 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe "#ensure_device_target" do
-    it "raises an error" do
-      expect(Calabash::Cucumber::Environment).to receive(:device_target).and_return("no matching")
-
-      expect do
-        launcher.send(:ensure_device_target)
-      end.to raise_error Calabash::Cucumber::DeviceNotFoundError,
-                         /Could not find a matching device in your environment/
-    end
-
-    it "returns a RunLoop::Device" do
-      stub_env({"DEVICE_TARGET" => nil})
-
-      actual = launcher.send(:ensure_device_target)
-
-      expect(actual).to be_a_kind_of(RunLoop::Device)
-      expect(actual.simulator?).to be_truthy
-    end
-  end
-
   describe "#attach" do
     let(:run_loop) do
       {
