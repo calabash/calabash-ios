@@ -59,39 +59,6 @@ describe Calabash::Cucumber::Environment do
     expect(Calabash::Cucumber::Environment.xtc?).to be_falsey
   end
 
-  describe ".device_target" do
-    describe "DEVICE_TARGET is defined" do
-      it "simulator" do
-        expect(RunLoop::Environment).to receive(:device_target).and_return("simulator")
-        expect(RunLoop::Core).to receive(:default_simulator).and_return("Default Simulator")
-
-        actual = Calabash::Cucumber::Environment.device_target
-        expect(actual).to be == "Default Simulator"
-      end
-
-      it "device" do
-        expect(RunLoop::Environment).to receive(:device_target).and_return("device")
-        expect(RunLoop::Core).to receive(:detect_connected_device).and_return("a udid")
-
-        actual = Calabash::Cucumber::Environment.device_target
-        expect(actual).to be == "a udid"
-      end
-
-      it "anything else" do
-        expect(RunLoop::Environment).to receive(:device_target).and_return("a")
-        expect(Calabash::Cucumber::Environment.device_target).to be == "a"
-      end
-    end
-
-    it "DEVICE_TARGET is not defined" do
-      expect(RunLoop::Environment).to receive(:device_target).and_return(nil)
-      expect(RunLoop::Core).to receive(:default_simulator).and_return("Default Simulator")
-
-      actual = Calabash::Cucumber::Environment.device_target
-      expect(actual).to be == "Default Simulator"
-    end
-  end
-
   describe ".device_endpoint" do
     it "DEVICE_ENDPOINT is defined" do
       expect(RunLoop::Environment).to receive(:device_endpoint).and_return("endpoint")
@@ -159,34 +126,6 @@ describe Calabash::Cucumber::Environment do
 
       stub_env({"RESET_BETWEEN_SCENARIOS" => 1})
       expect(Calabash::Cucumber::Environment.reset_between_scenarios?).to be_falsey
-    end
-  end
-
-  describe ".run_loop_device" do
-    let(:identifier) { "some device id" }
-
-    before do
-      allow(Calabash::Cucumber::Environment).to receive(:device_target).and_return(identifier)
-    end
-
-    it "returns nil on the XTC" do
-      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
-
-      actual = Calabash::Cucumber::Environment.run_loop_device
-      expect(actual).to be == nil
-    end
-
-    it "returns a RunLoop::Device instance" do
-      allow(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
-      options = {
-        :sim_control => Calabash::Cucumber::Environment.simctl,
-        :instruments => Calabash::Cucumber::Environment.instruments
-      }
-      expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier, options).and_return(:device)
-
-
-      actual = Calabash::Cucumber::Environment.run_loop_device
-      expect(actual).to be == :device
     end
   end
 
