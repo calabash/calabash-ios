@@ -449,6 +449,7 @@ true.  Please remove this method call from your hooks.
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
       def xcode
+        RunLoop.deprecated("0.19.0", "Use Calabash::Cucumber::Environment.xcode")
         Calabash::Cucumber::Environment.xcode
       end
 
