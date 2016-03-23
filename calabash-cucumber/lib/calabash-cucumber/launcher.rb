@@ -58,14 +58,6 @@ module Calabash
       @@launcher = nil
 
       # @!visibility private
-      SERVER_VERSION_NOT_AVAILABLE = '0.0.0'
-
-      # @!visibility private
-      # Class variable for caching the embedded server version so we only need to
-      # check the server version one time.
-      @@server_version = nil
-
-      # @!visibility private
       attr_accessor :run_loop
 
       # @!visibility private
@@ -312,12 +304,7 @@ Resetting physical devices is not supported.
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
-          # skip compatibility check if injecting dylib
-          if !options[:inject_dylib]
-            # Don't check until method is rewritten.
-            # TODO Enable
-            # check_server_gem_compatibility
-          end
+          check_server_gem_compatibility
         end
 
         usage_tracker.post_usage_async
@@ -360,70 +347,6 @@ Resetting physical devices is not supported.
       end
 
       # @!visibility private
-      # Extracts server version from the app binary at `app_bundle_path` by
-      # inspecting the binary's strings table.
-      #
-      # @note
-      #  SPECIAL: sets the `@@server_version` class variable to cache the server
-      #  version because the server version will never change during runtime.
-      #
-      # @return [String] the server version
-      # @param [String] app_bundle_path file path (usually) to the application bundle
-      # @raise [RuntimeError] if there is no executable at `app_bundle_path`
-      # @raise [RuntimeError] if the server version cannot be extracted from any
-      #   binary at `app_bundle_path`
-      def server_version_from_bundle(app_bundle_path)
-        return @@server_version unless @@server_version.nil?
-        exe_paths = []
-        Dir.foreach(app_bundle_path) do |item|
-          next if item == '.' or item == '..'
-
-          full_path = File.join(app_bundle_path, item)
-          if File.executable?(full_path) and not File.directory?(full_path)
-            exe_paths << full_path
-          end
-        end
-
-        if exe_paths.empty?
-          RunLoop.log_warn("Could not find executable in '#{app_bundle_path}'")
-
-          @@server_version = SERVER_VERSION_NOT_AVAILABLE
-          return @@server_version
-        end
-
-        server_version = nil
-        exe_paths.each do |path|
-          server_version_string = `xcrun strings "#{path}" | grep -E 'CALABASH VERSION'`.chomp!
-          if server_version_string
-            server_version = server_version_string.split(' ').last
-            break
-          end
-        end
-
-        unless server_version
-          RunLoop.log_warn("Could not find server version by inspecting the binary strings table")
-
-          @@server_version = SERVER_VERSION_NOT_AVAILABLE
-          return @@server_version
-        end
-
-        @@server_version = server_version
-      end
-
-      # queries the server for its version.
-      #
-      # SPECIAL: sets the +@@server_version+ class variable to cache the server
-      # version because the server version will never change during runtime.
-      #
-      # @return [String] the server version
-      # @raise [RuntimeError] if the server cannot be reached
-      def server_version_from_server
-        return @@server_version unless @@server_version.nil?
-        ensure_connectivity if self.device == nil
-        @@server_version = self.device.server_version
-      end
-
-      # @!visibility private
       # Checks the server and gem version compatibility and generates a warning if
       # the server and gem are not compatible.
       #
@@ -432,33 +355,26 @@ Resetting physical devices is not supported.
       #
       # @return [nil] nothing to return
       def check_server_gem_compatibility
-        app_bundle_path = self.launch_args[:app]
-        if File.directory?(app_bundle_path)
-          server_version = server_version_from_bundle(app_bundle_path)
-        else
-          server_version = server_version_from_server
-        end
+        # Only check once.
+        return server_version if server_version
 
-        if server_version == SERVER_VERSION_NOT_AVAILABLE
-          RunLoop.log_warn("Server version could not be found - skipping compatibility check")
-          return nil
-        end
+        version_string = self.device.server_version
 
-        server_version = RunLoop::Version.new(server_version)
+        @server_version = RunLoop::Version.new(version_string)
         gem_version = RunLoop::Version.new(Calabash::Cucumber::VERSION)
         min_server_version = RunLoop::Version.new(Calabash::Cucumber::MIN_SERVER_VERSION)
 
-        if server_version < min_server_version
+        if @server_version < min_server_version
           msgs = [
-            'The server version is not compatible with gem version.',
-            'Please update your server.',
-            'https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version',
+            "The server version is not compatible with gem version.",
+            "Please update your server.",
+            "https://github.com/calabash/calabash-ios/wiki/Updating-your-Calabash-iOS-version",
             "       gem version: '#{gem_version}'",
             "min server version: '#{min_server_version}'",
-            "    server version: '#{server_version}'"]
+            "    server version: '#{@server_version}'"]
           RunLoop.log_warn("#{msgs.join("\n")}")
         end
-        nil
+        @server_version
       end
 
       # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
@@ -552,6 +468,28 @@ true.  Please remove this method call from your hooks.
         false
       end
 
+      # @!visibility private
+      # @deprecated 0.19.0  - no replacement.
+      def server_version_from_server
+        RunLoop.deprecated("0.19.0", "No replacement")
+        server_version
+      end
+
+      # @!visibility private
+      # @deprecated 0.19.0 - no replacement
+      def server_version_from_bundle(app_bundle_path)
+        RunLoop.deprecated("0.19.0", "No replacement")
+        options = {:app => app_bundle_path }
+        app_details = RunLoop::DetectAUT.detect_app_under_test(options)
+        app = app_details[:app]
+
+        if app.respond_to?(:calabash_server_version)
+          app.calabash_server_version
+        else
+          nil
+        end
+      end
+
       private
 
       # @!visibility private
@@ -563,6 +501,10 @@ true.  Please remove this method call from your hooks.
         instruments = Calabash::Cucumber::Environment.instruments
         RunLoop::Device.detect_device(options, xcode, simctl, instruments)
       end
+
+      # The version of the embedded LPServer
+      # @return RunLoop::Version
+      attr_reader :server_version
 
       # @!visibility private
       # @return [RunLoop::Device] A RunLoop::Device instance.

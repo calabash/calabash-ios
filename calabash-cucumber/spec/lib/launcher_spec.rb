@@ -227,152 +227,70 @@ describe 'Calabash Launcher' do
     expect(launcher.calabash_notify(nil)).to be == false
   end
 
-  describe 'checking server/gem compatibility' do
+  it "#server_version_from_server - deprecated" do
+    expect(launcher).to receive(:server_version).and_return("0.19.0")
+    expect(launcher.server_version_from_server).to be == "0.19.0"
+  end
 
-    before(:example) do
-      Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
+  it "#server_version_from_bundle - deprecated" do
+    version = RunLoop::Version.new("2.0")
+    path = Resources.shared.app_bundle_path(:cal_smoke_app)
+    app = RunLoop::App.new(path)
+
+    hash = {
+      :app => app,
+      :bundle_id => app.bundle_identifier,
+      :is_ipa => false
+    }
+    options = {:app => path }
+    expect(RunLoop::DetectAUT).to receive(:detect_app_under_test).with(options).and_return(hash)
+    expect(app).to receive(:calabash_server_version).and_return(version)
+
+    expect(launcher.server_version_from_bundle(path)).to be == version
+  end
+
+  describe "#check_server_gem_compatibility" do
+
+    let(:cal_device) { Resources.shared.device_for_mocking }
+    let(:v20) { RunLoop::Version.new("2.0") }
+    let(:v10) { RunLoop::Version.new("1.0") }
+
+    before do
+      launcher.instance_variable_set(:@server_version, nil)
+      allow(launcher).to receive(:device).and_return(cal_device)
     end
 
-    after(:example) do
-      Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
+    it "server version is set" do
+      expect(launcher).to receive(:server_version).twice.and_return("2.0")
+
+      expect(launcher.check_server_gem_compatibility).to be == "2.0"
     end
 
-    describe '#server_version_from_server' do
+    it "compatible" do
+      stub_const("Calabash::Cucumber::MIN_SERVER_VERSION", v20.to_s)
+      expect(cal_device).to receive(:server_version).and_return(v20.to_s)
 
-      it 'returns a version by asking the running server' do
-        # We can't stand up the server, so we'll create a device and ask for
-        # its version.  It is the best we can do for now.
-        device = Resources.shared.device_for_mocking
-        launcher.instance_variable_set(:@device, device)
-        actual = launcher.server_version_from_server
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '0.10.0'
-      end
-
-      it "returns '@@server_version' if it is not nil" do
-        Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, '1.0.0')
-        actual = launcher.server_version_from_server
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
-      end
+      expect(launcher.check_server_gem_compatibility).to be == v20
+      expect(launcher.instance_variable_get(:@server_version)).to be == v20
+      expect(launcher.send(:server_version)).to be == v20
     end
 
-    describe '#server_version_from_bundle' do
+    it "not compatible" do
+      stub_const("Calabash::Cucumber::MIN_SERVER_VERSION", v20.to_s)
+      expect(cal_device).to receive(:server_version).and_return(v10.to_s)
 
-      describe 'returns calabash version an app bundle when' do
-        it 'strings can find the version' do
-          abp = Resources.shared.app_bundle_path :server_gem_compatibility
-          actual = launcher.server_version_from_bundle abp
-          expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '11.11.11'
-        end
+      actual = nil
 
-        it 'and when there is a space is the path' do
-          abp = Resources.shared.app_bundle_path :server_gem_compatibility
-          dir = Dir.mktmpdir('path with space')
-          FileUtils.cp_r abp, dir
-          abp = File.expand_path(File.join(dir, 'server-gem-compatibility.app'))
-          actual = launcher.server_version_from_bundle abp
-          expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '11.11.11'
-        end
-      end
+      out = capture_stdout do
+        actual = launcher.check_server_gem_compatibility
+      end.string
 
-      it "returns '0.0.0' when strings cannot extract a version" do
-        abp = Resources.shared.app_bundle_path :calabash_not_linked
-        actual = nil
-        capture_stderr do
-          actual = launcher.server_version_from_bundle abp
-        end
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '0.0.0'
-      end
+      expect(actual).to be == v10
+      expect(launcher.instance_variable_get(:@server_version)).to be == v10
+      expect(launcher.send(:server_version)).to be == v10
 
-      it "returns '@@server_version' if it is not nil" do
-        Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, '1.0.0')
-        actual = launcher.server_version_from_bundle nil
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
-      end
-    end
-
-    describe '#check_server_gem_compatibility' do
-
-      describe 'when targeting an .app' do
-        let (:app) { Resources.shared.app_bundle_path :smoke }
-
-        describe 'prints a message if server' do
-          it 'and gem are compatible' do
-            launcher.launch_args = {:app => app}
-            min_server_version = Calabash::Cucumber::MIN_SERVER_VERSION
-            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
-            out = capture_stderr do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).to be == ''
-          end
-
-          it 'and gem are not compatible' do
-            launcher.launch_args = {:app => app}
-            min_server_version = '0.0.1'
-            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
-            out = capture_stdout do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).not_to be == nil
-            expect(out.string.length).not_to be == 0
-          end
-
-          it 'version cannot be found' do
-            launcher.launch_args = {:app => app}
-            min_server_version = Calabash::Cucumber::Launcher::SERVER_VERSION_NOT_AVAILABLE
-            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
-            out = capture_stdout do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).not_to be == nil
-            expect(out.string.length).not_to be == 0
-          end
-        end
-      end
-
-      describe 'when targeting an .ipa' do
-        let (:app) { 'foo.ipa' }
-
-        describe 'prints a message if server' do
-          it 'and gem are compatible' do
-            launcher.launch_args = {:app => app}
-            min_server_version = Calabash::Cucumber::MIN_SERVER_VERSION
-            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stdout do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).to be == ''
-          end
-
-          it 'and gem are not compatible' do
-            launcher.launch_args = {:app => app}
-            min_server_version = '0.0.1'
-            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stdout do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).not_to be == nil
-            expect(out.string.length).not_to be == 0
-          end
-
-          it 'version cannot be found' do
-            launcher.launch_args = {:app => app}
-            min_server_version = Calabash::Cucumber::Launcher::SERVER_VERSION_NOT_AVAILABLE
-            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stdout do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).not_to be == nil
-            expect(out.string.length).not_to be == 0
-          end
-        end
-      end
+      match = out[/The server version is not compatible with gem version/, 0]
+      expect(match).to be_truthy
     end
   end
 
