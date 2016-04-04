@@ -85,7 +85,7 @@ Then /^I touch (?:the)? user location$/ do
 end
 
 Then /^I (?:touch|press) (?:done|search)$/ do
-  done
+  tap_keyboard_action_key
   sleep(STEP_PAUSE)
 end
 
