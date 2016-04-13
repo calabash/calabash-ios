@@ -21,7 +21,7 @@ module Calabash
       # @return [Symbol] Returns the device orientation as one of
       #  `{:down, :up, :left, :right}`.
       def device_orientation(force_down=false)
-        res = map(nil, :orientation, :device).first
+        res = fetch_results(nil, :orientation, :device).first
 
         if ['face up', 'face down'].include?(res)
           if force_down
@@ -47,7 +47,7 @@ module Calabash
       # @return [String] Returns the device orientation as one of
       #  `{'down' | 'up' | 'left' | 'right'}`.
       def status_bar_orientation
-        map(nil, :orientation, :status_bar).first
+        fetch_results(nil, :orientation, :status_bar).first
       end
 
       # Is the device in the portrait orientation?

@@ -16,7 +16,7 @@ module Calabash
                    {:query => query, :operation => operation_map})
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "map #{query}, #{method_name} failed because: #{res['reason']}\n#{res['details']}"
+          screenshot_and_raise "fetch_results #{query}, #{method_name} failed because: #{res['reason']}\n#{res['details']}"
         end
 
         res
