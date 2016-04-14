@@ -1,10 +1,15 @@
-require 'json'
-
 module Calabash
   module Cucumber
 
     # @!visibility private
-    module Map
+    class Map
+
+      require "json"
+      require "calabash-cucumber/http_helpers"
+      require "calabash-cucumber/failure_helpers"
+
+      include Calabash::Cucumber::HTTPHelpers
+      include Calabash::Cucumber::FailureHelpers
 
       # Returns an array of views matched by the `query` or the result of
       # performing the Objective-C sequence defined by the `method_name` and
@@ -49,8 +54,8 @@ module Calabash
       # Well behaved LPOperations should return the view as JSON objects.
       #
       # @todo Calabash LPOperations should return 'views touched' in JSON format
-      def map(query, method_name, *method_args)
-        raw_map(query, method_name, *method_args)['results']
+      def self.map(query, method_name, *method_args)
+        self.raw_map(query, method_name, *method_args)['results']
       end
 
       # Returns a JSON object the represents the result of performing an http
@@ -70,17 +75,24 @@ module Calabash
       #                  the `method_name` with arguments defined in
       #                  `method_args` on all views matched by the `query`
       #
-      # @see Calabash::Cucumber::Map#map for examples.
-      def raw_map(query, method_name, *method_args)
+      # @see map for examples.
+      def self.raw_map(query, method_name, *method_args)
         operation_map = {
             :method_name => method_name,
             :arguments => method_args
         }
-        res = http({:method => :post, :path => 'map'},
-                   {:query => query, :operation => operation_map})
+
+        res = Map.new.http({:method => :post, :path => 'map'},
+                                {:query => query, :operation => operation_map})
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "map #{query}, #{method_name} failed because: #{res['reason']}\n#{res['details']}"
+          message = %Q[
+map #{query}, #{method_name} failed for:
+
+ reason: #{res["reason"]}
+details: #{res["details"]}
+]
+          Map.new.screenshot_and_raise(message)
         end
 
         res
@@ -121,10 +133,10 @@ module Calabash
       # Here a <tt>[ nil ]</tt> should be considered invalid because the
       # the operation could not be performed because there is not row that
       # matches `mark`
-      def assert_map_results(map_results, msg)
+      def self.assert_map_results(map_results, msg)
         compact = map_results.compact
         if compact.empty? or compact.member? '<VOID>' or compact.member? '*****'
-          screenshot_and_raise msg
+          Map.new.screenshot_and_raise msg
         end
       end
     end
