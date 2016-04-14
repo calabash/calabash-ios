@@ -25,31 +25,31 @@ module Calabash
       # @examples
       #
       #   # Calls 'text' on any visible UITextField, because :text is not a defined operation.
-      #   > map("textField", :text)
+      #   > fetch_results("textField", :text)
       #   => [ "old text" ]
       #
       #   # Does not call 'setText:', because :setText is a defined operation.
-      #   > map("textField", :setText, 'new text')
+      #   > fetch_results("textField", :setText, 'new text')
       #   => [ <UITextField ... > ]
       #
       #   # Calls 'setText:', because 'setText:' is not a defined operation.
-      #   > map("textField", 'setText:', 'newer text')
+      #   > fetch_results("textField", 'setText:', 'newer text')
       #   => [ "<VOID>" ]
       #
       #   # Will return [] because :unknownSelector is not defined on UITextField.
-      #   > map("textField", :unknownSelector)
+      #   > fetch_results("textField", :unknownSelector)
       #   => []
       #
       #   # Will return [] because 'setAlpha' requires 1 argument and none was provided.
       #   # An error will be logged by the server in the device logs.
-      #   > map("textField", 'setAlpha:')
+      #   > fetch_results("textField", 'setAlpha:')
       #   => []
       #
       #
       # Well behaved LPOperations should return the view as JSON objects.
       #
       # @todo Calabash LPOperations should return 'views touched' in JSON format
-      def map(query, method_name, *method_args)
+      def fetch_results(query, method_name, *method_args)
         raw_map(query, method_name, *method_args)['results']
       end
 
@@ -70,7 +70,7 @@ module Calabash
       #                  the `method_name` with arguments defined in
       #                  `method_args` on all views matched by the `query`
       #
-      # @see Calabash::Cucumber::Map#map for examples.
+      # @see Calabash::Cucumber::Map#fetch_results for examples.
       def raw_map(query, method_name, *method_args)
         operation_map = {
             :method_name => method_name,
@@ -80,13 +80,13 @@ module Calabash
                    {:query => query, :operation => operation_map})
         res = JSON.parse(res)
         if res['outcome'] != 'SUCCESS'
-          screenshot_and_raise "map #{query}, #{method_name} failed because: #{res['reason']}\n#{res['details']}"
+          screenshot_and_raise "fetch_results #{query}, #{method_name} failed because: #{res['reason']}\n#{res['details']}"
         end
 
         res
       end
 
-      # Asserts the result of a calabash `map` call and raises an error with
+      # Asserts the result of a calabash `fetch_results` call and raises an error with
       # `msg` if no valid results are found.
       #
       # Casual gem users should never need to call this method; this is a
@@ -99,7 +99,7 @@ module Calabash
       #       contains '*****' string #=> [ "*****"  ]
       #         contains a single nil #=> [ nil ]
       #
-      # When evaluating whether a `map` call is successful it is important to
+      # When evaluating whether a `fetch_results` call is successful it is important to
       # note that sometimes a <tt>[ nil ]</tt> or <tt>[nil, <val>, nil]</tt> is
       # a valid result.
       #
@@ -109,14 +109,14 @@ module Calabash
       #    label @ index 1 has text nil (the [label text] => nil)
       #    label @ index 2 has text "bar"
       #
-      #    map('label', :text) => ['foo', nil, 'bar']
-      #    map('label index:1', :text) => [nil]
+      #    fetch_results('label', :text) => ['foo', nil, 'bar']
+      #    fetch_results('label index:1', :text) => [nil]
       #
       # In other cases, <tt>[ nil ]</tt> should be treated as an invalid result
       #
       #    # invalid
       #    > mark = 'mark does not exist'
-      #    > map('tableView', :scrollToRowWithMark, mark, args) => [ nil ]
+      #    > fetch_results('tableView', :scrollToRowWithMark, mark, args) => [ nil ]
       #
       # Here a <tt>[ nil ]</tt> should be considered invalid because the
       # the operation could not be performed because there is not row that

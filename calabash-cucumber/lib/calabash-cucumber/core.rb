@@ -139,7 +139,7 @@ module Calabash
       # @param [Array] args optional var-args list describing a chain of method selectors.
       #   Full details {http://developer.xamarin.com/guides/testcloud/calabash/calabash-query-syntax/ Query Syntax}.
       def query(uiquery, *args)
-        map(uiquery, :query, *args)
+        fetch_results(uiquery, :query, *args)
       end
 
       # Shorthand alias for `query`.
@@ -160,7 +160,7 @@ module Calabash
       def flash(uiquery, *args)
         # todo deprecate the *args argument in the flash method
         # todo :flash operation should return views as JSON objects
-        map(uiquery, :flash, *args).compact
+        fetch_results(uiquery, :flash, *args).compact
       end
 
       # Returns the version of the running calabash server.
@@ -410,7 +410,7 @@ module Calabash
           raise ArgumentError, "Expected '#{direction} to be one of #{allowed_directions}"
         end
 
-        views_touched=map(uiquery, :scroll, dir_symbol)
+        views_touched=fetch_results(uiquery, :scroll, dir_symbol)
         msg = "could not find view to scroll: '#{uiquery}', args: #{dir_symbol}"
         assert_map_results(views_touched, msg)
         views_touched
@@ -425,7 +425,7 @@ module Calabash
       #
       # @param {String} uiquery query describing view scroll (should be  UIScrollView or a web view).
       def scroll_to_row(uiquery, number)
-        views_touched=map(uiquery, :scrollToRow, number)
+        views_touched=fetch_results(uiquery, :scrollToRow, number)
         msg = "unable to scroll: '#{uiquery}' to: #{number}"
         assert_map_results(views_touched, msg)
         views_touched
@@ -468,7 +468,7 @@ module Calabash
         if options.has_key?(:animate)
           args << options[:animate]
         end
-        views_touched=map(uiquery, :scrollToRow, row.to_i, sec.to_i, *args)
+        views_touched=fetch_results(uiquery, :scrollToRow, row.to_i, sec.to_i, *args)
         msg = "unable to scroll: '#{uiquery}' to '#{options}'"
         assert_map_results(views_touched, msg)
         views_touched
@@ -517,7 +517,7 @@ module Calabash
           args << options[:animate]
         end
 
-        views_touched=map(uiquery, :scrollToRowWithMark, mark, *args)
+        views_touched=fetch_results(uiquery, :scrollToRowWithMark, mark, *args)
         msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
         assert_map_results(views_touched, msg)
         views_touched
@@ -574,7 +574,7 @@ module Calabash
 
         animate = opts[:animate]
 
-        views_touched=map(uiquery, :collectionViewScroll, item.to_i, section.to_i, scroll_position, animate)
+        views_touched=fetch_results(uiquery, :collectionViewScroll, item.to_i, section.to_i, scroll_position, animate)
 
         if opts[:failed_message]
           msg = opts[:failed_message]
@@ -640,7 +640,7 @@ module Calabash
         args << scroll_position
         args << opts[:animate]
 
-        views_touched=map(uiquery, :collectionViewScrollToItemWithMark, mark, *args)
+        views_touched=fetch_results(uiquery, :collectionViewScrollToItemWithMark, mark, *args)
         msg = opts[:failed_message] || "Unable to scroll: '#{uiquery}' to cell with mark: '#{mark}' with #{opts}"
         assert_map_results(views_touched, msg)
         views_touched
@@ -830,7 +830,7 @@ details => '#{result["details"]}'
         value_str = value.to_s
 
         args = [merged_options[:animate], merged_options[:notify_targets]]
-        views_touched = map(uiquery, :changeSlider, value_str, *args)
+        views_touched = fetch_results(uiquery, :changeSlider, value_str, *args)
 
         msg = "Could not set value of slider to '#{value}' using query '#{uiquery}'"
         assert_map_results(views_touched, msg)
@@ -1075,7 +1075,7 @@ arguments => '#{arguments}'
       #
       # @return [Array<String>] The text fields that were modified.
       def set_text(uiquery, txt)
-        text_fields_modified = map(uiquery, :setText, txt)
+        text_fields_modified = fetch_results(uiquery, :setText, txt)
 
         msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
         assert_map_results(text_fields_modified, msg)
@@ -1095,7 +1095,7 @@ arguments => '#{arguments}'
       #
       # @return [Array<String>] The text fields that were modified.
       def clear_text(uiquery)
-        views_modified = map(uiquery, :setText, '')
+        views_modified = fetch_results(uiquery, :setText, '')
         msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
         assert_map_results(views_modified, msg)
         views_modified

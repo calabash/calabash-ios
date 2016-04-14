@@ -70,7 +70,7 @@ describe Calabash::Cucumber::Core do
 
       describe 'valid' do
         before do
-          expect(world).to receive(:map).twice.and_return [true]
+          expect(world).to receive(:fetch_results).twice.and_return [true]
           expect(world).to receive(:assert_map_results).twice.and_return true
         end
 
