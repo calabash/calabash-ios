@@ -1,14 +1,14 @@
 require 'calabash-cucumber/uia'
 require 'calabash-cucumber/connection_helpers'
 require 'calabash-cucumber/query_helpers'
-require 'calabash-cucumber/map'
 
 # @!visibility private
 class Calabash::Cucumber::InstrumentsActions
   include Calabash::Cucumber::UIA
   include Calabash::Cucumber::ConnectionHelpers
   include Calabash::Cucumber::QueryHelpers
-  include Calabash::Cucumber::Map
+
+  require "calabash-cucumber/map"
 
   # @!visibility private
   def touch(options)
@@ -100,7 +100,7 @@ class Calabash::Cucumber::InstrumentsActions
 
   # @!visibility private
   def find_and_normalize(ui_query)
-    raw_result = raw_map(ui_query, :query)
+    raw_result = Calabash::Cucumber::Map.raw_map(ui_query, :query)
     orientation = raw_result['status_bar_orientation']
     res = raw_result['results']
 

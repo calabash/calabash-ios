@@ -3,6 +3,8 @@ describe Calabash::Cucumber::Core do
   let(:actions) do
     Class.new do
       def swipe(dir, options); :success; end
+      def to_s; "#<ActionInterface>"; end
+      def inspect; to_s; end
     end.new
   end
 
@@ -15,6 +17,8 @@ describe Calabash::Cucumber::Core do
   let(:world) do
     Class.new do
       include Calabash::Cucumber::Core
+      def to_s; "#<World>"; end
+      def inspect; to_s; end
     end.new
   end
 
@@ -70,8 +74,8 @@ describe Calabash::Cucumber::Core do
 
       describe 'valid' do
         before do
-          expect(world).to receive(:map).twice.and_return [true]
-          expect(world).to receive(:assert_map_results).twice.and_return true
+          expect(Calabash::Cucumber::Map).to receive(:map).twice.and_return [true]
+          expect(Calabash::Cucumber::Map).to receive(:assert_map_results).twice.and_return true
         end
 
         it 'up' do
@@ -403,4 +407,3 @@ describe Calabash::Cucumber::Core do
     end
   end
 end
-

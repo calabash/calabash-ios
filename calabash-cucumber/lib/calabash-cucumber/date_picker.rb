@@ -281,9 +281,10 @@ module Calabash
         args = args_for_change_date_on_picker options
         query_str = query_string_for_picker picker_id
 
-        views_touched = map(query_str, :changeDatePickerDate, target_str, fmt_str, *args)
+        views_touched = Map.map(query_str, :changeDatePickerDate, target_str,
+                                fmt_str, *args)
         msg = "could not change date on picker to '#{target_dt}' using query '#{query_str}' with options '#{options}'"
-        assert_map_results(views_touched,msg)
+        Map.assert_map_results(views_touched,msg)
         views_touched
       end
     end
