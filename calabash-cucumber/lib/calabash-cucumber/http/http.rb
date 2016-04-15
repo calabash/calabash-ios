@@ -66,6 +66,7 @@ module Calabash
 
           begin
             success, body = self.ping_app
+            RunLoop.log_debug("Connected to Calaash Server on: #{try + 1} of #{max_retry_count}")
             return success, body if success
           rescue => e
             last_error = e
