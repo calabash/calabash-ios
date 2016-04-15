@@ -296,4 +296,28 @@ describe 'Calabash Launcher' do
 
     expect(launcher.send(:detect_device, options)).to be == simulator
   end
+
+  describe "#detect_inject_dylib_option" do
+    it "options[:inject_dylib] is falsey" do
+      expect(launcher.send(:detect_inject_dylib_option, {})).to be == nil
+      expect(launcher.send(:detect_inject_dylib_option,
+                           {:inject_dylib => false})).to be == nil
+
+      expect(launcher.send(:detect_inject_dylib_option,
+                           {:inject_dylib => nil})).to be == nil
+    end
+
+    it "{:inject_dylib => true}" do
+      expected = Calabash::Cucumber::Dylibs.path_to_sim_dylib
+      expect(launcher.send(:detect_inject_dylib_option,
+                           {:inject_dylib => true})).to be == expected
+    end
+
+    it "{:inject_dylib => 'path/to/dylib'}" do
+      expected = "path/to/calabash.dylib"
+      expect(launcher.send(:detect_inject_dylib_option,
+                           {:inject_dylib => expected})).to be == expected
+
+    end
+  end
 end
