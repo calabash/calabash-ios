@@ -36,6 +36,10 @@ class Resources
     @irbrc_path ||= File.expand_path(File.join(File.dirname(__FILE__), '..', 'scripts', '.irbrc'))
   end
 
+  def simulator_dylib
+    @sim_dylib_path ||= File.join(resources_dir, "libCalabashDynSim.dylib")
+  end
+
   def app_bundle_path(bundle_name)
     case bundle_name
       when :lp_simple_example
