@@ -58,9 +58,9 @@ class Resources
   end
 
   def simulator_identifier_with_name(name)
-    @simulators ||= sim_control.simulators
+    @simulators ||= simctl.simulators
 
-    match = @simulators.shuffle.find do |simulator|
+    match = @simulators.find do |simulator|
       simulator.name == name
     end
     match.instruments_identifier(xcode)
