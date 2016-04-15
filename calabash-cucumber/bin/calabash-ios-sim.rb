@@ -1,5 +1,4 @@
-require "calabash-cucumber/environment"
-require 'run_loop'
+require "run_loop"
 
 def quit_sim
   RunLoop::SimControl.new.quit_sim
@@ -87,19 +86,18 @@ This operation will quit and reset the simulator.
   language = args[0]
   locale = args[1]
 
-  device_target = Calabash::Cucumber::Environment.device_target
-  default_target = RunLoop::Core.default_simulator
+  xcode = RunLoop::Xcode.new
+  instruments = RunLoop::Instruments.new
+  simctl = RunLoop::Simctl.new
 
-  target = device_target || default_target
-
-  device = RunLoop::Device.device_with_identifier(target)
+  device = RunLoop::Device.detect_device({}, xcode, simctl, instruments)
 
   if device.nil?
-    if target == device_target
+    if RunLoop::Environment.device_target
       puts %Q{
 Could not find simulator matching:
 
-DEVICE_TARGET=#{device_target}
+  DEVICE_TARGET=#{RunLoop::Environment.device_target}
 
 Check the output of:
 
@@ -109,8 +107,12 @@ for a list of available simulators.
 }
     else
       puts %Q{
-Could not find the default simulator.  Make sure that you have
-the right version of run_loop installed for your Xcode version.
+Could not find the default simulator:
+
+  #{RunLoop::Core.default_simulator}
+
+1. Your Xcode version might not be compatible with run-loop #{RunLoop::VERSION}.
+2. You might need to install additional simulators in Xcode.
 }
     end
 
@@ -121,7 +123,7 @@ the right version of run_loop installed for your Xcode version.
     puts %Q{
 This tool is for simulators only.
 
-#{target} is a physical device.
+#{device} is a physical device.
 }
     return false
   end
