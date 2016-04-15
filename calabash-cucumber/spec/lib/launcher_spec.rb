@@ -283,7 +283,7 @@ describe 'Calabash Launcher' do
   end
 
   it "#detect_device" do
-    simctl = Resources.shared.sim_control
+    simctl = Resources.shared.simctl
     xcode = Resources.shared.xcode
     instruments = Resources.shared.instruments
     expect(Calabash::Cucumber::Environment).to receive(:simctl).and_return(simctl)
