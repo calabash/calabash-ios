@@ -8,5 +8,6 @@ rbenv exec \
   bundle exec \
   rspec \
   spec/lib \
-  spec/integration/launcher/inject_dylibs_spec.rb
+  spec/bin \
+  spec/integration \
 
