@@ -43,7 +43,7 @@ Dir.chdir xtc_test_dir do
   File.open("Gemfile", "w") do |file|
     file.write("source \"https://rubygems.org\"\n")
     file.write("gem \"calabash-cucumber\", \"#{calabash_version}\"\n")
-    file.write("gem \"cucumber\", \"~> 1.3\"\n")
+    file.write("gem \"cucumber\", \"~> 2.0\"\n")
   end
 
   Luffa.log_pass("Wrote new Gemfile with calabash-version '#{calabash_version}'")
