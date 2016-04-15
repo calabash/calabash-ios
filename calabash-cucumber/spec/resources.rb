@@ -16,6 +16,10 @@ class Resources
     @active_xcode_version ||= xcode.version
   end
 
+  def simctl
+    @simctl ||= RunLoop::Simctl.new
+  end
+
   def sim_control
     @sim_control ||= RunLoop::SimControl.new
   end
