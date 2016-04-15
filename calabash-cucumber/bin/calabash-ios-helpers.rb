@@ -34,7 +34,7 @@ end
 
 def print_help
   file = File.join(File.dirname(__FILE__), '..', 'doc', 'calabash-ios-help.txt')
-  system("less #{file}")
+  puts File.read(file)
 end
 
 def ensure_correct_path(args)
