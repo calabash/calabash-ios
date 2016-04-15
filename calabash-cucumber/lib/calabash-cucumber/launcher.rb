@@ -292,10 +292,11 @@ Resetting physical devices is not supported.
 
         options = launch_options.clone
 
-        # Reusing SimControl, Instruments, and Xcode can speed up launches.
+        # Reusing Simctl, Instruments, and Xcode can speed up launches.
         options[:simctl] = simctl || Calabash::Cucumber::Environment.simctl
         options[:instruments] = instruments || Calabash::Cucumber::Environment.instruments
         options[:xcode] = xcode || Calabash::Cucumber::Environment.xcode
+        options[:inject_dylib] = detect_inject_dylib_option(launch_options)
 
         self.launch_args = options
 
@@ -507,6 +508,25 @@ true.  Please remove this method call from your hooks.
       # The version of the embedded LPServer
       # @return RunLoop::Version
       attr_reader :server_version
+
+      # @!visibility private
+      #
+      # @param [Hash] options the launch options passed by the user
+      def detect_inject_dylib_option(options)
+        return nil if !options[:inject_dylib]
+
+        value = options[:inject_dylib]
+
+        # Test for boolean true.
+        if [true].include?(value)
+          # Injection is only supported on simulators, so this cool for now.
+          # Depend on run-loop to raise an error.
+          Calabash::Cucumber::Dylibs.path_to_sim_dylib
+        else
+          # User supplied a path
+          value
+        end
+      end
     end
   end
 end

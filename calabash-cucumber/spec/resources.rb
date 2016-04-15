@@ -16,6 +16,10 @@ class Resources
     @active_xcode_version ||= xcode.version
   end
 
+  def simctl
+    @simctl ||= RunLoop::Simctl.new
+  end
+
   def sim_control
     @sim_control ||= RunLoop::SimControl.new
   end
@@ -30,6 +34,10 @@ class Resources
 
   def irbrc_path
     @irbrc_path ||= File.expand_path(File.join(File.dirname(__FILE__), '..', 'scripts', '.irbrc'))
+  end
+
+  def simulator_dylib
+    @sim_dylib_path ||= File.join(resources_dir, "libCalabashDynSim.dylib")
   end
 
   def app_bundle_path(bundle_name)
