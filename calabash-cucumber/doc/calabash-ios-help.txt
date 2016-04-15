@@ -2,13 +2,12 @@ Usage: calabash-ios <command-name> [parameters]
   <command-name> can be one of
     help
     gen
-    setup (EXPERIMENTAL) [opt path]?
     download [opt path]?
-    check (EXPERIMENTAL) [opt path to .ipa/.app]?
-    sim locale [lang] [regional]?
+    sim locale [language code] [locale code]
     sim reset
     sim acc
-    sim location {on|off} <bundleid>
+    setup (EXPERIMENTAL) [opt path]?
+    check (EXPERIMENTAL) [opt path to .ipa/.app]?
 
   Commands:
   gen creates a skeleton features dir. This is usually used once when
@@ -69,9 +68,5 @@ Usage: calabash-ios <command-name> [parameters]
       for the optional regional parameter, for example,
       da_DK, en_US.
 
-  sim location {on|off} <bundleid>
-      set allow location on/off for current project or bundleid
-
-  sim reset (EXPERIMENTAL) Will select "Reset Content and Settings"
-      in the iOS Simulators using AppleScript.
+  sim reset Reset the Content & Settings of all iOS Simulators
 

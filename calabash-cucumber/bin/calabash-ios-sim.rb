@@ -12,49 +12,6 @@ def calabash_sim_accessibility
   RunLoop::SimControl.new.enable_accessibility_on_sims
 end
 
-def calabash_sim_location(args)
-
-  if args.length == 0
-    print_usage
-    exit 0
-  end
-  on_off = args.shift
-  if args.length == 0
-    print_usage
-    exit 0
-  end
-  bundle_id = args.shift
-
-
-  dirs = Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "*.*", "Library", "Caches", "locationd"))
-  dirs.each do |sim_dir|
-    existing_path = "#{sim_dir}/clients.plist"
-    if File.exist?(existing_path)
-      plist_path = existing_path
-    else
-      plist_path = File.expand_path("#{@script_dir}/data/clients.plist")
-    end
-
-    plist = CFPropertyList::List.new(:file => plist_path)
-    hash = CFPropertyList.native_types(plist.value)
-
-    app_hash = hash[bundle_id]
-    if not app_hash
-      app_hash = hash[bundle_id] = {}
-    end
-    app_hash["BundleId"] = bundle_id
-    app_hash["Authorized"] = on_off == "on" ? true : false
-    app_hash["LocationTimeStarted"] = 0
-
-    ##Plist edit the template
-    res_plist = CFPropertyList::List.new
-    res_plist.value = CFPropertyList.guess(hash)
-    res_plist.save(existing_path, CFPropertyList::List::FORMAT_BINARY)
-
-  end
-end
-
-
 def calabash_sim_locale(args)
 
   if args.length != 2
