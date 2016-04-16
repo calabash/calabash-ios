@@ -26,7 +26,7 @@ module Calabash
       # @!visibility private
       def self.simctl
         return nil if self.xtc?
-        @@simctl ||= RunLoop::SimControl.new
+        @@simctl ||= RunLoop::Simctl.new
       end
 
       # @!visibility private

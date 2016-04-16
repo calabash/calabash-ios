@@ -12,11 +12,6 @@ end
 describe Calabash::Cucumber::UIA do
 
   describe 'targeting simulators' do
-    let(:sim_control) {
-      obj = RunLoop::SimControl.new
-      obj.reset_sim_content_and_settings
-      obj
-    }
     let(:launcher) { Calabash::Cucumber::Launcher.new }
     let(:test_object) { Calabash::RspecIntegrationTests::UIA::TestObject.new }
     let(:options) {
@@ -24,7 +19,9 @@ describe Calabash::Cucumber::UIA do
             {
                   :app => Resources.shared.app_bundle_path(:cal_smoke_app),
                   :device_target =>  'simulator',
-                  :sim_control => sim_control,
+                  :simctl => Resources.shared.simctl,
+                  :instruments => Resources.shared.instruments,
+                  :xcode => Resources.shared.xcode,
                   :launch_retries => Luffa::Retry.instance.launch_retries
             }
     }

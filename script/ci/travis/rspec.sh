@@ -4,10 +4,8 @@ cd calabash-cucumber
 bundle update
 rm -rf spec/reports
 
-rbenv exec \
-  bundle exec \
+bundle exec \
   rspec \
   spec/lib \
-  spec/bin \
-  spec/integration \
+  spec/integration/launcher/console_attach_spec.rb
 

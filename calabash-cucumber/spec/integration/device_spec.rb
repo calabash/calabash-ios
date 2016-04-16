@@ -7,6 +7,8 @@ unless Luffa::Environment.travis_ci?
 
     let(:endpoint) { 'http://localhost:37265' }
     let(:xcode) { Resources.shared.xcode }
+    let(:simctl) { Resources.shared.simctl }
+    let(:instruments) { Resources.shared.instruments }
 
     it 'sets instance variables' do
       device_target = Resources.shared.simulator_identifier_with_name('iPhone 5s')
@@ -14,8 +16,8 @@ unless Luffa::Environment.travis_ci?
             :app => Resources.shared.app_bundle_path(:cal_smoke_app),
             :device_target =>  device_target,
             :xcode => xcode,
-            :sim_control => Resources.shared.sim_control,
-            :instruments => Resources.shared.instruments,
+            :simctl => simctl,
+            :instruments => instruments,
             :launch_retries => Luffa::Retry.instance.launch_retries
       }
       launcher = Calabash::Cucumber::Launcher.new
@@ -40,8 +42,8 @@ unless Luffa::Environment.travis_ci?
               :app => Resources.shared.app_bundle_path(:cal_smoke_app),
               :device_target =>  device_target,
               :xcode => xcode,
-              :sim_control => Resources.shared.sim_control,
-              :instruments => Resources.shared.instruments,
+              :simctl => simctl,
+              :instruments => instruments,
               :launch_retries => Luffa::Retry.instance.launch_retries
         }
         launcher = Calabash::Cucumber::Launcher.new
