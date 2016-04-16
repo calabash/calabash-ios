@@ -4,6 +4,44 @@ module Calabash
     # A collection of methods that help you use console.
     module ConsoleHelpers
 
+      # List the visible element ids.
+      def ids
+        accessibility_marks(:id)
+      end
+
+      # List the visible element labels.
+      def labels
+        accessibility_marks(:label)
+      end
+
+      # List the visible element texts.
+      def text
+        text_marks
+      end
+
+      # List the visible element with all marks.
+      def marks
+        opts = {:print => false, :return => true }
+        res = accessibility_marks(:id, opts).each { |elm|elm << :ai }
+        res.concat(accessibility_marks(:label, opts).each { |elm| elm << :al })
+        res.concat(text_marks(opts).each { |elm| elm << :text })
+        max_width = 0
+        res.each { |elm|
+          len = elm[0].length
+          max_width = len if len > max_width
+        }
+
+        counter = -1
+        res.sort.each { |elm|
+          printf("%4s %-4s => %#{max_width}s => %s\n",
+                 "[#{counter = counter + 1}]",
+                 elm[2], elm[0], elm[1])
+        }
+        nil
+      end
+
+      private
+
       # List the visible element with given mark(s).
       # @param {Array} marks
       # @param {Integer} max_width
@@ -65,42 +103,6 @@ module Calabash
 
         print_marks(res, max_width) if opts[:print]
         opts[:return] ? res : nil
-      end
-
-      # List the visible element ids.
-      def ids
-        accessibility_marks(:id)
-      end
-
-      # List the visible element labels.
-      def labels
-        accessibility_marks(:label)
-      end
-
-      # List the visible element texts.
-      def text
-        text_marks
-      end
-
-      # List the visible element with all marks.
-      def marks
-        opts = {:print => false, :return => true }
-        res = accessibility_marks(:id, opts).each { |elm|elm << :ai }
-        res.concat(accessibility_marks(:label, opts).each { |elm| elm << :al })
-        res.concat(text_marks(opts).each { |elm| elm << :text })
-        max_width = 0
-        res.each { |elm|
-          len = elm[0].length
-          max_width = len if len > max_width
-        }
-
-        counter = -1
-        res.sort.each { |elm|
-          printf("%4s %-4s => %#{max_width}s => %s\n",
-                 "[#{counter = counter + 1}]",
-                 elm[2], elm[0], elm[1])
-        }
-        nil
       end
     end
   end
