@@ -22,8 +22,8 @@ module Calabash
       # List the visible element with all marks.
       def marks
         opts = {:print => false, :return => true }
-        res = accessibility_marks(:id, opts).each { |elm|elm << :ai }
-        res.concat(accessibility_marks(:label, opts).each { |elm| elm << :al })
+        res = accessibility_marks(:id, opts).each { |elm|elm << :id }
+        res.concat(accessibility_marks(:label, opts).each { |elm| elm << :label })
         res.concat(text_marks(opts).each { |elm| elm << :text })
         max_width = 0
         res.each { |elm|
@@ -33,11 +33,11 @@ module Calabash
 
         counter = -1
         res.sort.each { |elm|
-          printf("%4s %-4s => %#{max_width}s => %s\n",
+          printf("%4s %-6s => %#{max_width}s => %s\n",
                  "[#{counter = counter + 1}]",
                  elm[2], elm[0], elm[1])
         }
-        nil
+        true
       end
 
       private
@@ -55,30 +55,40 @@ module Calabash
       # @!visibility private
       # List the visible element with accessibility marks.
       def accessibility_marks(kind, opts={})
-        opts = {:print => true, :return => false}.merge(opts)
+        merged_opts = {:print => true, :return => false}.merge(opts)
 
         kinds = [:id, :label]
-        raise "'#{kind}' is not one of '#{kinds}'" unless kinds.include?(kind)
+        raise ArgumentError,
+              "'#{kind}' is not one of '#{kinds}'" unless kinds.include?(kind)
 
-        res = Array.new
+        results = Array.new
         max_width = 0
+
         query('*').each { |view|
           aid = view[kind.to_s]
           unless aid.nil? or aid.eql?('')
             cls = view['class']
             len = cls.length
             max_width = len if len > max_width
-            res << [cls, aid]
+            results << [cls, aid]
           end
         }
-        print_marks(res, max_width) if opts[:print]
-        opts[:return] ? res : nil
+
+        if merged_opts[:print]
+          print_marks(results, max_width)
+        end
+
+        if merged_opts[:return]
+          results
+        else
+          true
+        end
       end
 
       # @!visibility private
       # List the visible element with text marks.
       def text_marks(opts={})
-        opts = {:print => true, :return => false}.merge(opts)
+        merged_opts = {:print => true, :return => false}.merge(opts)
 
         indexes = Array.new
         idx = 0
@@ -88,7 +98,7 @@ module Calabash
           idx = idx + 1
         }
 
-        res = Array.new
+        results = Array.new
 
         all_views = query('*')
         max_width = 0
@@ -98,11 +108,18 @@ module Calabash
           text = all_texts[index]
           len = cls.length
           max_width = len if len > max_width
-          res << [cls, text]
+          results << [cls, text]
         }
 
-        print_marks(res, max_width) if opts[:print]
-        opts[:return] ? res : nil
+        if merged_opts[:print]
+          print_marks(results, max_width)
+        end
+
+        if merged_opts[:return]
+          results
+        else
+          true
+        end
       end
     end
   end
