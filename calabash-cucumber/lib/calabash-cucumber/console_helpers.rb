@@ -14,6 +14,7 @@ module Calabash
         }
       end
 
+      # @!visibility private
       # List the visible element with accessibility marks.
       def accessibility_marks(kind, opts={})
         opts = {:print => true, :return => false}.merge(opts)
@@ -36,6 +37,7 @@ module Calabash
         opts[:return] ? res : nil
       end
 
+      # @!visibility private
       # List the visible element with text marks.
       def text_marks(opts={})
         opts = {:print => true, :return => false}.merge(opts)
@@ -101,6 +103,5 @@ module Calabash
         nil
       end
     end
-
   end
 end
