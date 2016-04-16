@@ -63,7 +63,6 @@ Gem::Specification.new do |s|
 
   # Shared with run-loop.
   s.add_dependency('json')
-  s.add_dependency('CFPropertyList')
   s.add_dependency('awesome_print')
 
   s.add_development_dependency 'yard', '~> 0.8'

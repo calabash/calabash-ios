@@ -16,7 +16,8 @@ script:
   - if [[ ( ! -z $XTC_API_TOKEN && ! -z $XTC_USER && `ruby -e 'print RUBY_VERSION'` == '2.2.3' ) ]]; then script/ci/travis/xtc-submit-ci.rb; fi
   - script/ci/travis/bundle-install.rb
   - script/ci/travis/install-gem-ci.rb
-  - script/ci/travis/rspec-ci.rb
+  - script/ci/travis/rspec.sh
+  - script/ci/cli.sh
 
 rvm:
   - 2.1.7

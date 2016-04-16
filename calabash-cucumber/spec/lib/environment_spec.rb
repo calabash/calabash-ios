@@ -30,7 +30,7 @@ describe Calabash::Cucumber::Environment do
       expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
 
       actual = Calabash::Cucumber::Environment.simctl
-      expect(actual).to be_a_kind_of(RunLoop::SimControl)
+      expect(actual).to be_a_kind_of(RunLoop::Simctl)
       expect(Calabash::Cucumber::Environment.class_variable_get(:@@simctl)).to be == actual
     end
   end
