@@ -767,17 +767,6 @@ details => '#{result["details"]}'
       end
 
       # @!visibility private
-      def move_wheel(opts={})
-        q = opts[:query] || 'pickerView'
-        wheel = opts[:wheel] || 0
-        dir = opts[:dir] || :down
-
-        raise 'Wheel index must be non negative' if wheel < 0
-        raise "Only up and down supported :dir (#{dir})" unless [:up, :down].include?(dir)
-        raise NotImplementedError
-      end
-
-      # @!visibility private
       def picker(opts={:query => 'pickerView', :action => :texts})
         raise 'Not implemented' unless opts[:action] == :texts
 
