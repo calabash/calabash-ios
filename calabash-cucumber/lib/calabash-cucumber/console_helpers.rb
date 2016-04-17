@@ -73,6 +73,30 @@ module Calabash
         puts RunLoop::Color.green("Calabash says, '#{messages.shuffle.first}'")
       end
 
+      # Turn on debug logging.
+      def verbose
+        if RunLoop::Environment.debug?
+          puts RunLoop::Color.cyan("Debug logging is already turned on.")
+        else
+          ENV["DEBUG"] = "1"
+          puts RunLoop::Color.cyan("Turned on debug logging.")
+        end
+
+        true
+      end
+
+      # Turn off debug logging.
+      def quiet
+        if RunLoop::Environment.debug?
+          ENV["DEBUG"] = "0"
+          puts RunLoop::Color.cyan("Turned off debug logging.")
+        else
+          puts RunLoop::Color.cyan("Debug logging is already turned off.")
+        end
+
+        true
+      end
+
       private
 
       # List the visible element with given mark(s).

@@ -131,16 +131,51 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
     expect(out[/\[24\] id     =>                   UITextField => text/, 0]).to be_truthy
   end
 
-  it "#print_marks" do
-    console.send(:print_marks, ids, 29)
-  end
-
   it "#puts_message_of_the_day" do
     out = capture_stdout do
       console.puts_message_of_the_day
     end.string.gsub(/\e\[(\d+)m/, "")
 
     expect(out[/Calabash says,/, 0]).to be_truthy
+  end
+
+  describe "verbose and quiet" do
+    let(:original_debug) { ENV["DEBUG"] }
+
+    describe "#verbose" do
+      it "already on" do
+        expect(RunLoop::Environment).to receive(:debug?).and_return(true)
+        console.verbose
+      end
+
+      it "turns it on" do
+        expect(RunLoop::Environment).to receive(:debug?).and_return(false)
+        console.verbose
+        expect(ENV["DEBUG"]).to be == "1"
+      end
+    end
+
+    describe "#quiet" do
+      it "already off" do
+        expect(RunLoop::Environment).to receive(:debug?).and_return(false)
+        console.quiet
+      end
+
+      it "turns it off" do
+        expect(RunLoop::Environment).to receive(:debug?).and_return(true)
+        console.quiet
+        expect(ENV["DEBUG"]).to be == "0"
+      end
+    end
+
+    after do
+      ENV["DEBUG"] = original_debug
+    end
+  end
+
+
+  it "#print_marks" do
+    console.send(:print_marks, ids, 29)
   end
 
   describe "accessibility_marks" do
