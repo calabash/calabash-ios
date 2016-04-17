@@ -1,5 +1,6 @@
 require "irb/completion"
 require "irb/ext/save-history"
+require "benchmark"
 
 begin
   require "awesome_print"
