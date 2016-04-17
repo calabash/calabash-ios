@@ -22,7 +22,7 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
     path
   end
 
-  it "ids, labels, text, and marks" do
+  it "ids, labels, text, marks, and tree" do
     env = {"CALABASH_IRBRC" => dot_irbrc}
     out, err = nil
     Open3.popen3(env, "bundle", "exec", "calabash-ios", "console") do |stdin, stdout, stderr, _|
@@ -31,6 +31,7 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
       stdin.puts "labels"
       stdin.puts "text"
       stdin.puts "marks"
+      stdin.puts "tree"
       stdin.close
       out = stdout.read.strip
       err = stderr.read.strip
