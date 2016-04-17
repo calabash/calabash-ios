@@ -135,6 +135,14 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
     console.send(:print_marks, ids, 29)
   end
 
+  it "#puts_message_of_the_day" do
+    out = capture_stdout do
+      console.puts_message_of_the_day
+    end.string.gsub(/\e\[(\d+)m/, "")
+
+    expect(out[/Calabash says,/, 0]).to be_truthy
+  end
+
   describe "accessibility_marks" do
     let(:options) { {:print => false, :return => true} }
 

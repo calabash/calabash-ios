@@ -46,6 +46,33 @@ module Calabash
         true
       end
 
+      # Print a message to the console.
+      def puts_message_of_the_day
+        messages = [
+          "Let's get this done!",
+          "Ready to rumble.",
+          "Enjoy.",
+          "Remember to breathe.",
+          "Take a deep breath.",
+          "Isn't it time for a break?",
+          "Can I get you a coffee?",
+          "What is a calabash anyway?",
+          "Smile! You are on camera!",
+          "Let op! Wild Rooster!",
+          "Don't touch that button!",
+          "I'm gonna take this to 11.",
+          "Console. Engaged.",
+          "Your wish is my command.",
+          "This console session was created just for you.",
+          "Den som jager to harer, får ingen.",
+          "Uti, non abuti.",
+          "Non Satis Scire",
+          "Nullius in verba",
+          "Det ka æn jå væer ei jált"
+        ]
+        puts RunLoop::Color.green("Calabash says, '#{messages.shuffle.first}'")
+      end
+
       private
 
       # List the visible element with given mark(s).

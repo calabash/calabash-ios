@@ -40,6 +40,12 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
     puts out
     puts err
     expect(out[/Error/,0]).to be == nil
-    expect(err).to be == ''
+
+    out_no_color = out.gsub(/\e\[(\d+)m/, "")
+
+    # message of the day
+    expect(out_no_color[/Calabash says,/, 0]).to be_truthy
+
+    expect(err).to be == ""
   end
 end

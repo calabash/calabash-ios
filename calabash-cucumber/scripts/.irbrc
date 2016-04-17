@@ -57,3 +57,5 @@ def enable_usage_tracking(level="system_info")
   puts "Calabash will collect statistics using the '#{level}' rule."
   level
 end
+
+puts_message_of_the_day
