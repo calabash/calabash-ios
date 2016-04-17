@@ -80,5 +80,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'guard-bundler'
   s.add_development_dependency 'growl'
   s.add_development_dependency 'stub_env'
-  s.add_dependency("oj", "~> 2.0")
+  # Sometimes JSON.parse is failing to parse JSON dumped to a file.
+  s.add_development_dependency("oj", "~> 2.0")
 end
