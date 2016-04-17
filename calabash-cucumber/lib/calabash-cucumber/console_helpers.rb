@@ -70,10 +70,10 @@ module Calabash
         results = Array.new
         max_width = 0
 
-        query('*').each { |view|
+        query("*").each { |view|
           aid = view[kind.to_s]
-          unless aid.nil? or aid.eql?('')
-            cls = view['class']
+          unless aid.nil? or aid.eql?("")
+            cls = view["class"]
             len = cls.length
             max_width = len if len > max_width
             results << [cls, aid]
@@ -98,19 +98,19 @@ module Calabash
 
         indexes = Array.new
         idx = 0
-        all_texts = query('*', :text)
+        all_texts = query("*", :text)
         all_texts.each { |view|
-          indexes << idx unless view.eql?('*****') or view.eql?('')
+          indexes << idx unless view.eql?("*****") or view.eql?("")
           idx = idx + 1
         }
 
         results = Array.new
 
-        all_views = query('*')
+        all_views = query("*")
         max_width = 0
         indexes.each { |index|
           view = all_views[index]
-          cls = view['class']
+          cls = view["class"]
           text = all_texts[index]
           len = cls.length
           max_width = len if len > max_width
@@ -154,36 +154,36 @@ Please report this issue.
       end
 
       def dump_json_data(json_data)
-        json_data['children'].each {|child| write_child(child)}
+        json_data["children"].each {|child| write_child(child)}
       end
 
       def write_child(data, indentation=0)
         render(data, indentation)
-        data['children'].each do |child|
+        data["children"].each do |child|
           write_child(child, indentation+1)
         end
       end
 
       def render(data, indentation)
         if visible?(data)
-          type = data['type']
+          type = data["type"]
 
-          str_type = if data['type'] == 'dom'
-            "#{RunLoop::Color.cyan("[")}#{type}:#{RunLoop::Color.cyan("#{data['nodeName']}]")} "
+          str_type = if data["type"] == "dom"
+            "#{RunLoop::Color.cyan("[")}#{type}:#{RunLoop::Color.cyan("#{data["nodeName"]}]")} "
           else
             RunLoop::Color.cyan("[#{type}] ")
           end
 
-          str_id = data['id'] ? "[id:#{RunLoop::Color.blue(data['id'])}] " : ''
-          str_label = data['label'] ? "[label:#{RunLoop::Color.green(data['label'])}] " : ''
-          str_text = data['value'] ? "[text:#{RunLoop::Color.magenta(data['value'])}] " : ''
+          str_id = data["id"] ? "[id:#{RunLoop::Color.blue(data["id"])}] " : ""
+          str_label = data["label"] ? "[label:#{RunLoop::Color.green(data["label"])}] " : ""
+          str_text = data["value"] ? "[text:#{RunLoop::Color.magenta(data["value"])}] " : ""
           output("#{str_type}#{str_id}#{str_label}#{str_text}", indentation)
           output("\n", indentation)
         end
       end
 
       def visible?(data)
-        (data['visible'] == 1) || data['children'].map{|child| visible?(child)}.any?
+        (data["visible"] == 1) || data["children"].map{|child| visible?(child)}.any?
       end
 
       def output(string, indentation)
