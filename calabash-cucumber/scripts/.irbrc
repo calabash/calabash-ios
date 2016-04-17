@@ -1,33 +1,35 @@
-require 'irb/completion'
-require 'irb/ext/save-history'
+require "irb/completion"
+require "irb/ext/save-history"
 
 begin
-  require 'awesome_print'
+  require "awesome_print"
 rescue LoadError => e
-  msg = ["Caught a LoadError: could not load 'awesome_print'",
-         "#{e}",
-         '',
-         'Use bundler (recommended) or uninstall awesome_print.',
-         '',
-         '# Use bundler (recommended)',
-         '$ bundle update',
-         '$ bundle exec calabash-ios console',
-         '',
-         '# Uninstall',
-         '$ gem update --system',
-         '$ gem uninstall -Vax --force --no-abort-on-dependent awesome_print']
-  puts msg
+  puts %Q[
+Caught a LoadError: could not load 'awesome_print'",
+
+#{e}
+
+Use bundler (recommended) or uninstall awesome_print.
+
+# Use bundler (recommended)
+$ bundle update
+$ bundle exec calabash-ios console
+
+# Uninstall awesome_print and reinstall calabash-cucumber
+$ gem update --system
+$ gem uninstall -Vax --force --no-abort-on-dependent awesome_print
+$ gem install calabash-cucumber
+
+]
   exit(1)
 end
 
 AwesomePrint.irb!
 
-ARGV.concat [ '--readline',
-              '--prompt-mode',
-              'simple']
+ARGV.concat ["--readline", "--prompt-mode", "simple"]
 
 IRB.conf[:SAVE_HISTORY] = 100
-IRB.conf[:HISTORY_FILE] = '.irb-history'
+IRB.conf[:HISTORY_FILE] = ".irb-history"
 
 begin
   require "pry"
@@ -57,10 +59,10 @@ IRB.conf[:PROMPT][:CALABASH_IOS] = {
 
 IRB.conf[:PROMPT_MODE] = :CALABASH_IOS
 
-require 'calabash-cucumber/operations'
+require "calabash-cucumber/operations"
 extend Calabash::Cucumber::Operations
 
-require 'calabash-cucumber/console_helpers'
+require "calabash-cucumber/console_helpers"
 include Calabash::Cucumber::ConsoleHelpers
 Calabash::Cucumber::ConsoleHelpers.start_readline_history!
 
