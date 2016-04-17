@@ -45,7 +45,7 @@ describe 'Command Line Interface' do
     copied_irbrc = File.join(target_dir, '.irbrc')
     FileUtils.cp(original_irbrc, copied_irbrc)
     contents = File.read(copied_irbrc)
-    substituted = contents.gsub(/require 'awesome_print'/, "require 'unknown_gem'")
+    substituted = contents.gsub(/require "awesome_print"/, "require 'unknown_gem'")
     File.open(copied_irbrc, 'w') do |file|
       file.puts substituted
     end
@@ -58,7 +58,7 @@ describe 'Command Line Interface' do
       err = stderr.read.strip
 
       expect(err).to be == ''
-      expect(out[/Caught a LoadError: could not load 'awesome_print'/,0]).to_not be nil
+      expect(out[/Caught a LoadError: could not load 'awesome_print'/,0]).to be_truthy
       expect(process_status.value.exitstatus).to be == 1
     end
   end

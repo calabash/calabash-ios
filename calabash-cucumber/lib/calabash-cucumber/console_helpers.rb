@@ -46,6 +46,108 @@ module Calabash
         true
       end
 
+      # @!visibility private
+      #
+      # Users should not call this!!!
+      #
+      # Needs to be called in the .irbrc to ensure good `copy` behavior.
+      def self.start_readline_history!
+        require "irb"
+        file_name = IRB.conf[:HISTORY_FILE]
+
+        if File.exist?(file_name)
+          contents = File.read(file_name)
+          history = ConsoleHelpers.encode_utf8_or_raise(contents)
+          @@start_readline_history = history.split($-0)
+        else
+          @@start_readline_history = []
+        end
+      end
+
+      # Copy all the commands entered in the current console session into the OS
+      # Clipboard.
+      def copy
+        ConsoleHelpers.copy
+      end
+
+      # Clear the clipboard
+      def clear_clipboard
+        ConsoleHelpers.clear_clipboard!
+      end
+
+      # Clear the console history.
+      def clear
+        ConsoleHelpers.clear
+      end
+
+      # Print a message to the console.
+      def puts_message_of_the_day
+        messages = [
+          "Let's get this done!",
+          "Ready to rumble.",
+          "Enjoy.",
+          "Remember to breathe.",
+          "Take a deep breath.",
+          "Isn't it time for a break?",
+          "Can I get you a coffee?",
+          "What is a calabash anyway?",
+          "Smile! You are on camera!",
+          "Let op! Wild Rooster!",
+          "Don't touch that button!",
+          "I'm gonna take this to 11.",
+          "Console. Engaged.",
+          "Your wish is my command.",
+          "This console session was created just for you.",
+          "Den som jager to harer, får ingen.",
+          "Uti, non abuti.",
+          "Non Satis Scire",
+          "Nullius in verba",
+          "Det ka æn jå væer ei jált"
+        ]
+        puts RunLoop::Color.green("Calabash says, \"#{messages.shuffle.first}\"")
+      end
+
+      # Turn on debug logging.
+      def verbose
+        if RunLoop::Environment.debug?
+          puts RunLoop::Color.cyan("Debug logging is already turned on.")
+        else
+          ENV["DEBUG"] = "1"
+          puts RunLoop::Color.cyan("Turned on debug logging.")
+        end
+
+        true
+      end
+
+      # Turn off debug logging.
+      def quiet
+        if RunLoop::Environment.debug?
+          ENV["DEBUG"] = "0"
+          puts RunLoop::Color.cyan("Turned off debug logging.")
+        else
+          puts RunLoop::Color.cyan("Debug logging is already turned off.")
+        end
+
+        true
+      end
+
+      # @!visibility private
+      def puts_console_details
+        puts ""
+        puts RunLoop::Color.magenta("#########################  Useful Methods  ##########################")
+        puts RunLoop::Color.cyan("     ids => List all the visible accessibility ids.")
+        puts RunLoop::Color.cyan("  labels => List all the visible accessibility labels.")
+        puts RunLoop::Color.cyan("    text => List all the visible texts.")
+        puts RunLoop::Color.cyan("   marks => List all the visible marks.")
+        puts RunLoop::Color.cyan("    tree => The app's visible view hierarchy.")
+        puts RunLoop::Color.cyan("   flash => flash(<query>); Disco effect for views matching <query>")
+        puts RunLoop::Color.cyan(" verbose => Turn debug logging on.")
+        puts RunLoop::Color.cyan("   quiet => Turn debug logging off.")
+        puts RunLoop::Color.cyan("    copy => Copy console commands to clipboard.")
+        puts RunLoop::Color.cyan("   clear => Clear the console.")
+        puts ""
+      end
+
       private
 
       # List the visible element with given mark(s).
@@ -189,6 +291,97 @@ Please report this issue.
       def output(string, indentation)
         (indentation*2).times {print " "}
         print "#{string}"
+      end
+
+      # @!visibility private
+      def self.copy
+        require "clipboard"
+        history = ConsoleHelpers.current_console_history
+        commands = ConsoleHelpers.filter_commands(history)
+        string = commands.join($-0)
+        Clipboard.copy(string)
+        true
+      end
+
+      # @!visibility private
+      def self.clear_clipboard!
+        require "clipboard"
+        @@start_readline_history = ConsoleHelpers.readline_history
+        Clipboard.clear
+        true
+      end
+
+      # @!visibility private
+      def self.clear
+        if RunLoop::Environment.windows_env?
+          ConsoleHelpers.system_clear("cls")
+        else
+          ConsoleHelpers.system_clear("clear")
+        end
+        true
+      end
+
+      # @!visibility private
+      def self.system_clear(command)
+        system(command)
+      end
+
+      # @!visibility private
+      def self.current_console_history
+        readline_history = ConsoleHelpers.readline_history
+        length = readline_history.length - @@start_readline_history.length
+
+        readline_history.last(length)
+      end
+
+      # @!visibility private
+      FILTER_REGEX = Regexp.union(/\s*tree(\(|\z)/,
+                                  /\s*flash(\(|\z)/,
+                                  /\s*ids(\(|\z)/,
+                                  /\s*labels(\(|\z)/,
+                                  /\s*text(\(|\z)/,
+                                  /\s*marks(\(|\z)/,
+                                  /\s*verbose(\(|\z)/,
+                                  /\s*quiet(\(|\z)/,
+                                  /\s*clear(\(|\z)/,
+                                  /\s*clear_clipboard(\(|\z)/,
+                                  /\s*copy(\(|\z)/,
+                                  /\s*start_test_server_in_background(\(|\z)/,
+                                  /\s*exit(\(|\z)/)
+
+      # @!visibility private
+      def self.filter_commands(commands)
+        commands.reject {|command| command =~ FILTER_REGEX}
+      end
+
+      # @!visibility private
+      def self.readline_history
+        require "readline"
+        Readline::HISTORY.to_a
+      end
+
+      # @!visibility private
+      def self.encode_utf8_or_raise(string)
+        return "" if !string
+
+        utf8 = string.force_encoding("UTF-8").chomp
+
+        return utf8 if utf8.valid_encoding?
+
+        encoded = utf8.encode("UTF-8", "UTF-8",
+                              invalid: :replace, undef: :replace, replace: "")
+
+        return encoded if encoded.valid_encoding?
+
+        raise RuntimeError, %Q{
+Could not force UTF-8 encoding on this string:
+
+#{string}
+
+Please file an issue with a stacktrace and the text of this error.
+
+https://github.com/calabash/calabash-ios/issues
+}
       end
     end
   end
