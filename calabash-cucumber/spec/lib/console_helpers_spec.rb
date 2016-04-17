@@ -173,6 +173,26 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
     end
   end
 
+  it "#copy" do
+    require "calabash-cucumber/console_helpers"
+    expect(Calabash::Cucumber::ConsoleHelpers).to receive(:copy).and_return(:copied)
+
+    expect(console.copy).to be == :copied
+  end
+
+  it "#clear_clipboard" do
+    require "calabash-cucumber/console_helpers"
+    expect(Calabash::Cucumber::ConsoleHelpers).to receive(:clear_clipboard!).and_return(:cleared)
+
+    expect(console.clear_clipboard).to be == :cleared
+  end
+
+  it "#clear" do
+    require "calabash-cucumber/console_helpers"
+    expect(Calabash::Cucumber::ConsoleHelpers).to receive(:clear).and_return(:cleared)
+
+    expect(console.clear).to be == :cleared
+  end
 
   it "#print_marks" do
     console.send(:print_marks, ids, 29)
@@ -317,6 +337,176 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
         expect(JSON).to receive(:parse).with(dump_json).and_return(:parsed)
 
         expect(console.send(:http_fetch_view_hierarchy)).to be == :parsed
+      end
+    end
+
+    it ".copy" do
+      require "clipboard"
+      mod = Calabash::Cucumber::ConsoleHelpers
+      history = ["a", "b", "c"]
+      filtered = ["a", "b"]
+      expect(mod).to receive(:current_console_history).and_return(history)
+      expect(mod).to receive(:filter_commands).with(history).and_return(filtered)
+      expect(Clipboard).to receive(:copy).with("a#{$-0}b").and_return(:copied)
+
+      expect(mod.send(:copy)).to be == true
+    end
+
+    it ".clear_clipboard!" do
+      require "clipboard"
+      mod = Calabash::Cucumber::ConsoleHelpers
+      expect(mod).to receive(:readline_history).and_return(:history)
+      expect(Clipboard).to receive(:clear).and_return("")
+
+      expect(mod.send(:clear_clipboard!)).to be == true
+      expect(mod.class_variable_get(:@@start_readline_history)).to be == :history
+    end
+
+    describe ".clear" do
+      it "windows env" do
+        mod = Calabash::Cucumber::ConsoleHelpers
+        expect(RunLoop::Environment).to receive(:windows_env?).and_return(true)
+        expect(mod).to receive(:system_clear).with("cls").and_return(:true)
+
+        expect(mod.send(:clear)).to be == true
+      end
+
+      it "non-windows" do
+        mod = Calabash::Cucumber::ConsoleHelpers
+        expect(RunLoop::Environment).to receive(:windows_env?).and_return(false)
+        expect(mod).to receive(:system_clear).with("clear").and_return(:true)
+
+        expect(mod.send(:clear)).to be == true
+      end
+    end
+
+    it ".current_console_history" do
+      mod = Calabash::Cucumber::ConsoleHelpers
+      readline_history = ["a", "b", "c", "d"]
+      variable_history = ["c", "d"]
+      mod.class_variable_set(:@@start_readline_history, variable_history)
+      expect(mod).to receive(:readline_history).and_return(readline_history)
+
+      expect(mod.send(:current_console_history)).to be == ["c", "d"]
+    end
+
+    it ".filter_commands" do
+      commands = [
+        "tree",
+        "flash",
+        "ids",
+        "labels",
+        "text",
+        "marks",
+        "verbose",
+        "query",
+        "touch",
+        "quiet",
+        "clear",
+        "clear_clipboard",
+        "copy",
+        "start_test_server_in_background",
+        "exit"
+      ]
+
+      mod = Calabash::Cucumber::ConsoleHelpers
+      expected = ["query", "touch"]
+      expect(mod.send(:filter_commands, commands)).to be == expected
+    end
+
+    describe ".start_readline_history!" do
+      let(:conf) do
+        {
+          :HISTORY_FILE => ".irb-history"
+        }
+      end
+
+      before do
+        require "irb"
+        require "calabash-cucumber/console_helpers"
+        allow(IRB).to receive(:conf).and_return(conf)
+      end
+
+      it "initializes @@start_readline_history to empty array if no history file" do
+        expect(File).to receive(:exist?).with(conf[:HISTORY_FILE]).and_return(false)
+
+        mod = Calabash::Cucumber::ConsoleHelpers
+        mod.start_readline_history!
+        expect(mod.class_variable_get(:@@start_readline_history)).to be == []
+      end
+
+      it "reads contents of history and initializes @@start_readline_history" do
+        dir = Resources.shared.resources_dir
+        file = File.join(dir, "console", "history-with-non-utf8.log")
+        conf[:HISTORY_FILE] = file
+
+        mod = Calabash::Cucumber::ConsoleHelpers
+        mod.start_readline_history!
+        actual = mod.class_variable_get(:@@start_readline_history)
+
+        expect(actual[0]).to be == "  PID COMMAND"
+        expect(actual[1]).to be == "  324 /usr/libexec/UserEventAgent (Aqua)"
+        expect(actual[2]).to be == "  403 /Applications/M^\\M^IM^AM^SM^MM^E.app/Contents/MacOS/M^\\M^IM^AM^SM^MM^E"
+        expect(actual[3]).to be == " 1497 irb"
+      end
+    end
+
+    describe ".encode_utf8_or_raise" do
+      let(:string) { "string" }
+      let(:encoded) { "encoded" }
+      let(:forced) { "forced" }
+      let(:mod) { Calabash::Cucumber::ConsoleHelpers }
+
+      before do
+        require "calabash-cucumber/console_helpers"
+      end
+
+      it "returns '' if string arg is falsey" do
+        expect(mod.send(:encode_utf8_or_raise, nil)).to be == ''
+      end
+
+      it "returns utf8 encoding" do
+        expect(string).to receive(:force_encoding).with("UTF-8").and_return(encoded)
+        expect(encoded).to receive(:chomp).and_return(encoded)
+        expect(encoded).to receive(:valid_encoding?).and_return(true)
+
+        expect(mod.send(:encode_utf8_or_raise, string)).to be == encoded
+      end
+
+      it "forces utf8 encoding" do
+        expect(string).to receive(:force_encoding).with("UTF-8").and_return(encoded)
+        expect(encoded).to receive(:chomp).and_return(encoded)
+        expect(encoded).to receive(:valid_encoding?).and_return(false)
+        expect(encoded).to receive(:encode).and_return(forced)
+        expect(forced).to receive(:valid_encoding?).and_return(true)
+
+        expect(mod.send(:encode_utf8_or_raise, string)).to be == forced
+      end
+
+      it "raises an error if string cannot be coerced to UTF8" do
+        expect(string).to receive(:force_encoding).with("UTF-8").and_return(encoded)
+        expect(encoded).to receive(:chomp).and_return(encoded)
+        expect(encoded).to receive(:valid_encoding?).and_return(false)
+        expect(encoded).to receive(:encode).and_return(forced)
+        expect(forced).to receive(:valid_encoding?).and_return(false)
+
+        expect do
+          mod.send(:encode_utf8_or_raise, string)
+        end.to raise_error RuntimeError,
+                           /Could not force UTF-8 encoding on this string:/
+      end
+
+      it "handles string with non-UTF8 characters" do
+        dir = Resources.shared.resources_dir
+        file = File.join(dir, "console", "history-with-non-utf8.log")
+        string = File.read(file)
+        actual = mod.send(:encode_utf8_or_raise, string)
+        split = actual.split($-0)
+
+        expect(split[0]).to be == "  PID COMMAND"
+        expect(split[1]).to be == "  324 /usr/libexec/UserEventAgent (Aqua)"
+        expect(split[2]).to be == "  403 /Applications/M^\\M^IM^AM^SM^MM^E.app/Contents/MacOS/M^\\M^IM^AM^SM^MM^E"
+        expect(split[3]).to be == " 1497 irb"
       end
     end
   end

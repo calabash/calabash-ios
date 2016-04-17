@@ -42,6 +42,8 @@ end
 
 require "calabash-cucumber"
 
+Calabash::Cucumber::ConsoleHelpers.start_readline_history!
+
 def preferences
   Calabash::Cucumber::Preferences.new
 end

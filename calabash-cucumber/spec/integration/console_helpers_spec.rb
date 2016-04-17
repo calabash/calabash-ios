@@ -22,16 +22,22 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
     path
   end
 
-  it "ids, labels, text, marks, and tree" do
+  it "calabash-ios console" do
     env = {"CALABASH_IRBRC" => dot_irbrc}
     out, err = nil
     Open3.popen3(env, "bundle", "exec", "calabash-ios", "console") do |stdin, stdout, stderr, _|
       stdin.puts "start_test_server_in_background(#{launch_options})"
       stdin.puts "ids"
       stdin.puts "labels"
+      stdin.puts %Q[query("view marked:'switch'")]
       stdin.puts "text"
       stdin.puts "marks"
       stdin.puts "tree"
+      stdin.puts %Q[touch("view marked:'switch'")]
+      stdin.puts "copy"
+      stdin.puts "clear_clipboard"
+      # Don't call because it messes with debugging output
+      # stdin.puts "clear"
       stdin.close
       out = stdout.read.strip
       err = stderr.read.strip
@@ -40,12 +46,17 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
     puts out
     puts err
     expect(out[/Error/,0]).to be == nil
+    expect(err).to be == ""
 
     out_no_color = out.gsub(/\e\[(\d+)m/, "")
 
     # message of the day
     expect(out_no_color[/Calabash says,/, 0]).to be_truthy
 
-    expect(err).to be == ""
+    # clip board does not seem to be available in subshell
+    # copy-n-paste
+    # expected = "query(\"view marked:'switch'\")\ntouch(\"view marked:'switch'\")"
+    # expect(out_no_color[/#{expected}/,0]).to be_truthy
+
   end
 end
