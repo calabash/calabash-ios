@@ -59,11 +59,10 @@ Gem::Specification.new do |s|
   s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
-  s.add_dependency("run_loop", "2.1.1.pre5")
+  s.add_dependency("run_loop", ">= 2.1.1", "< 3.0")
 
   # Shared with run-loop.
   s.add_dependency('json')
-  s.add_dependency('CFPropertyList')
   s.add_dependency('awesome_print')
 
   s.add_development_dependency 'yard', '~> 0.8'
@@ -81,5 +80,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'guard-bundler'
   s.add_development_dependency 'growl'
   s.add_development_dependency 'stub_env'
-
+  s.add_dependency("oj", "~> 2.0")
 end

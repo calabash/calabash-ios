@@ -1,14 +1,11 @@
 require 'tempfile'
 require 'json'
 
-UPDATE_TARGETS = ['hooks']
-
 def msg(title, &block)
   puts "\n" + "-"*10 + title + "-"*10
   block.call
   puts "-"*10 + "-------" + "-"*10 + "\n"
 end
-
 
 def print_usage
   puts <<EOF
@@ -20,26 +17,24 @@ def print_usage
       generate a features folder structure.
     console
       starts an interactive console to interact with your app via Calabash
-    setup [<path>]
-      setup your XCode project for calabash-ios (EXPERIMENTAL)
     download
       install latest compatible version of calabash.framework
-    check [{<path to .ipa>|<path to .app>}]
-      check whether an app or ipa is linked with calabash.framework (EXPERIMENTAL)
-    sim locale <lang> [<region>]
-      change locale and regional settings in all iOS Simulators
-    sim location {on|off} <bundleid>
-      set allow location on/off for current project or bundleid
+    sim locale [language code] [locale code]
+      change locale and regional settings for an iOS Simulator
     sim reset
       reset content and settings in all iOS Simulators
     sim acc
       enable accessibility in all iOS Simulators
+    check [{<path to .ipa>|<path to .app>}]
+      check whether an app or ipa is linked with calabash.framework (EXPERIMENTAL)
+    setup [<path>]
+      setup your Xcode project for calabash-ios (EXPERIMENTAL)
 EOF
 end
 
 def print_help
   file = File.join(File.dirname(__FILE__), '..', 'doc', 'calabash-ios-help.txt')
-  system("less #{file}")
+  puts File.read(file)
 end
 
 def ensure_correct_path(args)
