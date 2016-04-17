@@ -7,6 +7,7 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
       def to_s; "#<Calabash iOS Console>"; end
       def inspect; to_s; end
       def query(_, *_); ; ; end
+      def http(_); ; ; end
     end.new
   end
 
@@ -70,9 +71,31 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
     Oj.load_file(path)
   end
 
-  before do
-    query_text_result
+  let(:dump_json) do
+    dir = Resources.shared.resources_dir
+    File.join(dir, "console", "dump.json")
   end
+
+  let(:dump_hash) do
+    JSON.parse(File.read(dump_json))
+  end
+
+  it "#tree" do
+    expect(console).to receive(:http_fetch_view_hierarchy).and_return(dump_hash)
+    expect(console).to receive(:dump_json_data).with(dump_hash).and_call_original
+
+    actual = nil
+    out = capture_stdout do
+      actual = console.tree
+    end.string.gsub(/\e\[(\d+)m/, "")
+
+    expect(actual).to be == true
+    regex = /        \[CalViewWithArbitrarySelectors\] \[id:controls page\] \[label:UI controls\]/
+    expect(out[regex, 0]).to be_truthy
+    regex = /        \[UITabBarButtonLabel\] \[label:Date Picker\] \[text:Date Picker\]/
+    expect(out[regex, 0]).to be_truthy
+  end
+
   it "#ids" do
     expect(console).to receive(:accessibility_marks).with(:id).and_return([:ids])
 
@@ -195,6 +218,62 @@ describe "Calabash::Cucumber::ConsoleHelpers" do
 
         expect(out[/\[0\]   UITabBarButtonLabel => Controls/, 0]).to be_truthy
         expect(out[/\[4\]   UITabBarButtonLabel => Special/, 0]).to be_truthy
+      end
+    end
+
+    describe "#http_fetch_view_hierarchy" do
+      let(:route) { {method: :get, path: "dump"} }
+
+      describe "raises errors" do
+        it "nil body" do
+          expect(console).to receive(:http).with(route).and_return(nil)
+
+          expect do
+            console.send(:http_fetch_view_hierarchy)
+          end.to raise_error(Calabash::Cucumber::ResponseError,
+                             /Server replied with an empty response/)
+        end
+
+        it "empty body" do
+          expect(console).to receive(:http).with(route).and_return("")
+
+          expect do
+            console.send(:http_fetch_view_hierarchy)
+          end.to raise_error(Calabash::Cucumber::ResponseError,
+                             /Server replied with an empty response/)
+        end
+
+        describe "JSON parse error" do
+
+          before do
+            expect(console).to receive(:http).with(route).and_return(dump_json)
+          end
+
+          it "TypeError" do
+            expect(JSON).to receive(:parse).with(dump_json).and_raise TypeError
+
+            expect do
+              console.send(:http_fetch_view_hierarchy)
+            end.to raise_error(Calabash::Cucumber::ResponseError,
+                               /Could not parse server response/)
+          end
+
+          it "JSON::ParserError" do
+            expect(JSON).to receive(:parse).with(dump_json).and_raise JSON::ParserError
+
+            expect do
+              console.send(:http_fetch_view_hierarchy)
+            end.to raise_error(Calabash::Cucumber::ResponseError,
+                               /Could not parse server response/)
+          end
+        end
+      end
+
+      it "parses json" do
+        expect(console).to receive(:http).with(route).and_return(dump_json)
+        expect(JSON).to receive(:parse).with(dump_json).and_return(:parsed)
+
+        expect(console.send(:http_fetch_view_hierarchy)).to be == :parsed
       end
     end
   end

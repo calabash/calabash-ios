@@ -3,22 +3,24 @@ module Calabash
     # A collection of methods that help you use console.
     module ConsoleHelpers
 
+      # Print a representation of the current view hierarchy.
       def tree
-        dump_json_data(JSON.parse(http({:method => :get, :path => 'dump'})))
+        hash = http_fetch_view_hierarchy
+        dump_json_data(hash)
         true
       end
 
-      # List the visible element ids.
+      # Print the visible element ids.
       def ids
         accessibility_marks(:id)
       end
 
-      # List the visible element labels.
+      # Print the visible element labels.
       def labels
         accessibility_marks(:label)
       end
 
-      # List the visible element texts.
+      # Print the visible element texts.
       def text
         text_marks
       end
@@ -126,6 +128,31 @@ module Calabash
         end
       end
 
+      def http_fetch_view_hierarchy
+        require "json"
+        response_body = http({:method => :get, :path => "dump"})
+
+        if response_body.nil? || response_body == ""
+          raise ResponseError,
+                "Server replied with an empty response.  Your app has probably crashed"
+        end
+
+        begin
+          hash = JSON.parse(response_body)
+        rescue TypeError, JSON::ParserError => e
+          raise ResponseError,  %Q{Could not parse server response:
+
+#{e}
+
+There was a problem parsing your app's view hierarchy.
+
+Please report this issue.
+}
+        end
+
+        hash
+      end
+
       def dump_json_data(json_data)
         json_data['children'].each {|child| write_child(child)}
       end
@@ -142,14 +169,14 @@ module Calabash
           type = data['type']
 
           str_type = if data['type'] == 'dom'
-            "#{Color.yellow("[")}#{type}:#{Color.yellow("#{data['nodeName']}]")} "
+            "#{RunLoop::Color.cyan("[")}#{type}:#{RunLoop::Color.cyan("#{data['nodeName']}]")} "
           else
-            Color.yellow("[#{type}] ")
+            RunLoop::Color.cyan("[#{type}] ")
           end
 
-          str_id = data['id'] ? "[id:#{Color.blue(data['id'])}] " : ''
-          str_label = data['label'] ? "[label:#{Color.green(data['label'])}] " : ''
-          str_text = data['value'] ? "[text:#{Color.magenta(data['value'])}] " : ''
+          str_id = data['id'] ? "[id:#{RunLoop::Color.blue(data['id'])}] " : ''
+          str_label = data['label'] ? "[label:#{RunLoop::Color.green(data['label'])}] " : ''
+          str_text = data['value'] ? "[text:#{RunLoop::Color.magenta(data['value'])}] " : ''
           output("#{str_type}#{str_id}#{str_label}#{str_text}", indentation)
           output("\n", indentation)
         end
