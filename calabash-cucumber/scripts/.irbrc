@@ -31,8 +31,10 @@ IRB.conf[:SAVE_HISTORY] = 50
 IRB.conf[:HISTORY_FILE] = '.irb-history'
 
 require 'calabash-cucumber/operations'
-
 extend Calabash::Cucumber::Operations
+
+require 'calabash-cucumber/console_helpers'
+include Calabash::Cucumber::ConsoleHelpers
 
 def embed(x,y=nil,z=nil)
   puts "Screenshot at #{x}"
