@@ -131,6 +131,23 @@ module Calabash
         true
       end
 
+      # @!visibility private
+      def puts_console_details
+        puts ""
+        puts RunLoop::Color.magenta("#########################  Useful Methods  ##########################")
+        puts RunLoop::Color.cyan("     ids => List all the visible accessibility ids.")
+        puts RunLoop::Color.cyan("  labels => List all the visible accessibility labels.")
+        puts RunLoop::Color.cyan("    text => List all the visible texts.")
+        puts RunLoop::Color.cyan("   marks => List all the visible marks.")
+        puts RunLoop::Color.cyan("    tree => The app's visible view hierarchy.")
+        puts RunLoop::Color.cyan("   flash => flash(<query>); Disco effect for views matching <query>")
+        puts RunLoop::Color.cyan(" verbose => Turn debug logging on.")
+        puts RunLoop::Color.cyan("   quiet => Turn debug logging off.")
+        puts RunLoop::Color.cyan("    copy => Copy console commands to clipboard.")
+        puts RunLoop::Color.cyan("   clear => Clear the console.")
+        puts ""
+      end
+
       private
 
       # List the visible element with given mark(s).

@@ -60,4 +60,5 @@ def enable_usage_tracking(level="system_info")
   level
 end
 
+puts_console_details
 puts_message_of_the_day
