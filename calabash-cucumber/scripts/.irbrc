@@ -27,14 +27,17 @@ ARGV.concat [ '--readline',
               '--prompt-mode',
               'simple']
 
-IRB.conf[:SAVE_HISTORY] = 50
+IRB.conf[:SAVE_HISTORY] = 100
 IRB.conf[:HISTORY_FILE] = '.irb-history'
 
-require 'calabash-cucumber/operations'
-extend Calabash::Cucumber::Operations
+begin
+  require "pry"
+  Pry.config.history.should_save = false
+  Pry.config.history.should_load = false
+  require "pry-nav"
+rescue LoadError => _
 
-require 'calabash-cucumber/console_helpers'
-include Calabash::Cucumber::ConsoleHelpers
+end
 
 def embed(x,y=nil,z=nil)
   puts "Screenshot at #{x}"
@@ -42,6 +45,24 @@ end
 
 require "calabash-cucumber"
 
+IRB.conf[:AUTO_INDENT] = true
+
+IRB.conf[:PROMPT][:CALABASH_IOS] = {
+  :PROMPT_I => "calabash-ios #{Calabash::Cucumber::VERSION}> ",
+  :PROMPT_N => "calabash-ios #{Calabash::Cucumber::VERSION}> ",
+  :PROMPT_S => nil,
+  :PROMPT_C => "> ",
+  :AUTO_INDENT => false,
+  :RETURN => "%s\n"
+}
+
+IRB.conf[:PROMPT_MODE] = :CALABASH_IOS
+
+require 'calabash-cucumber/operations'
+extend Calabash::Cucumber::Operations
+
+require 'calabash-cucumber/console_helpers'
+include Calabash::Cucumber::ConsoleHelpers
 Calabash::Cucumber::ConsoleHelpers.start_readline_history!
 
 def preferences
