@@ -3,6 +3,12 @@
 This release remove almost all deprecated methods.  Further, Calabash
 will no longer respond to legacy environment variables.
 
+* Improve console experience #1073
+* Remove 'sim location' CLI tool #1071
+* Added tree feature for console #1070 @ark-konopacki
+* Added briar's marks extension for irbc #1068 @ark-konopacki
+* Complete switch to run loop 2.1.0 interface #1069
+* Change Map module to class and provide class methods #1065 @svandeven
 * Use tap_keyboard_action_key instead of done #1057 @lucatorella
 * Launcher#check_server_gem_compatibility should be a post-launch check
   #1051
