@@ -82,6 +82,22 @@ module Calabash
             :arguments => method_args
         }
 
+        # this is ugly but working
+        if !query.match(/{.*}/).nil?
+          str = query.match(/{.*}/)[0]
+          correct = false
+          predicate = %w(BEGINSWITH CONTAINS ENDSWITH LIKE MATCHES)
+          predicate.each do |value|
+            if str.include?(value)
+              correct = true
+            end
+          end
+          if !correct
+            fail "Incorrect predicate used, valid selectors are #{predicate}"
+          end
+
+        end
+
         res = Map.new.http({:method => :post, :path => 'map'},
                                 {:query => query, :operation => operation_map})
         res = JSON.parse(res)
