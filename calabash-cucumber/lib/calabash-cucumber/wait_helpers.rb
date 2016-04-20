@@ -231,6 +231,27 @@ module Calabash
         end
       end
 
+      # Waits for any of one or more Calabash queries to return a non-empty result
+      # Uses `wait_for`.
+      # @see #wait_for
+      # @see #wait_for_any_element_exists
+      # @see Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS
+      #
+      # @param [Array<String>] elements_arr an Array of Calabash queries to wait for (i.e. `element_exists(element_query)`)
+      # @param [Hash] options options for controlling the details of the wait.
+      #   The same options as {Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS} apply.
+      # @return [nil] when the condition is satisfied
+      # @raise [Calabash::Cucumber::WaitHelpers::WaitError] when the timeout is exceeded
+      def wait_for_any_elements_exist(elements_arr, options={})
+        if elements_arr.is_a?(String)
+          elements_arr = [elements_arr]
+        end
+        options[:timeout_message] = options[:timeout_message] || "Timeout waiting for elements: #{elements_arr.join(',')}"
+        wait_for(options) do
+          elements_arr.any? { |q| element_exists(q) }
+        end
+      end
+
       # Waits for a Calabash query to return an empty result (typically a UI element to disappear).
       # Uses `wait_for`.
       # @see #wait_for
