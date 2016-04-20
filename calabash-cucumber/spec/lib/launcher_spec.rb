@@ -174,24 +174,84 @@ describe 'Calabash Launcher' do
     expect(launcher.default_uia_strategy(nil, nil, nil)).to be == :host
   end
 
-  it "#simulator_target? - deprecated" do
-    expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
-    expect(launcher.simulator_target?).to be_truthy
-
-    expect(launcher).to receive(:detect_device).with({}).and_return(device)
-    expect(launcher.simulator_target?).to be_falsey
-  end
 
   it "#calabash_no_launch? - deprecated" do
     expect(launcher.calabash_no_stop?).to be == false
   end
 
-  it "#device_target? - deprecated" do
-    expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
-    expect(launcher.device_target?).to be_falsey
+  describe "determining if device is simulator or physical device" do
+    let(:cal_device) do
+      Class.new do
+        def to_s; "#<Calabash::Cucumber::Device>"; end
+        def inspect; to_s; end
 
-    expect(launcher).to receive(:detect_device).with({}).and_return(device)
-    expect(launcher.device_target?).to be_truthy
+        def simulator?; ; end
+        def device?; ; end
+      end.new
+    end
+
+    describe "Xamarin Test Cloud" do
+
+      before do
+        expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+      end
+
+      it "#device_target?" do
+        expect(launcher.device_target?).to be_truthy
+      end
+
+      it "#simulator_target?" do
+        expect(launcher.simulator_target?).to be_falsey
+      end
+    end
+
+    describe "#device_target?" do
+
+      before do
+        allow(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+      end
+
+      it "@device is defined - after app launch check" do
+        launcher.instance_variable_set(:@device, cal_device)
+        expect(cal_device).to receive(:device?).and_return(true, false)
+
+        expect(launcher.device_target?).to be_truthy
+        expect(launcher.device_target?).to be_falsey
+      end
+
+      it "@device is not defined - pre launch check" do
+        launcher.instance_variable_set(:@device, nil)
+        expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
+        expect(launcher.device_target?).to be_falsey
+
+        expect(launcher).to receive(:detect_device).with({}).and_return(device)
+        expect(launcher.device_target?).to be_truthy
+      end
+    end
+
+    describe "#simulator_target?" do
+
+      before do
+        allow(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+      end
+
+      it "@device is defined - after launch check" do
+        launcher.instance_variable_set(:@device, cal_device)
+        expect(cal_device).to receive(:simulator?).and_return(true, false)
+
+        expect(launcher.simulator_target?).to be_truthy
+        expect(launcher.simulator_target?).to be_falsey
+      end
+
+      it "@device is not defined - pre launch check" do
+        launcher.instance_variable_set(:@device, nil)
+        expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
+        expect(launcher.simulator_target?).to be_truthy
+
+        expect(launcher).to receive(:detect_device).with({}).and_return(device)
+        expect(launcher.simulator_target?).to be_falsey
+      end
+    end
   end
 
   it "#app_path - deprecated" do
