@@ -235,6 +235,44 @@ Queries will work, but gestures will not.
         @@launcher
       end
 
+      # Is the current device under test a physical device?
+      #
+      # Can be used before or after the application has been launched.
+      #
+      # Maintainers, please do not call this method.
+      #
+      # @param [Hash] options This argument is deprecated since 0.19.0.
+      #
+      # @return [Boolean] True if the device under test a physical device.
+      def device_target?(options={})
+        if Calabash::Cucumber::Environment.xtc?
+          true
+        elsif @device
+          @device.device?
+        else
+          detect_device(options).physical_device?
+        end
+      end
+
+      # Is the current device under test a simulator?
+      #
+      # Can be used before or after the application has been launched.
+      #
+      # Maintainers, please do not call this method.
+      #
+      # @param [Hash] options This argument is deprecated since 0.19.0.
+      #
+      # @return [Boolean] True if the device under test a simulator.
+      def simulator_target?(options={})
+        if Calabash::Cucumber::Environment.xtc?
+          false
+        elsif @device
+          @device.simulator?
+        else
+          detect_device(options).simulator?
+        end
+      end
+
       # Erases a simulator. This is the same as touching the Simulator
       # "Reset Content & Settings" menu item.
       #
@@ -424,20 +462,6 @@ true.  Please remove this method call from your hooks.
       def discover_device_target(launch_args)
         RunLoop.deprecated("0.19.0", "No replacement")
         nil
-      end
-
-      # @!visibility private
-      # @deprecated 0.19.0 - no replacement
-      def device_target?(options={})
-        RunLoop.deprecated("0.19.0", "No replacement")
-        detect_device(options).physical_device?
-      end
-
-      # @!visibility private
-      # @deprecated 0.19.0 - no replacement
-      def simulator_target?(options={})
-        RunLoop.deprecated("0.19.0", "No replacement")
-        detect_device(options).simulator?
       end
 
       # @!visibility private
