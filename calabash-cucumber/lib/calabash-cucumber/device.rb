@@ -102,7 +102,8 @@ module Calabash
       #    :sample => 1,
       #    :height => 1334,
       #    :width => 750,
-      #    :scale" => 2
+      #    :scale" => 2,
+      #    :native_scale => 2
       #  }
       #
       #
