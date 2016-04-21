@@ -1,8 +1,11 @@
 ### 0.19.0
 
-This release remove almost all deprecated methods.  Further, Calabash
-will no longer respond to legacy environment variables.
+This release removes almost all deprecated methods.  Further, Calabash
+will no longer respond to legacy environment variables.  See the
+changelog/0.19.0.md for specific details.
 
+* Launcher: restore public API for device/simulator_target? #1078
+  @JoeSSS, @TeresaP
 * Improve console experience #1073
 * Remove 'sim location' CLI tool #1071
 * Added tree feature for console #1070 @ark-konopacki
