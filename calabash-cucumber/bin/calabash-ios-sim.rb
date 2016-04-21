@@ -1,10 +1,4 @@
-require 'calabash-cucumber/utils/simulator_accessibility'
-require 'calabash-cucumber/utils/logging'
-require "calabash-cucumber/environment"
-require 'run_loop'
-
-include Calabash::Cucumber::Logging
-include Calabash::Cucumber::SimulatorAccessibility
+require "run_loop"
 
 def quit_sim
   RunLoop::SimControl.new.quit_sim
@@ -17,49 +11,6 @@ end
 def calabash_sim_accessibility
   RunLoop::SimControl.new.enable_accessibility_on_sims
 end
-
-def calabash_sim_location(args)
-
-  if args.length == 0
-    print_usage
-    exit 0
-  end
-  on_off = args.shift
-  if args.length == 0
-    print_usage
-    exit 0
-  end
-  bundle_id = args.shift
-
-
-  dirs = Dir.glob(File.join(File.expand_path("~/Library"), "Application Support", "iPhone Simulator", "*.*", "Library", "Caches", "locationd"))
-  dirs.each do |sim_dir|
-    existing_path = "#{sim_dir}/clients.plist"
-    if File.exist?(existing_path)
-      plist_path = existing_path
-    else
-      plist_path = File.expand_path("#{@script_dir}/data/clients.plist")
-    end
-
-    plist = CFPropertyList::List.new(:file => plist_path)
-    hash = CFPropertyList.native_types(plist.value)
-
-    app_hash = hash[bundle_id]
-    if not app_hash
-      app_hash = hash[bundle_id] = {}
-    end
-    app_hash["BundleId"] = bundle_id
-    app_hash["Authorized"] = on_off == "on" ? true : false
-    app_hash["LocationTimeStarted"] = 0
-
-    ##Plist edit the template
-    res_plist = CFPropertyList::List.new
-    res_plist.value = CFPropertyList.guess(hash)
-    res_plist.save(existing_path, CFPropertyList::List::FORMAT_BINARY)
-
-  end
-end
-
 
 def calabash_sim_locale(args)
 
@@ -92,19 +43,18 @@ This operation will quit and reset the simulator.
   language = args[0]
   locale = args[1]
 
-  device_target = Calabash::Cucumber::Environment.device_target
-  default_target = RunLoop::Core.default_simulator
+  xcode = RunLoop::Xcode.new
+  instruments = RunLoop::Instruments.new
+  simctl = RunLoop::Simctl.new
 
-  target = device_target || default_target
-
-  device = RunLoop::Device.device_with_identifier(target)
+  device = RunLoop::Device.detect_device({}, xcode, simctl, instruments)
 
   if device.nil?
-    if target == device_target
+    if RunLoop::Environment.device_target
       puts %Q{
 Could not find simulator matching:
 
-DEVICE_TARGET=#{device_target}
+  DEVICE_TARGET=#{RunLoop::Environment.device_target}
 
 Check the output of:
 
@@ -114,8 +64,12 @@ for a list of available simulators.
 }
     else
       puts %Q{
-Could not find the default simulator.  Make sure that you have
-the right version of run_loop installed for your Xcode version.
+Could not find the default simulator:
+
+  #{RunLoop::Core.default_simulator}
+
+1. Your Xcode version might not be compatible with run-loop #{RunLoop::VERSION}.
+2. You might need to install additional simulators in Xcode.
 }
     end
 
@@ -126,7 +80,7 @@ the right version of run_loop installed for your Xcode version.
     puts %Q{
 This tool is for simulators only.
 
-#{target} is a physical device.
+#{device} is a physical device.
 }
     return false
   end
@@ -156,36 +110,4 @@ Examples:
 SUCCESS!
 }
   true
-end
-
-
-def calabash_sim_device(args)
-  quit_simulator
-  options = ["iPad", "iPad_Retina", "iPhone", "iPhone_Retina", "iPhone_Retina_4inch"]
-  if args.length != 1 or not options.find { |x| x == args[0] }
-    print_usage
-    puts "Unrecognized args: #{args}"
-    puts "should be one of #{options.inspect}"
-    exit(0)
-  end
-  path =File.join(File.expand_path("~/Library"), "Preferences", "com.apple.iphonesimulator.plist")
-  plist = CFPropertyList::List.new(:file => path)
-  hash = CFPropertyList.native_types(plist.value)
-
-  device = case args[0]
-             when "iPad_Retina"
-               "iPad (Retina)"
-             when "iPhone_Retina"
-               "iPhone (Retina 3.5-inch)"
-             when "iPhone_Retina_4inch"
-               "iPhone (Retina 4-inch)"
-             else
-               args[0]
-           end
-  if device
-    hash['SimulateDevice'] = device
-    plist.value = CFPropertyList.guess(hash)
-    plist.save(path, CFPropertyList::List::FORMAT_BINARY)
-  end
-
 end

@@ -31,15 +31,6 @@ elsif cmd == 'gen'
 elsif cmd == 'console'
   console
   exit 0
-elsif cmd == 'build'
-  build
-  exit 0
-elsif cmd == 'update'
-  update(ARGV)
-  exit 0
-elsif cmd == 'run'
-  run
-  exit 0
 elsif cmd == 'download'
   calabash_download(ARGV)
   exit 0
@@ -48,9 +39,6 @@ elsif cmd == 'setup'
   exit 0
 elsif cmd == 'check'
   validate_setup(ARGV)
-  exit 0
-elsif cmd == 'submit'
-  calabash_submit(ARGV)
   exit 0
 elsif cmd == 'version'
   require 'calabash-cucumber'
@@ -67,17 +55,11 @@ elsif cmd == 'sim'
     calabash_sim_reset
   elsif subcmd == 'acc'
     calabash_sim_accessibility
-  elsif subcmd == 'location'
-      calabash_sim_location(ARGV)
   elsif subcmd == 'locale'
     calabash_sim_locale(ARGV)
-  elsif subcmd == 'device'
-    calabash_sim_device(ARGV)
   else
     print_usage
   end
 else
   print_usage
 end
-
-

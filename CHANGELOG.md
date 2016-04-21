@@ -1,3 +1,50 @@
+### 0.19.0
+
+This release removes almost all deprecated methods.  Further, Calabash
+will no longer respond to legacy environment variables.  See the
+changelog/0.19.0.md for specific details.
+
+* Launcher: restore public API for device/simulator_target? #1078
+  @JoeSSS, @TeresaP
+* Improve console experience #1073
+* Remove 'sim location' CLI tool #1071
+* Added tree feature for console #1070 @ark-konopacki
+* Added briar's marks extension for irbc #1068 @ark-konopacki
+* Complete switch to run loop 2.1.0 interface #1069
+* Change Map module to class and provide class methods #1065 @svandeven
+* Use tap_keyboard_action_key instead of done #1057 @lucatorella
+* Launcher#check_server_gem_compatibility should be a post-launch check
+  #1051
+* Launcher: use RunLoop 2.1.0 APIs where possible #1050
+* Core: remove references to @calabash_launcher Cucumber World variable
+  #1049
+* Deprecate Launcher#calabash_notify #1048
+* Deprecate old Launcher behaviors and use new RunLoop APIs in #relaunch
+  #1047
+* Launcher: deprecated #default_uia_strategy #1046
+* Move http methods out of launcher #1044
+* Rotation: remove playback API - since 0.16.2 #1040
+* Replace NO_STOP with QUIT_APP_AFTER_SCENARIO #1038
+* Unify logging between RunLoop and Calabash #1035
+* Gem: remove deprecated.rb #1034
+* Remove more deprecated Device behaviors #1033
+* Remove CALABASH_VERSION_PATH #1028
+* Remove unnecessary methods from Launcher #1027
+* Remove deprecated methods for 0.19.0 #1026
+* Remove the Playback API #1025
+* Remove deprecated XcodeTools, PlistBuddy, and SimulatorAccessibility
+  #1024
+* Remove deprecated methods from KeyboardHelpers #1023
+* Remove deprecated ENV variables and constants #1022
+* Core: undeprecate #set_text #1021
+* CLI: remove 'update' command #1020
+* Remove sim_launcher gem dependency and SimulatorLauncher class #1016
+* Remove KeyboardHelpers.done #1004
+* Screen coordinates are incorrect when running in Zoomed mode #998
+* Remove the sim_launcher dependency #921
+* Cannot query UIWebView by accessibilityIdentifier or
+  accessibilityLabel #735
+
 ### 0.18.2
 
 * Replace automatic .app detection with RunLoop implementation #1011

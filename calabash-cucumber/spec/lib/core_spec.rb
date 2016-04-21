@@ -3,6 +3,8 @@ describe Calabash::Cucumber::Core do
   let(:actions) do
     Class.new do
       def swipe(dir, options); :success; end
+      def to_s; "#<ActionInterface>"; end
+      def inspect; to_s; end
     end.new
   end
 
@@ -15,7 +17,43 @@ describe Calabash::Cucumber::Core do
   let(:world) do
     Class.new do
       include Calabash::Cucumber::Core
+      def to_s; "#<World>"; end
+      def inspect; to_s; end
     end.new
+  end
+
+  describe "logging" do
+    it "#calabash_warn" do
+      actual = capture_stdout do
+        world.calabash_warn("You have been warned")
+      end.string.gsub(/\e\[(\d+)m/, "")
+
+      expect(actual).to be == "WARN: You have been warned\n"
+    end
+
+    it "#calabash_info" do
+      actual = capture_stdout do
+        world.calabash_info("You have been info'd")
+      end.string.gsub(/\e\[(\d+)m/, "").strip
+
+      # The .strip above future proofs against changes to the silly leading
+      # space in RunLoop.log_info2.
+      expect(actual).to be == "INFO: You have been info'd"
+    end
+
+    it "#deprecated" do
+      version = '0.9.169'
+      dep_msg = 'this is a deprecation message'
+      out = capture_stdout do
+        world.deprecated(version, dep_msg, :warn)
+      end.string.gsub(/\e\[(\d+)m/, "")
+
+      tokens = out.split($-0)
+      message = tokens[0]
+      expect(message).to be == "WARN: deprecated '#{version}' - #{dep_msg}"
+      expect(tokens.count).to be > 5
+      expect(tokens.count).to be < 9
+    end
   end
 
   describe '#scroll' do
@@ -36,8 +74,8 @@ describe Calabash::Cucumber::Core do
 
       describe 'valid' do
         before do
-          expect(world).to receive(:map).twice.and_return [true]
-          expect(world).to receive(:assert_map_results).twice.and_return true
+          expect(Calabash::Cucumber::Map).to receive(:map).twice.and_return [true]
+          expect(Calabash::Cucumber::Map).to receive(:assert_map_results).twice.and_return true
         end
 
         it 'up' do
@@ -270,6 +308,28 @@ describe Calabash::Cucumber::Core do
     end
   end
 
+  describe "console_attach" do
+    it "raises an error on the XTC" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      expect do
+        world.console_attach
+      end.to raise_error RuntimeError,
+      /This method is not available on the Xamarin Test Cloud/
+    end
+
+    it "calls launcher#attach" do
+      launcher = Calabash::Cucumber::Launcher.new
+      strategy = :host
+      options = { :uia_strategy => strategy }
+      expect(launcher).to receive(:attach).with(options).and_return(launcher)
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+
+      actual = world.console_attach(strategy)
+      expect(actual).to be == launcher
+    end
+  end
+
   describe "shake" do
     describe "raises errors" do
 
@@ -347,4 +407,3 @@ describe Calabash::Cucumber::Core do
     end
   end
 end
-

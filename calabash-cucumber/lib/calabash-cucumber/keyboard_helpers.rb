@@ -1,12 +1,9 @@
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
-require 'calabash-cucumber/playback_helpers'
 require 'calabash-cucumber/environment_helpers'
-require 'calabash-cucumber/utils/logging'
 
 module Calabash
   module Cucumber
-
 
     # Raised when there is a problem involving a keyboard mode.  There are
     # three keyboard modes:  docked, split, and undocked.
@@ -52,7 +49,6 @@ module Calabash
     module KeyboardHelpers
 
       include Calabash::Cucumber::TestsHelpers
-      include Calabash::Cucumber::Logging
 
       # @!visibility private
       KEYPLANE_NAMES = {
@@ -166,13 +162,6 @@ module Calabash
         wait_for(opts) do
           keyboard_visible?
         end
-      end
-
-      # @deprecated 0.9.163 replaced with `wait_for_keyboard`
-      # @see #wait_for_keyboard
-      def await_keyboard
-        _deprecated('0.9.163', "use 'wait_for_keyboard' instead", :warn)
-        wait_for_keyboard
       end
 
       # @!visibility private
@@ -291,12 +280,6 @@ module Calabash
       # @option opts [Float] :wait_after_char ('POST_ENTER_KEYBOARD' or 0.05)
       #  how long to wait after a character is typed.
       def keyboard_enter_char(chr, opts={})
-        unless opts.is_a?(Hash)
-         msg = "you should no longer pass a boolean as the second arg; pass {:should_screenshot => '#{opts}'}  hash instead"
-         _deprecated('0.9.163', msg, :warn)
-         opts = {:should_screenshot => opts}
-        end
-
         default_opts = {:should_screenshot => true,
                         # introduce a small wait to avoid skipping characters
                         # keep this as short as possible
@@ -448,33 +431,6 @@ module Calabash
       # @raise [RuntimeError] if the text cannot be typed.
       def tap_keyboard_action_key
         keyboard_enter_char 'Return'
-      end
-
-      # @deprecated 0.10.0 replaced with `tap_keyboard_action_key`
-      # @see #tap_keyboard_action_key
-      #
-      # Touches the keyboard action key.
-      #
-      # The action key depends on the keyboard.  Some examples include:
-      #
-      # * Return
-      # * Next
-      # * Go
-      # * Join
-      # * Search
-      #
-      # @note
-      #  Not all keyboards have an action key.  For example, numeric keyboards
-      #  do not have an action key.
-      #
-      # @raise [RuntimeError] if the text cannot be typed.
-      def done
-        _deprecated("0.10.0",
-%Q{Use tap_keyboard_action_key
-
-The `done` method will be removed in 0.19.0
-}, :warn)
-        tap_keyboard_action_key
       end
 
       # @!visibility private

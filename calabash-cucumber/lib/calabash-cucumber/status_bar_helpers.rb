@@ -1,12 +1,8 @@
-require 'calabash-cucumber/utils/logging'
-
 module Calabash
   module Cucumber
 
     # Contains methods for interacting with the status bar.
     module StatusBarHelpers
-
-      include Calabash::Cucumber::Logging
 
       # Returns the device orientation as reported by `[[UIDevice currentDevice] orientation]`.
       #
@@ -25,13 +21,11 @@ module Calabash
       # @return [Symbol] Returns the device orientation as one of
       #  `{:down, :up, :left, :right}`.
       def device_orientation(force_down=false)
-        res = map(nil, :orientation, :device).first
+        res = Map.map(nil, :orientation, :device).first
 
         if ['face up', 'face down'].include?(res)
-          if full_console_logging?
-            if force_down
-              puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
-            end
+          if force_down
+            puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
           end
 
           return res unless force_down
@@ -53,7 +47,7 @@ module Calabash
       # @return [String] Returns the device orientation as one of
       #  `{'down' | 'up' | 'left' | 'right'}`.
       def status_bar_orientation
-        map(nil, :orientation, :status_bar).first
+        Map.map(nil, :orientation, :status_bar).first
       end
 
       # Is the device in the portrait orientation?

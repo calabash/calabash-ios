@@ -1,5 +1,4 @@
 require 'calabash-cucumber/launcher'
-require 'calabash-cucumber/utils/simulator_accessibility'
 
 describe 'Calabash Launcher' do
 
@@ -21,532 +20,364 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  describe "device attribute" do
+
+    # Legacy API. This is a required method.  Do not remove.
+    it "#device=" do
+      launcher.device = :device
+      expect(launcher.device).to be == :device
+      expect(launcher.instance_variable_get(:@device)).to be == :device
+    end
+
+    describe "#device" do
+      it "is lazy eval'd" do
+        launcher.instance_variable_set(:@device, :device)
+        expect(launcher.device).to be == :device
+      end
+
+      it "calls out to the LPServer" do
+        connected = [
+          true,
+          {"device_name"  => "denis" }
+          ]
+        expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(connected)
+        device = launcher.device
+
+        expect(device).to be_a_kind_of(Calabash::Cucumber::Device)
+        expect(device.device_name).to be == "denis"
+      end
+    end
+  end
+
+  it "#usage_tracker" do
+    actual = launcher.usage_tracker
+    expect(actual).to be_a_kind_of(Calabash::Cucumber::UsageTracker)
+    expect(launcher.instance_variable_get(:@usage_tracker)).to be == actual
+  end
+
+  describe "#quit_app_after_scenario?" do
+    it "#calabash_no_stop?" do
+      expect(launcher).to receive(:quit_app_after_scenario?).and_return(false)
+      expect(RunLoop).not_to receive(:deprecated).and_call_original
+      expect(launcher.calabash_no_stop?).to be_truthy
+
+      expect(launcher).to receive(:quit_app_after_scenario?).and_return(true)
+      expect(RunLoop).not_to receive(:deprecated).and_call_original
+      expect(launcher.calabash_no_stop?).to be_falsey
+    end
+
+    it "calls out to Environment" do
+      expect(Calabash::Cucumber::Environment).to receive(:quit_app_after_scenario?).and_return(:value)
+
+      expect(launcher.quit_app_after_scenario?).to be == :value
+    end
+  end
+
+  describe "#attach" do
+    let(:run_loop) do
+      {
+        :udid => "identifier",
+        :pid => 1
+      }
+    end
+
+    let(:cache) do
+      Class.new do
+        def read ; end
+      end.new
+    end
+
+    before do
+      allow(RunLoop::HostCache).to receive(:default).and_return(cache)
+      allow(cache).to receive(:read).and_return(run_loop)
+    end
+
+    it "the happy path" do
+      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
+
+      actual = launcher.attach
+
+      expect(launcher.actions).to be_a_kind_of(Calabash::Cucumber::InstrumentsActions)
+      expect(actual).to be == launcher
+    end
+
+    it "cannot connect to http server" do
+      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_raise(Calabash::Cucumber::ServerNotRespondingError)
+
+      actual = launcher.attach
+
+      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(actual).to be_falsey
+    end
+
+    it "cannot establish communication with instruments" do
+      run_loop[:pid] = nil
+
+      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
+
+      actual = launcher.attach
+
+      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(actual).to be == launcher
+    end
+
+    it "raises an error on the XTC" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+
+      expect do
+        launcher.attach
+      end.to raise_error RuntimeError,
+        /This method is not available on the Xamarin Test Cloud/
+    end
+  end
+
   describe "#reset_simulator" do
-    describe "raises an error when" do
-      it "DEVICE_TARGET is a device UDID" do
-        stub_env({"DEVICE_TARGET" => UDID})
+
+    before do
+      allow(RunLoop::CoreSimulator).to receive(:erase).and_return(true)
+    end
+
+    it "device arg is a RunLoop::Device (simulator)" do
+      actual = launcher.reset_simulator(simulator)
+      expect(actual).to be == simulator
+    end
+
+    it "device arg is a RunLoop::Device (physical device)" do
+      expect do
+        launcher.reset_simulator(device)
+      end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+    end
+
+    it "device arg is something else (simulator)" do
+      identifier = simulator.udid
+      options = { :device => identifier }
+      expect(launcher).to receive(:detect_device).with(options).and_return(simulator)
+      actual = launcher.reset_simulator(identifier)
+      expect(actual).to be == simulator
+    end
+
+    it "device arg is something else (physical device)" do
+      identifier = device.udid
+      options = { :device => identifier }
+      expect(launcher).to receive(:detect_device).with(options).and_return(device)
+      expect do
+        launcher.reset_simulator(identifier)
+      end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+    end
+  end
+
+  it "#discover_device_target - deprecated" do
+    expect(launcher.discover_device_target(nil)).to be == nil
+  end
+
+  it ".default_uia_strategy - deprecated" do
+    expect(launcher.default_uia_strategy(nil, nil, nil)).to be == :host
+  end
+
+
+  it "#calabash_no_launch? - deprecated" do
+    expect(launcher.calabash_no_stop?).to be == false
+  end
+
+  describe "determining if device is simulator or physical device" do
+    let(:cal_device) do
+      Class.new do
+        def to_s; "#<Calabash::Cucumber::Device>"; end
+        def inspect; to_s; end
+
+        def simulator?; ; end
+        def device?; ; end
+      end.new
+    end
+
+    describe "Xamarin Test Cloud" do
+
+      before do
+        expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+      end
+
+      it "#device_target?" do
+        expect(launcher.device_target?).to be_truthy
+      end
+
+      it "#simulator_target?" do
+        expect(launcher.simulator_target?).to be_falsey
+      end
+    end
+
+    describe "#device_target?" do
+
+      before do
+        allow(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
+      end
+
+      it "@device is defined - after app launch check" do
+        launcher.instance_variable_set(:@device, cal_device)
+        expect(cal_device).to receive(:device?).and_return(true, false)
 
         expect(launcher.device_target?).to be_truthy
-        expect do
-          launcher.reset_simulator
-        end.to raise_error ArgumentError, /Resetting physical devices is not supported/
+        expect(launcher.device_target?).to be_falsey
       end
 
-      it "device is a RunLoop::Device representing a physical device" do
-        expect(launcher).to receive(:device_target?).and_return nil
+      it "@device is not defined - pre launch check" do
+        launcher.instance_variable_set(:@device, nil)
+        expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
+        expect(launcher.device_target?).to be_falsey
 
-        expect do
-          launcher.reset_simulator(device)
-        end.to raise_error ArgumentError, /Resetting physical devices is not supported/
-      end
-    end
-
-    describe "nil or empty arg" do
-      it "DEVICE_TARGET defined" do
-        identifier = "simulator"
-        expect(Calabash::Cucumber::Environment).to receive(:device_target).and_return(identifier)
-        expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier).and_return(simulator)
-        expect(RunLoop::CoreSimulator).to receive(:erase).with(simulator).and_return true
-
-        expect(launcher.reset_simulator).to be == simulator
-      end
-
-      it "DEVICE_TARGET undefined" do
-        identifier = "simulator"
-        expect(Calabash::Cucumber::Environment).to receive(:device_target).and_return(nil)
-        expect(RunLoop::Core).to receive(:default_simulator).and_return(identifier)
-        expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier).and_return(simulator)
-        expect(RunLoop::CoreSimulator).to receive(:erase).with(simulator).and_return true
-
-        expect(launcher.reset_simulator).to be == simulator
-      end
-
-      it "arg is a device instance" do
-        expect(RunLoop::CoreSimulator).to receive(:erase).with(simulator).and_return true
-
-        expect(launcher.reset_simulator(simulator)).to be == simulator
-      end
-
-      describe "arg is a string" do
-        it "RunLoop cannot find a matching simulator" do
-          identifier = "no matching simulator"
-
-          expect do
-            launcher.reset_simulator(identifier)
-          end.to raise_error ArgumentError, /Could not find a device with a UDID or name matching/
-        end
-
-        it "RunLoop can find a matching simulator" do
-           identifier = "simulator"
-           expect(RunLoop::Device).to receive(:device_with_identifier).with(identifier).and_return(simulator)
-           expect(RunLoop::CoreSimulator).to receive(:erase).with(simulator).and_return true
-
-           expect(launcher.reset_simulator(identifier)).to be == simulator
-        end
-      end
-    end
-  end
-
-  describe '#discover_device_target' do
-
-    let(:options) do { :device_target => 'OPTION!' } end
-
-    it 'respects the DEVICE_TARGET' do
-      stub_env('DEVICE_TARGET', 'TARGET!')
-
-      expect(launcher.discover_device_target(options)).to be == 'TARGET!'
-    end
-
-    it 'uses :device_target option' do
-      stub_env({'DEVICE_TARGET' => nil})
-
-      expect(launcher.discover_device_target(options)).to be == 'OPTION!'
-    end
-
-    it 'returns nil if neither is defined' do
-      stub_env({'DEVICE_TARGET' => nil})
-
-      expect(launcher.discover_device_target({})).to be == nil
-    end
-  end
-
-  describe '.default_uia_strategy' do
-    let(:sim_control) { RunLoop::SimControl.new }
-    let(:xcode) { sim_control.xcode }
-    let(:instruments) { RunLoop::Instruments.new }
-
-    describe 'Xcode >= 7.0' do
-      it 'returns :host' do
-        expect(sim_control.xcode).to receive(:version_gte_7?).and_return true
-
-        actual = launcher.default_uia_strategy({}, sim_control, instruments)
-        expect(actual).to be == :host
+        expect(launcher).to receive(:detect_device).with({}).and_return(device)
+        expect(launcher.device_target?).to be_truthy
       end
     end
 
-    describe 'Xcode < 7.0' do
+    describe "#simulator_target?" do
 
       before do
-        expect(sim_control.xcode).to receive(:version_gte_7?).at_least(:once).and_return false
+        allow(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(false)
       end
 
-      it ':device_target is nil' do
-        options = { :device_target => nil }
+      it "@device is defined - after launch check" do
+        launcher.instance_variable_set(:@device, cal_device)
+        expect(cal_device).to receive(:simulator?).and_return(true, false)
 
-        actual = launcher.default_uia_strategy(options, sim_control, instruments)
-        expect(actual).to be == :host
+        expect(launcher.simulator_target?).to be_truthy
+        expect(launcher.simulator_target?).to be_falsey
       end
 
-      it ':device_target is the empty string' do
-        options = { :device_target => '' }
+      it "@device is not defined - pre launch check" do
+        launcher.instance_variable_set(:@device, nil)
+        expect(launcher).to receive(:detect_device).with({}).and_return(simulator)
+        expect(launcher.simulator_target?).to be_truthy
 
-        actual = launcher.default_uia_strategy(options, sim_control, instruments)
-        expect(actual).to be == :host
-      end
-
-      it ":device_target is 'simulator'" do
-        options = { :device_target => 'simulator' }
-
-        actual = launcher.default_uia_strategy(options, sim_control, instruments)
-        expect(actual).to be == :preferences
-      end
-
-      it ':device_target is a simulator UDID' do
-        expect(sim_control).to receive(:simulators).and_return [simulator]
-        options = { :device_target =>  simulator.udid }
-
-        actual = launcher.default_uia_strategy(options, sim_control, instruments)
-        expect(actual).to be == :preferences
-      end
-
-      it ':device_target is a simulator name' do
-        expect(sim_control).to receive(:simulators).and_return [simulator]
-        expect(simulator).to receive(:instruments_identifier).and_return 'name'
-        options = { :device_target => 'name' }
-
-        actual = launcher.default_uia_strategy(options, sim_control, instruments)
-        expect(actual).to be == :preferences
-      end
-
-      describe 'physical devices' do
-
-        let(:v71) { RunLoop::Version.new('7.1') }
-
-        before do
-          expect(sim_control).to receive(:simulators).and_return []
-          expect(instruments).to receive(:physical_devices).and_return [device]
-        end
-
-        describe ':device_target is a device UDID' do
-          it 'iOS >= 8.0' do
-            options = { :device_target => device.udid }
-
-            actual = launcher.default_uia_strategy(options, sim_control, instruments)
-            expect(actual).to be == :host
-          end
-
-          it 'iOS < 7.0' do
-            expect(device).to receive(:version).at_least(:once).and_return v71
-            options = { :device_target => device.udid }
-
-            actual = launcher.default_uia_strategy(options, sim_control, instruments)
-            expect(actual).to be == :preferences
-          end
-        end
-
-        describe ':device_target is a device name' do
-          it 'iOS >= 8.0' do
-            options = { :device_target => device.name }
-
-            actual = launcher.default_uia_strategy(options, sim_control, instruments)
-            expect(actual).to be == :host
-          end
-
-          it 'iOS < 7.0' do
-            expect(device).to receive(:version).at_least(:once).and_return v71
-            options = { :device_target => device.name }
-
-            actual = launcher.default_uia_strategy(options, sim_control, instruments)
-            expect(actual).to be == :preferences
-          end
-        end
-      end
-
-      it 'returns :host when all else fails' do
-        expect(sim_control).to receive(:simulators).and_return []
-        expect(instruments).to receive(:physical_devices).and_return []
-        options = { :device_target => device.udid }
-
-        actual = launcher.default_uia_strategy(options, sim_control, instruments)
-        expect(actual).to be == :host
+        expect(launcher).to receive(:detect_device).with({}).and_return(device)
+        expect(launcher.simulator_target?).to be_falsey
       end
     end
   end
 
-  describe '#simulator_target?' do
+  it "#app_path - deprecated" do
+    expect(launcher.app_path).to be == nil
+  end
 
-    it ':device_target is nil' do
-      options = { :device_target => nil }
+  it "#ensure_connectivity - deprecated" do
+    expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
+    expect(launcher.ensure_connectivity).to be_truthy
+  end
 
-      expect(launcher.simulator_target?(options)).to be_falsey
+  it "#calabash_notify - deprecated" do
+    expect(launcher.calabash_notify(nil)).to be == false
+  end
+
+  it "#server_version_from_server - deprecated" do
+    expect(launcher).to receive(:server_version).and_return("0.19.0")
+    expect(launcher.server_version_from_server).to be == "0.19.0"
+  end
+
+  it "#server_version_from_bundle - deprecated" do
+    version = RunLoop::Version.new("2.0")
+    path = Resources.shared.app_bundle_path(:cal_smoke_app)
+    app = RunLoop::App.new(path)
+
+    hash = {
+      :app => app,
+      :bundle_id => app.bundle_identifier,
+      :is_ipa => false
+    }
+    options = {:app => path }
+    expect(RunLoop::DetectAUT).to receive(:detect_app_under_test).with(options).and_return(hash)
+    expect(app).to receive(:calabash_server_version).and_return(version)
+
+    expect(launcher.server_version_from_bundle(path)).to be == version
+  end
+
+  describe "#check_server_gem_compatibility" do
+
+    let(:cal_device) { Resources.shared.device_for_mocking }
+    let(:v20) { RunLoop::Version.new("2.0") }
+    let(:v10) { RunLoop::Version.new("1.0") }
+
+    before do
+      launcher.instance_variable_set(:@server_version, nil)
+      allow(launcher).to receive(:device).and_return(cal_device)
     end
 
-    it ':device_target is the empty string' do
-      options = { :device_target => '' }
+    it "server version is set" do
+      expect(launcher).to receive(:server_version).twice.and_return("2.0")
 
-      expect(launcher.simulator_target?(options)).to be_falsey
+      expect(launcher.check_server_gem_compatibility).to be == "2.0"
     end
 
-    it ":device_target is 'simulator'" do
-      options = { :device_target => 'simulator' }
+    it "compatible" do
+      stub_const("Calabash::Cucumber::MIN_SERVER_VERSION", v20.to_s)
+      expect(cal_device).to receive(:server_version).and_return(v20.to_s)
 
-      expect(launcher.simulator_target?(options)).to be_truthy
+      expect(launcher.check_server_gem_compatibility).to be == v20
+      expect(launcher.instance_variable_get(:@server_version)).to be == v20
+      expect(launcher.send(:server_version)).to be == v20
     end
 
-    it ':device_target is a Xcode 5 Simulator' do
-      options = { :device_target => 'iPhone Retina (4-inch) - Simulator - iOS 7.1' }
+    it "not compatible" do
+      stub_const("Calabash::Cucumber::MIN_SERVER_VERSION", v20.to_s)
+      expect(cal_device).to receive(:server_version).and_return(v10.to_s)
 
-      expect(launcher.simulator_target?(options)).to be_truthy
-    end
+      actual = nil
 
-    it ':device_target is a Xcode 6 CoreSimulator' do
-      options = { :device_target => 'iPhone 5s (8.4 Simulator)' }
+      out = capture_stdout do
+        actual = launcher.check_server_gem_compatibility
+      end.string
 
-      expect(launcher.simulator_target?(options)).to be_truthy
-    end
+      expect(actual).to be == v10
+      expect(launcher.instance_variable_get(:@server_version)).to be == v10
+      expect(launcher.send(:server_version)).to be == v10
 
-    it ':device_target is a UDID' do
-      options = { :device_target => UDID }
-
-      expect(launcher.simulator_target?(options)).to be_falsey
-    end
-
-    it 'not a CoreSimulator environment' do
-      expect(launcher.xcode).to receive(:version_gte_6?).and_return false
-      options = { :device_target => 'some name' }
-
-      expect(launcher.simulator_target?(options)).to be_falsey
-    end
-
-    describe 'CoreSimulator' do
-
-      before do
-        expect(launcher.xcode).to receive(:version_gte_6?).at_least(:once).and_return true
-      end
-
-      let(:sim_control) { RunLoop::SimControl.new }
-
-      describe 'matches a simulator' do
-
-        let(:options) do { :sim_control => sim_control } end
-
-        before do
-          expect(sim_control).to receive(:simulators).and_return [simulator]
-        end
-
-        it 'by instruments identifier' do
-          # Xcode 7 CoreSimulator - does not contain 'Simulator' in the name.
-          expect(simulator).to receive(:instruments_identifier).and_return 'iPhone 5s (9.0)'
-          options[:device_target] = 'iPhone 5s (9.0)'
-
-          expect(launcher.simulator_target?(options)).to be_truthy
-        end
-
-        it 'by sim udid' do
-          options[:device_target] = simulator.udid
-
-          expect(launcher.simulator_target?(options)).to be_truthy
-        end
-      end
-
-      it 'matches no simulator' do
-        expect(sim_control).to receive(:simulators).and_return []
-        options = { :device_target => 'some name',
-                    :sim_control => sim_control }
-
-        expect(launcher.simulator_target?(options)).to be_falsey
-      end
+      match = out[/The server version is not compatible with gem version/, 0]
+      expect(match).to be_truthy
     end
   end
 
-  describe 'resetting application content and settings' do
-    describe 'should be able to detect the base simulator sdk from the launch args' do
-      it 'should return nil if the test targets a device' do
-        expect(launcher).to receive(:device_target?).and_return(true)
-        expect(launcher.sdk_version_for_simulator_target({})).to be nil
-      end
-
-      it 'should return nil if :device_target is nil' do
-        expect(launcher.sdk_version_for_simulator_target({})).to be nil
-      end
-
-      it 'should return nil if :device_target is not a simulator' do
-        launch_args = {:device_target => UDID}
-        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be nil
-      end
-
-      it "should return nil if :device_target is 'simulator'" do
-        launch_args = {:device_target => 'simulator'}
-        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be nil
-      end
-
-      it 'should return an SDK if :device_target is an Xcode 5.1+ simulator string' do
-        launch_args = {:device_target => 'iPhone Retina (4-inch 64-bit) - Simulator - iOS 7.0'}
-        expect(launcher.sdk_version_for_simulator_target(launch_args)).to be == '7.0'
-      end
-    end
+  it "#default_launch_args - deprecated" do
+    expect(launcher.default_launch_args).to be == {}
   end
 
-  describe 'checking server/gem compatibility' do
-
-    before(:example) do
-      Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
-    end
-
-    after(:example) do
-      Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, nil)
-    end
-
-    describe '#server_version_from_server' do
-
-      it 'returns a version by asking the running server' do
-        # We can't stand up the server, so we'll create a device and ask for
-        # its version.  It is the best we can do for now.
-        device = Resources.shared.device_for_mocking
-        launcher.device = device
-        actual = launcher.server_version_from_server
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '0.10.0'
-      end
-
-      it "returns '@@server_version' if it is not nil" do
-        Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, '1.0.0')
-        actual = launcher.server_version_from_server
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
-      end
-    end
-
-    describe '#server_version_from_bundle' do
-
-      describe 'returns calabash version an app bundle when' do
-        it 'strings can find the version' do
-          abp = Resources.shared.app_bundle_path :server_gem_compatibility
-          actual = launcher.server_version_from_bundle abp
-          expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '11.11.11'
-        end
-
-        it 'and when there is a space is the path' do
-          abp = Resources.shared.app_bundle_path :server_gem_compatibility
-          dir = Dir.mktmpdir('path with space')
-          FileUtils.cp_r abp, dir
-          abp = File.expand_path(File.join(dir, 'server-gem-compatibility.app'))
-          actual = launcher.server_version_from_bundle abp
-          expect(actual).not_to be == nil
-          expect(RunLoop::Version.new(actual).to_s).to be == '11.11.11'
-        end
-      end
-
-      it "returns '0.0.0' when strings cannot extract a version" do
-        abp = Resources.shared.app_bundle_path :calabash_not_linked
-        actual = nil
-        capture_stderr do
-          actual = launcher.server_version_from_bundle abp
-        end
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '0.0.0'
-      end
-
-      it "returns '@@server_version' if it is not nil" do
-        Calabash::Cucumber::Launcher.class_variable_set(:@@server_version, '1.0.0')
-        actual = launcher.server_version_from_bundle nil
-        expect(actual).not_to be == nil
-        expect(RunLoop::Version.new(actual).to_s).to be == '1.0.0'
-      end
-    end
-
-    describe '#check_server_gem_compatibility' do
-
-      describe 'when targeting an .app' do
-        let (:app) { Resources.shared.app_bundle_path :smoke }
-
-        describe 'prints a message if server' do
-          it 'and gem are compatible' do
-            launcher.launch_args = {:app => app}
-            min_server_version = Calabash::Cucumber::MIN_SERVER_VERSION
-            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
-            out = capture_stderr do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).to be == ''
-          end
-
-          it 'and gem are not compatible' do
-            launcher.launch_args = {:app => app}
-            min_server_version = '0.0.1'
-            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
-            out = capture_stderr do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).not_to be == nil
-            expect(out.string.length).not_to be == 0
-          end
-
-          it 'version cannot be found' do
-            launcher.launch_args = {:app => app}
-            min_server_version = Calabash::Cucumber::Launcher::SERVER_VERSION_NOT_AVAILABLE
-            expect(launcher).to receive(:server_version_from_bundle).and_return(min_server_version)
-            out = capture_stderr do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).not_to be == nil
-            expect(out.string.length).not_to be == 0
-          end
-        end
-      end
-
-      describe 'when targeting an .ipa' do
-        let (:app) { 'foo.ipa' }
-
-        describe 'prints a message if server' do
-          it 'and gem are compatible' do
-            launcher.launch_args = {:app => app}
-            min_server_version = Calabash::Cucumber::MIN_SERVER_VERSION
-            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stderr do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).to be == ''
-          end
-
-          it 'and gem are not compatible' do
-            launcher.launch_args = {:app => app}
-            min_server_version = '0.0.1'
-            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stderr do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).not_to be == nil
-            expect(out.string.length).not_to be == 0
-          end
-
-          it 'version cannot be found' do
-            launcher.launch_args = {:app => app}
-            min_server_version = Calabash::Cucumber::Launcher::SERVER_VERSION_NOT_AVAILABLE
-            expect(launcher).to receive(:server_version_from_server).and_return(min_server_version)
-            out = capture_stderr do
-              launcher.check_server_gem_compatibility
-            end
-            expect(out.string).not_to be == nil
-            expect(out.string.length).not_to be == 0
-          end
-        end
-      end
-    end
+  it "#detect_connected_device? - deprecated" do
+    expect(launcher.detect_connected_device?).to be_falsey
   end
 
-  describe 'default launch args should respect DEVICE_TARGET' do
+  it "#detect_device" do
+    simctl = Resources.shared.simctl
+    xcode = Resources.shared.xcode
+    instruments = Resources.shared.instruments
+    expect(Calabash::Cucumber::Environment).to receive(:simctl).and_return(simctl)
+    expect(Calabash::Cucumber::Environment).to receive(:xcode).and_return(xcode)
+    expect(Calabash::Cucumber::Environment).to receive(:instruments).and_return(instruments)
 
-    let(:fake_udid) { 'FAKE-UDID' }
+    options = { :device => simulator.udid }
+    args = [options, xcode, simctl, instruments]
+    expect(RunLoop::Device).to receive(:detect_device).with(*args).and_return(simulator)
 
-    it "should return 'simulator' if DEVICE_TARGET nil" do
-      args = launcher.default_launch_args
-      expect(args[:device_target]).to be == 'simulator'
+    expect(launcher.send(:detect_device, options)).to be == simulator
+  end
+
+  describe "#detect_inject_dylib_option" do
+    it "options[:inject_dylib] is falsey" do
+      expect(launcher.send(:detect_inject_dylib_option, {})).to be == nil
+      expect(launcher.send(:detect_inject_dylib_option,
+                           {:inject_dylib => false})).to be == nil
+
+      expect(launcher.send(:detect_inject_dylib_option,
+                           {:inject_dylib => nil})).to be == nil
     end
 
-    describe 'running with instruments' do
+    it "{:inject_dylib => true}" do
+      expected = Calabash::Cucumber::Dylibs.path_to_sim_dylib
+      expect(launcher.send(:detect_inject_dylib_option,
+                           {:inject_dylib => true})).to be == expected
+    end
 
-      it 'should be running against instruments' do
-        args = launcher.default_launch_args
-        expect(args[:launch_method]).to be == :instruments
-      end
+    it "{:inject_dylib => 'path/to/dylib'}" do
+      expected = "path/to/calabash.dylib"
+      expect(launcher.send(:detect_inject_dylib_option,
+                           {:inject_dylib => expected})).to be == expected
 
-      describe 'running against devices' do
-        describe 'when DEVICE_TARGET = < udid >' do
-          it 'it should return udid if DEVICE_TARGET is a udid' do
-            stub_env('DEVICE_TARGET', fake_udid)
-            args = launcher.default_launch_args
-            expect(args[:device_target]).to be == fake_udid
-            expect(args[:udid]).to be == fake_udid
-          end
-        end
-
-        describe 'when DEVICE_TARGET = device' do
-
-          before(:example) do
-            stub_env('DEVICE_TARGET', 'device')
-          end
-
-          describe 'detecting connected devices' do
-            describe "when DETECT_CONNECTED_DEVICE == '1'" do
-              it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                stub_env('DETECT_CONNECTED_DEVICE', '1')
-                args = launcher.default_launch_args
-                target = args[:device_target]
-                detected = RunLoop::Core.detect_connected_device
-
-                if detected
-                  expect(target).to be == detected
-                  expect(args[:udid]).to be == detected
-                else
-                  #pending('this behavior is needs verification')
-                  expect(target).to be == 'simulator'
-                end
-              end
-
-              context "when DETECT_CONNECTED_DEVICE != '1'" do
-                it 'should return a udid if DEVICE_TARGET=device if a device is connected and simulator otherwise' do
-                  args = launcher.default_launch_args
-                  target = args[:device_target]
-                  expect(target).to be == 'device'
-                  expect(args[:udid]).to be == 'device'
-                end
-              end
-            end
-          end
-        end
-      end
     end
   end
 end

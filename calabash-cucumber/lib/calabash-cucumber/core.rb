@@ -5,19 +5,11 @@ require 'calabash-cucumber/uia'
 require 'calabash-cucumber/environment_helpers'
 require 'calabash-cucumber/connection'
 require 'calabash-cucumber/connection_helpers'
-require 'calabash-cucumber/launch/simulator_launcher'
 require 'calabash-cucumber/query_helpers'
-require 'calabash-cucumber/playback_helpers'
 require 'calabash-cucumber/failure_helpers'
 require 'calabash-cucumber/status_bar_helpers'
 require 'calabash-cucumber/rotation_helpers'
 require 'calabash-cucumber/map'
-require 'calabash-cucumber/utils/logging'
-
-
-# legacy support - module was deprecated 0.9.169
-# replaced with simulator-launcher
-require 'calabash-cucumber/launch/simulator_helper'
 
 module Calabash
   module Cucumber
@@ -25,26 +17,68 @@ module Calabash
     # A collection of methods that provide the core calabash behaviors.
     module Core
 
-      include Calabash::Cucumber::Logging
+      require "calabash-cucumber/map"
       include Calabash::Cucumber::EnvironmentHelpers
       include Calabash::Cucumber::ConnectionHelpers
       include Calabash::Cucumber::QueryHelpers
       include Calabash::Cucumber::FailureHelpers
-      include Calabash::Cucumber::Map
       include Calabash::Cucumber::UIA
       include Calabash::Cucumber::StatusBarHelpers
       include Calabash::Cucumber::RotationHelpers
-      include Calabash::Cucumber::PlaybackHelpers
 
       # @!visibility private
-      # @deprecated Use Cucumber's step method (avoid this: using step is not considered best practice).
+      # @deprecated Use Cucumber's step method.
+      #
+      # Using `step` is not considered a best practice.
+      #
       # Used in older cucumber versions that didn't have the `step` method.
+      #
       # Shouldn't be used anymore.
       def macro(txt)
         if self.respond_to? :step
           step(txt)
         else
           Then txt
+        end
+      end
+
+      # Prints a blue warning message.
+      # @param [String] msg the message to print
+      # @return [void]
+      def calabash_warn(msg)
+        require "run_loop/logging"
+        RunLoop.log_warn(msg)
+      end
+
+      # Prints a green info message.
+      # @param [String] msg the message to print
+      # @return [void]
+      def calabash_info(msg)
+        require "run_loop/logging"
+        RunLoop.log_info2(msg)
+      end
+
+      # Prints a deprecated message that includes the line number.
+      #
+      # @param [String] version indicates when the feature was deprecated
+      # @param [String] msg deprecation message (possibly suggesting alternatives)
+      # @param [Symbol] type { :warn | :pending } - :pending will raise a
+      #   cucumber pending error
+      # @return [void]
+      def deprecated(version, msg, type)
+        allowed = [:pending, :warn]
+        unless allowed.include?(type)
+          raise ArgumentError, "Expected type '#{type}' to be one of #{allowed.join(", ")}"
+        end
+
+        stack = Kernel.caller(0, 6)[1..-1].join("\n")
+
+        msg = "deprecated '#{version}' - #{msg}\n#{stack}"
+
+        if type.eql?(:pending)
+          pending(msg)
+        else
+          calabash_warn(msg)
         end
       end
 
@@ -109,7 +143,7 @@ module Calabash
       # @param [Array] args optional var-args list describing a chain of method selectors.
       #   Full details {http://developer.xamarin.com/guides/testcloud/calabash/calabash-query-syntax/ Query Syntax}.
       def query(uiquery, *args)
-        map(uiquery, :query, *args)
+        Map.map(uiquery, :query, *args)
       end
 
       # Shorthand alias for `query`.
@@ -130,7 +164,7 @@ module Calabash
       def flash(uiquery, *args)
         # todo deprecate the *args argument in the flash method
         # todo :flash operation should return views as JSON objects
-        map(uiquery, :flash, *args).compact
+        Map.map(uiquery, :flash, *args).compact
       end
 
       # Returns the version of the running calabash server.
@@ -144,16 +178,6 @@ module Calabash
       # @return [String] the version of the loaded Calabash library.
       def client_version
         Calabash::Cucumber::VERSION
-      end
-
-      # Queries all views in view hierarchy, even if not visible.
-      # @deprecated use the 'all' or 'visible' modifier in query syntax
-      def query_all(uiquery, *args)
-        msg0 = "use the 'all' or 'visible' query language feature"
-        msg1 = 'see: https://github.com/calabash/calabash-ios/wiki/05-Query-syntax'
-        msg = "#{msg0}\n#{msg1}"
-        _deprecated('0.9.133', msg, :warn)
-        map("all #{uiquery}", :query, *args)
       end
 
       # Performs the `tap` gesture on the (first) view that matches
@@ -390,9 +414,9 @@ module Calabash
           raise ArgumentError, "Expected '#{direction} to be one of #{allowed_directions}"
         end
 
-        views_touched=map(uiquery, :scroll, dir_symbol)
+        views_touched = Map.map(uiquery, :scroll, dir_symbol)
         msg = "could not find view to scroll: '#{uiquery}', args: #{dir_symbol}"
-        assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -405,9 +429,9 @@ module Calabash
       #
       # @param {String} uiquery query describing view scroll (should be  UIScrollView or a web view).
       def scroll_to_row(uiquery, number)
-        views_touched=map(uiquery, :scrollToRow, number)
+        views_touched = Map.map(uiquery, :scrollToRow, number)
         msg = "unable to scroll: '#{uiquery}' to: #{number}"
-        assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -448,9 +472,9 @@ module Calabash
         if options.has_key?(:animate)
           args << options[:animate]
         end
-        views_touched=map(uiquery, :scrollToRow, row.to_i, sec.to_i, *args)
+        views_touched = Map.map(uiquery, :scrollToRow, row.to_i, sec.to_i, *args)
         msg = "unable to scroll: '#{uiquery}' to '#{options}'"
-        assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -497,9 +521,9 @@ module Calabash
           args << options[:animate]
         end
 
-        views_touched=map(uiquery, :scrollToRowWithMark, mark, *args)
+        views_touched = Map.map(uiquery, :scrollToRowWithMark, mark, *args)
         msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
-        assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -554,7 +578,9 @@ module Calabash
 
         animate = opts[:animate]
 
-        views_touched=map(uiquery, :collectionViewScroll, item.to_i, section.to_i, scroll_position, animate)
+        views_touched = Map.map(uiquery, :collectionViewScroll,
+                                item.to_i, section.to_i,
+                                scroll_position, animate)
 
         if opts[:failed_message]
           msg = opts[:failed_message]
@@ -562,7 +588,7 @@ module Calabash
           msg = "unable to scroll: '#{uiquery}' to item '#{item}' in section '#{section}'"
         end
 
-        assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -620,9 +646,11 @@ module Calabash
         args << scroll_position
         args << opts[:animate]
 
-        views_touched=map(uiquery, :collectionViewScrollToItemWithMark, mark, *args)
+        views_touched = Map.map(uiquery, :collectionViewScrollToItemWithMark,
+                                mark, *args)
+
         msg = opts[:failed_message] || "Unable to scroll: '#{uiquery}' to cell with mark: '#{mark}' with #{opts}"
-        assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -739,25 +767,6 @@ details => '#{result["details"]}'
       end
 
       # @!visibility private
-      def move_wheel(opts={})
-        q = opts[:query] || 'pickerView'
-        wheel = opts[:wheel] || 0
-        dir = opts[:dir] || :down
-
-        raise 'Wheel index must be non negative' if wheel < 0
-        raise "Only up and down supported :dir (#{dir})" unless [:up, :down].include?(dir)
-
-        if ENV['OS'] == 'ios4'
-          playback "wheel_#{dir}", :query => "#{q} pickerTable index:#{wheel}"
-        elsif ios7?
-          raise NotImplementedError
-        else
-          playback "wheel_#{dir}", :query => "#{q} pickerTableView index:#{wheel}"
-        end
-
-      end
-
-      # @!visibility private
       def picker(opts={:query => 'pickerView', :action => :texts})
         raise 'Not implemented' unless opts[:action] == :texts
 
@@ -818,10 +827,10 @@ details => '#{result["details"]}'
         value_str = value.to_s
 
         args = [merged_options[:animate], merged_options[:notify_targets]]
-        views_touched = map(uiquery, :changeSlider, value_str, *args)
+        views_touched = Map.map(uiquery, :changeSlider, value_str, *args)
 
         msg = "Could not set value of slider to '#{value}' using query '#{uiquery}'"
-        assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
@@ -837,7 +846,7 @@ details => '#{result["details"]}'
       #   trailing ":"
       #
       # @param [String] selector the selector to perform on the app delegate
-      # @param [Object] argument the argument to pass to the selector
+      # @param [Object] arguments the arguments to pass to the selector
       # @return [Object] the result of performing the selector with the argument
       def backdoor(selector, *arguments)
         parameters = {
@@ -939,9 +948,9 @@ arguments => '#{arguments}'
       # @return {Calabash::Cucumber::Launcher} the launcher object in use
       def start_test_server_in_background(args={})
         stop_test_server
-        @calabash_launcher = Calabash::Cucumber::Launcher.new()
-        @calabash_launcher.relaunch(args)
-        @calabash_launcher
+        launcher = Calabash::Cucumber::Launcher.new
+        launcher.relaunch(args)
+        launcher
       end
 
       # Helper method to easily create page object instances from a cucumber execution context.
@@ -1006,23 +1015,6 @@ arguments => '#{arguments}'
         tap_mark(label, *args)
       end
 
-      # taps a view with mark `hash_or_string`
-      # @deprecated In later Calabash versions we will change the semantics of `tap` to take a general query
-      #   (instead of a 'mark' now). We're deprecating this now to prepare people for a breaking change.
-      # @param {String} hash_or_string mark to pass to call `tap_mark(hash_or_string)`.
-      # @return {Array<Hash>} array containing the serialized version of the tapped view.
-      def tap(hash_or_string, *args)
-        deprecation_msg = 'Use tap_mark instead. In later Calabash versions we will change the semantics of `tap` to take a general query.'
-        _deprecated('0.10.0', deprecation_msg, :warn)
-        if hash_or_string.is_a?(String)
-          tap_mark(hash_or_string, *args)
-        elsif hash_or_string.respond_to?(:[])
-          wait_tap(hash_or_string[:query], hash_or_string)
-        else
-          raise(ArgumentError, "first parameter to tap must be a string or a hash. Was: #{hash_or_string.class}, #{hash_or_string}")
-        end
-      end
-
       # taps a view with mark `label`. Equivalent to `touch("* marked:'#{label}'")`
       # @param {String} label the mark of the view to tap
       # @param {Array} args optional additional arguments to pass to `touch`.
@@ -1038,76 +1030,73 @@ arguments => '#{arguments}'
         query(q).map { |e| e['html'] }
       end
 
-      # sets the text value of the views matched by +uiquery+ to +txt+
+      # Sets the text value of the views matched by +uiquery+ to +txt+.
       #
-      # @deprecated since 0.9.145
+      # You should always try to enter text "like the user would" using the
+      # `keyboard_enter_text` method.  There are cases, however, when this does
+      # not work or is very slow.
       #
-      # we have stopped testing this method.  you have been warned.
+      # Please note that if you use this method, the UITextFieldDelegate and
+      # UITextViewDelegate methods ***will not be called*** if you use this
+      # method of text entry.  This means that if you have UI elements that
+      # respond to text changes, they ***will not be updated***.
       #
-      # * to enter text using the native keyboard use 'keyboard_enter_text'
-      # * to delete text use 'keyboard_enter_text('Delete')"
-      # * to clear a text field or text view:
-      #   - RECOMMENDED: use queries and touches to replicate what the user would do
-      #     - for text fields, implement a clear text button and touch it
-      #     - for text views, use touches to reveal text editing popup
-      #       see https://github.com/calabash/calabash-ios/issues/151
-      #   - use 'clear_text'
-      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
+      # UIAutomation's keyboard.typeString is incredibly buggy.  Calabash goes
+      # to great lengths to provide a stable typing interface.  However, there
+      # are cases where our patches cause problems.  If your app crashes or
+      # hangs when calling `keyboard_enter_text` there are a couple of options.
       #
-      # raises an error if the +uiquery+ finds no matching queries or finds
+      # 1. Try `fast_enter_text`.  This may or may not cause delegate methods
+      #    to be called (see the note above).
+      # 2. Call `keyboard.typeString` directly.  This will bypass the Calabash
+      #    fixes (which sometimes cause hanging and/or crashes).
+      #
+      # ```
+      # touch(" < touch a text field or text view > ")
+      # wait_for_keyboard
+      # uia("UIATarget.localTarget().frontMostApp().keyboard().typeString('your string')")
+      # ```
+      #
+      # Please be aware that keyboard.typeString is prone to errors.  We
+      # recommend using `keyboard_enter_text` or `fast_enter_text` whenever
+      # possible.
+      #
+      # One valid use of this method is on WebViews.  Find examples in the
+      # [CalWebApp features/steps/set_text_steps.rb](https://github.com/calabash/ios-webview-test-app/blob/master/CalWebViewApp/features/steps/set_text_steps.rb).
+      #
+      # @param [String] uiquery used to find the text input views
+      # @param [String] txt the new text
+      #
+      # @raise[RuntimeError] If the +uiquery+ finds no matching queries or finds
       # a view that does not respond to the objc selector 'setText'
+      #
+      # @return [Array<String>] The text fields that were modified.
       def set_text(uiquery, txt)
-        msgs = ["'set_text' is deprecated and its behavior is now unpredictable",
-                "* to enter text using the native keyboard use 'keyboard_enter_text'",
-                "* to delete text use 'keyboard_enter_text('Delete')",
-                '* to clear a text field or text view:',
-                '  - RECOMMENDED: use queries and touches to replicate what the user would do',
-                '    * for text fields, implement a clear text button and touch it',
-                '    * for text views, use touches to reveal text editing popup',
-                '    see https://github.com/calabash/calabash-ios/issues/151',
-                "  - use 'clear_text'",
-                'https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API']
-        msg = msgs.join("\n")
-        _deprecated('0.9.145', msg, :warn)
-
-        text_fields_modified = map(uiquery, :setText, txt)
+        text_fields_modified = Map.map(uiquery, :setText, txt)
 
         msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
-        assert_map_results(text_fields_modified, msg)
+        Map.assert_map_results(text_fields_modified, msg)
         text_fields_modified
       end
 
-      # sets the text value of the views matched by +uiquery+ to <tt>''</tt>
+      # Sets the text value of the views matched by +uiquery+ to <tt>''</tt>
       # (the empty string)
       #
-      # using this sparingly and with caution
+      # Using this sparingly and with caution.  We recommend using queries and
+      # touches to replicate what the _user would do_.
       #
+      # @param [String] uiquery used to find the text input views
       #
-      # it is recommended that you instead do some combination of the following
+      # @raise[RuntimeError] If the +uiquery+ finds no matching queries or finds
+      # a view that does not respond to the objc selector 'setText'
       #
-      # * use queries and touches to replicate with the user would
-      #   - for text fields, implement a clear text button and touch it
-      #   - for text views, use touches to reveal text editing popup
-      #   see https://github.com/calabash/calabash-ios/issues/151
-      #
-      #  https://github.com/calabash/calabash-ios/wiki/03.5-Calabash-iOS-Ruby-API
-      #
-      # raises an error if the +uiquery+ finds no matching queries or finds
-      # a _single_ view that does not respond to the objc selector 'setText'
-      #
-      # IMPORTANT
-      # calling:
-      #
-      #     > clear_text("view")
-      #
-      # will clear the text on _all_ visible views that respond to 'setText'
+      # @return [Array<String>] The text fields that were modified.
       def clear_text(uiquery)
-        views_modified = map(uiquery, :setText, '')
+        views_modified = Map.map(uiquery, :setText, '')
         msg = "query '#{uiquery}' returned no matching views that respond to 'setText'"
-        assert_map_results(views_modified, msg)
+        Map.assert_map_results(views_modified, msg)
         views_modified
       end
-
 
       # Sets user preference (NSUserDefaults) value of key `key` to `val`.
       # @example
@@ -1153,8 +1142,8 @@ arguments => '#{arguments}'
       # @!visibility private
       # @todo broken currently
       def stop_test_server
-        l = @calabash_launcher || Calabash::Cucumber::Launcher.launcher_if_used
-        l.stop if l
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        launcher.stop if launcher
       end
 
       # @!visibility private
@@ -1182,15 +1171,19 @@ arguments => '#{arguments}'
       #   when starting the console.
       # @return [Calabash::Cucumber::Launcher,nil] the currently active
       #  calabash launcher
+      #
+      # @raise [RuntimeError] This method is not available on the Xamarin Test
+      #  Cloud
       def console_attach(uia_strategy = nil)
-        # setting the @calabash_launcher here for backward compatibility
-        @calabash_launcher = launcher.attach({:uia_strategy => uia_strategy})
+        if Calabash::Cucumber::Environment.xtc?
+          raise "This method is not available on the Xamarin Test Cloud"
+        end
+        launcher.attach({:uia_strategy => uia_strategy})
       end
 
       # @!visibility private
       def launcher
-        # setting the @calabash_launcher here for backward compatibility
-        @calabash_launcher = Calabash::Cucumber::Launcher.launcher
+        Calabash::Cucumber::Launcher.launcher
       end
 
       # @!visibility private
@@ -1226,7 +1219,7 @@ arguments => '#{arguments}'
         views_touched = launcher.actions.send(action, options)
         unless uiquery.nil?
           msg = "#{action} could not find view: '#{uiquery}', args: #{options}"
-          assert_map_results(views_touched, msg)
+          Map.assert_map_results(views_touched, msg)
         end
         views_touched
       end

@@ -79,16 +79,6 @@ def calabash_download(args)
   download_calabash(File.expand_path("."))
 end
 
-# @todo eval for deprecation - has no callers.
-def has_proxy?
-  ENV['http_proxy'] ? true : false
-end
-
-def proxy
-  url_parts = URI.split(ENV['http_proxy'])
-  [url_parts[2], url_parts[3]]
-end
-
 def download_calabash(project_path)
   file = 'calabash.framework'
   ##Download calabash.framework
@@ -155,7 +145,6 @@ def setup_project(project_name, project_path, path)
 
 end
 
-require 'calabash-cucumber/launch/simulator_launcher'
 def validate_setup(args)
   if args.length > 0
     if args[0].end_with?(".ipa")
@@ -169,63 +158,12 @@ def validate_setup(args)
       exit 1
     end
   else
-    dd_dir = Calabash::Cucumber::SimulatorLauncher.new().derived_data_dir_for_project
-      if not dd_dir
-        puts "Unable to find iOS XCode project."
-        puts "You should run this command from an XCode project directory."
-        exit 1
-      end
-      app_bundles = Dir.glob(File.join(dd_dir, "Build", "Products", "*", "*.app"))
-      sim_dirs = Dir.glob(File.join(dd_dir, "Build", "Products", "Debug-iphonesimulator", "*.app"))
-      sim_dirs = sim_dirs.concat(Dir.glob(File.join(dd_dir, "Build", "Products", "Calabash-iphonesimulator", "*.app")))
-      if sim_dirs.empty?
-        msg = ["Have you built your app for simulator?"]
-        msg << "You should build the -cal target and your normal target"
-        msg << "(with configuration Debug)."
-        msg << "Searched dir: #{dd_dir}/Build/Products"
-        msg("Error") do
-          puts msg.join("\n")
-        end
-        exit 1
-      elsif sim_dirs.count != 2
-        msg = ["Have you built your app for simulator?"]
-        msg << "You should build the -cal target and your normal target"
-        msg << "(with configuration Debug)."
-        msg << "Searched dir: #{dd_dir}/Build/Products"
-        msg("Error") do
-          puts msg.join("\n")
-        end
-        exit 1
-      end
-      out_debug = `otool "#{sim_dirs[0]}"/* -o 2> /dev/null | grep CalabashServer`
-      out_cal = `otool "#{sim_dirs[1]}"/* -o 2> /dev/null | grep CalabashServer 2> /dev/null`
-      ok = (not /CalabashServer/.match(out_debug)) and /CalabashServer/.match(out_cal)
-      if ok
-        msg("OK") do
-          puts "Your configuration seems ok."
-          puts "app in directory:"
-          puts sim_dirs[0]
-          puts "does not have calabash.framework linked in."
-          puts "directory:"
-          puts sim_dirs[1]
-          puts "does."
-        end
-      else
-        msg("Fail") do
-          puts "Your configuration looks bad."
-          if (not /CalabashServer/.match(out_debug))
-            puts "WARNING: You Debug build seems to be linking with Calabash."
-            puts "You should restore your xcodeproject file from backup."
-          else
-            puts "app in directory"
-            puts sim_dirs[1]
-            puts "does not have calabash.framework linked in."
-          end
-        end
-      end
+    $stderr.puts(
+      %Q["Please pass a .app or .ipa as an argument.  Ad hoc validation of projects
+is not yet supported])
+    $stderr.flush
+    exit 1
   end
-
-
 end
 
 def validate_ipa(ipa)
@@ -262,56 +200,4 @@ def validate_app(app)
     puts "App: #{app} *does not contain* calabash.framework"
     exit(1)
   end
-end
-
-def update(args)
-  if args.length > 0
-    target = args[0]
-    unless UPDATE_TARGETS.include?(target)
-      msg('Error') do
-        puts "Invalid target #{target}. Must be one of: #{UPDATE_TARGETS.join(' ')}"
-      end
-      exit 1
-    end
-
-
-
-    target_file = 'features/support/launch.rb'
-    msg('Question') do
-      puts "I'm about to update the #{target_file} file."
-      puts "Please hit return to confirm that's what you want."
-    end
-    exit 2 unless STDIN.gets.chomp == ''
-
-
-    unless File.exist?(target_file)
-      msg('Error') do
-        puts "Unable to find file #{target_file}"
-        puts "Please change directory so that #{target_file} exists."
-      end
-      exit 1
-    end
-    new_launch_script = File.join(@script_dir, 'launch.rb')
-
-    FileUtils.cp(new_launch_script, 'features/support/01_launch.rb', :verbose => true)
-    FileUtils.rm(target_file, :force => true, :verbose => true)
-
-    hooks_file = 'features/support/hooks.rb'
-    if File.exist?(hooks_file)
-      FileUtils.mv(hooks_file, 'features/support/02_pre_stop_hooks.rb', :verbose => true)
-    end
-
-    msg('Info') do
-      puts "File copied.\n"
-      puts 'Launch on device using environment variable DEVICE_TARGET=device.'
-      puts 'Launch on simulator by default or using environment variable DEVICE_TARGET=simulator.'
-    end
-  else
-    msg('Error') do
-      puts "update must take one of the following targets: #{UPDATE_TARGETS.join(' ')}"
-    end
-    exit 1
-
-  end
-
 end

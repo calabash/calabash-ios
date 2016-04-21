@@ -85,7 +85,7 @@ Then /^I touch (?:the)? user location$/ do
 end
 
 Then /^I (?:touch|press) (?:done|search)$/ do
-  done
+  tap_keyboard_action_key
   sleep(STEP_PAUSE)
 end
 
@@ -136,12 +136,6 @@ Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field n
   wait_for_keyboard
   keyboard_enter_text(text_to_type)
   sleep(STEP_PAUSE)
-end
-
-When /^I clear "([^\"]*)"$/ do |name|
-  msg = "When I clear <name>' will be deprecated because it is ambiguous - what should be cleared?"
-  _deprecated('0.9.151', msg, :warn)
-  clear_text("textField marked: '#{name}'")
 end
 
 Then /^I clear (?:input|text) field number (\d+)$/ do |index|

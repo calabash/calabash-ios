@@ -1,6 +1,3 @@
-require 'json'
-require 'calabash-cucumber/utils/logging'
-
 module Calabash
   module Cucumber
 
@@ -8,8 +5,6 @@ module Calabash
     # app is running on.  It also includes the following information about the
     # app that is running on the current device.
     class Device
-
-      include Calabash::Cucumber::Logging
 
       # @!visibility private
       GESTALT_IPHONE = 'iPhone'
@@ -166,44 +161,27 @@ module Calabash
           end
         end
 
-        # Deprecated 0.16.2 server
-        @system = version_data['system']
-
-        # 0.16.2 server adds 'device_family' key.
-        unless @device_family
-          # Deprecated 0.16.2 server
-          simulator_device = version_data['simulator_device']
-          if @system == GESTALT_SIM_SYS
-            @device_family = simulator_device
-          else
-            @device_family = @system.split(/[\d,.]/).first
-          end
-        end
-
         # 0.16.2 server adds 'ios_version' key
         unless @ios_version
           @ios_version = version_data['iOS_version']
         end
-
-        # Deprecated 0.13.0
-        @iphone_4in = version_data['4inch']
       end
 
       # Is this device a simulator or physical device?
       # @return [Boolean] true if this device is a simulator
       def simulator?
-        # Post 0.16.2 server
-        unless simulator_details.nil? || simulator_details.empty?
-          true
+        details = simulator_details
+        if details
+          details != ""
         else
-          system == GESTALT_SIM_SYS
+          false
         end
       end
 
       # Is this device a device or simulator?
       # @return [Boolean] true if this device is a physical device
       def device?
-        not simulator?
+        !simulator?
       end
 
       # Is this device an iPhone?
@@ -290,19 +268,6 @@ module Calabash
         ios_version_object.major == 5
       end
 
-      # @deprecated 0.11.2 Replaced with screen_dimensions.
-      #
-      # The screen size of the device.
-      #
-      # @return [Hash] representation of the screen size
-      def screen_size
-        _deprecated('0.11.2', 'Replaced with screen_dimensions', :warn)
-        return screen_dimensions if screen_dimensions
-        return { :width => 768, :height => 1024 } if ipad?
-        return { :width => 320, :height => 568 } if iphone_4in?
-        { :width => 320, :height => 480 }
-      end
-
       # Is the app that is running an iPhone-only app emulated on an iPad?
       #
       # @note If the app is running in emulation mode, there will be a 1x or 2x
@@ -313,84 +278,6 @@ module Calabash
       def iphone_app_emulated_on_ipad?
         iphone_app_emulated_on_ipad
       end
-
-      # @deprecated 0.9.169 replaced with `server_version`
-      #
-      # @see #server_version
-      #
-      # The version of the embedded Calabash server running in the app under
-      # test on this device.
-      # @see #server_version
-      # @return [String] the version of the embedded Calabash server
-      def framework_version
-        _deprecated('0.9.169', "use 'server_version', instead", :warn)
-        @server_version
-      end
-
-      # @deprecated 0.10.0 no replacement
-      def udid
-        _deprecated('0.10.0', 'no replacement', :warn)
-        @udid
-      end
-
-      # @deprecated 0.10.0 no replacement
-      def udid=(value)
-        _deprecated('0.10.0', 'no replacement', :warn)
-        @udid = value
-      end
-
-      # @deprecated 0.9.168 replaced with iphone_4in?
-      #
-      # @see #iphone_4in?
-      #
-      # Is this device an iPhone 5?
-      # @note Deprecated because the iPhone 5S reports as an iPhone6,*.
-      # @return [Boolean] true if this device is an iPhone 5
-      def iphone_5?
-        _deprecated('0.9.168', "use 'iphone_4in?' instead", :warn)
-        iphone_4in?
-      end
-
-      # @deprecated 0.13.1 - Call `iphone_4in?` instead.
-      #
-      # @see #iphone_4in?
-      #
-      # @note Deprecated after introducing new `form_factor` behavior.
-      # @return [Boolean] true if this device is an iPhone 5 or 5s
-      def iphone_4in
-        _deprecated('0.13.1', "use 'iphone_4in?' instead", :warn)
-        @iphone_4in
-      end
-
-      # @deprecated 0.16.2 No replacement.
-      #
-      # @example
-      #  # simulator
-      #  i386
-      #  x86_64
-      #
-      # @example
-      #  # examples from physical devices
-      #  iPhone7,1
-      #  iPhone5,2
-      #
-      # @attribute [r] system
-      # @return [String] The model of this device.
-      #  this device.
-      attr_reader :system
-
-      # @deprecated 0.13.1 no replacement
-      #
-      # Indicates whether or not this device has a 4in screen.
-      # @attribute [r] iphone_4in
-      # @return [Boolean] `true` if this device has a 4in screen.
-      attr_reader :iphone_4in
-
-      # @deprecated 0.10.0 no replacement
-      #
-      # @!attribute [rw] udid
-      # @return [String] The udid of this device.
-      attr_accessor :udid
 
       private
 
