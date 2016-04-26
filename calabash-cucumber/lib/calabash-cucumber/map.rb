@@ -82,20 +82,23 @@ module Calabash
             :arguments => method_args
         }
 
-        res = Map.new.http({:method => :post, :path => 'map'},
-                                {:query => query, :operation => operation_map})
-        res = JSON.parse(res)
-        if res['outcome'] != 'SUCCESS'
+        route = {:method => :post, :path => "map"}
+        parameters = {:query => query,
+                      :operation => operation_map}
+        body = self.map_factory.http(route, parameters)
+
+        hash = JSON.parse(body)
+        if hash["outcome"] != "SUCCESS"
           message = %Q[
 map #{query}, #{method_name} failed for:
 
- reason: #{res["reason"]}
-details: #{res["details"]}
+ reason: #{hash["reason"]}
+details: #{hash["details"]}
 ]
-          Map.new.screenshot_and_raise(message)
+          self.map_factory.screenshot_and_raise(message)
         end
 
-        res
+        hash
       end
 
       # Asserts the result of a calabash `map` call and raises an error with
@@ -138,6 +141,12 @@ details: #{res["details"]}
         if compact.empty? or compact.member? '<VOID>' or compact.member? '*****'
           Map.new.screenshot_and_raise msg
         end
+      end
+
+      private
+
+      def self.map_factory
+        Map.new
       end
     end
   end
