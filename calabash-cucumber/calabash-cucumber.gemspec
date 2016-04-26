@@ -79,6 +79,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry-nav'
   s.add_development_dependency 'guard-rspec'
   s.add_development_dependency 'guard-bundler'
+  # Pin to 3.0.6; >= 3.1.0 requires ruby 2.2. This is guard dependency.
+  s.add_development_dependency("listen", "3.0.6")
   s.add_development_dependency 'growl'
   s.add_development_dependency 'stub_env'
   # Sometimes JSON.parse is failing to parse JSON dumped to a file.
