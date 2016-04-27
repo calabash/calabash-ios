@@ -159,7 +159,7 @@ module Calabash
             end
           end
           if !correct
-            fail "Incorrect predicate used, valid selectors are #{predicate}"
+            fail "Incorrect predicate used, valid selectors are: #{predicate}"
           end
         else
           return true

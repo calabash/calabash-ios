@@ -40,5 +40,40 @@ describe Calabash::Cucumber::Map do
                          /map view marked:'my mark', scrollToViewWithMark failed for:/)
     end
   end
+
+  describe ".raw_map.correct_predicate" do
+    let(:query) { "view marked:'my mark'" }
+    let(:incorrect_predicate) {%w(BEGINSWTH CONTAIN ENDWITH LKE MTCHES)}
+    let(:correct_predicate) {%w(BEGINSWITH CONTAINS ENDSWITH LIKE MATCHES)}
+
+    before do
+      allow(Calabash::Cucumber::Map).to receive(:map_factory).and_return(map)
+    end
+
+    it "raw_map receive incorrect predicate and raise error" do
+
+      incorrect_predicate.each do |predicate|
+        merged_query = query + "{text #{predicate} 'sometext'}"
+        expect do
+          Calabash::Cucumber::Map.raw_map(merged_query, method_name, args)
+        end.to raise_error(RuntimeError,
+                           /Incorrect predicate used, valid selectors are:/)
+      end
+
+    end
+
+    it "raw_map receive correct predicate and not raise error" do
+
+      correct_predicate.each do |predicate|
+        merged_query = query + "{text #{predicate} 'sometext'}"
+        expect do
+          Calabash::Cucumber::Map.raw_map(merged_query, method_name, args)
+        end.not_to raise_error(RuntimeError,
+                           /Incorrect predicate used, valid selectors are:/)
+      end
+
+    end
+  end
+
 end
 
