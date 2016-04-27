@@ -36,7 +36,7 @@ begin
   require "pry"
   Pry.config.history.should_save = true
   Pry.config.history.should_load = true
-  Pry.config.history.file = "./pry-history"
+  Pry.config.history.file = ".pry-history"
   require "pry-nav"
 rescue LoadError => _
 
