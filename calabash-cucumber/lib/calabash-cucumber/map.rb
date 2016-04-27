@@ -77,28 +77,29 @@ module Calabash
       #
       # @see map for examples.
       def self.raw_map(query, method_name, *method_args)
-        operation_map = {
-            :method_name => method_name,
-            :arguments => method_args
-        }
+        if correct_predicate?(query)
+          operation_map = {
+              :method_name => method_name,
+              :arguments => method_args
+          }
 
-        route = {:method => :post, :path => "map"}
-        parameters = {:query => query,
-                      :operation => operation_map}
-        body = self.map_factory.http(route, parameters)
+          route = {:method => :post, :path => "map"}
+          parameters = {:query => query,
+                        :operation => operation_map}
+          body = self.map_factory.http(route, parameters)
 
-        hash = JSON.parse(body)
-        if hash["outcome"] != "SUCCESS"
-          message = %Q[
-map #{query}, #{method_name} failed for:
+          hash = JSON.parse(body)
+          if hash["outcome"] != "SUCCESS"
+            message = %Q[
+              map #{query}, #{method_name} failed for:
+              reason: #{hash["reason"]}
+              details: #{hash["details"]}
+            ]
+            self.map_factory.screenshot_and_raise(message)
+          end
 
- reason: #{hash["reason"]}
-details: #{hash["details"]}
-]
-          self.map_factory.screenshot_and_raise(message)
+          hash
         end
-
-        hash
       end
 
       # Asserts the result of a calabash `map` call and raises an error with
@@ -143,6 +144,27 @@ details: #{hash["details"]}
         end
       end
 
+      # Evaluating whether a query contain correct predicate selector
+      # returs true if query does not include predicate part or include correct
+      # predicate selector
+      def self.correct_predicate?(query)
+        if !query.match(/{.*}/).nil?
+          str = query.match(/{.*}/)[0]
+          correct = false
+          predicate = %w(BEGINSWITH CONTAINS ENDSWITH LIKE MATCHES)
+          predicate.each do |value|
+            if str.include?(value)
+              correct = true
+              return correct
+            end
+          end
+          if !correct
+            fail "Incorrect predicate used, valid selectors are #{predicate}"
+          end
+        else
+          return true
+        end
+      end
       private
 
       def self.map_factory
