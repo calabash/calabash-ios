@@ -51,7 +51,12 @@ module Calabash
       def screenshot_embed(options={:prefix => nil, :name => nil, :label => nil})
         path = screenshot(options)
         filename = options[:label] || File.basename(path)
-        embed(path, 'image/png', filename)
+        if self.respond_to?(:embed)
+          embed(path, 'image/png', filename)
+        else
+          RunLoop.log_info2("Embed is not available in this context. Will not embed.")
+        end
+        true
       end
 
       # Generates a screenshot of the app UI by calling screenshot_embed and raises an error.
@@ -82,7 +87,6 @@ module Calabash
       def fail(msg='Error. Check log for details.', options={:prefix => nil, :name => nil, :label => nil})
         screenshot_and_raise(msg, options)
       end
-
     end
   end
 end
