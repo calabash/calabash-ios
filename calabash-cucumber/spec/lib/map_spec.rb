@@ -46,10 +46,6 @@ describe Calabash::Cucumber::Map do
     let(:incorrect_predicate) {%w(BEGINSWTH CONTAIN ENDWITH LKE MTCHES)}
     let(:correct_predicate) {%w(BEGINSWITH CONTAINS ENDSWITH LIKE MATCHES)}
 
-    before do
-      allow(Calabash::Cucumber::Map).to receive(:map_factory).and_return(map)
-    end
-
     it "raw_map receive incorrect predicate and raise error" do
 
       incorrect_predicate.each do |predicate|
