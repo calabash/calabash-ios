@@ -77,7 +77,7 @@ module Calabash
       #
       # @see map for examples.
       def self.raw_map(query, method_name, *method_args)
-        if correct_predicate?(query)
+        if correct_predicate?(query) || correct_format?(query)
           operation_map = {
               :method_name => method_name,
               :arguments => method_args
@@ -145,8 +145,7 @@ module Calabash
       end
 
       # Evaluating whether a query contain correct predicate selector
-      # returs true if query does not include predicate part or include correct
-      # predicate selector
+      # returns true if query include correct predicate selector
       def self.correct_predicate?(query)
         if !query.match(/{.*}/).nil?
           str = query.match(/{.*}/)[0]
@@ -161,8 +160,22 @@ module Calabash
           if !correct
             fail "Incorrect predicate used, valid selectors are: #{predicate}"
           end
+        end
+      end
+
+      # Evaluating whether a query contain two ' characters
+      # returns true if query include : character and two ' characters
+      # returns true if query does not include : character, like query("label")
+      # TODO: We can add additional verification in future
+      def self.correct_format?(query)
+        if !query.match(/:'/).nil?
+          if !query.match(/:'.*'/).nil?
+            true
+          else
+            fail 'Incorrect query format please check query string'
+          end
         else
-          return true
+          true
         end
       end
       private
