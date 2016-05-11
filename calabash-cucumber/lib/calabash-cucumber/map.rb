@@ -3,6 +3,7 @@ module Calabash
 
     # @!visibility private
     class Map
+      VALID_PREDICATES = ['BEGINSWITH', 'CONTAINS', 'ENDSWITH', 'LIKE', 'MATCHES']
 
       require "json"
       require "calabash-cucumber/http_helpers"
@@ -144,35 +145,44 @@ module Calabash
         end
       end
 
+      # Return predicate section of query
+      def self.query_predicate(query)
+        query.match(/{.*}/)
+      end
+
       # Evaluating whether a query contain correct predicate selector
-      # returns true if query include correct predicate selector
+      # and if predicate string contain two ' char
+      # returns true or raise an exceptions
       def self.correct_predicate?(query)
-        if !query.match(/{.*}/).nil?
-          str = query.match(/{.*}/)[0]
+        match = query_predicate(query)
+        if !match.nil?
           correct = false
-          predicate = %w(BEGINSWITH CONTAINS ENDSWITH LIKE MATCHES)
-          predicate.each do |value|
-            if str.include?(value)
+          predicates = VALID_PREDICATES
+          predicates.each do |value|
+            if match.to_s.include?(value)
               correct = true
               return correct
             end
           end
-          if !correct
-            fail "Incorrect predicate used, valid selectors are: #{predicate}"
+          if !match.to_s.match(/{.*'.*'.*}/).nil? && correct
+            true
+          else
+            raise("Incorrect predicate used, valid selectors are: #{predicates}")
           end
         end
       end
 
       # Evaluating whether a query contain two ' characters
       # returns true if query include : character and two ' characters
-      # returns true if query does not include : character, like query("label")
+      # like query("label marked:'label'")
+      # returns true or raise an exceptions
       # TODO: We can add additional verification in future
       def self.correct_format?(query)
         if !query.match(/:'/).nil?
           if !query.match(/:'.*'/).nil?
             true
           else
-            fail 'Incorrect query format please check query string'
+            raise('Incorrect query format please check query string')
           end
         else
           true

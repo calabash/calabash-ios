@@ -5,6 +5,7 @@ describe Calabash::Cucumber::Map do
   let(:method_name) { :scrollToViewWithMark }
   let(:args) { ["arg0", "arg1", "arg2"] }
   let(:map) { Calabash::Cucumber::Map.new }
+  let(:correct_predicate) {Calabash::Cucumber::Map::VALID_PREDICATES}
 
   it ".map_factory" do
     actual = Calabash::Cucumber::Map.send(:map_factory)
@@ -44,7 +45,7 @@ describe Calabash::Cucumber::Map do
   describe ".raw_map.correct_predicate" do
     let(:query) { "view marked:'my mark'" }
     let(:incorrect_predicate) {%w(BEGINSWTH CONTAIN ENDWITH LKE MTCHES)}
-    let(:correct_predicate) {%w(BEGINSWITH CONTAINS ENDSWITH LIKE MATCHES)}
+    # let(:correct_predicate) {VALID_PREDICATES}
 
     it "raw_map receive incorrect predicate and raise error" do
 
