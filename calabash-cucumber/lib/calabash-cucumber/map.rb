@@ -3,7 +3,7 @@ module Calabash
 
     # @!visibility private
     class Map
-      VALID_PREDICATES = ['BEGINSWITH', 'CONTAINS', 'ENDSWITH', 'LIKE', 'MATCHES']
+      VALID_PREDICATES = ['BEGINSWITH', 'CONTAINS', 'ENDSWITH', 'LIKE', 'MATCHES', '<', '>']
 
       require "json"
       require "calabash-cucumber/http_helpers"
@@ -161,13 +161,12 @@ module Calabash
           predicates.each do |value|
             if match.to_s.include?(value)
               correct = true
-              return correct
             end
           end
           if !match.to_s.match(/{.*'.*'.*}/).nil? && correct
             true
           else
-            raise("Incorrect predicate used, valid selectors are: #{predicates}")
+            raise("Incorrect predicate used, valid operation are: #{predicates}")
           end
         end
       end
@@ -178,12 +177,13 @@ module Calabash
       # returns true or raise an exceptions
       # TODO: We can add additional verification in future
       def self.correct_format?(query)
-        if !query.match(/:'/).nil?
+        if !query.match(/:'/).nil? && query_predicate(query).nil?
           if !query.match(/:'.*'/).nil?
             true
           else
             raise('Incorrect query format please check query string')
           end
+        elsif !query_predicate(query).nil?
         else
           true
         end
