@@ -70,7 +70,7 @@ describe 'Launcher:  #console_attach' do
       if Luffa::Environment.travis_ci?
         # :host is failing on Travis ~ 33% of the time.
         puts puts "\033[31mWARN: skipping :host on Travis CI - fails 33% of the time.\033[0m"
-        strategies = [:preferences, :shared_element]
+        strategies = [:preferences]
       else
         strategies = [:preferences, :host, :shared_element]
       end
