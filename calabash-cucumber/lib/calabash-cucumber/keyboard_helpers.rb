@@ -490,13 +490,8 @@ module Calabash
       #
       # @raise [RuntimeError] if the device is not an iPad
       def dismiss_ipad_keyboard
-        screenshot_and_raise 'cannot dismiss keyboard on iphone' if device_family_iphone?
-
-        if uia_available?
-          send_uia_command({:command =>  "#{_query_uia_hide_keyboard_button}.tap()"})
-        else
-          touch(_query_for_keyboard_mode_key)
-        end
+        screenshot_and_raise "Cannot dismiss keyboard on iPhone" if device_family_iphone?
+        send_uia_command({:command =>  "#{_query_uia_hide_keyboard_button}.tap()"})
 
         opts = {:timeout_message => 'keyboard did not disappear'}
         wait_for(opts) do
