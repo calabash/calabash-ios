@@ -373,13 +373,8 @@ module Calabash
       # @param [String] text the text to enter
       def fast_enter_text(text)
         _ensure_can_enter_text
-        if uia_available?
-          uia_set_responder_value(text)
-        else
-          keyboard_enter_text(text)
-        end
+        uia_set_responder_value(text)
       end
-
 
       # Touches the keyboard action key.
       #
