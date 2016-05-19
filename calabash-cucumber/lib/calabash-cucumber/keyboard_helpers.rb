@@ -229,17 +229,8 @@ module Calabash
         return if opts[:skip]
 
         screenshot = opts[:screenshot]
-        unless keyboard_visible?
-          msg = 'no visible keyboard'
-          if screenshot
-            screenshot_and_raise msg
-          else
-            raise msg
-          end
-        end
-
-        if split_keyboard_visible? and uia_not_available?
-          msg = 'cannot type on a split keyboard without launching with Instruments'
+        if !keyboard_visible?
+          msg = "No visible keyboard."
           if screenshot
             screenshot_and_raise msg
           else
@@ -291,46 +282,32 @@ module Calabash
         _ensure_can_enter_text({:screenshot => should_screenshot,
                                 :skip => (not should_screenshot)})
 
-        if uia_available?
-          if chr.length == 1
-            uia_type_string_raw chr
-          else
-            code = UIA_SUPPORTED_CHARS[chr]
-
-            unless code
-              raise "typing character '#{chr}' is not yet supported when running with Instruments"
-            end
-
-            # on iOS 6, the Delete char code is _not_ \b
-            # on iOS 7, the Delete char code is \b on non-numeric keyboards
-            #           on numeric keyboards, it is actually a button on the
-            #           keyboard and not a key
-            if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
-              js_tap_delete = "(function() {"\
-                  "var deleteElement = uia.keyboard().elements().firstWithName('Delete');"\
-                  "deleteElement = deleteElement.isValid() ? deleteElement : uia.keyboard().elements().firstWithName('delete');"\
-                  "deleteElement.tap();"\
-                "})();"
-              uia(js_tap_delete)
-            else
-              uia_type_string_raw(code)
-            end
-          end
-          # noinspection RubyStringKeysInHashInspection
-          res = {'results' => []}
+        if chr.length == 1
+          uia_type_string_raw chr
         else
-          res = http({:method => :post, :path => 'keyboard'},
-                     {:key => chr, :events => load_playback_data('touch_done')})
-          res = JSON.parse(res)
-          if res['outcome'] != 'SUCCESS'
-            msg = "Keyboard enter failed failed because: #{res['reason']}\n#{res['details']}"
-            if should_screenshot
-              screenshot_and_raise msg
-            else
-              raise msg
-            end
+          code = UIA_SUPPORTED_CHARS[chr]
+
+          unless code
+            raise "typing character '#{chr}' is not yet supported when running with Instruments"
+          end
+
+          # on iOS 6, the Delete char code is _not_ \b
+          # on iOS 7, the Delete char code is \b on non-numeric keyboards
+          #           on numeric keyboards, it is actually a button on the
+          #           keyboard and not a key
+          if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
+            js_tap_delete = "(function() {"\
+              "var deleteElement = uia.keyboard().elements().firstWithName('Delete');"\
+              "deleteElement = deleteElement.isValid() ? deleteElement : uia.keyboard().elements().firstWithName('delete');"\
+              "deleteElement.tap();"\
+              "})();"
+            uia(js_tap_delete)
+          else
+            uia_type_string_raw(code)
           end
         end
+        # noinspection RubyStringKeysInHashInspection
+        res = {'results' => []}
 
         if ENV['POST_ENTER_KEYBOARD']
           w = ENV['POST_ENTER_KEYBOARD'].to_f
@@ -349,19 +326,9 @@ module Calabash
       # @raise [RuntimeError] if the text cannot be typed.
       def keyboard_enter_text(text)
         _ensure_can_enter_text
-        if uia_available?
-          text_before = _text_from_first_responder()
-          text_before = text_before.gsub("\n","\\n") if text_before
-          uia_type_string(text, text_before)
-        else
-          text.each_char do |ch|
-            begin
-              keyboard_enter_char(ch, {:should_screenshot => false})
-            rescue
-              _search_keyplanes_and_enter_char(ch)
-            end
-          end
-        end
+        text_before = _text_from_first_responder()
+        text_before = text_before.gsub("\n","\\n") if text_before
+        uia_type_string(text, text_before)
       end
 
       # @!visibility private
@@ -406,13 +373,8 @@ module Calabash
       # @param [String] text the text to enter
       def fast_enter_text(text)
         _ensure_can_enter_text
-        if uia_available?
-          uia_set_responder_value(text)
-        else
-          keyboard_enter_text(text)
-        end
+        uia_set_responder_value(text)
       end
-
 
       # Touches the keyboard action key.
       #
@@ -528,13 +490,8 @@ module Calabash
       #
       # @raise [RuntimeError] if the device is not an iPad
       def dismiss_ipad_keyboard
-        screenshot_and_raise 'cannot dismiss keyboard on iphone' if device_family_iphone?
-
-        if uia_available?
-          send_uia_command({:command =>  "#{_query_uia_hide_keyboard_button}.tap()"})
-        else
-          touch(_query_for_keyboard_mode_key)
-        end
+        screenshot_and_raise "Cannot dismiss keyboard on iPhone" if device_family_iphone?
+        send_uia_command({:command =>  "#{_query_uia_hide_keyboard_button}.tap()"})
 
         opts = {:timeout_message => 'keyboard did not disappear'}
         wait_for(opts) do
@@ -553,76 +510,10 @@ module Calabash
       # @raise [RuntimeError] when the device is not an iPad
       # @raise [RuntimeError] the app was not launched with instruments
       def _point_for_ipad_keyboard_mode_key
-        raise 'the keyboard mode does not exist on the on the iphone' if device_family_iphone?
-        raise 'cannot detect keyboard mode key without launching with instruments' unless uia_available?
+        raise "The keyboard mode does not exist on the on the iphone" if device_family_iphone?
         res = send_uia_command({:command => "#{_query_uia_hide_keyboard_button}.rect()"})
         origin = res['value']['origin']
         {:x => origin['x'], :y => origin['y']}
-      end
-
-      # @!visibility private
-      # Returns a query string for touching one of the options that appears when
-      # the iPad mode key is touched and held.
-      #
-      # The mode key is also know as the 'Hide keyboard' key.
-      #
-      # @note
-      #  This is only available when running outside of instruments.
-      #
-      # @param [Symbol] top_or_bottom can be one of `{:top | :bottom}`
-      # @param [Symbol] mode `{:docked | :undocked | :skipped}`
-      #
-      # @raise [RuntimeError] the device is not an iPad
-      # @raise [RuntimeError] the app was not launched with instruments
-      # @raise [RuntimeError] the method is passed invalid arguments
-      def _query_for_touch_for_keyboard_mode_option(top_or_bottom, mode)
-        raise 'the keyboard mode does not exist on the iphone' if device_family_iphone?
-
-        if uia_available?
-          raise "UIA is available, use '_point_for_keyboard_mode_key' instead"
-        end
-
-        valid = [:top, :bottom]
-        unless valid.include? top_or_bottom
-          raise "expected '#{top_or_bottom}' to be one of '#{valid}'"
-        end
-
-        valid = [:split, :undocked, :docked]
-        unless valid.include? mode
-          raise "expected '#{mode}' to be one of '#{valid}'"
-        end
-
-        hash = {:split => {:top => 'Merge',
-                           :bottom => 'Dock and Merge'},
-                :undocked => {:top => 'Dock',
-                              :bottom => 'Split'},
-                :docked => {:top => 'Undock',
-                            :bottom => 'Split'}}
-        mark = hash[mode][top_or_bottom]
-        "label marked:'#{mark}'"
-      end
-
-      # @!visibility private
-      # Returns a query for touching the iPad keyboard mode key.
-      #
-      # The mode key is also know as the 'Hide keyboard' key.
-      #
-      # @note
-      #  This is only available when running outside of instruments.  Use
-      #  ` _point_for_ipad_keyboard_mode_key` when the app is _not_ launched
-      #  with instruments.
-      #
-      # raises an error when
-      # * the device is not an iPad
-      # * the app was launched with Instruments i.e. there is a <tt>run_loop</tt>
-      def _query_for_keyboard_mode_key
-        raise 'cannot detect keyboard mode key on iphone' if device_family_iphone?
-        if uia_available?
-          raise "UIA is available, use '_point_for_keyboard_mode_key' instead"
-        end
-        qstr = "view:'UIKBKeyView'"
-        idx = query(qstr).count - 1
-        "#{qstr} index:#{idx}"
       end
 
       # @!visibility private
@@ -633,19 +524,12 @@ module Calabash
       #
       # The `mode` key allows the user to undock, dock, or split the keyboard.
       def _touch_bottom_keyboard_mode_row
-        mode = ipad_keyboard_mode
-        if uia_available?
-          start_pt = _point_for_ipad_keyboard_mode_key
-          # there are 10 pt btw the key and the popup and the row is 50 pt
-          y_offset = 10 + 25
-          end_pt = {:x => (start_pt[:x] - 40), :y => (start_pt[:y] - y_offset)}
-          uia_pan_offset(start_pt, end_pt, {})
-        else
-          pan(_query_for_keyboard_mode_key, nil, {:duration => 1.0})
-          touch(_query_for_touch_for_keyboard_mode_option(:bottom, mode))
-          sleep(0.5)
-        end
-        2.times { sleep(0.5) }
+        start_pt = _point_for_ipad_keyboard_mode_key
+        # there are 10 pt btw the key and the popup and the row is 50 pt
+        y_offset = 10 + 25
+        end_pt = {:x => (start_pt[:x] - 40), :y => (start_pt[:y] - y_offset)}
+        uia_pan_offset(start_pt, end_pt, {})
+        sleep(1.0)
       end
 
       # Touches the top option on the popup dialog that is presented when the
@@ -655,23 +539,15 @@ module Calabash
       #
       # The `mode` key allows the user to undock, dock, or split the keyboard.
       def _touch_top_keyboard_mode_row
-        mode = ipad_keyboard_mode
-        if uia_available?
-          start_pt = _point_for_ipad_keyboard_mode_key
-          # there are 10 pt btw the key and the popup and each row is 50 pt
-          # NB: no amount of offsetting seems to allow touching the top row
-          #     when the keyboard is split
+        start_pt = _point_for_ipad_keyboard_mode_key
+        # there are 10 pt btw the key and the popup and each row is 50 pt
+        # NB: no amount of offsetting seems to allow touching the top row
+        #     when the keyboard is split
 
-          x_offset = 40
-          y_offset = 10 + 50 + 25
-          end_pt = {:x => (start_pt[:x] - x_offset), :y => (start_pt[:y] - y_offset)}
-          uia_pan_offset(start_pt, end_pt, {:duration => 1.0})
-        else
-          pan(_query_for_keyboard_mode_key, nil, {})
-          touch(_query_for_touch_for_keyboard_mode_option(:top, mode))
-          sleep(0.5)
-        end
-        2.times { sleep(0.5) }
+        x_offset = 40
+        y_offset = 10 + 50 + 25
+        end_pt = {:x => (start_pt[:x] - x_offset), :y => (start_pt[:y] - y_offset)}
+        uia_pan_offset(start_pt, end_pt, {:duration => 1.0})
       end
 
       # Ensures that the iPad keyboard is docked.
@@ -847,9 +723,6 @@ module Calabash
       #
       # @raise [RuntimeError] if the app was not launched with instruments
       def uia_keyboard_visible?
-        unless uia_available?
-          screenshot_and_raise 'only available if there is a run_loop i.e. the app was launched with Instruments'
-        end
         res = uia_query_windows(:keyboard)
         not res.eql?(':nil')
       end
@@ -865,9 +738,6 @@ module Calabash
       #
       # @raise [RuntimeError] if the app was not launched with instruments
       def uia_wait_for_keyboard(opts={})
-        unless uia_available?
-          screenshot_and_raise 'only available if there is a run_loop i.e. the app was launched with Instruments'
-        end
         default_opts = {:timeout => 10,
                         :retry_frequency => 0.1,
                         :post_timeout => 0.5}
