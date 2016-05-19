@@ -517,71 +517,6 @@ module Calabash
       end
 
       # @!visibility private
-      # Returns a query string for touching one of the options that appears when
-      # the iPad mode key is touched and held.
-      #
-      # The mode key is also know as the 'Hide keyboard' key.
-      #
-      # @note
-      #  This is only available when running outside of instruments.
-      #
-      # @param [Symbol] top_or_bottom can be one of `{:top | :bottom}`
-      # @param [Symbol] mode `{:docked | :undocked | :skipped}`
-      #
-      # @raise [RuntimeError] the device is not an iPad
-      # @raise [RuntimeError] the app was not launched with instruments
-      # @raise [RuntimeError] the method is passed invalid arguments
-      def _query_for_touch_for_keyboard_mode_option(top_or_bottom, mode)
-        raise 'the keyboard mode does not exist on the iphone' if device_family_iphone?
-
-        if uia_available?
-          raise "UIA is available, use '_point_for_keyboard_mode_key' instead"
-        end
-
-        valid = [:top, :bottom]
-        unless valid.include? top_or_bottom
-          raise "expected '#{top_or_bottom}' to be one of '#{valid}'"
-        end
-
-        valid = [:split, :undocked, :docked]
-        unless valid.include? mode
-          raise "expected '#{mode}' to be one of '#{valid}'"
-        end
-
-        hash = {:split => {:top => 'Merge',
-                           :bottom => 'Dock and Merge'},
-                :undocked => {:top => 'Dock',
-                              :bottom => 'Split'},
-                :docked => {:top => 'Undock',
-                            :bottom => 'Split'}}
-        mark = hash[mode][top_or_bottom]
-        "label marked:'#{mark}'"
-      end
-
-      # @!visibility private
-      # Returns a query for touching the iPad keyboard mode key.
-      #
-      # The mode key is also know as the 'Hide keyboard' key.
-      #
-      # @note
-      #  This is only available when running outside of instruments.  Use
-      #  ` _point_for_ipad_keyboard_mode_key` when the app is _not_ launched
-      #  with instruments.
-      #
-      # raises an error when
-      # * the device is not an iPad
-      # * the app was launched with Instruments i.e. there is a <tt>run_loop</tt>
-      def _query_for_keyboard_mode_key
-        raise 'cannot detect keyboard mode key on iphone' if device_family_iphone?
-        if uia_available?
-          raise "UIA is available, use '_point_for_keyboard_mode_key' instead"
-        end
-        qstr = "view:'UIKBKeyView'"
-        idx = query(qstr).count - 1
-        "#{qstr} index:#{idx}"
-      end
-
-      # @!visibility private
       # Touches the bottom option on the popup dialog that is presented when the
       # the iPad keyboard `mode` key is touched and held.
       #
@@ -589,19 +524,12 @@ module Calabash
       #
       # The `mode` key allows the user to undock, dock, or split the keyboard.
       def _touch_bottom_keyboard_mode_row
-        mode = ipad_keyboard_mode
-        if uia_available?
-          start_pt = _point_for_ipad_keyboard_mode_key
-          # there are 10 pt btw the key and the popup and the row is 50 pt
-          y_offset = 10 + 25
-          end_pt = {:x => (start_pt[:x] - 40), :y => (start_pt[:y] - y_offset)}
-          uia_pan_offset(start_pt, end_pt, {})
-        else
-          pan(_query_for_keyboard_mode_key, nil, {:duration => 1.0})
-          touch(_query_for_touch_for_keyboard_mode_option(:bottom, mode))
-          sleep(0.5)
-        end
-        2.times { sleep(0.5) }
+        start_pt = _point_for_ipad_keyboard_mode_key
+        # there are 10 pt btw the key and the popup and the row is 50 pt
+        y_offset = 10 + 25
+        end_pt = {:x => (start_pt[:x] - 40), :y => (start_pt[:y] - y_offset)}
+        uia_pan_offset(start_pt, end_pt, {})
+        sleep(1.0)
       end
 
       # Touches the top option on the popup dialog that is presented when the
@@ -611,23 +539,15 @@ module Calabash
       #
       # The `mode` key allows the user to undock, dock, or split the keyboard.
       def _touch_top_keyboard_mode_row
-        mode = ipad_keyboard_mode
-        if uia_available?
-          start_pt = _point_for_ipad_keyboard_mode_key
-          # there are 10 pt btw the key and the popup and each row is 50 pt
-          # NB: no amount of offsetting seems to allow touching the top row
-          #     when the keyboard is split
+        start_pt = _point_for_ipad_keyboard_mode_key
+        # there are 10 pt btw the key and the popup and each row is 50 pt
+        # NB: no amount of offsetting seems to allow touching the top row
+        #     when the keyboard is split
 
-          x_offset = 40
-          y_offset = 10 + 50 + 25
-          end_pt = {:x => (start_pt[:x] - x_offset), :y => (start_pt[:y] - y_offset)}
-          uia_pan_offset(start_pt, end_pt, {:duration => 1.0})
-        else
-          pan(_query_for_keyboard_mode_key, nil, {})
-          touch(_query_for_touch_for_keyboard_mode_option(:top, mode))
-          sleep(0.5)
-        end
-        2.times { sleep(0.5) }
+        x_offset = 40
+        y_offset = 10 + 50 + 25
+        end_pt = {:x => (start_pt[:x] - x_offset), :y => (start_pt[:y] - y_offset)}
+        uia_pan_offset(start_pt, end_pt, {:duration => 1.0})
       end
 
       # Ensures that the iPad keyboard is docked.
