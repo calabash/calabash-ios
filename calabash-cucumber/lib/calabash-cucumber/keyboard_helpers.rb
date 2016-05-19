@@ -510,8 +510,7 @@ module Calabash
       # @raise [RuntimeError] when the device is not an iPad
       # @raise [RuntimeError] the app was not launched with instruments
       def _point_for_ipad_keyboard_mode_key
-        raise 'the keyboard mode does not exist on the on the iphone' if device_family_iphone?
-        raise 'cannot detect keyboard mode key without launching with instruments' unless uia_available?
+        raise "The keyboard mode does not exist on the on the iphone" if device_family_iphone?
         res = send_uia_command({:command => "#{_query_uia_hide_keyboard_button}.rect()"})
         origin = res['value']['origin']
         {:x => origin['x'], :y => origin['y']}
