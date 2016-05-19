@@ -229,17 +229,8 @@ module Calabash
         return if opts[:skip]
 
         screenshot = opts[:screenshot]
-        unless keyboard_visible?
-          msg = 'no visible keyboard'
-          if screenshot
-            screenshot_and_raise msg
-          else
-            raise msg
-          end
-        end
-
-        if split_keyboard_visible? and uia_not_available?
-          msg = 'cannot type on a split keyboard without launching with Instruments'
+        if !keyboard_visible?
+          msg = "No visible keyboard."
           if screenshot
             screenshot_and_raise msg
           else
