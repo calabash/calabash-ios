@@ -282,46 +282,32 @@ module Calabash
         _ensure_can_enter_text({:screenshot => should_screenshot,
                                 :skip => (not should_screenshot)})
 
-        if uia_available?
-          if chr.length == 1
-            uia_type_string_raw chr
-          else
-            code = UIA_SUPPORTED_CHARS[chr]
-
-            unless code
-              raise "typing character '#{chr}' is not yet supported when running with Instruments"
-            end
-
-            # on iOS 6, the Delete char code is _not_ \b
-            # on iOS 7, the Delete char code is \b on non-numeric keyboards
-            #           on numeric keyboards, it is actually a button on the
-            #           keyboard and not a key
-            if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
-              js_tap_delete = "(function() {"\
-                  "var deleteElement = uia.keyboard().elements().firstWithName('Delete');"\
-                  "deleteElement = deleteElement.isValid() ? deleteElement : uia.keyboard().elements().firstWithName('delete');"\
-                  "deleteElement.tap();"\
-                "})();"
-              uia(js_tap_delete)
-            else
-              uia_type_string_raw(code)
-            end
-          end
-          # noinspection RubyStringKeysInHashInspection
-          res = {'results' => []}
+        if chr.length == 1
+          uia_type_string_raw chr
         else
-          res = http({:method => :post, :path => 'keyboard'},
-                     {:key => chr, :events => load_playback_data('touch_done')})
-          res = JSON.parse(res)
-          if res['outcome'] != 'SUCCESS'
-            msg = "Keyboard enter failed failed because: #{res['reason']}\n#{res['details']}"
-            if should_screenshot
-              screenshot_and_raise msg
-            else
-              raise msg
-            end
+          code = UIA_SUPPORTED_CHARS[chr]
+
+          unless code
+            raise "typing character '#{chr}' is not yet supported when running with Instruments"
+          end
+
+          # on iOS 6, the Delete char code is _not_ \b
+          # on iOS 7, the Delete char code is \b on non-numeric keyboards
+          #           on numeric keyboards, it is actually a button on the
+          #           keyboard and not a key
+          if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
+            js_tap_delete = "(function() {"\
+              "var deleteElement = uia.keyboard().elements().firstWithName('Delete');"\
+              "deleteElement = deleteElement.isValid() ? deleteElement : uia.keyboard().elements().firstWithName('delete');"\
+              "deleteElement.tap();"\
+              "})();"
+            uia(js_tap_delete)
+          else
+            uia_type_string_raw(code)
           end
         end
+        # noinspection RubyStringKeysInHashInspection
+        res = {'results' => []}
 
         if ENV['POST_ENTER_KEYBOARD']
           w = ENV['POST_ENTER_KEYBOARD'].to_f
