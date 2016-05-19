@@ -723,9 +723,6 @@ module Calabash
       #
       # @raise [RuntimeError] if the app was not launched with instruments
       def uia_keyboard_visible?
-        unless uia_available?
-          screenshot_and_raise 'only available if there is a run_loop i.e. the app was launched with Instruments'
-        end
         res = uia_query_windows(:keyboard)
         not res.eql?(':nil')
       end
@@ -741,9 +738,6 @@ module Calabash
       #
       # @raise [RuntimeError] if the app was not launched with instruments
       def uia_wait_for_keyboard(opts={})
-        unless uia_available?
-          screenshot_and_raise 'only available if there is a run_loop i.e. the app was launched with Instruments'
-        end
         default_opts = {:timeout => 10,
                         :retry_frequency => 0.1,
                         :post_timeout => 0.5}
