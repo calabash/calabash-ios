@@ -326,19 +326,9 @@ module Calabash
       # @raise [RuntimeError] if the text cannot be typed.
       def keyboard_enter_text(text)
         _ensure_can_enter_text
-        if uia_available?
-          text_before = _text_from_first_responder()
-          text_before = text_before.gsub("\n","\\n") if text_before
-          uia_type_string(text, text_before)
-        else
-          text.each_char do |ch|
-            begin
-              keyboard_enter_char(ch, {:should_screenshot => false})
-            rescue
-              _search_keyplanes_and_enter_char(ch)
-            end
-          end
-        end
+        text_before = _text_from_first_responder()
+        text_before = text_before.gsub("\n","\\n") if text_before
+        uia_type_string(text, text_before)
       end
 
       # @!visibility private
