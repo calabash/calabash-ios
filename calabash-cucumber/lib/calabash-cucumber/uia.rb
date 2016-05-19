@@ -12,11 +12,20 @@ module Calabash
       # @param {String} command the JavaScript snippet to execute
       # @return {Object} the result returned by the UIA process
       def uia(command, options={})
+        raise ArgumentError, "Please supply :command" unless command
+
         # UIA only makes sense if there is a run loop
         launcher = Calabash::Cucumber::Launcher.launcher_if_used
         run_loop = launcher && launcher.active? && launcher.run_loop
-        raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
-        raise ArgumentError, 'please supply :command' unless command
+
+        # Automatically attach in the calabash console
+        if !run_loop && defined?(IRB)
+          RunLoop.log_debug("Attaching to current instruments process...")
+          launcher = Calabash::Cucumber::Launcher.new
+          Calabash::Cucumber::Launcher.attach
+          run_loop = launcher.run_loop
+          RunLoop.log_debug("Attached!")
+        end
 
         strategy = run_loop[:uia_strategy]
         case strategy
