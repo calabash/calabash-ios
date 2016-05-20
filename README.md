@@ -42,6 +42,13 @@ For more information about ruby on MacOS, see these Wiki pages:
 * [Ruby on MacOS](https://github.com/calabash/calabash-ios/wiki/Ruby-on-MacOS)
 * [Best Practice: Never install gems with sudo](https://github.com/calabash/calabash-ios/wiki/Best-Practice%3A--Never-install-gems-with-sudo)
 
+## IMPORTANT
+
+Calabash uses private APIs to inspect your app's view hierarchy.  Apps that inlcude the Calabash iOS
+Server will be rejected if they are submitted to the AppStore.  The tutorials below describe a number
+ways to add Calabash to your Xcode project that will ensure you do not accidently submit a binary that
+will be reject because it includes Calabash.
+
 ## Getting Started
 
 If you want to see Calabash iOS in action, head over to the [Calabash iOS Smoke Test App](https://github.com/calabash/ios-smoke-test-app) and follow the instructions in the README.  We use this app to document, demonstrate, and test Calabash iOS.  You can use this app to explore Calabash and as an example for how to configure your Xcode project and Calabash workflow.
