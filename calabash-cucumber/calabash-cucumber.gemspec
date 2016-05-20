@@ -60,7 +60,7 @@ Gem::Specification.new do |s|
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
   s.add_dependency("clipboard", "~> 1.0")
-  s.add_dependency("run_loop", ">= 2.1.1", "< 3.0")
+  s.add_dependency("run_loop", ">= 2.1.2", "< 3.0")
 
   # Shared with run-loop.
   s.add_dependency('json')
@@ -79,6 +79,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry-nav'
   s.add_development_dependency 'guard-rspec'
   s.add_development_dependency 'guard-bundler'
+  # Pin to 3.0.6; >= 3.1.0 requires ruby 2.2. This is guard dependency.
+  s.add_development_dependency("listen", "3.0.6")
   s.add_development_dependency 'growl'
   s.add_development_dependency 'stub_env'
   # Sometimes JSON.parse is failing to parse JSON dumped to a file.

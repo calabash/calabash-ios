@@ -82,7 +82,7 @@ module Calabash
         else
           msg << "Not attached to instruments."
           msg << "Start your app with `start_test_server_in_background`"
-          msg << "If you app is already running, try `console_attach`"
+          msg << "If your app is already running, try `console_attach`"
         end
         msg.join("\n")
       end

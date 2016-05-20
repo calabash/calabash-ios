@@ -57,6 +57,14 @@ class Resources
     end
   end
 
+  def local_tmp_dir
+    @local_tmp_dir ||= lambda do
+      path = File.expand_path(File.join(File.dirname(__FILE__),  "..", "tmp"))
+      FileUtils.mkdir_p(path)
+      path
+    end.call
+  end
+
   def simulator_identifier_with_name(name)
     @simulators ||= simctl.simulators
 

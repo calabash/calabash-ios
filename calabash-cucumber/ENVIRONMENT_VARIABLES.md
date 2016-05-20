@@ -44,8 +44,8 @@ Paths or values with spaces need double or single quotes.
 #### Example: Quoting values with spaces.
 
 ```
-APP_BUNDLE_PATH="Users/adamant/path with/a spaces/in it"   # Correct!
-APP_BUNDLE_PATH=Users/adam ant/path with/a spaces/in it     # Incorrect.
+APP="Users/adamant/path with/a spaces/in it"   # Correct!
+APP=Users/adam ant/path with/a spaces/in it     # Incorrect.
 
 DEVICE_TARGET='iPhone Retina (3.5-inch) - Simulator - iOS 7.1'  # Correct!
 DEVICE_TARGET=iPhone Retina (3.5-inch) - Simulator - iOS 7.1    # Incorrect.
@@ -57,7 +57,8 @@ DEVICE_TARGET=iPhone Retina (3.5-inch) - Simulator - iOS 7.1    # Incorrect.
 
 ***iOS Simulator testing only.***
 
-`APP_BUNDLE_PATH` and `APP` are synonyms; use either, but not both.
+`APP` and `APP_BUNDLE_PATH` are synonyms, but `APP` is preferred.
+`APP_BUNDLE_PATH` is deprecated and will soon be removed. 
 
 Use this variable to tell calabash where it can find the the application bundle (AKA app bundle).
 

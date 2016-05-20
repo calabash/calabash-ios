@@ -279,7 +279,9 @@ Please report this issue.
           str_id = data["id"] ? "[id:#{RunLoop::Color.blue(data["id"])}] " : ""
           str_label = data["label"] ? "[label:#{RunLoop::Color.green(data["label"])}] " : ""
           str_text = data["value"] ? "[text:#{RunLoop::Color.magenta(data["value"])}] " : ""
-          output("#{str_type}#{str_id}#{str_label}#{str_text}", indentation)
+          str_node_type = data["nodeType"] ? "[nodeType:#{RunLoop::Color.red(data["nodeType"])}] " : ""
+
+          output("#{str_type}#{str_id}#{str_label}#{str_text}#{str_node_type}", indentation)
           output("\n", indentation)
         end
       end

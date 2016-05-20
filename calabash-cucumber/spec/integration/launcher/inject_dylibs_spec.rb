@@ -18,6 +18,12 @@ describe Calabash::Cucumber::Launcher do
   end
 
   it "Launch and inject a dylib on a simulator" do
+    if RunLoop::Environment.ci?
+      timeout = 40
+    else
+      timeout = 20
+    end
+    RunLoop::DylibInjector::RETRY_OPTIONS[:timeout] = timeout
     launcher.relaunch(options)
     expect(launcher.run_loop).not_to be == nil
   end
