@@ -38,7 +38,7 @@ module Calabash
         }
 
         counter = -1
-        res.sort.each { |elm|
+        res.sort_by.each { |elm|
           printf("%4s %-6s => %#{max_width}s => %s\n",
                  "[#{counter = counter + 1}]",
                  elm[2], elm[0], elm[1])
@@ -155,7 +155,7 @@ module Calabash
       # @param {Integer} max_width
       def print_marks(marks, max_width)
         counter = -1
-        marks.sort.each { |elm|
+        marks.sort_by.each { |elm|
           printf("%4s %#{max_width + 2}s => %s\n", "[#{counter = counter + 1}]", elm[0], elm[1])
         }
       end
