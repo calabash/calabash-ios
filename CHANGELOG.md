@@ -1,3 +1,12 @@
+### 0.19.2
+
+This is a server only release.  The gem behavior has not changed.
+
+The 0.19.2 server fixes touch coordinates for legacy applications on
+iPhone 6 Plus form factors.  Legacy applications do not have the correct
+icons, launch images, and image assets (@3x) to support non-scaled
+display on iPhone 6 and iPhone 6 Plus form factors.
+
 ### 0.19.1
 
 * UIA: automatically attach in the IRB #1102
