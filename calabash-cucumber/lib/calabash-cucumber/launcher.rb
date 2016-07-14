@@ -418,6 +418,7 @@ Resetting physical devices is not supported.
       end
 
       # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
+      # TODO remove in 0.20.0
       # @!visibility private
       def calabash_no_stop?
         # Not yet.  Save for 0.20.0.
@@ -427,6 +428,7 @@ Resetting physical devices is not supported.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def calabash_no_launch?
         RunLoop.log_warn(%Q[
 Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
@@ -438,6 +440,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement.
+      # TODO remove in 0.20.0
       def default_uia_strategy(launch_args, sim_control, instruments)
         RunLoop::deprecated("0.19.0", "This method has been removed.")
         :host
@@ -445,6 +448,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def detect_connected_device?
         RunLoop.deprecated("0.19.0", "No replacement")
         false
@@ -452,6 +456,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def default_launch_args
         RunLoop.deprecated("0.19.0", "No replacement")
         {}
@@ -459,6 +464,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def discover_device_target(launch_args)
         RunLoop.deprecated("0.19.0", "No replacement")
         nil
@@ -466,6 +472,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def app_path
         RunLoop.deprecated("0.19.0", "No replacement")
         nil
@@ -473,6 +480,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def xcode
         RunLoop.deprecated("0.19.0", "Use Calabash::Cucumber::Environment.xcode")
         Calabash::Cucumber::Environment.xcode
@@ -480,6 +488,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def ensure_connectivity
         RunLoop.deprecated("0.19.0", "No replacement")
         Calabash::Cucumber::HTTP.ensure_connectivity
@@ -491,12 +500,14 @@ true.  Please remove this method call from your hooks.
       # #relaunch will now send ":on_launch" to the Cucumber World if:
       # * the Launcher is part of the World (it is not by default).
       # * Cucumber responds to :on_launch.
+      # TODO remove in 0.20.0
       def calabash_notify(_)
         false
       end
 
       # @!visibility private
       # @deprecated 0.19.0  - no replacement.
+      # TODO remove in 0.20.0
       def server_version_from_server
         RunLoop.deprecated("0.19.0", "No replacement")
         server_version
@@ -504,6 +515,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def server_version_from_bundle(app_bundle_path)
         RunLoop.deprecated("0.19.0", "No replacement")
         options = {:app => app_bundle_path }
