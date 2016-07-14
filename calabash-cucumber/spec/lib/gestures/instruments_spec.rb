@@ -71,6 +71,9 @@ describe Calabash::Cucumber::Gestures::Instruments do
           }
         end
 
+        # Legacy - requires run-loop > 2.1.3
+        it "is passed a hash with no :gesture_performer"
+
         it "is passed a hash with an invalid :gesture_performer" do
           hash[:gesture_performer] = :invalid
           expect do

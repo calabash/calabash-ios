@@ -72,18 +72,22 @@ args = #{args}
 Expected run_loop arg to be a hash, but found:
 
 run_loop = #{run_loop} is_a => #{run_loop.class}
+
 ])
           end
 
-          if run_loop[:gesture_performer] != :instruments
+          performer = run_loop[:gesture_performer]
+          # TODO Can remove the performer existence check after run-loop > 2.1.3
+          if performer && performer != :instruments
             raise(ArgumentError, %Q[
 Invalid :gesture_performer. Expected :instruments but found:
 
-#{run_loop[:gesture_performer]}
+#{performer}
 
 in
 
 #{run_loop}
+
 ])
           end
 
