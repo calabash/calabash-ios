@@ -384,4 +384,25 @@ describe 'Calabash Launcher' do
 
     end
   end
+
+  context ".active?" do
+    it "is deprecated" do
+      expect(RunLoop).to receive(:deprecated).and_call_original
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(:attached)
+
+      expect(launcher.active?).to be == :attached
+    end
+  end
+
+  context ".attached_to_gesture_performer?" do
+    it "returns true if @actions is non-nil" do
+      launcher.instance_variable_set(:@actions, :actions)
+      expect(launcher.attached_to_gesture_performer?).to be_truthy
+    end
+
+    it "returns false if @actions is nil" do
+      launcher.instance_variable_set(:@actions, nil)
+      expect(launcher.attached_to_gesture_performer?).to be_falsey
+    end
+  end
 end

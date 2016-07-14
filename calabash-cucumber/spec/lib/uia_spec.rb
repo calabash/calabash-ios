@@ -78,9 +78,14 @@ describe Calabash::Cucumber::UIA do
         it 'when http returns nil - simulates an app crash' do
           launcher = Calabash::Cucumber::Launcher.new
           launcher.run_loop = {:uia_strategy => :preferences}
+
           expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+          expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
           expect(test_obj).to receive(:http).and_return('')
-          expect { test_obj.uia('command') }.to raise_error RuntimeError
+
+          expect do
+            test_obj.uia('command')
+          end.to raise_error RuntimeError
         end
       end
     end
@@ -91,6 +96,8 @@ describe Calabash::Cucumber::UIA do
           launcher = Calabash::Cucumber::Launcher.new
           launcher.run_loop = {:uia_strategy => :host}
           expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+          expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
+
           run_loop_response =
                 {
                       'status' => 'unknown status',
@@ -98,7 +105,10 @@ describe Calabash::Cucumber::UIA do
                       'index' => 1
                 }
           expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
-          expect { test_obj.uia('command') }.to raise_error RuntimeError
+
+          expect do
+            test_obj.uia('command')
+          end.to raise_error RuntimeError
         end
 
         describe 'when response status is error' do
@@ -106,6 +116,8 @@ describe Calabash::Cucumber::UIA do
             launcher = Calabash::Cucumber::Launcher.new
             launcher.run_loop = {:uia_strategy => :host}
             expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+            expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
+
             run_loop_response =
                   {
                         'status' => 'error',
@@ -113,20 +125,28 @@ describe Calabash::Cucumber::UIA do
                         'index' => 1
                   }
             expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
-            expect { test_obj.uia('command') }.to raise_error RuntimeError
+
+            expect do
+              test_obj.uia('command')
+            end.to raise_error RuntimeError
           end
 
           it 'and response does not contain a value' do
             launcher = Calabash::Cucumber::Launcher.new
             launcher.run_loop = {:uia_strategy => :host}
             expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+            expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
+
             run_loop_response =
-                  {
-                        'status' => 'error',
-                        'index' => 1
-                  }
+              {
+                'status' => 'error',
+                'index' => 1
+              }
             expect(RunLoop).to receive(:send_command).and_return(run_loop_response)
-            expect { test_obj.uia('command') }.to raise_error('uia action failed for an unknown reason')
+
+            expect do
+              test_obj.uia('command')
+            end.to raise_error('uia action failed for an unknown reason')
           end
         end
       end

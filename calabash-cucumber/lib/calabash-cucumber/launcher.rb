@@ -149,7 +149,7 @@ module Calabash
       # @see Calabash::Cucumber::Core#console_attach
       def self.attach
         l = launcher
-        return l if l && l.active?
+        return l if l && l.attached_to_gesture_performer?
         l.attach
       end
 
@@ -215,12 +215,20 @@ Queries will work, but gestures will not.
 
       # @!visibility private
       def instruments?
-        !!(active? && run_loop[:pid])
+        !!(attached_to_gesture_performer? && run_loop[:pid])
       end
 
       # @!visibility private
+      def attached_to_gesture_performer?
+        @actions != nil
+      end
+
+      # @deprecated 0.19.3 - replaced with attached_to_gesture_performer?
+      # TODO remove in 0.20.0
+      # @!visibility private
       def active?
-        not run_loop.nil?
+        RunLoop.deprecated("0.19.3", "replaced with attached_to_gesture_performer?")
+        attached_to_gesture_performer?
       end
 
       # A reference to the current launcher (instantiates a new one if needed).
