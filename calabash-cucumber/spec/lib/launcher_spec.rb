@@ -75,10 +75,14 @@ describe 'Calabash Launcher' do
 
   describe "#attach" do
     let(:run_loop) do
-      {
-        :udid => "identifier",
-        :pid => 1
-      }
+        {
+          :pid => 10,
+          :udid => "identifier",
+          :gesture_performer => :instruments,
+          :index => 1,
+          :log_file => "path/to/log",
+          :uia_strategy => :host
+        }
     end
 
     let(:cache) do
@@ -97,7 +101,7 @@ describe 'Calabash Launcher' do
 
       actual = launcher.attach
 
-      expect(launcher.actions).to be_a_kind_of(Calabash::Cucumber::InstrumentsActions)
+      expect(launcher.actions).to be_a_kind_of(Calabash::Cucumber::Gestures::Instruments)
       expect(actual).to be == launcher
     end
 

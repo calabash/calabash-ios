@@ -39,7 +39,8 @@ module Calabash
     class Launcher
 
       require "calabash-cucumber/device"
-      require "calabash-cucumber/actions/instruments_actions"
+      require "calabash-cucumber/gestures/performer"
+      require "calabash-cucumber/gestures/instruments"
       require "calabash-cucumber/usage_tracker"
       require "calabash-cucumber/dylibs"
       require "calabash-cucumber/environment"
@@ -189,7 +190,7 @@ Try `start_test_server_in_background`
         end
 
         if self.run_loop[:pid]
-          self.actions = Calabash::Cucumber::InstrumentsActions.new
+          self.actions = Calabash::Cucumber::Gestures::Instruments.new(self.run_loop)
         else
           RunLoop.log_warn(
 %Q[
@@ -200,7 +201,6 @@ Queries will work, but gestures will not.
 
 ])
         end
-
         self
       end
 
@@ -339,7 +339,7 @@ Resetting physical devices is not supported.
         self.launch_args = options
 
         self.run_loop = new_run_loop(options)
-        self.actions= Calabash::Cucumber::InstrumentsActions.new
+        self.actions = Calabash::Cucumber::Gestures::Instruments.new(self.run_loop)
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
