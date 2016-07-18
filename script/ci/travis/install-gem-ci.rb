@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
 
-require 'luffa'
+require "luffa"
+require "bundler"
 
-# @todo Enable code-signing on Travis CI for dylibs
+# TODO: code siging environment so server dylibs can be built.
 
 require File.expand_path(File.join(File.dirname(__FILE__), 'ci-helpers'))
 
@@ -16,20 +17,23 @@ Dir.chdir working_directory do
 
   env_vars = { 'CALABASH_SERVER_PATH' => server_dir }
 
-  do_system('rake build_server',
-            {:env_vars => env_vars,
-             :pass_msg => 'built the framework, frank lib, and dylibs',
-             :fail_msg => 'could not build all the libraries'})
+  Bundler.with_clean_env do
+    do_system('rake build_server',
+              {:env_vars => env_vars,
+               :pass_msg => 'built the framework, frank lib, and dylibs',
+               :fail_msg => 'could not build all the libraries'})
 
 
-  if Luffa::Environment.travis_ci?
-    ['dylibs/libCalabashDyn.dylib', 'dylibs/libCalabashDynSim.dylib'].each do |lib|
-      Luffa.log_warn("Installing empty dylib to #{lib} on Travis CI")
-      system('touch', lib)
+    if Luffa::Environment.travis_ci?
+      ['dylibs/libCalabashDyn.dylib', 'dylibs/libCalabashDynSim.dylib'].each do |lib|
+        Luffa.log_warn("Installing empty dylib to #{lib} on Travis CI")
+        system('touch', lib)
+      end
     end
-  end
 
-  do_system('rake install',
-            {:pass_msg => 'successfully used rake to install the gem',
-             :fail_msg => 'could not install the gem with rake'})
+    do_system('rake install',
+              {:pass_msg => 'successfully used rake to install the gem',
+               :fail_msg => 'could not install the gem with rake'})
+  end
 end
+
