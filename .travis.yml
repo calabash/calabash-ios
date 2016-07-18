@@ -35,6 +35,9 @@ notifications:
       - chris.fuentes@xamarin.com
     on_success: change
     on_failure: always
+  slack:
+    rooms:
+      secure: j15+d9xbUbGIyX4mmTmWP4EUg13LFiyeSGoVvpjsrPyoCR78V4jqbunLON55KczLQD5ql+xBwv34x57UZhca8g74ZBulF7A5xm7oxSyOgMOB1hgf5ruEU3n8dtWvHFvuLUyreu2QYrmGPznJnEOXE0feFuDBiyp1BpTvk4gwr+4=
 
 env:
   global:
