@@ -1,29 +1,14 @@
 #!/usr/bin/env ruby
 
+if !ENV["XTC_API_TOKEN"] || !ENV["XTC_USER"]
+  puts "Skipping on non-maintainer activity."
+  exit 0
+end
+
 require "luffa"
 require "dotenv"
 
-# Clean install of _this_ version of Calabash
-Luffa::Gem.uninstall_gem("calabash-cucumber")
-Dir.chdir(File.join("calabash-cucumber")) do
-  exit_code = Luffa.unix_command("rake install",
-                                 :exit_on_nonzero_status => false)
-  if exit_code != 0
-    Luffa.unix_command("rm -rf dylibs")
-    Luffa.unix_command("mkdir -p dylibs")
-    Luffa.unix_command("rm -rf staticlib")
-    Luffa.unix_command("mkdir -p staticlib")
-
-    ["dylibs/libCalabashDyn.dylib",
-     "dylibs/libCalabashDynSim.dylib",
-     "staticlib/calabash.framework.zip",
-     "staticlib/libFrankCalabash.a"].each do |library|
-       Luffa.unix_command("echo \"touch\" > #{library}")
-     end
-  end
-end
-
-calabash_version = lambda {
+calabash_version = lambda do
   file = File.join("calabash-cucumber", "lib", "calabash-cucumber", "version.rb")
   content = File.read(file)
   regex = /(\d+\.\d+\.\d+(\.pre\d+)?)/
@@ -34,7 +19,7 @@ calabash_version = lambda {
   end
 
   match
-}.call
+end.call
 
 xtc_test_dir = File.join("calabash-cucumber", "test", "xtc")
 Dir.chdir xtc_test_dir do
@@ -47,7 +32,7 @@ Dir.chdir xtc_test_dir do
   end
 
   Luffa.log_pass("Wrote new Gemfile with calabash-version '#{calabash_version}'")
-  Luffa.log_pass("Wrote new Gemfile with cucumber '~> ~1.3'")
+  Luffa.log_pass("Wrote new Gemfile with cucumber '~> 2.0'")
 
   # On Travis, the XTC api token and user are _private_ and are available to gem
   # maintainers only.  Pull requests and commits that do not originate from a
