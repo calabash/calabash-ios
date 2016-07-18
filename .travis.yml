@@ -33,7 +33,6 @@ notifications:
     recipients:
       - joshua.moody@xamarin.com
       - chris.fuentes@xamarin.com
-      - karl.krukow@xamarin.com
     on_success: change
     on_failure: always
 
