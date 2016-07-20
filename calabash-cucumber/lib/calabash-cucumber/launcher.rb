@@ -208,14 +208,18 @@ Queries will work, but gestures will not.
       #
       # @return {Boolean} true if we're using instruments to launch
       def self.instruments?
-        l = launcher_if_used
-        return false unless l
-        l.instruments?
+        launcher = Launcher::launcher_if_used
+        if !launcher
+          false
+        else
+          launcher.instruments?
+        end
       end
 
       # @!visibility private
       def instruments?
-        !!(attached_to_gesture_performer? && run_loop[:pid])
+        attached_to_gesture_performer? &&
+          @actions.class.send(:name) == :instruments
       end
 
       # @!visibility private

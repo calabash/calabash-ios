@@ -20,6 +20,62 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  it "has a great to_s method"
+
+  context ".instruments?" do
+    it "returns true if @@launcher defined and is attached to :instruments" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return true
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_truthy
+    end
+
+    it "returns false if @@launcher is not defined" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(nil)
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_falsey
+    end
+
+    it "returns false if @@launcher is defined, but not attached to :instruments" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return false
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_falsey
+    end
+  end
+
+  context "#instruments?" do
+    let (:gesture_performer) do
+      Class.new do
+        def self.name; ; end
+      end.new
+    end
+
+    before do
+      launcher.instance_variable_set(:@actions, gesture_performer)
+    end
+
+    it "returns true if attached to instruments gesture performer" do
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+      expect(gesture_performer.class).to receive(:name).and_return(:instruments)
+
+      expect(launcher.instruments?).to be_truthy
+    end
+
+    it "returns false if not attached to gesture performer" do
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+
+      expect(launcher.instruments?).to be_falsey
+    end
+
+    it "returns false if attached to gesture performer that is not instruments" do
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+      expect(gesture_performer.class).to receive(:name).and_return(:not_instruments)
+
+      expect(launcher.instruments?).to be_falsey
+    end
+  end
+
   describe "device attribute" do
 
     # Legacy API. This is a required method.  Do not remove.
