@@ -9,6 +9,7 @@ require "calabash-cucumber/dylibs"
 require "calabash-cucumber/http/http"
 require "calabash-cucumber/gestures/performer"
 require "calabash-cucumber/gestures/instruments"
+require "calabash-cucumber/gestures/device_agent"
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
 require 'calabash-cucumber/keyboard_helpers'
