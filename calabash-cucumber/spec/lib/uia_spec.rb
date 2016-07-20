@@ -77,8 +77,7 @@ describe Calabash::Cucumber::UIA do
       describe 'raises an error' do
         it 'when http returns nil - simulates an app crash' do
           launcher = Calabash::Cucumber::Launcher.new
-          launcher.run_loop = {:uia_strategy => :preferences}
-
+          expect(launcher).to receive(:run_loop).and_return({:uia_strategy => :preferences})
           expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
           expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
           expect(test_obj).to receive(:http).and_return('')
@@ -94,7 +93,7 @@ describe Calabash::Cucumber::UIA do
       describe 'raises an error' do
         it 'when response status is not expected' do
           launcher = Calabash::Cucumber::Launcher.new
-          launcher.run_loop = {:uia_strategy => :host}
+          expect(launcher).to receive(:run_loop).and_return({:uia_strategy => :host})
           expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
           expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
 
@@ -114,7 +113,7 @@ describe Calabash::Cucumber::UIA do
         describe 'when response status is error' do
           it 'and response contains a value' do
             launcher = Calabash::Cucumber::Launcher.new
-            launcher.run_loop = {:uia_strategy => :host}
+            expect(launcher).to receive(:run_loop).and_return({:uia_strategy => :host})
             expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
             expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
 
@@ -133,7 +132,7 @@ describe Calabash::Cucumber::UIA do
 
           it 'and response does not contain a value' do
             launcher = Calabash::Cucumber::Launcher.new
-            launcher.run_loop = {:uia_strategy => :host}
+            expect(launcher).to receive(:run_loop).and_return({:uia_strategy => :host})
             expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
             expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
 

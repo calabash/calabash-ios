@@ -59,7 +59,7 @@ module Calabash
       @@launcher = nil
 
       # @!visibility private
-      attr_accessor :run_loop
+      attr_reader :run_loop
 
       # @!visibility private
       attr_reader :gesture_performer
@@ -78,7 +78,7 @@ module Calabash
       # @!visibility private
       def to_s
         msg = ["#{self.class}"]
-        if self.run_loop
+        if run_loop
           msg << "Log file: #{self.run_loop[:log_file]}"
         else
           msg << "Not attached to instruments."
@@ -158,7 +158,7 @@ module Calabash
                            :http_connection_timeout => 10}
         merged_options = default_options.merge(options)
 
-        self.run_loop = RunLoop::HostCache.default.read
+        @run_loop = RunLoop::HostCache.default.read
 
         begin
           Calabash::Cucumber::HTTP.ensure_connectivity(merged_options)
@@ -183,8 +183,8 @@ Try `start_test_server_in_background`
           return false
         end
 
-        if self.run_loop[:pid]
-          @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(self.run_loop)
+        if run_loop[:pid]
+          @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(run_loop)
         else
           RunLoop.log_warn(
 %Q[
@@ -344,8 +344,8 @@ Resetting physical devices is not supported.
 
         self.launch_args = options
 
-        self.run_loop = new_run_loop(options)
-        @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(self.run_loop)
+        @run_loop = new_run_loop(options)
+        @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(@run_loop)
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
