@@ -1182,14 +1182,20 @@ arguments => '#{arguments}'
       end
 
       # @!visibility private
+      # TODO should be private
       def launcher
         Calabash::Cucumber::Launcher.launcher
       end
 
       # @!visibility private
+      # TODO should be private
       def run_loop
-        l = Calabash::Cucumber::Launcher.launcher_if_used
-        l && l.run_loop
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        if launcher
+          launcher.run_loop
+        else
+          nil
+        end
       end
 
       # @!visibility private

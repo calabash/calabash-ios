@@ -11,6 +11,7 @@ describe Calabash::Cucumber::Core do
   let(:launcher) do
     Class.new do
       def gesture_performer; ; end
+      def run_loop; ; end
       def to_s; "#<Launcher>"; end
       def inspect; to_s; end
     end.new
@@ -406,6 +407,42 @@ describe Calabash::Cucumber::Core do
 
       actual = world.shake(1.0)
       expect(actual).to be == hash["results"]
+    end
+  end
+
+  context "#launcher" do
+    it "returns @@launcher" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher).and_return(launcher)
+
+      expect(world.launcher).to be == launcher
+    end
+
+    it "returns nil" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher).and_return(nil)
+
+      expect(world.launcher).to be == nil
+    end
+  end
+
+  context "#run_loop" do
+    it "returns hash representing a run_loop if one is available" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:run_loop).and_return({})
+
+      expect(world.run_loop).to be == {}
+    end
+
+    it "returns nil if Launcher::@@launcher is nil" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(nil)
+
+      expect(world.run_loop).to be == nil
+    end
+
+    it "returns nil if @@launcher.run_loop is nil" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:run_loop).and_return(nil)
+
+      expect(world.run_loop).to be == nil
     end
   end
 end
