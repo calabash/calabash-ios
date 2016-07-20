@@ -1200,12 +1200,18 @@ arguments => '#{arguments}'
 
       # @!visibility private
       def tail_run_loop_log
-        l = run_loop
-        unless l
-          raise 'Unable to tail run_loop since there is not active run_loop...'
+        if !run_loop
+          raise "Unable to tail instruments log because there is no active run-loop"
         end
-        cmd = %Q[osascript -e 'tell application "Terminal" to do script "tail -n 10000 -f #{l[:log_file]} | grep -v \\"Default: \\\\*\\""']
-        raise "Unable to " unless system(cmd)
+
+        require "calabash-cucumber/log_tailer"
+
+        if launcher.instruments?
+          Calabash::Cucumber::LogTailer.tail_in_terminal(run_loop[:log_file])
+        else
+          # TODO Tail the .run_loop/xcuitest/<launcher>.log?
+          raise "Cannot tail a non-instruments run-loop"
+        end
       end
 
       # @!visibility private

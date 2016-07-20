@@ -12,6 +12,7 @@ describe Calabash::Cucumber::Core do
     Class.new do
       def gesture_performer; ; end
       def run_loop; ; end
+      def instruments?; ; end
       def to_s; "#<Launcher>"; end
       def inspect; to_s; end
     end.new
@@ -443,6 +444,39 @@ describe Calabash::Cucumber::Core do
       expect(launcher).to receive(:run_loop).and_return(nil)
 
       expect(world.run_loop).to be == nil
+    end
+  end
+
+  context "#tail_run_loop_log" do
+    let(:path) { "path/to/log.txt" }
+    let(:hash) { {:log_file => path} }
+
+    it "raises error if there is not an active run-loop" do
+      expect(world).to receive(:run_loop).and_return(nil)
+
+      expect do
+        world.tail_run_loop_log
+      end.to raise_error RuntimeError,
+                         /Unable to tail instruments log because there is no active run-loop/
+    end
+
+    it "raises error if there is active run-loop is not :instruments based" do
+      expect(world).to receive(:run_loop).and_return(hash)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return(false)
+
+      expect do
+        world.tail_run_loop_log
+      end.to raise_error RuntimeError, /Cannot tail a non-instruments run-loop/
+    end
+
+    it "opens a Terminal window to tail run-loop log file" do
+      expect(world).to receive(:run_loop).at_least(:once).and_return(hash)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return(true)
+      expect(Calabash::Cucumber::LogTailer).to receive(:tail_in_terminal).with(path).and_return(true)
+
+      expect(world.tail_run_loop_log).to be_truthy
     end
   end
 end
