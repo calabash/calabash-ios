@@ -59,10 +59,10 @@ module Calabash
       @@launcher = nil
 
       # @!visibility private
-      attr_accessor :run_loop
+      attr_reader :run_loop
 
       # @!visibility private
-      attr_accessor :actions
+      attr_reader :gesture_performer
 
       # @!visibility private
       attr_accessor :launch_args
@@ -78,7 +78,7 @@ module Calabash
       # @!visibility private
       def to_s
         msg = ["#{self.class}"]
-        if self.run_loop
+        if run_loop
           msg << "Log file: #{self.run_loop[:log_file]}"
         else
           msg << "Not attached to instruments."
@@ -140,16 +140,10 @@ module Calabash
       end
 
       # @!visibility private
-      def actions
-        attach if @actions.nil?
-        @actions
-      end
-
-      # @!visibility private
       # @see Calabash::Cucumber::Core#console_attach
       def self.attach
         l = launcher
-        return l if l && l.active?
+        return l if l && l.attached_to_gesture_performer?
         l.attach
       end
 
@@ -164,7 +158,7 @@ module Calabash
                            :http_connection_timeout => 10}
         merged_options = default_options.merge(options)
 
-        self.run_loop = RunLoop::HostCache.default.read
+        @run_loop = RunLoop::HostCache.default.read
 
         begin
           Calabash::Cucumber::HTTP.ensure_connectivity(merged_options)
@@ -189,8 +183,8 @@ Try `start_test_server_in_background`
           return false
         end
 
-        if self.run_loop[:pid]
-          self.actions = Calabash::Cucumber::Gestures::Instruments.new(self.run_loop)
+        if run_loop[:pid]
+          @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(run_loop)
         else
           RunLoop.log_warn(
 %Q[
@@ -208,19 +202,31 @@ Queries will work, but gestures will not.
       #
       # @return {Boolean} true if we're using instruments to launch
       def self.instruments?
-        l = launcher_if_used
-        return false unless l
-        l.instruments?
+        launcher = Launcher::launcher_if_used
+        if !launcher
+          false
+        else
+          launcher.instruments?
+        end
       end
 
       # @!visibility private
       def instruments?
-        !!(active? && run_loop[:pid])
+        attached_to_gesture_performer? &&
+          @gesture_performer.class.send(:name) == :instruments
       end
 
       # @!visibility private
+      def attached_to_gesture_performer?
+        @gesture_performer != nil
+      end
+
+      # @deprecated 0.19.3 - replaced with attached_to_gesture_performer?
+      # TODO remove in 0.20.0
+      # @!visibility private
       def active?
-        not run_loop.nil?
+        RunLoop.deprecated("0.19.3", "replaced with attached_to_gesture_performer?")
+        attached_to_gesture_performer?
       end
 
       # A reference to the current launcher (instantiates a new one if needed).
@@ -338,8 +344,8 @@ Resetting physical devices is not supported.
 
         self.launch_args = options
 
-        self.run_loop = new_run_loop(options)
-        self.actions = Calabash::Cucumber::Gestures::Instruments.new(self.run_loop)
+        @run_loop = new_run_loop(options)
+        @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(@run_loop)
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity

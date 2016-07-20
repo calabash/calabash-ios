@@ -16,7 +16,7 @@ module Calabash
 
         # UIA only makes sense if there is a run loop
         launcher = Calabash::Cucumber::Launcher.launcher_if_used
-        run_loop = launcher && launcher.active? && launcher.run_loop
+        run_loop = launcher && launcher.attached_to_gesture_performer? && launcher.run_loop
 
         # Automatically attach in the calabash console
         if !run_loop && defined?(IRB)

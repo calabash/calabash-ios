@@ -20,6 +20,62 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  it "has a great to_s method"
+
+  context ".instruments?" do
+    it "returns true if @@launcher defined and is attached to :instruments" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return true
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_truthy
+    end
+
+    it "returns false if @@launcher is not defined" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(nil)
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_falsey
+    end
+
+    it "returns false if @@launcher is defined, but not attached to :instruments" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return false
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_falsey
+    end
+  end
+
+  context "#instruments?" do
+    let (:gesture_performer) do
+      Class.new do
+        def self.name; ; end
+      end.new
+    end
+
+    before do
+      launcher.instance_variable_set(:@gesture_performer, gesture_performer)
+    end
+
+    it "returns true if attached to instruments gesture performer" do
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+      expect(gesture_performer.class).to receive(:name).and_return(:instruments)
+
+      expect(launcher.instruments?).to be_truthy
+    end
+
+    it "returns false if not attached to gesture performer" do
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+
+      expect(launcher.instruments?).to be_falsey
+    end
+
+    it "returns false if attached to gesture performer that is not instruments" do
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+      expect(gesture_performer.class).to receive(:name).and_return(:not_instruments)
+
+      expect(launcher.instruments?).to be_falsey
+    end
+  end
+
   describe "device attribute" do
 
     # Legacy API. This is a required method.  Do not remove.
@@ -96,32 +152,32 @@ describe 'Calabash Launcher' do
       allow(cache).to receive(:read).and_return(run_loop)
     end
 
-    it "the happy path" do
+    it "attaches to an instruments run-loop" do
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
 
       actual = launcher.attach
 
-      expect(launcher.actions).to be_a_kind_of(Calabash::Cucumber::Gestures::Instruments)
+      expect(launcher.gesture_performer).to be_a_kind_of(Calabash::Cucumber::Gestures::Instruments)
       expect(actual).to be == launcher
     end
 
-    it "cannot connect to http server" do
+    it "raises error if it cannot connect to LPServer" do
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_raise(Calabash::Cucumber::ServerNotRespondingError)
 
       actual = launcher.attach
 
-      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(launcher.instance_variable_get(:@gesture_performer)).to be == nil
       expect(actual).to be_falsey
     end
 
-    it "cannot establish communication with instruments" do
+    it "raises if it cannot communication with instruments" do
       run_loop[:pid] = nil
 
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
 
       actual = launcher.attach
 
-      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(launcher.instance_variable_get(:@gesture_performer)).to be == nil
       expect(actual).to be == launcher
     end
 
@@ -382,6 +438,27 @@ describe 'Calabash Launcher' do
       expect(launcher.send(:detect_inject_dylib_option,
                            {:inject_dylib => expected})).to be == expected
 
+    end
+  end
+
+  context ".active?" do
+    it "is deprecated" do
+      expect(RunLoop).to receive(:deprecated).and_call_original
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(:attached)
+
+      expect(launcher.active?).to be == :attached
+    end
+  end
+
+  context ".attached_to_gesture_performer?" do
+    it "returns true if @gesture_performer is non-nil" do
+      launcher.instance_variable_set(:@gesture_performer, :gesture_performer)
+      expect(launcher.attached_to_gesture_performer?).to be_truthy
+    end
+
+    it "returns false if @actions is nil" do
+      launcher.instance_variable_set(:@gesture_performer, nil)
+      expect(launcher.attached_to_gesture_performer?).to be_falsey
     end
   end
 end

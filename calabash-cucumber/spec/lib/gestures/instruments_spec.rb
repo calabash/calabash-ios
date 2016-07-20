@@ -71,8 +71,14 @@ describe Calabash::Cucumber::Gestures::Instruments do
           }
         end
 
-        # Legacy - requires run-loop > 2.1.3
-        it "is passed a hash with no :gesture_performer"
+        # Legacy - can be removed once run-loop > 2.1.3 is required.
+        it "is passed a hash with no :gesture_performer" do
+          hash[:gesture_performer] = :device_agent
+
+          expect do
+            Calabash::Cucumber::Gestures::Instruments.expect_valid_run_loop(hash)
+          end.to raise_error ArgumentError, /Invalid :gesture_performer/
+        end
 
         it "is passed a hash with an invalid :gesture_performer" do
           hash[:gesture_performer] = :invalid

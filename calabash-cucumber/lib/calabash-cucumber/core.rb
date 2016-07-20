@@ -285,7 +285,7 @@ module Calabash
       def flick(uiquery, delta, options={})
         uiquery, options = extract_query_and_options(uiquery, options)
         options[:delta] = delta
-        views_touched = launcher.actions.flick(options)
+        views_touched = launcher.gesture_performer.flick(options)
         unless uiquery.nil?
           screenshot_and_raise "flick could not find view: '#{uiquery}', args: #{options}" if views_touched.empty?
         end
@@ -353,7 +353,7 @@ module Calabash
           end
         end
 
-        launcher.actions.swipe(dir.to_sym, merged_options)
+        launcher.gesture_performer.swipe(dir.to_sym, merged_options)
       end
 
 
@@ -370,7 +370,7 @@ module Calabash
       # @option options {Numeric} :duration (1) duration of the 'pan'.
       # @return {Array<Hash>} array containing the serialized version of the touched view.
       def pan(from, to, options={})
-        launcher.actions.pan(from, to, options)
+        launcher.gesture_performer.pan(from, to, options)
       end
 
       # Performs a "pinch" gesture.
@@ -387,7 +387,7 @@ module Calabash
       # @option options {String} :query (nil) if specified, the pinch will be made relative to this query.
       # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
       def pinch(in_out, options={})
-        launcher.actions.pinch(in_out.to_sym,options)
+        launcher.gesture_performer.pinch(in_out.to_sym,options)
       end
 
       # @!visibility private
@@ -1182,41 +1182,59 @@ arguments => '#{arguments}'
       end
 
       # @!visibility private
+      # TODO should be private
       def launcher
         Calabash::Cucumber::Launcher.launcher
       end
 
       # @!visibility private
+      # TODO should be private
       def run_loop
-        l = Calabash::Cucumber::Launcher.launcher_if_used
-        l && l.run_loop
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        if launcher
+          launcher.run_loop
+        else
+          nil
+        end
       end
 
       # @!visibility private
       def tail_run_loop_log
-        l = run_loop
-        unless l
-          raise 'Unable to tail run_loop since there is not active run_loop...'
+        if !run_loop
+          raise "Unable to tail instruments log because there is no active run-loop"
         end
-        cmd = %Q[osascript -e 'tell application "Terminal" to do script "tail -n 10000 -f #{l[:log_file]} | grep -v \\"Default: \\\\*\\""']
-        raise "Unable to " unless system(cmd)
+
+        require "calabash-cucumber/log_tailer"
+
+        if launcher.instruments?
+          Calabash::Cucumber::LogTailer.tail_in_terminal(run_loop[:log_file])
+        else
+          # TODO Tail the .run_loop/xcuitest/<launcher>.log?
+          raise "Cannot tail a non-instruments run-loop"
+        end
       end
 
       # @!visibility private
       def dump_run_loop_log
-        l = run_loop
-        unless l
-          raise 'Unable to dump run_loop since there is not active run_loop...'
+        if !run_loop
+          raise "Unable to dump run-loop log because there is no active run-loop"
         end
-        cmd = %Q[cat "#{l[:log_file]}" | grep -v "Default: \\*\\*\\*"]
-        puts `#{cmd}`
-      end
 
+        if launcher.instruments?
+          cmd = %Q[cat "#{run_loop[:log_file]}" | grep -v "Default: \\*\\*\\*"]
+          RunLoop.log_unix_cmd(cmd)
+          puts `#{cmd}`
+          true
+        else
+          # TODO What should we dump in non-instruments runs?
+          raise "Cannot dump non-instruments run-loop"
+        end
+      end
 
       # @!visibility private
       def query_action_with_options(action, uiquery, options)
         uiquery, options = extract_query_and_options(uiquery, options)
-        views_touched = launcher.actions.send(action, options)
+        views_touched = launcher.gesture_performer.send(action, options)
         unless uiquery.nil?
           msg = "#{action} could not find view: '#{uiquery}', args: #{options}"
           Map.assert_map_results(views_touched, msg)

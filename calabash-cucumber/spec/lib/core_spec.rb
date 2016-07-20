@@ -1,16 +1,24 @@
 describe Calabash::Cucumber::Core do
 
-  let(:actions) do
+  before do
+    allow(RunLoop::Environment).to receive(:debug?).and_return(true)
+  end
+
+  let(:gesture_performer) do
     Class.new do
-      def swipe(dir, options); :success; end
-      def to_s; "#<ActionInterface>"; end
+      def swipe(_, _); :success; end
+      def to_s; "#<GesturePerformer Interface>"; end
       def inspect; to_s; end
     end.new
   end
 
   let(:launcher) do
     Class.new do
-      def actions; ; end
+      def gesture_performer; ; end
+      def run_loop; ; end
+      def instruments?; ; end
+      def to_s; "#<Launcher>"; end
+      def inspect; to_s; end
     end.new
   end
 
@@ -109,8 +117,8 @@ describe Calabash::Cucumber::Core do
         before do
           expect(world).to receive(:uia_available?).and_return true
           expect(world).to receive(:launcher).and_return launcher
-          expect(launcher).to receive(:actions).and_return actions
-          expect(actions).to receive(:swipe).and_return :success
+          expect(launcher).to receive(:gesture_performer).and_return gesture_performer
+          expect(gesture_performer).to receive(:swipe).and_return :success
         end
 
         it ':light' do
@@ -140,14 +148,14 @@ describe Calabash::Cucumber::Core do
         expect(world).to receive(:uia_available?).and_return false
         expect(world).to receive(:status_bar_orientation).and_return :down
         expect(world).to receive(:launcher).and_return launcher
-        expect(launcher).to receive(:actions).and_return actions
+        expect(launcher).to receive(:gesture_performer).and_return gesture_performer
       end
 
       describe 'uia is not available' do
         it 'adds :status_bar_orientation' do
           options = {}
           merged = {:status_bar_orientation => :down}
-          expect(actions).to receive(:swipe).with(:left, merged).and_return :success
+          expect(gesture_performer).to receive(:swipe).with(:left, merged).and_return :success
 
           expect(world.swipe(:left, options)).to be == :success
         end
@@ -157,7 +165,7 @@ describe Calabash::Cucumber::Core do
           options = {:status_bar_orientation => :left}
           merged = {:status_bar_orientation => :down}
 
-          expect(actions).to receive(:swipe).with(:left, merged).and_return :success
+          expect(gesture_performer).to receive(:swipe).with(:left, merged).and_return :success
 
           expect(world.swipe(:left, options)).to be == :success
         end
@@ -404,6 +412,107 @@ describe Calabash::Cucumber::Core do
 
       actual = world.shake(1.0)
       expect(actual).to be == hash["results"]
+    end
+  end
+
+  context "#launcher" do
+    it "returns @@launcher" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher).and_return(launcher)
+
+      expect(world.launcher).to be == launcher
+    end
+
+    it "returns nil" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher).and_return(nil)
+
+      expect(world.launcher).to be == nil
+    end
+  end
+
+  context "#run_loop" do
+    it "returns hash representing a run_loop if one is available" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:run_loop).and_return({})
+
+      expect(world.run_loop).to be == {}
+    end
+
+    it "returns nil if Launcher::@@launcher is nil" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(nil)
+
+      expect(world.run_loop).to be == nil
+    end
+
+    it "returns nil if @@launcher.run_loop is nil" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:run_loop).and_return(nil)
+
+      expect(world.run_loop).to be == nil
+    end
+  end
+
+  context "#tail_run_loop_log" do
+    let(:path) { "path/to/log.txt" }
+    let(:hash) { {:log_file => path} }
+
+    it "raises error if there is not an active run-loop" do
+      expect(world).to receive(:run_loop).and_return(nil)
+
+      expect do
+        world.tail_run_loop_log
+      end.to raise_error RuntimeError,
+                         /Unable to tail instruments log because there is no active run-loop/
+    end
+
+    it "raises error if there is active run-loop but it is not :instruments based" do
+      expect(world).to receive(:run_loop).and_return(hash)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return(false)
+
+      expect do
+        world.tail_run_loop_log
+      end.to raise_error RuntimeError, /Cannot tail a non-instruments run-loop/
+    end
+
+    it "opens a Terminal window to tail run-loop log file" do
+      expect(world).to receive(:run_loop).at_least(:once).and_return(hash)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return(true)
+      expect(Calabash::Cucumber::LogTailer).to receive(:tail_in_terminal).with(path).and_return(true)
+
+      expect(world.tail_run_loop_log).to be_truthy
+    end
+  end
+
+  context "#dump_run_loop_log" do
+    let(:path) { File.join(Resources.shared.resources_dir, "run_loop.out") }
+    let(:hash) { {:log_file => path} }
+
+    it "raises error if there is not an active run-loop" do
+      expect(world).to receive(:run_loop).and_return(nil)
+
+      expect do
+        world.dump_run_loop_log
+      end.to raise_error RuntimeError,
+                         /Unable to dump run-loop log because there is no active run-loop/
+    end
+
+    it "raises error if there is an active run-loop but it is not :instruments based" do
+      expect(world).to receive(:run_loop).and_return(hash)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return(false)
+
+      expect do
+        world.dump_run_loop_log
+      end.to raise_error RuntimeError, /Cannot dump non-instruments run-loop/
+    end
+
+    it "prints the contents of the run-loop log file" do
+      expect(world).to receive(:run_loop).at_least(:once).and_return(hash)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return(true)
+
+      expect(world.dump_run_loop_log).to be_truthy
     end
   end
 end
