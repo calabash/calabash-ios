@@ -52,7 +52,7 @@ describe 'Calabash Launcher' do
     end
 
     before do
-      launcher.instance_variable_set(:@actions, gesture_performer)
+      launcher.instance_variable_set(:@gesture_performer, gesture_performer)
     end
 
     it "returns true if attached to instruments gesture performer" do
@@ -152,32 +152,32 @@ describe 'Calabash Launcher' do
       allow(cache).to receive(:read).and_return(run_loop)
     end
 
-    it "the happy path" do
+    it "attaches to an instruments run-loop" do
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
 
       actual = launcher.attach
 
-      expect(launcher.actions).to be_a_kind_of(Calabash::Cucumber::Gestures::Instruments)
+      expect(launcher.gesture_performer).to be_a_kind_of(Calabash::Cucumber::Gestures::Instruments)
       expect(actual).to be == launcher
     end
 
-    it "cannot connect to http server" do
+    it "raises error if it cannot connect to LPServer" do
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_raise(Calabash::Cucumber::ServerNotRespondingError)
 
       actual = launcher.attach
 
-      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(launcher.instance_variable_get(:@gesture_performer)).to be == nil
       expect(actual).to be_falsey
     end
 
-    it "cannot establish communication with instruments" do
+    it "raises if it cannot communication with instruments" do
       run_loop[:pid] = nil
 
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
 
       actual = launcher.attach
 
-      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(launcher.instance_variable_get(:@gesture_performer)).to be == nil
       expect(actual).to be == launcher
     end
 
@@ -451,13 +451,13 @@ describe 'Calabash Launcher' do
   end
 
   context ".attached_to_gesture_performer?" do
-    it "returns true if @actions is non-nil" do
-      launcher.instance_variable_set(:@actions, :actions)
+    it "returns true if @gesture_performer is non-nil" do
+      launcher.instance_variable_set(:@gesture_performer, :gesture_performer)
       expect(launcher.attached_to_gesture_performer?).to be_truthy
     end
 
     it "returns false if @actions is nil" do
-      launcher.instance_variable_set(:@actions, nil)
+      launcher.instance_variable_set(:@gesture_performer, nil)
       expect(launcher.attached_to_gesture_performer?).to be_falsey
     end
   end

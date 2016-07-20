@@ -285,7 +285,7 @@ module Calabash
       def flick(uiquery, delta, options={})
         uiquery, options = extract_query_and_options(uiquery, options)
         options[:delta] = delta
-        views_touched = launcher.actions.flick(options)
+        views_touched = launcher.gesture_performer.flick(options)
         unless uiquery.nil?
           screenshot_and_raise "flick could not find view: '#{uiquery}', args: #{options}" if views_touched.empty?
         end
@@ -353,7 +353,7 @@ module Calabash
           end
         end
 
-        launcher.actions.swipe(dir.to_sym, merged_options)
+        launcher.gesture_performer.swipe(dir.to_sym, merged_options)
       end
 
 
@@ -370,7 +370,7 @@ module Calabash
       # @option options {Numeric} :duration (1) duration of the 'pan'.
       # @return {Array<Hash>} array containing the serialized version of the touched view.
       def pan(from, to, options={})
-        launcher.actions.pan(from, to, options)
+        launcher.gesture_performer.pan(from, to, options)
       end
 
       # Performs a "pinch" gesture.
@@ -387,7 +387,7 @@ module Calabash
       # @option options {String} :query (nil) if specified, the pinch will be made relative to this query.
       # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
       def pinch(in_out, options={})
-        launcher.actions.pinch(in_out.to_sym,options)
+        launcher.gesture_performer.pinch(in_out.to_sym,options)
       end
 
       # @!visibility private
@@ -1216,7 +1216,7 @@ arguments => '#{arguments}'
       # @!visibility private
       def query_action_with_options(action, uiquery, options)
         uiquery, options = extract_query_and_options(uiquery, options)
-        views_touched = launcher.actions.send(action, options)
+        views_touched = launcher.gesture_performer.send(action, options)
         unless uiquery.nil?
           msg = "#{action} could not find view: '#{uiquery}', args: #{options}"
           Map.assert_map_results(views_touched, msg)

@@ -1,16 +1,18 @@
 describe Calabash::Cucumber::Core do
 
-  let(:actions) do
+  let(:gesture_performer) do
     Class.new do
-      def swipe(dir, options); :success; end
-      def to_s; "#<ActionInterface>"; end
+      def swipe(_, _); :success; end
+      def to_s; "#<GesturePerformer Interface>"; end
       def inspect; to_s; end
     end.new
   end
 
   let(:launcher) do
     Class.new do
-      def actions; ; end
+      def gesture_performer; ; end
+      def to_s; "#<Launcher>"; end
+      def inspect; to_s; end
     end.new
   end
 
@@ -109,8 +111,8 @@ describe Calabash::Cucumber::Core do
         before do
           expect(world).to receive(:uia_available?).and_return true
           expect(world).to receive(:launcher).and_return launcher
-          expect(launcher).to receive(:actions).and_return actions
-          expect(actions).to receive(:swipe).and_return :success
+          expect(launcher).to receive(:gesture_performer).and_return gesture_performer
+          expect(gesture_performer).to receive(:swipe).and_return :success
         end
 
         it ':light' do
@@ -140,14 +142,14 @@ describe Calabash::Cucumber::Core do
         expect(world).to receive(:uia_available?).and_return false
         expect(world).to receive(:status_bar_orientation).and_return :down
         expect(world).to receive(:launcher).and_return launcher
-        expect(launcher).to receive(:actions).and_return actions
+        expect(launcher).to receive(:gesture_performer).and_return gesture_performer
       end
 
       describe 'uia is not available' do
         it 'adds :status_bar_orientation' do
           options = {}
           merged = {:status_bar_orientation => :down}
-          expect(actions).to receive(:swipe).with(:left, merged).and_return :success
+          expect(gesture_performer).to receive(:swipe).with(:left, merged).and_return :success
 
           expect(world.swipe(:left, options)).to be == :success
         end
@@ -157,7 +159,7 @@ describe Calabash::Cucumber::Core do
           options = {:status_bar_orientation => :left}
           merged = {:status_bar_orientation => :down}
 
-          expect(actions).to receive(:swipe).with(:left, merged).and_return :success
+          expect(gesture_performer).to receive(:swipe).with(:left, merged).and_return :success
 
           expect(world.swipe(:left, options)).to be == :success
         end
