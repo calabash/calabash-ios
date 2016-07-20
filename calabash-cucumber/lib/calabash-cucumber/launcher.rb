@@ -41,6 +41,7 @@ module Calabash
       require "calabash-cucumber/device"
       require "calabash-cucumber/gestures/performer"
       require "calabash-cucumber/gestures/instruments"
+      require "calabash-cucumber/gestures/device_agent"
       require "calabash-cucumber/usage_tracker"
       require "calabash-cucumber/dylibs"
       require "calabash-cucumber/environment"
@@ -342,10 +343,26 @@ Resetting physical devices is not supported.
         options[:xcode] = xcode || Calabash::Cucumber::Environment.xcode
         options[:inject_dylib] = detect_inject_dylib_option(launch_options)
 
-        self.launch_args = options
+        @launch_args = options
 
         @run_loop = new_run_loop(options)
-        @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(@run_loop)
+        if run_loop.is_a?(Hash)
+          @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(@run_loop)
+        elsif @run_loop.is_a?(RunLoop::XCUITest)
+          @gesture_performer = Calabash::Cucumber::Gestures::DeviceAgent.new(@run_loop)
+        else
+          raise ArgumentError, %Q[
+
+Could not determine which gesture performer to use based on the launch arguments:
+
+#{@launch_args.join("$-0")}
+
+RunLoop.run returned:
+
+#{@run_loop}
+
+]
+        end
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
