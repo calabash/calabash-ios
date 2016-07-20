@@ -1216,14 +1216,20 @@ arguments => '#{arguments}'
 
       # @!visibility private
       def dump_run_loop_log
-        l = run_loop
-        unless l
-          raise 'Unable to dump run_loop since there is not active run_loop...'
+        if !run_loop
+          raise "Unable to dump run-loop log because there is no active run-loop"
         end
-        cmd = %Q[cat "#{l[:log_file]}" | grep -v "Default: \\*\\*\\*"]
-        puts `#{cmd}`
-      end
 
+        if launcher.instruments?
+          cmd = %Q[cat "#{run_loop[:log_file]}" | grep -v "Default: \\*\\*\\*"]
+          RunLoop.log_unix_cmd(cmd)
+          puts `#{cmd}`
+          true
+        else
+          # TODO What should we dump in non-instruments runs?
+          raise "Cannot dump non-instruments run-loop"
+        end
+      end
 
       # @!visibility private
       def query_action_with_options(action, uiquery, options)

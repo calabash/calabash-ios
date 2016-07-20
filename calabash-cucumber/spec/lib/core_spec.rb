@@ -1,5 +1,9 @@
 describe Calabash::Cucumber::Core do
 
+  before do
+    allow(RunLoop::Environment).to receive(:debug?).and_return(true)
+  end
+
   let(:gesture_performer) do
     Class.new do
       def swipe(_, _); :success; end
@@ -460,7 +464,7 @@ describe Calabash::Cucumber::Core do
                          /Unable to tail instruments log because there is no active run-loop/
     end
 
-    it "raises error if there is active run-loop is not :instruments based" do
+    it "raises error if there is active run-loop but it is not :instruments based" do
       expect(world).to receive(:run_loop).and_return(hash)
       expect(world).to receive(:launcher).and_return(launcher)
       expect(launcher).to receive(:instruments?).and_return(false)
@@ -477,6 +481,38 @@ describe Calabash::Cucumber::Core do
       expect(Calabash::Cucumber::LogTailer).to receive(:tail_in_terminal).with(path).and_return(true)
 
       expect(world.tail_run_loop_log).to be_truthy
+    end
+  end
+
+  context "#dump_run_loop_log" do
+    let(:path) { File.join(Resources.shared.resources_dir, "run_loop.out") }
+    let(:hash) { {:log_file => path} }
+
+    it "raises error if there is not an active run-loop" do
+      expect(world).to receive(:run_loop).and_return(nil)
+
+      expect do
+        world.dump_run_loop_log
+      end.to raise_error RuntimeError,
+                         /Unable to dump run-loop log because there is no active run-loop/
+    end
+
+    it "raises error if there is an active run-loop but it is not :instruments based" do
+      expect(world).to receive(:run_loop).and_return(hash)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return(false)
+
+      expect do
+        world.dump_run_loop_log
+      end.to raise_error RuntimeError, /Cannot dump non-instruments run-loop/
+    end
+
+    it "prints the contents of the run-loop log file" do
+      expect(world).to receive(:run_loop).at_least(:once).and_return(hash)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return(true)
+
+      expect(world.dump_run_loop_log).to be_truthy
     end
   end
 end
