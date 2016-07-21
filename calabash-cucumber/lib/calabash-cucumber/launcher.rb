@@ -41,6 +41,7 @@ module Calabash
       require "calabash-cucumber/device"
       require "calabash-cucumber/gestures/performer"
       require "calabash-cucumber/gestures/instruments"
+      require "calabash-cucumber/gestures/device_agent"
       require "calabash-cucumber/usage_tracker"
       require "calabash-cucumber/dylibs"
       require "calabash-cucumber/environment"
@@ -77,15 +78,22 @@ module Calabash
 
       # @!visibility private
       def to_s
-        msg = ["#{self.class}"]
-        if run_loop
-          msg << "Log file: #{self.run_loop[:log_file]}"
+        class_name = "Launcher"
+
+        if !@gesture_performer
+          "#<#{class_name}: not attached to a gesture performer>"
         else
-          msg << "Not attached to instruments."
-          msg << "Start your app with `start_test_server_in_background`"
-          msg << "If your app is already running, try `console_attach`"
+          gestures = "<#{class_name} using #{@gesture_performer.class.name} gestures"
+          if instruments?
+            "#{gestures} - log: #{@gesture_performer.run_loop[:log_file]}>"
+          elsif @gesture_performer.class.name == :device_agent
+            device_agent = @gesture_performer.device_agent
+            launcher_name = device_agent.cbx_launcher.name
+            "#{gestures} and #{launcher_name} launcher>"
+          else
+            "#{gestures}>"
+          end
         end
-        msg.join("\n")
       end
 
       # @!visibility private
@@ -342,10 +350,26 @@ Resetting physical devices is not supported.
         options[:xcode] = xcode || Calabash::Cucumber::Environment.xcode
         options[:inject_dylib] = detect_inject_dylib_option(launch_options)
 
-        self.launch_args = options
+        @launch_args = options
 
         @run_loop = new_run_loop(options)
-        @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(@run_loop)
+        if run_loop.is_a?(Hash)
+          @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(@run_loop)
+        elsif @run_loop.is_a?(RunLoop::XCUITest)
+          @gesture_performer = Calabash::Cucumber::Gestures::DeviceAgent.new(@run_loop)
+        else
+          raise ArgumentError, %Q[
+
+Could not determine which gesture performer to use based on the launch arguments:
+
+#{@launch_args.join("$-0")}
+
+RunLoop.run returned:
+
+#{@run_loop}
+
+]
+        end
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
@@ -380,7 +404,18 @@ Resetting physical devices is not supported.
       # @!visibility private
       # TODO Should call calabash exit route to shutdown the server.
       def stop
-        RunLoop.stop(run_loop) if run_loop && run_loop[:pid]
+        performer = @gesture_performer
+        return :no_gesture_performer if !performer
+
+        performer_name = performer.class.send(:name)
+        if performer_name == :instruments
+          RunLoop.stop(performer.run_loop)
+        elsif performer_name == :device_agent
+          performer.device_agent.stop
+        else
+          RunLoop.log_warn("Unknown gesture performer: #{performer_name}")
+          :unknown_performer
+        end
       end
 
       # Should Calabash quit the app under test after a Scenario?

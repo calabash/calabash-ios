@@ -20,7 +20,101 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
-  it "has a great to_s method"
+  let(:instruments_performer) do
+    Class.new do
+      def self.name; :instruments; end
+      def run_loop; {:log_file => "path/to/file.log"}; end
+    end.new
+  end
+
+  let(:device_agent_performer) do
+    Class.new do
+      def self.name; :device_agent; end
+      def device_agent
+        Class.new do
+          def cbx_launcher
+            Class.new do
+              def name; "iOSDeviceManager"; end
+            end.new
+          end
+          def stop; :stopped; end
+        end.new
+      end
+    end.new
+  end
+
+  let(:unknown_performer) do
+    Class.new do
+      def self.name; :performer; end
+    end.new
+  end
+
+  context "#to_s" do
+    it "is not attached to any gesture performer" do
+      expect(launcher.to_s[/not attached to a gesture performer/]).to be_truthy
+    end
+
+    it "is attached to instruments" do
+      launcher.instance_variable_set(:@gesture_performer, instruments_performer)
+
+      expect(launcher.to_s[/instruments gestures/]).to be_truthy
+    end
+
+    it "is attached to device_agent" do
+      launcher.instance_variable_set(:@gesture_performer, device_agent_performer)
+
+      expected = "<Launcher using device_agent gestures and iOSDeviceManager launcher>"
+      expect(launcher.to_s).to be == expected
+    end
+
+    it "is attached to some other gesture performer" do
+      launcher.instance_variable_set(:@gesture_performer, unknown_performer)
+
+      expected = "<Launcher using performer gestures>"
+      expect(launcher.to_s).to be == expected
+    end
+  end
+
+  context "#inspect" do
+    it "is the same as to_s" do
+      expect(launcher.inspect).to be == launcher.to_s
+    end
+  end
+
+  context "#stop" do
+    it "does nothing if launcher does not have a gesture performer" do
+      launcher.instance_variable_set(:@gesture_performer, nil)
+
+      expect(launcher.stop).to be == :no_gesture_performer
+    end
+
+    it "calls RunLoop.stop if gesture performer is :instruments" do
+      run_loop = instruments_performer.run_loop
+      expect(RunLoop).to receive(:stop).with(run_loop).and_return(:stopped)
+
+      launcher.instance_variable_set(:@gesture_performer, instruments_performer)
+
+      expect(launcher.stop).to be == :stopped
+    end
+
+    it "calls #stop if gesture performer is :device_agent" do
+      launcher.instance_variable_set(:@gesture_performer, device_agent_performer)
+
+      expect(launcher.stop).to be == :stopped
+    end
+
+    it "logs a warning if the gesture performer is unknown" do
+      launcher.instance_variable_set(:@gesture_performer, unknown_performer)
+
+      actual = nil
+      out = capture_stdout do
+        actual = launcher.stop
+      end.string
+
+      expect(actual).to be == :unknown_performer
+      expect(out[/Unknown gesture performer/]).to be_truthy
+    end
+  end
 
   context ".instruments?" do
     it "returns true if @@launcher defined and is attached to :instruments" do
