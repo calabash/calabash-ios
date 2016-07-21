@@ -78,15 +78,22 @@ module Calabash
 
       # @!visibility private
       def to_s
-        msg = ["#{self.class}"]
-        if run_loop
-          msg << "Log file: #{self.run_loop[:log_file]}"
+        class_name = "Launcher"
+
+        if !@gesture_performer
+          "#<#{class_name}: not attached to a gesture performer>"
         else
-          msg << "Not attached to instruments."
-          msg << "Start your app with `start_test_server_in_background`"
-          msg << "If your app is already running, try `console_attach`"
+          gestures = "<#{class_name} using #{@gesture_performer.class.name} gestures"
+          if instruments?
+            "#{gestures} - log: #{@gesture_performer.run_loop[:log_file]}>"
+          elsif @gesture_performer.class.name == :device_agent
+            device_agent = @gesture_performer.device_agent
+            launcher_name = device_agent.cbx_launcher.name
+            "#{gestures} and #{launcher_name} launcher>"
+          else
+            "#{gestures}>"
+          end
         end
-        msg.join("\n")
       end
 
       # @!visibility private

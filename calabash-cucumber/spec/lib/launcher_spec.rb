@@ -20,7 +20,59 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
-  it "has a great to_s method"
+  context "#to_s" do
+    it "is not attached to any gesture performer" do
+      expect(launcher.to_s[/not attached to a gesture performer/]).to be_truthy
+    end
+
+    it "is attached to instruments" do
+      instruments = Class.new do
+        def self.name; :instruments; end
+        def run_loop; {:log_file => "path/to/file.log"}; end
+      end.new
+
+      launcher.instance_variable_set(:@gesture_performer, instruments)
+
+      expect(launcher.to_s[/instruments gestures/]).to be_truthy
+    end
+
+    it "is attached to device_agent" do
+      device_agent = Class.new do
+        def self.name; :device_agent; end
+        def device_agent
+          Class.new do
+            def cbx_launcher
+              Class.new do
+                def name; "iOSDeviceManager"; end
+              end.new
+            end
+          end.new
+        end
+      end.new
+
+      launcher.instance_variable_set(:@gesture_performer, device_agent)
+
+      expected = "<Launcher using device_agent gestures and iOSDeviceManager launcher>"
+      expect(launcher.to_s).to be == expected
+    end
+
+    it "is attached to some other gesture performer" do
+      performer = Class.new do
+        def self.name; :performer; end
+      end.new
+
+      launcher.instance_variable_set(:@gesture_performer, performer)
+
+      expected = "<Launcher using performer gestures>"
+      expect(launcher.to_s).to be == expected
+    end
+  end
+
+  context "#inspect" do
+    it "is the same as to_s" do
+      expect(launcher.inspect).to be == launcher.to_s
+    end
+  end
 
   context ".instruments?" do
     it "returns true if @@launcher defined and is attached to :instruments" do
