@@ -221,12 +221,12 @@ Queries will work, but gestures will not.
       # @!visibility private
       def instruments?
         attached_to_gesture_performer? &&
-          gesture_performer.class.send(:name) == :instruments
+          @gesture_performer.class.send(:name) == :instruments
       end
 
       # @!visibility private
       def attached_to_gesture_performer?
-        gesture_performer != nil
+        @gesture_performer != nil
       end
 
       # @deprecated 0.19.3 - replaced with attached_to_gesture_performer?
@@ -404,7 +404,7 @@ RunLoop.run returned:
       # @!visibility private
       # TODO Should call calabash exit route to shutdown the server.
       def stop
-        performer = gesture_performer
+        performer = @gesture_performer
         return :no_gesture_performer if !performer
 
         performer_name = performer.class.send(:name)
