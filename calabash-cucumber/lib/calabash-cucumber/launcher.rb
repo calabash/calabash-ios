@@ -404,7 +404,18 @@ RunLoop.run returned:
       # @!visibility private
       # TODO Should call calabash exit route to shutdown the server.
       def stop
-        RunLoop.stop(run_loop) if run_loop && run_loop[:pid]
+        performer = gesture_performer
+        return :no_gesture_performer if !performer
+
+        performer_name = performer.class.send(:name)
+        if performer_name == :instruments
+          RunLoop.stop(performer.run_loop)
+        elsif performer_name == :device_agent
+          performer.device_agent.stop
+        else
+          RunLoop.log_warn("Unknown gesture performer: #{performer_name}")
+          :unknown_performer
+        end
       end
 
       # Should Calabash quit the app under test after a Scenario?
