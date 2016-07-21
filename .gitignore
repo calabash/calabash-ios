@@ -30,8 +30,9 @@ Gemfile.lock
 .ruby-gemset
 .bundle
 
-# rspec
+# rspec and cucumber reports
 calabash-cucumber/spec/reports
+calabash-cucumber/test/cucumber/reports
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
