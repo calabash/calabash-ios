@@ -123,8 +123,8 @@ module Calabash
       UIA_DEVICE_ORIENTATION = {
             :portrait => 1,
             :upside_down => 2,
-            :landscape_left => 3,
-            :landscape_right => 4
+            :landscape_left => 3, # Home button on the right
+            :landscape_right => 4 # Home button on the left
       }.freeze
 
       # @! visibility private

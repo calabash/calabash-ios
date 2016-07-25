@@ -84,18 +84,40 @@ describe Calabash::Cucumber::RotationHelpers do
   end
 
   describe '#uia_orientation_key' do
-    describe ':left' do
-      it ':down' do helper.send(:uia_orientation_key, :left, :down) == :landscape_right end
-      it ':right' do helper.send(:uia_orientation_key, :left, :right) == :portrait end
-      it ':left' do helper.send(:uia_orientation_key, :left, :left) == :upside_down end
-      it ':up' do helper.send(:uia_orientation_key, :left, :up) == :landscape_left end
+    describe 'rotate :left' do
+      it 'returns :landscape_left when home button is :down' do
+        expect(helper.send(:uia_orientation_key, :left, :down)).to be == :landscape_left
+      end
+
+      it 'returns :upside_down when home button is :right' do
+        expect(helper.send(:uia_orientation_key, :left, :right)).to be == :upside_down
+      end
+
+      it 'returns :portrait with home button is :left' do
+        expect(helper.send(:uia_orientation_key, :left, :left)).to be == :portrait
+      end
+
+      it 'returns :landscape_right when the home button is :up' do
+        expect(helper.send(:uia_orientation_key, :left, :up)).to be == :landscape_right
+      end
     end
 
-    describe ':right' do
-      it ':down' do helper.send(:uia_orientation_key, :right, :down) == :landscape_left end
-      it ':right' do helper.send(:uia_orientation_key, :right, :right) == :upside_down end
-      it ':left' do helper.send(:uia_orientation_key, :right, :left) == :portrait end
-      it ':up' do helper.send(:uia_orientation_key, :right, :up) == :landscape_right end
+    describe 'rotate :right' do
+      it 'returns :landscape_right when home button is :down' do
+        expect(helper.send(:uia_orientation_key, :right, :down)).to be == :landscape_right
+      end
+
+      it 'returns :portrait when home button is :right' do
+        expect(helper.send(:uia_orientation_key, :right, :right)).to be == :portrait
+      end
+
+      it 'returns :upside_down when home button is :left' do
+        expect(helper.send(:uia_orientation_key, :right, :left)).to be == :upside_down
+      end
+
+      it 'returns :landscape_left when home button is :up' do
+        expect(helper.send(:uia_orientation_key, :right, :up)).to be == :landscape_left
+      end
     end
   end
 
