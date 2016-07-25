@@ -120,7 +120,7 @@ module Calabash
       end
 
       # @! visibility private
-      UIA_DEVICE_ORIENTATION = {
+      DEVICE_ORIENTATION = {
             :portrait => 1,
             :upside_down => 2,
             :landscape_left => 3, # Home button on the right
@@ -138,7 +138,7 @@ module Calabash
             raise ArgumentError,
                   "Expected '#{orientation}' to be :left, :right, :up, or :down"
         end
-        value = UIA_DEVICE_ORIENTATION[key]
+        value = DEVICE_ORIENTATION[key]
         cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
         uia(cmd)
       end
@@ -146,7 +146,7 @@ module Calabash
       # @! visibility private
       def rotate_with_uia(direction, current_orientation)
         key = orientation_key(direction, current_orientation)
-        value = UIA_DEVICE_ORIENTATION[key]
+        value = DEVICE_ORIENTATION[key]
         cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
         uia(cmd)
       end

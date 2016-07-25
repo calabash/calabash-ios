@@ -76,7 +76,7 @@ describe Calabash::Cucumber::RotationHelpers do
 
   it '#rotate_with_uia' do
     expect(helper).to receive(:orientation_key).and_return :key
-    stub_const('Calabash::Cucumber::RotationHelpers::UIA_DEVICE_ORIENTATION', {:key => 'value' })
+    stub_const('Calabash::Cucumber::RotationHelpers::DEVICE_ORIENTATION', {:key => 'value' })
     expected = 'UIATarget.localTarget().setDeviceOrientation(value)'
     expect(helper).to receive(:uia).with(expected).and_return :result
 
