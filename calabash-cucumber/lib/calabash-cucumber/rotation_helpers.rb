@@ -145,7 +145,7 @@ module Calabash
 
       # @! visibility private
       def rotate_with_uia(direction, current_orientation)
-        key = uia_orientation_key(direction, current_orientation)
+        key = orientation_key(direction, current_orientation)
         value = UIA_DEVICE_ORIENTATION[key]
         cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
         uia(cmd)
@@ -162,7 +162,7 @@ module Calabash
       # :right => home button on the right => landscape_left
       #
       # Notice how :left and :right are mapped.
-      def uia_orientation_key(direction, current_orientation)
+      def orientation_key(direction, current_orientation)
         key = nil
         case direction
           when :left then
