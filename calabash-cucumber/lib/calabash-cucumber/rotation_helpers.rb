@@ -152,29 +152,38 @@ module Calabash
       end
 
       # @! visibility private
+      #
+      # It is important to remember that the current orientation is the
+      # position of the home button:
+      #
+      # :up => home button on the top => upside_down
+      # :bottom => home button on the bottom => portrait
+      # :left => home button on the left => landscape_right
+      # :right => home button on the right => landscape_left
+      #
+      # Notice how :left and :right are mapped.
       def uia_orientation_key(direction, current_orientation)
-
         key = nil
         case direction
           when :left then
             if current_orientation == :down
-              key = :landscape_right
-            elsif current_orientation == :right
-              key = :portrait
-            elsif current_orientation == :left
-              key = :upside_down
-            elsif current_orientation == :up
               key = :landscape_left
+            elsif current_orientation == :right
+              key = :upside_down
+            elsif current_orientation == :left
+              key = :portrait
+            elsif current_orientation == :up
+              key = :landscape_right
             end
           when :right then
             if current_orientation == :down
-              key = :landscape_left
-            elsif current_orientation == :right
-              key = :upside_down
-            elsif current_orientation == :left
-              key = :portrait
-            elsif current_orientation == :up
               key = :landscape_right
+            elsif current_orientation == :right
+              key = :portrait
+            elsif current_orientation == :left
+              key = :upside_down
+            elsif current_orientation == :up
+              key = :landscape_left
             end
           else
             raise ArgumentError,
