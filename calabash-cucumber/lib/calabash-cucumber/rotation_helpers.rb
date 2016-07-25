@@ -91,7 +91,7 @@ module Calabash
 
         ap result if RunLoop::Environment.debug?
 
-        status_bar_orientation
+        status_bar_orientation.to_sym
       end
 
       private
