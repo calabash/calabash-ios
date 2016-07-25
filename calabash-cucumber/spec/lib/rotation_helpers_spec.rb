@@ -19,7 +19,7 @@ describe Calabash::Cucumber::RotationHelpers do
   describe '#rotate_home_button_to' do
     it 're-raises ArgumentError' do
       error = ArgumentError.new('Expect ArgumentError')
-      expect(helper).to receive(:ensure_valid_rotate_home_to_arg).and_raise error
+      expect(helper).to receive(:expect_valid_rotate_home_to_arg).and_raise error
 
       expect do
         helper.rotate_home_button_to(:invalid)
@@ -27,7 +27,7 @@ describe Calabash::Cucumber::RotationHelpers do
     end
 
     it 'does nothing if device is already in the target orientation' do
-      expect(helper).to receive(:ensure_valid_rotate_home_to_arg).and_return :down
+      expect(helper).to receive(:expect_valid_rotate_home_to_arg).and_return :down
       expect(helper).to receive(:status_bar_orientation).and_return 'down'
 
       expect(helper.rotate_home_button_to('down')).to be == :down
@@ -75,8 +75,8 @@ describe Calabash::Cucumber::RotationHelpers do
   end
 
   it '#rotate_with_uia' do
-    expect(helper).to receive(:uia_orientation_key).and_return :key
-    stub_const('Calabash::Cucumber::RotationHelpers::UIA_DEVICE_ORIENTATION', {:key => 'value' })
+    expect(helper).to receive(:orientation_key).and_return :key
+    stub_const('Calabash::Cucumber::RotationHelpers::DEVICE_ORIENTATION', {:key => 'value' })
     expected = 'UIATarget.localTarget().setDeviceOrientation(value)'
     expect(helper).to receive(:uia).with(expected).and_return :result
 
@@ -84,18 +84,40 @@ describe Calabash::Cucumber::RotationHelpers do
   end
 
   describe '#uia_orientation_key' do
-    describe ':left' do
-      it ':down' do helper.send(:uia_orientation_key, :left, :down) == :landscape_right end
-      it ':right' do helper.send(:uia_orientation_key, :left, :right) == :portrait end
-      it ':left' do helper.send(:uia_orientation_key, :left, :left) == :upside_down end
-      it ':up' do helper.send(:uia_orientation_key, :left, :up) == :landscape_left end
+    describe 'rotate :left' do
+      it 'returns :landscape_left when home button is :down' do
+        expect(helper.send(:orientation_key, :left, :down)).to be == :landscape_left
+      end
+
+      it 'returns :upside_down when home button is :right' do
+        expect(helper.send(:orientation_key, :left, :right)).to be == :upside_down
+      end
+
+      it 'returns :portrait with home button is :left' do
+        expect(helper.send(:orientation_key, :left, :left)).to be == :portrait
+      end
+
+      it 'returns :landscape_right when the home button is :up' do
+        expect(helper.send(:orientation_key, :left, :up)).to be == :landscape_right
+      end
     end
 
-    describe ':right' do
-      it ':down' do helper.send(:uia_orientation_key, :right, :down) == :landscape_left end
-      it ':right' do helper.send(:uia_orientation_key, :right, :right) == :upside_down end
-      it ':left' do helper.send(:uia_orientation_key, :right, :left) == :portrait end
-      it ':up' do helper.send(:uia_orientation_key, :right, :up) == :landscape_right end
+    describe 'rotate :right' do
+      it 'returns :landscape_right when home button is :down' do
+        expect(helper.send(:orientation_key, :right, :down)).to be == :landscape_right
+      end
+
+      it 'returns :portrait when home button is :right' do
+        expect(helper.send(:orientation_key, :right, :right)).to be == :portrait
+      end
+
+      it 'returns :upside_down when home button is :left' do
+        expect(helper.send(:orientation_key, :right, :left)).to be == :upside_down
+      end
+
+      it 'returns :landscape_left when home button is :up' do
+        expect(helper.send(:orientation_key, :right, :up)).to be == :landscape_left
+      end
     end
   end
 
@@ -146,25 +168,25 @@ describe Calabash::Cucumber::RotationHelpers do
   describe '#ensure_valid_rotate_home_to_arg' do
     it 'raises error when arg is invalid' do
       expect do
-        helper.send(:ensure_valid_rotate_home_to_arg, :invalid)
+        helper.send(:expect_valid_rotate_home_to_arg, :invalid)
       end.to raise_error ArgumentError, /Expected/
     end
 
     describe 'valid arguments' do
       it 'top' do
-        expect(helper.send(:ensure_valid_rotate_home_to_arg, 'top')).to be == :up
+        expect(helper.send(:expect_valid_rotate_home_to_arg, 'top')).to be == :up
       end
 
       it ':top' do
-        expect(helper.send(:ensure_valid_rotate_home_to_arg, :top)).to be == :up
+        expect(helper.send(:expect_valid_rotate_home_to_arg, :top)).to be == :up
       end
 
       it 'bottom' do
-        expect(helper.send(:ensure_valid_rotate_home_to_arg, 'bottom')).to be == :down
+        expect(helper.send(:expect_valid_rotate_home_to_arg, 'bottom')).to be == :down
       end
 
       it ':bottom' do
-        expect(helper.send(:ensure_valid_rotate_home_to_arg, :bottom)).to be == :down
+        expect(helper.send(:expect_valid_rotate_home_to_arg, :bottom)).to be == :down
       end
     end
   end

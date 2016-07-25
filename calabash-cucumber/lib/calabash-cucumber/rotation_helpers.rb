@@ -47,7 +47,7 @@ module Calabash
       def rotate_home_button_to(direction)
 
         begin
-          as_symbol = ensure_valid_rotate_home_to_arg(direction)
+          as_symbol = expect_valid_rotate_home_to_arg(direction)
         rescue ArgumentError => e
           raise ArgumentError, e.message
         end
@@ -91,7 +91,7 @@ module Calabash
 
         ap result if RunLoop::Environment.debug?
 
-        status_bar_orientation
+        status_bar_orientation.to_sym
       end
 
       private
@@ -102,7 +102,7 @@ module Calabash
       end
 
       # @! visibility private
-      def ensure_valid_rotate_home_to_arg(arg)
+      def expect_valid_rotate_home_to_arg(arg)
         coerced = arg.to_sym
 
         if coerced == :top
@@ -120,11 +120,11 @@ module Calabash
       end
 
       # @! visibility private
-      UIA_DEVICE_ORIENTATION = {
+      DEVICE_ORIENTATION = {
             :portrait => 1,
             :upside_down => 2,
-            :landscape_left => 3,
-            :landscape_right => 4
+            :landscape_left => 3, # Home button on the right
+            :landscape_right => 4 # Home button on the left
       }.freeze
 
       # @! visibility private
@@ -138,43 +138,52 @@ module Calabash
             raise ArgumentError,
                   "Expected '#{orientation}' to be :left, :right, :up, or :down"
         end
-        value = UIA_DEVICE_ORIENTATION[key]
+        value = DEVICE_ORIENTATION[key]
         cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
         uia(cmd)
       end
 
       # @! visibility private
       def rotate_with_uia(direction, current_orientation)
-        key = uia_orientation_key(direction, current_orientation)
-        value = UIA_DEVICE_ORIENTATION[key]
+        key = orientation_key(direction, current_orientation)
+        value = DEVICE_ORIENTATION[key]
         cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
         uia(cmd)
       end
 
       # @! visibility private
-      def uia_orientation_key(direction, current_orientation)
-
+      #
+      # It is important to remember that the current orientation is the
+      # position of the home button:
+      #
+      # :up => home button on the top => upside_down
+      # :bottom => home button on the bottom => portrait
+      # :left => home button on the left => landscape_right
+      # :right => home button on the right => landscape_left
+      #
+      # Notice how :left and :right are mapped.
+      def orientation_key(direction, current_orientation)
         key = nil
         case direction
           when :left then
             if current_orientation == :down
-              key = :landscape_right
-            elsif current_orientation == :right
-              key = :portrait
-            elsif current_orientation == :left
-              key = :upside_down
-            elsif current_orientation == :up
               key = :landscape_left
+            elsif current_orientation == :right
+              key = :upside_down
+            elsif current_orientation == :left
+              key = :portrait
+            elsif current_orientation == :up
+              key = :landscape_right
             end
           when :right then
             if current_orientation == :down
-              key = :landscape_left
-            elsif current_orientation == :right
-              key = :upside_down
-            elsif current_orientation == :left
-              key = :portrait
-            elsif current_orientation == :up
               key = :landscape_right
+            elsif current_orientation == :right
+              key = :portrait
+            elsif current_orientation == :left
+              key = :upside_down
+            elsif current_orientation == :up
+              key = :landscape_left
             end
           else
             raise ArgumentError,
