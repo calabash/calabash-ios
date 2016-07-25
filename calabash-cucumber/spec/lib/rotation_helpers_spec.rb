@@ -19,7 +19,7 @@ describe Calabash::Cucumber::RotationHelpers do
   describe '#rotate_home_button_to' do
     it 're-raises ArgumentError' do
       error = ArgumentError.new('Expect ArgumentError')
-      expect(helper).to receive(:ensure_valid_rotate_home_to_arg).and_raise error
+      expect(helper).to receive(:expect_valid_rotate_home_to_arg).and_raise error
 
       expect do
         helper.rotate_home_button_to(:invalid)
@@ -27,7 +27,7 @@ describe Calabash::Cucumber::RotationHelpers do
     end
 
     it 'does nothing if device is already in the target orientation' do
-      expect(helper).to receive(:ensure_valid_rotate_home_to_arg).and_return :down
+      expect(helper).to receive(:expect_valid_rotate_home_to_arg).and_return :down
       expect(helper).to receive(:status_bar_orientation).and_return 'down'
 
       expect(helper.rotate_home_button_to('down')).to be == :down
@@ -168,25 +168,25 @@ describe Calabash::Cucumber::RotationHelpers do
   describe '#ensure_valid_rotate_home_to_arg' do
     it 'raises error when arg is invalid' do
       expect do
-        helper.send(:ensure_valid_rotate_home_to_arg, :invalid)
+        helper.send(:expect_valid_rotate_home_to_arg, :invalid)
       end.to raise_error ArgumentError, /Expected/
     end
 
     describe 'valid arguments' do
       it 'top' do
-        expect(helper.send(:ensure_valid_rotate_home_to_arg, 'top')).to be == :up
+        expect(helper.send(:expect_valid_rotate_home_to_arg, 'top')).to be == :up
       end
 
       it ':top' do
-        expect(helper.send(:ensure_valid_rotate_home_to_arg, :top)).to be == :up
+        expect(helper.send(:expect_valid_rotate_home_to_arg, :top)).to be == :up
       end
 
       it 'bottom' do
-        expect(helper.send(:ensure_valid_rotate_home_to_arg, 'bottom')).to be == :down
+        expect(helper.send(:expect_valid_rotate_home_to_arg, 'bottom')).to be == :down
       end
 
       it ':bottom' do
-        expect(helper.send(:ensure_valid_rotate_home_to_arg, :bottom)).to be == :down
+        expect(helper.send(:expect_valid_rotate_home_to_arg, :bottom)).to be == :down
       end
     end
   end

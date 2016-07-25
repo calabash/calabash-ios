@@ -47,7 +47,7 @@ module Calabash
       def rotate_home_button_to(direction)
 
         begin
-          as_symbol = ensure_valid_rotate_home_to_arg(direction)
+          as_symbol = expect_valid_rotate_home_to_arg(direction)
         rescue ArgumentError => e
           raise ArgumentError, e.message
         end
@@ -102,7 +102,7 @@ module Calabash
       end
 
       # @! visibility private
-      def ensure_valid_rotate_home_to_arg(arg)
+      def expect_valid_rotate_home_to_arg(arg)
         coerced = arg.to_sym
 
         if coerced == :top
