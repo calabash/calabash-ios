@@ -33,6 +33,8 @@ Gemfile.lock
 # rspec and cucumber reports
 calabash-cucumber/spec/reports
 calabash-cucumber/test/cucumber/reports
+calabash-cucumber/test/cucumber/screenshots
+calabash-cucumber/test/cucumber/screenshot*png
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc

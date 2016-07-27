@@ -2,7 +2,7 @@
 
 require "run_loop"
 
-APP = File.expand_path(File.join(".", "iPhoneOnly.app"))
+SIM_APP = File.expand_path(File.join(".", "aut", "sim", "UnitTestApp.app"))
 
 calabash_dir = File.expand_path(File.join(ENV["HOME"], ".calabash"))
 
