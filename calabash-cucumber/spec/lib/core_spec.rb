@@ -5,7 +5,8 @@ describe Calabash::Cucumber::Core do
   end
 
   let(:gesture_performer) do
-    Class.new do
+    Class.new(Calabash::Cucumber::Gestures::Performer) do
+      def initialize; ; end
       def swipe(_, _); :success; end
       def to_s; "#<GesturePerformer Interface>"; end
       def inspect; to_s; end
@@ -169,6 +170,66 @@ describe Calabash::Cucumber::Core do
 
           expect(world.swipe(:left, options)).to be == :success
         end
+      end
+    end
+  end
+
+  context "#rotate_home_button_to" do
+    let(:position) { :left }
+
+    it "does nothing if status bar orientation is the same as current orientation" do
+      expect(world).to receive(:expect_valid_rotate_home_to_arg).with(:left).and_return(:left)
+      expect(world).to receive(:status_bar_orientation).and_return(:left)
+
+      expect(world.rotate_home_button_to(:left)).to be == :left
+    end
+
+    it "calls out to gesture performer to perform the gesture" do
+      expect(world).to receive(:expect_valid_rotate_home_to_arg).with(:left).and_return(:left)
+      expect(world).to receive(:status_bar_orientation).and_return(:right)
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:gesture_performer).and_return(gesture_performer)
+      expect(gesture_performer).to receive(:rotate_home_button_to).with(:left).and_return(:left)
+
+      expect(world.rotate_home_button_to(:left)).to be == :left
+    end
+  end
+
+  context "#rotate" do
+    it "raises an error if direction in not left or right" do
+      expect do
+        world.rotate(:invalid)
+      end.to raise_error(ArgumentError, /to be :left or :right/)
+    end
+
+    context "valid argument" do
+      before do
+        expect(world).to receive(:launcher).and_return(launcher)
+        expect(launcher).to receive(:gesture_performer).and_return(gesture_performer)
+      end
+
+      it "rotates right when passed :right" do
+        expect(gesture_performer).to receive(:rotate).with(:right).and_return :orientation
+
+        expect(world.rotate(:right)).to be == :orientation
+      end
+
+      it "rotates right when passed 'right'" do
+        expect(gesture_performer).to receive(:rotate).with(:right).and_return :orientation
+
+        expect(world.rotate("right")).to be == :orientation
+      end
+
+      it "rotates left when passed :left" do
+        expect(gesture_performer).to receive(:rotate).with(:left).and_return :orientation
+
+        expect(world.rotate(:left)).to be == :orientation
+      end
+
+      it "rotates left when passed 'left'" do
+        expect(gesture_performer).to receive(:rotate).with(:left).and_return :orientation
+
+        expect(world.rotate("left")).to be == :orientation
       end
     end
   end
