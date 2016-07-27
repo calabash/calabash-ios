@@ -68,6 +68,16 @@ module Calabash
         def keyboard_enter_text(string)
           abstract_method!
         end
+
+        # @!visibility private
+        def rotate(direction)
+          abstract_method!
+        end
+
+        # @!visibility private
+        def rotate_home_button_to(position)
+          abstract_method!
+        end
       end
     end
   end
