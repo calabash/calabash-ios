@@ -14,6 +14,12 @@ module Calabash
         require "calabash-cucumber/query_helpers"
         include Calabash::Cucumber::QueryHelpers
 
+        require "calabash-cucumber/status_bar_helpers"
+        include Calabash::Cucumber::StatusBarHelpers
+
+        require "calabash-cucumber/rotation_helpers"
+        include Calabash::Cucumber::RotationHelpers
+
         # @!visibility private
         def self.expect_valid_args(args)
           if args.nil?
@@ -70,6 +76,22 @@ args[0] = #{args[0]}
                                                   hash[:coordinates][:x],
                                                   hash[:coordinates][:y])
           [hash[:view]]
+        end
+
+        # @!visibility private
+        def rotate(direction)
+          # Caller is responsible for normalizing and verifying direction.
+          current_orientation = status_bar_orientation.to_sym
+          key = orientation_key(direction, current_orientation)
+          position = orientation_for_key(key)
+          rotate_home_button_to(position)
+        end
+
+        # @!visibility private
+        def rotate_home_button_to(position)
+          # Caller is responsible for normalizing and verifying position.
+          @device_agent.rotate_home_button_to(position)
+          status_bar_orientation.to_sym
         end
 
         private
