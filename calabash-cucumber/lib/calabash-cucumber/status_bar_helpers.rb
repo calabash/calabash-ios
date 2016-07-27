@@ -4,7 +4,8 @@ module Calabash
     # Contains methods for interacting with the status bar.
     module StatusBarHelpers
 
-      # Returns the device orientation as reported by `[[UIDevice currentDevice] orientation]`.
+      # Returns the device orientation as reported by
+      # `[[UIDevice currentDevice] orientation]`.
       #
       # @note This method is not used internally by the gem.  It is provided
       #  as an alternative to `status_bar_orientation`.  We recommend that you
@@ -16,25 +17,10 @@ module Calabash
       # @see #status_bar_orientation
       # @see Calabash::Cucumber::RotationHelpers#rotate_home_button_to
       #
-      # @param [Boolean] force_down if true, do rotations until a down
-      #  orientation is achieved
       # @return [Symbol] Returns the device orientation as one of
-      #  `{:down, :up, :left, :right}`.
-      def device_orientation(force_down=false)
-        res = Map.map(nil, :orientation, :device).first
-
-        if ['face up', 'face down'].include?(res)
-          if force_down
-            puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
-          end
-
-          return res unless force_down
-          return rotate_home_button_to :down
-        end
-
-        return res unless res.eql?('unknown')
-        return res unless force_down
-        rotate_home_button_to(:down)
+      #  `{'down', 'up', 'left', 'right', 'face up', 'face down', 'unknown'}`.
+      def device_orientation
+        Map.map(nil, :orientation, :device).first
       end
 
       # Returns the home button position relative to the status bar.
