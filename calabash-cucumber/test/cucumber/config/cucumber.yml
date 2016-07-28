@@ -3,6 +3,7 @@
 require "run_loop"
 
 SIM_APP = File.expand_path(File.join(".", "aut", "sim", "UnitTestApp.app"))
+DEVICE_APP = File.expand_path(File.join(".", "aut", "device", "UnitTestApp.app"))
 
 # Path to DeviceAgent.iOS repo to support launching CBX-Runner with xcodebuild.
 #
@@ -43,16 +44,20 @@ FileUtils.mkdir_p("./reports")
 
 verbose: DEBUG=1
 formatter: -f <%= formatter %>
+cbxws: CBXWS=<%= CBXWS %>
 
 # Launch on default simulator.
-simulator_vars: APP=<%= APP %>
+simulator_vars: APP=<%= SIM_APP %>
 simulator_tags: --tags ~@device_only --tags ~@device
 
-default:              -p simulator_vars -p simulator_tags
+default:  -p simulator_vars -p simulator_tags -p cbxws
 
 # Launch on device.
+# DeviceAgent requires CODE_SIGN_IDENTITY; could not make this work as a profile
+# with env variable there are spaces and parens in the variable.
+device_vars: APP=sh.calaba.UnitTestApp DEVICE_APP=<%= DEVICE_APP %>
 device_tags:  --tags ~@simulator_only --tags ~@simulator
-device:       -p device_tags -p formatter BUNDLE_ID=sh.calaba.iPhoneOnly
+device:       -p device_tags -p formatter -p device_vars -p cbxws
 
 iphone5S:    -p device DEVICE_TARGET=<%= devices[:iphone5S][:udid] %>    DEVICE_ENDPOINT=<%= devices[:iphone5S][:ip] %>
 iphone4S:    -p device DEVICE_TARGET=<%= devices[:iphone4S][:udid] %>    DEVICE_ENDPOINT=<%= devices[:iphone4S][:ip] %>
