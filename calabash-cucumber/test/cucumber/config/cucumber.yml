@@ -65,7 +65,7 @@ iphone6:     -p device DEVICE_TARGET=<%= devices[:iphone6][:udid] %>     DEVICE_
 iphone6plus: -p device DEVICE_TARGET=<%= devices[:iphone6plus][:udid] %> DEVICE_ENDPOINT=<%= devices[:iphone6plus][:ip] %>
 ipadmini:    -p device DEVICE_TARGET=<%= devices[:ipadmini][:udid] %>    DEVICE_ENDPOINT=<%= devices[:ipadmini][:ip] %>
 
-# Joshua's devices
+# jmoody devices
 neptune: -p iphone4S
 uranus:  -p iphone5S
 hat:     -p iphone6
