@@ -58,6 +58,25 @@ module Calabash::Launcher
     self.launcher.device_target?
   end
 
+  def self.prepare_physical_device
+    return if self.target_is_simulator?
+
+    self.ensure_app_installed
+    #self.uninstall_cbx_runner
+  end
+
+  # Not yet.
+  #
+  # Trying to debug restarting problems.
+  # def self.uninstall_cbx_runner
+  #   return if self.target_is_simulator?
+  #
+  #   device = RunLoop::Device.device_with_identifier(self.target, self.environment)
+  #   device_life_cycle = RunLoop::PhysicalDevice::IOSDeviceManager.new(device)
+  #
+  #   device_life_cycle.uninstall_app("com.apple.test.CBX-Runner")
+  # end
+
   def self.ensure_app_installed
     # RunLoop handles this automatically.
     return if self.target_is_simulator?
@@ -65,8 +84,6 @@ module Calabash::Launcher
     # This is a bit messy as we drop support BUNDLE_ID and support for handling
     # arm apps in the APP env var.
     path = ENV["DEVICE_APP"]
-
-
 
     app = RunLoop::App.new(path)
     device = RunLoop::Device.device_with_identifier(self.target, self.environment)
@@ -94,7 +111,7 @@ Exiting 1.
 end
 
 Before do |scenario|
-  Calabash::Launcher.ensure_app_installed
+  Calabash::Launcher.prepare_physical_device
 
   launcher = Calabash::Launcher.launcher
   options = {
