@@ -6,6 +6,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
       def initialize; ; end
       def to_s; "#<XCUITest subclass>"; end
       def inspect; to_s; end
+      def rotate_home_button_to(_); ; end
     end.new
   end
 
@@ -61,6 +62,26 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
     let(:query) { "query" }
     let(:options) { {:query => query} }
+
+    context "#rotate" do
+      it "rotates the interface based on direction" do
+        expect(device_agent).to receive(:status_bar_orientation).and_return("orientation")
+        expect(device_agent).to receive(:orientation_key).with(:left, :orientation).and_return(:key)
+        expect(device_agent).to receive(:orientation_for_key).with(:key).and_return(:value)
+        expect(device_agent).to receive(:rotate_home_button_to).with(:value).and_return(:new_orientation)
+
+        expect(device_agent.rotate(:left)).to be == :new_orientation
+      end
+    end
+
+    context "#rotate_home_button_to" do
+      it "rotates and returns the current status bar orientation" do
+        expect(xcuitest).to receive(:rotate_home_button_to).with(:position).and_return true
+        expect(device_agent).to receive(:status_bar_orientation).and_return("new_orientation")
+
+        expect(device_agent.rotate_home_button_to(:position)).to be == :new_orientation
+      end
+    end
 
     context "#query_for_coordinates" do
       it "raises an error if query returns no elements" do

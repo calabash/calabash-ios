@@ -180,6 +180,74 @@ module Calabash
         Calabash::Cucumber::VERSION
       end
 
+      # Rotates the home button to a position relative to the status bar.
+      #
+      # @example portrait
+      #  rotate_home_button_to :down
+      #
+      # @example upside down
+      #  rotate_home_button_to :up
+      #
+      # @example landscape with left home button AKA: _right_ landscape
+      #  rotate_home_button_to :left
+      #
+      # @example landscape with right home button AKA: _left_ landscape
+      #  rotate_home_button_to :right
+      #
+      # Refer to Apple's documentation for clarification about left vs.
+      # right landscape orientations.
+      #
+      # For legacy support the `dir` argument can be a String or Symbol.
+      # Please update your code to pass a Symbol.
+      #
+      # For legacy support `:top` and `top` are synonyms for `:up`.
+      # Please update your code to pass `:up`.
+      #
+      # For legacy support `:bottom` and `bottom` are synonyms for `:down`.
+      # Please update your code to pass `:down`.
+      #
+      # @param [Symbol] position The position of the home button after the rotation.
+      #  Can be one of `{:down | :left | :right | :up }`.
+      #
+      # @note A rotation will only occur if your view controller and application
+      #  support the target orientation.
+      #
+      # @return [Symbol] The position of the home button relative to the status
+      #  bar when all rotations have been completed.
+      def rotate_home_button_to(position)
+
+        normalized_symbol = expect_valid_rotate_home_to_arg(position)
+        current_orientation = status_bar_orientation.to_sym
+
+        return current_orientation if current_orientation == normalized_symbol
+
+        launcher.gesture_performer.send(:rotate_home_button_to, normalized_symbol)
+      end
+
+      # Rotates the device in the direction indicated by `direction`.
+      #
+      # @example rotate left
+      #  rotate :left
+      #
+      # @example rotate right
+      #  rotate :right
+      #
+      # @param [Symbol] direction The direction to rotate. Can be :left or :right.
+      #
+      # @return [Symbol] The position of the home button relative to the status
+      #   bar after the rotation.  Will be one of `{:down | :left | :right | :up }`.
+      # @raise [ArgumentError] If direction is not :left or :right.
+      def rotate(direction)
+        as_symbol = direction.to_sym
+
+        if as_symbol != :left && as_symbol != :right
+          raise ArgumentError,
+                "Expected '#{direction}' to be :left or :right"
+        end
+
+        launcher.gesture_performer.send(:rotate, as_symbol)
+      end
+
       # Performs the `tap` gesture on the (first) view that matches
       # query `uiquery`. Note that `touch` assumes the view is visible and not animating.
       # If the view is not visible `touch` will fail. If the view is animating

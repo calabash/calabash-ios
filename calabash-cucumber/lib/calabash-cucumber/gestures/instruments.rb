@@ -17,6 +17,12 @@ module Calabash
         require "calabash-cucumber/query_helpers"
         include Calabash::Cucumber::QueryHelpers
 
+        require "calabash-cucumber/status_bar_helpers"
+        include Calabash::Cucumber::StatusBarHelpers
+
+        require "calabash-cucumber/rotation_helpers"
+        include Calabash::Cucumber::RotationHelpers
+
         require "calabash-cucumber/map"
 
         # @!visibility private
@@ -184,6 +190,22 @@ Expected '#{strategy}' to be one of these supported strategies:
           uia_send_app_to_background(secs)
         end
 
+        def rotate(direction)
+          # Caller is responsible for providing a valid direction.
+          current_orientation = status_bar_orientation.to_sym
+          result = rotate_with_uia(direction, current_orientation)
+          recalibrate_after_rotation
+          ap result if RunLoop::Environment.debug?
+          status_bar_orientation.to_sym
+        end
+
+        def rotate_home_button_to(position)
+          # Caller is responsible for normalizing and validating the position
+          rotate_to_uia_orientation(position)
+          recalibrate_after_rotation
+          status_bar_orientation.to_sym
+        end
+
         private
 
         # @!visibility private
@@ -266,6 +288,35 @@ Expected '#{strategy}' to be one of these supported strategies:
             else
               # no-op by design.
           end
+        end
+
+        # @!visibility private
+        def recalibrate_after_rotation
+          uia_query :window
+        end
+
+        # @!visibility private
+        def rotate_to_uia_orientation(orientation)
+          case orientation
+            when :down then key = :portrait
+            when :up then key = :upside_down
+            when :left then key = :landscape_right
+            when :right then key = :landscape_left
+            else
+              raise ArgumentError,
+                    "Expected '#{orientation}' to be :left, :right, :up, or :down"
+          end
+          value = orientation_for_key(key)
+          cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
+          uia(cmd)
+        end
+
+        # @!visibility private
+        def rotate_with_uia(direction, current_orientation)
+          key = orientation_key(direction, current_orientation)
+          value = orientation_for_key(key)
+          cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
+          uia(cmd)
         end
       end
     end

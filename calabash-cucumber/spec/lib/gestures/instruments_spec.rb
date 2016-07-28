@@ -180,4 +180,113 @@ describe Calabash::Cucumber::Gestures::Instruments do
       expect(actual.instance_variable_get(:@run_loop)).to be == args
     end
   end
+
+  context "instance methods" do
+    let(:run_loop) do
+      {
+        :pid => 10,
+        :udid => :udid,
+        :gesture_performer => :instruments,
+        :index => 1,
+        :log_file => "path/to/log",
+        :uia_strategy => Calabash::Cucumber::Gestures::Instruments::UIA_STRATEGIES[0]
+      }
+    end
+
+    let(:instruments) { Calabash::Cucumber::Gestures::Instruments.new(run_loop) }
+
+    context "#rotate_with_uia" do
+      it "calls uia with the correct command" do
+        expect(instruments).to receive(:orientation_key).with(:direction, :orientation).and_return(:key)
+        expect(instruments).to receive(:orientation_for_key).with(:key).and_return(10)
+        cmd = "UIATarget.localTarget().setDeviceOrientation(10)"
+        expect(instruments).to receive(:uia).with(cmd).and_return(:success)
+
+        actual = instruments.send(:rotate_with_uia, :direction, :orientation)
+        expect(actual).to be == :success
+      end
+    end
+
+    context "#rotate_home_button_to" do
+      it "rotates" do
+        expect(instruments).to receive(:rotate_to_uia_orientation).with(:down).and_return :success
+        expect(instruments).to receive(:recalibrate_after_rotation).and_return(:success)
+        expect(instruments).to receive(:status_bar_orientation).and_return('after')
+
+        expect(instruments.rotate_home_button_to(:down)).to be == :after
+      end
+    end
+
+    context "#rotate" do
+
+      before do
+        expect(instruments).to receive(:status_bar_orientation).and_return(:before, :after)
+        expect(instruments).to receive(:rotate_with_uia).and_return :orientation
+        expect(instruments).to receive(:recalibrate_after_rotation).and_return(:success)
+      end
+
+      it ':left' do expect(instruments.rotate(:left)).to be == :after end
+      it ':right' do expect(instruments.rotate(:right)).to be == :after end
+    end
+
+    it '#rotate_with_uia' do
+      expect(instruments).to receive(:orientation_key).and_return :key
+      stub_const('Calabash::Cucumber::RotationHelpers::DEVICE_ORIENTATION', {:key => 'value' })
+      expected = 'UIATarget.localTarget().setDeviceOrientation(value)'
+      expect(instruments).to receive(:uia).with(expected).and_return :result
+
+      expect(instruments.send(:rotate_with_uia, :left, :down)).to be == :result
+    end
+
+    it "#recalibrate_afer_rotation" do
+      expect(instruments).to receive(:uia_query).with(:window).and_return :success
+
+      expect(instruments.send(:recalibrate_after_rotation)).to be == :success
+    end
+
+    describe '#rotate_to_uia_orientation' do
+      it 'raises an error for invalid arguments' do
+        expect do
+          instruments.send(:rotate_to_uia_orientation, :invalid)
+        end.to raise_error ArgumentError, /Expected/
+      end
+
+      describe 'valid arguments' do
+        it ':down' do
+          expected = 'UIATarget.localTarget().setDeviceOrientation(1)'
+          expect(instruments).to receive(:uia).with(expected).and_return :result
+
+          actual = instruments.send(:rotate_to_uia_orientation, :down)
+          expect(actual).to be == :result
+        end
+
+        it ':up' do
+          expected = 'UIATarget.localTarget().setDeviceOrientation(2)'
+          expect(instruments).to receive(:uia).with(expected).and_return :result
+
+          actual = instruments.send(:rotate_to_uia_orientation, :up)
+          expect(actual).to be == :result
+
+        end
+
+        it ':left' do
+          expected = 'UIATarget.localTarget().setDeviceOrientation(4)'
+          expect(instruments).to receive(:uia).with(expected).and_return :result
+
+          actual = instruments.send(:rotate_to_uia_orientation, :left)
+          expect(actual).to be == :result
+
+        end
+
+        it ':right' do
+          expected = 'UIATarget.localTarget().setDeviceOrientation(3)'
+          expect(instruments).to receive(:uia).with(expected).and_return :result
+
+          actual = instruments.send(:rotate_to_uia_orientation, :right)
+          expect(actual).to be == :result
+        end
+      end
+    end
+  end
 end
+
