@@ -4,6 +4,17 @@ require "run_loop"
 
 SIM_APP = File.expand_path(File.join(".", "aut", "sim", "UnitTestApp.app"))
 
+# Path to DeviceAgent.iOS repo to support launching CBX-Runner with xcodebuild.
+#
+# This will allow you to run cucumbers against non-released versions of DeviceAgent.
+#
+# CBX_LAUNCHER=xcodebuild be cucumber
+CBXWS = begin
+  repo = File.join("..", "..", "..", "..", "DeviceAgent.iOS")
+  workspace = File.join(repo, "CBXDriver.xcworkspace")
+  "#{File.expand_path(workspace)}"
+end
+
 calabash_dir = File.expand_path(File.join(ENV["HOME"], ".calabash"))
 
 devices = {}
