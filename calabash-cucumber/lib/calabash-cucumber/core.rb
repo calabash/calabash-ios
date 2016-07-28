@@ -657,7 +657,7 @@ module Calabash
       # Sends the app to the background.
       #
       # Sending the app to the background for more than 60 seconds may
-      # cause unpredicatable results.
+      # cause unpredictable results.
       #
       # @param [Numeric] seconds How long to send the app to the background.
       # @raise [ArgumentError] if `seconds` argument is < 1.0
