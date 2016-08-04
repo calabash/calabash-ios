@@ -60,7 +60,7 @@ Then(/^the home button is on the (left|right|top|bottom)$/) do |position|
 
   if actual != expected
     if expected == :up && !upside_down_supported?
-      message = "Up-side-down orientation is not supported iPhone"
+      message = "Up-side-down orientation is not supported on iPhone"
       colored = RunLoop::Color.blue(message)
       $stdout.puts("    #{colored}")
     else
