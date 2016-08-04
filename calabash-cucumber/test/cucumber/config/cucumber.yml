@@ -2,8 +2,8 @@
 
 require "run_loop"
 
-SIM_APP = File.expand_path(File.join(".", "aut", "sim", "UnitTestApp.app"))
-DEVICE_APP = File.expand_path(File.join(".", "aut", "device", "UnitTestApp.app"))
+SIM_APP = File.expand_path(File.join(".", "aut", "sim", "TestApp.app"))
+DEVICE_APP = File.expand_path(File.join(".", "aut", "device", "TestApp.app"))
 
 # Path to DeviceAgent.iOS repo to support launching CBX-Runner with xcodebuild.
 #
@@ -55,7 +55,7 @@ default:  -p simulator_vars -p simulator_tags -p cbxws
 # Launch on device.
 # DeviceAgent requires CODE_SIGN_IDENTITY; could not make this work as a profile
 # with env variable there are spaces and parens in the variable.
-device_vars: APP=sh.calaba.UnitTestApp DEVICE_APP=<%= DEVICE_APP %>
+device_vars: APP=sh.calaba.TestApp DEVICE_APP=<%= DEVICE_APP %>
 device_tags:  --tags ~@simulator_only --tags ~@simulator
 device:       -p device_tags -p formatter -p device_vars -p cbxws
 
