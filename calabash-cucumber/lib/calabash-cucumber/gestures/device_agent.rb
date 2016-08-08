@@ -83,6 +83,36 @@ args[0] = #{args[0]}
         end
 
         # @!visibility private
+        def double_tap(options)
+          hash = query_for_coordinates(options)
+          device_agent.perform_coordinate_gesture("double_tap",
+                                                  hash[:coordinates][:x],
+                                                  hash[:coordinates][:y])
+          [hash[:view]]
+        end
+
+        # @!visibility private
+        def two_finger_tap(options)
+          hash = query_for_coordinates(options)
+          device_agent.perform_coordinate_gesture("two_finger_tap",
+                                                  hash[:coordinates][:x],
+                                                  hash[:coordinates][:y])
+          [hash[:view]]
+        end
+
+        # @!visibility private
+        def touch_hold(options)
+          hash = query_for_coordinates(options)
+
+          duration = options[:duration] || 3
+          device_agent.perform_coordinate_gesture("touch",
+                                                  hash[:coordinates][:x],
+                                                  hash[:coordinates][:y],
+                                                  {:duration => duration})
+          [hash[:view]]
+        end
+
+        # @!visibility private
         def rotate(direction)
           # Caller is responsible for normalizing and verifying direction.
           current_orientation = status_bar_orientation.to_sym
@@ -101,6 +131,8 @@ args[0] = #{args[0]}
         private
 
         # @!visibility private
+        #
+        # Calls #point_from which applies any :offset supplied in the options.
         def query_for_coordinates(options)
           ui_query = options[:query]
 
