@@ -462,6 +462,92 @@ module Calabash
         launcher.gesture_performer.pinch(in_out.to_sym,options)
       end
 
+      # Use keyboard to enter a character.
+      #
+      # @note
+      #  There are several special 'characters', some of which do not appear on
+      #  all keyboards; e.g. `Delete`, `Return`.
+      #
+      # @see #keyboard_enter_text
+      #
+      # @note
+      #  You should prefer to call `keyboard_enter_text`.
+      #
+      # @raise [RuntimeError] If there is no visible keyboard
+      # @raise [RuntimeError] If the keyboard (layout) is not supported
+      #
+      # @param [String] char The character to type
+      # @param [Hash] options Controls the behavior of the method.
+      # @option opts [Numeric] :wait_after_char (0.05) How long to sleep after
+      #  typing a character.
+      def keyboard_enter_char(char, options={})
+        expect_keyboard_visible!
+
+        default_opts = {:wait_after_char => 0.05}
+        merged_options = default_opts.merge(options)
+
+        if char == "Return"
+          # Legacy.  Cannot change this.
+          tap_keyboard_action_key
+        elsif char == "Delete"
+          # Legacy.  Cannot change this.
+          tap_keyboard_delete_key
+        elsif char.length != 1
+          raise ArgumentError, %Q[
+Expected '#{char}' to be a single character or one of these special strings:
+
+* Return
+* Delete
+
+To type strings with more than one character, use keyboard_enter_text.
+]
+        else
+          launcher.gesture_performer.enter_char_with_keyboard(char)
+        end
+
+        duration = merged_options[:wait_after_char]
+        if duration > 0
+          sleep(duration)
+        end
+
+        []
+      end
+
+      # Touches the keyboard action key.
+      #
+      # The action key depends on the keyboard.  Some examples include:
+      #
+      # * Return
+      # * Next
+      # * Go
+      # * Join
+      # * Search
+      #
+      # @note
+      #  Not all keyboards have an action key.  For example, numeric keyboards
+      #  do not have an action key.
+      #
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def tap_keyboard_action_key
+        expect_keyboard_visible!
+        launcher.gesture_performer.tap_keyboard_action_key
+      end
+
+      # Uses the keyboard to enter text.
+      #
+      # @param [String] text the text to type.
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def keyboard_enter_text(text)
+        expect_keyboard_visible!
+        existing_text = _text_from_first_responder
+        if existing_text && existing_text == ""
+          escaped = ""
+        else
+          escaped = existing_text.gsub("\n","\\n")
+        end
+        launcher.gesture_performer.enter_text_with_keyboard(text, escaped)
+      end
+
       # @!visibility private
       # @deprecated
       def cell_swipe(options={})

@@ -242,98 +242,6 @@ module Calabash
         end
       end
 
-      # Use keyboard to enter a character.
-      #
-      # @note
-      #  IMPORTANT: Use the `POST_ENTER_KEYBOARD` environmental variable
-      #  to slow down the typing; adds a wait after each character is touched.
-      #  this can fix problems where the typing is too fast and characters are
-      #  skipped.
-      #
-      # @note
-      #  There are several special 'characters', some of which do not appear on
-      #  all keyboards; e.g. `Delete`, `Return`.
-      #
-      # @note
-      #  Since 0.9.163, this method accepts a Hash as the second parameter.  The
-      #  previous second parameter was a Boolean that controlled whether or not
-      #  to screenshot on errors.
-      #
-      # @see #keyboard_enter_text
-      #
-      # @note
-      #  You should prefer to call `keyboard_enter_text`.
-      #
-      # @raise [RuntimeError] if there is no visible keyboard
-      # @raise [RuntimeError] if the keyboard (layout) is not supported
-      #
-      # @param [String] chr the character to type
-      # @param [Hash] opts options to control the behavior of the method
-      # @option opts [Boolean] :should_screenshot (true) whether or not to
-      #  screenshot on errors
-      # @option opts [Float] :wait_after_char ('POST_ENTER_KEYBOARD' or 0.05)
-      #  how long to wait after a character is typed.
-      def keyboard_enter_char(chr, opts={})
-        default_opts = {:should_screenshot => true,
-                        # introduce a small wait to avoid skipping characters
-                        # keep this as short as possible
-                        :wait_after_char => (ENV['POST_ENTER_KEYBOARD'] || 0.05).to_f}
-
-        opts = default_opts.merge(opts)
-
-        should_screenshot = opts[:should_screenshot]
-        _ensure_can_enter_text({:screenshot => should_screenshot,
-                                :skip => (not should_screenshot)})
-
-        if chr.length == 1
-          uia_type_string_raw chr
-        else
-          code = UIA_SUPPORTED_CHARS[chr]
-
-          unless code
-            raise "typing character '#{chr}' is not yet supported when running with Instruments"
-          end
-
-          # on iOS 6, the Delete char code is _not_ \b
-          # on iOS 7, the Delete char code is \b on non-numeric keyboards
-          #           on numeric keyboards, it is actually a button on the
-          #           keyboard and not a key
-          if code.eql?(UIA_SUPPORTED_CHARS['Delete'])
-            js_tap_delete = "(function() {"\
-              "var deleteElement = uia.keyboard().elements().firstWithName('Delete');"\
-              "deleteElement = deleteElement.isValid() ? deleteElement : uia.keyboard().elements().firstWithName('delete');"\
-              "deleteElement.tap();"\
-              "})();"
-            uia(js_tap_delete)
-          else
-            uia_type_string_raw(code)
-          end
-        end
-        # noinspection RubyStringKeysInHashInspection
-        res = {'results' => []}
-
-        if ENV['POST_ENTER_KEYBOARD']
-          w = ENV['POST_ENTER_KEYBOARD'].to_f
-          if w > 0
-            sleep(w)
-          end
-        end
-        pause = opts[:wait_after_char]
-        sleep(pause) if pause > 0
-        res['results']
-      end
-
-      # Uses the keyboard to enter text.
-      #
-      # @param [String] text the text to type.
-      # @raise [RuntimeError] if the text cannot be typed.
-      def keyboard_enter_text(text)
-        _ensure_can_enter_text
-        text_before = _text_from_first_responder()
-        text_before = text_before.gsub("\n","\\n") if text_before
-        uia_type_string(text, text_before)
-      end
-
       # @!visibility private
       #
       # Enters text into view identified by a query
@@ -379,24 +287,6 @@ module Calabash
         uia_set_responder_value(text)
       end
 
-      # Touches the keyboard action key.
-      #
-      # The action key depends on the keyboard.  Some examples include:
-      #
-      # * Return
-      # * Next
-      # * Go
-      # * Join
-      # * Search
-      #
-      # @note
-      #  Not all keyboards have an action key.  For example, numeric keyboards
-      #  do not have an action key.
-      #
-      # @raise [RuntimeError] if the text cannot be typed.
-      def tap_keyboard_action_key
-        keyboard_enter_char 'Return'
-      end
 
       # @!visibility private
       # Returns the current keyplane.
