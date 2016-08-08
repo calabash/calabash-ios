@@ -203,6 +203,15 @@ Expected '#{strategy}' to be one of these supported strategies:
         end
 
         # @!visibility private
+        #
+        # Legacy API.
+        #
+        # It is the caller's responsibility to ensure the keyboard is visible.
+        def fast_enter_text(text)
+          uia_set_responder_value(text)
+        end
+
+        # @!visibility private
         # It is the caller's responsibility to ensure the keyboard is visible.
         def enter_char_with_keyboard(char)
           uia("uia.keyboard().typeString('#{char}')")

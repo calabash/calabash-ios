@@ -85,6 +85,13 @@ module Calabash
         end
 
         # @!visibility private
+        #
+        # Legacy API.
+        def fast_enter_text(text)
+          abstract_method!
+        end
+
+        # @!visibility private
         def rotate(direction)
           abstract_method!
         end
