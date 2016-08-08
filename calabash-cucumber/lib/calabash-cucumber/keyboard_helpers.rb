@@ -225,7 +225,7 @@ module Calabash
       #  a keyboard cannot be ensured
       # @option opts [Boolean] :skip (false) skip any checking (a nop) - used
       #  when iterating over keyplanes for keys
-      def _ensure_can_enter_text(opts={})
+      def expect_keyboard_visible!(opts={})
         default_opts = {:screenshot => true,
                         :skip => false}
         opts = default_opts.merge(opts)
@@ -375,7 +375,7 @@ module Calabash
       # different behaviour than using `keyboard_enter_text`.
       # @param [String] text the text to enter
       def fast_enter_text(text)
-        _ensure_can_enter_text
+        expect_keyboard_visible!
         uia_set_responder_value(text)
       end
 
