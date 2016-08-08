@@ -360,13 +360,13 @@ module Calabash
         views_touched
       end
 
-      # Performs the "long press" or "touch and hold" gesture on the (first) view that matches
-      # query `uiquery`.
+      # Performs the "long press" or "touch and hold" gesture on the (first)
+      # view that matches query `uiquery`.
       #
       # @note This assumes the view is visible and not animating.
       #
-      # If the view is not visible it will fail with an error. If the view is animating
-      # it will *silently* fail.
+      # If the view is not visible it will fail with an error. If the view is
+      # animating it will *silently* fail.
       #
       # By default, the gesture starts at the center of the view.
       #
@@ -374,10 +374,12 @@ module Calabash
       #   touch_hold "webView css:'input'", duration:10, offset:{x: -40}
       # @param {String} uiquery query describing view to touch.
       # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #   Offset supports an `:x` and `:y` key and causes the touch to be offset
+      #   with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @option options {Numeric} :duration (3) duration of the 'hold'.
-      # @return {Array<Hash>} array containing the serialized version of the touched view.
+      # @return {Array<Hash>} array containing the serialized version of the
+      #  touched view.
       def touch_hold(uiquery, options={})
         query_action_with_options(:touch_hold, uiquery, options)
       end
