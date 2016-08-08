@@ -83,6 +83,15 @@ args[0] = #{args[0]}
         end
 
         # @!visibility private
+        def double_tap(options)
+          hash = query_for_coordinates(options)
+          device_agent.perform_coordinate_gesture("double_tap",
+                                                  hash[:coordinates][:x],
+                                                  hash[:coordinates][:y])
+          [hash[:view]]
+        end
+
+        # @!visibility private
         def rotate(direction)
           # Caller is responsible for normalizing and verifying direction.
           current_orientation = status_bar_orientation.to_sym

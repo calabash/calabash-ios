@@ -135,10 +135,32 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         options = {}
 
         expect(device_agent).to receive(:query_for_coordinates).with(options).and_return(hash)
-        expect(device_agent.device_agent).to receive(:perform_coordinate_gesture).with("touch", 10, 20).and_return(true)
+        expect(device_agent.device_agent).to(
+          receive(:perform_coordinate_gesture).with("touch", 10, 20)).and_return(true)
         expected = [hash[:view]]
 
         expect(device_agent.touch(options)).to be == expected
+      end
+    end
+
+    context "#double_tap" do
+      it "performs a double tap and returns an array with one element: view that was touched" do
+        hash = {
+          :view => "the view acted on",
+          :coordinates => {
+            :x => 10,
+            :y => 20
+          }
+        }
+
+        options = {}
+
+        expect(device_agent).to receive(:query_for_coordinates).with(options).and_return(hash)
+        expect(device_agent.device_agent).to(
+          receive(:perform_coordinate_gesture).with("double_tap", 10, 20)).and_return(true)
+        expected = [hash[:view]]
+
+        expect(device_agent.double_tap(options)).to be == expected
       end
     end
   end

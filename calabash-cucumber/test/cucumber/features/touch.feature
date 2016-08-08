@@ -12,3 +12,10 @@ When the home button is on the bottom, I can touch
 When the home button is on the right, I can touch
 When the home button is on the left, I can touch
 When the home button is on the top, I can touch
+
+Scenario: Double tap in any orientation
+Given I am looking at the Tao tab
+When the home button is on the bottom, I can double tap
+When the home button is on the right, I can double tap
+When the home button is on the left, I can double tap
+When the home button is on the top, I can double tap

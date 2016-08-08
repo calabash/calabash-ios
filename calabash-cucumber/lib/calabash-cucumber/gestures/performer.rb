@@ -35,12 +35,12 @@ module Calabash
         end
 
         # @!visibility private
-        def flick(options)
+        def touch_hold(options)
           abstract_method!
         end
 
         # @!visibility private
-        def touch_hold(options)
+        def flick(options)
           abstract_method!
         end
 

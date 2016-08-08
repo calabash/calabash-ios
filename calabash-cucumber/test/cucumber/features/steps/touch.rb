@@ -43,7 +43,10 @@ end
 When(/^the home button is on the (top|right|left|bottom), I can (double tap|touch)$/) do |position, gesture|
   rotate_home_to_and_expect(position)
   if gesture == "double tap"
-    raise "Not implemented yet"
+    query = "* marked:'double tap'"
+    wait_for_view(query)
+    double_tap(query)
+    wait_for_gesture_text("double tap", "small button action")
   else
     query = "* marked:'touch'"
     wait_for_view(query)
