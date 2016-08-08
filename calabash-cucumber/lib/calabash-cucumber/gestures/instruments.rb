@@ -23,6 +23,9 @@ module Calabash
         require "calabash-cucumber/rotation_helpers"
         include Calabash::Cucumber::RotationHelpers
 
+        require "calabash-cucumber/keyboard_helpers"
+        include Calabash::Cucumber::KeyboardHelpers
+
         require "calabash-cucumber/map"
 
         # @!visibility private
@@ -188,6 +191,28 @@ Expected '#{strategy}' to be one of these supported strategies:
         # @!visibility private
         def send_app_to_background(secs)
           uia_send_app_to_background(secs)
+        end
+
+        # @!visibility private
+        #
+        # It is the caller's responsibility to:
+        # 1. expect the keyboard is visible
+        # 2. escape the existing text
+        def enter_text_with_keyboard(string, existing_text="")
+          uia_type_string(string, existing_text)
+        end
+
+        # @!visibility private
+        # It is the caller's responsibility to ensure the keyboard is visible.
+        def enter_char_with_keyboard(char)
+          uia("uia.keyboard().typeString('#{char}')")
+        end
+
+        # @!visibility private
+        # It is the caller's responsibility to ensure the keyboard is visible.
+        def tap_keyboard_action_key
+          code = Calabash::Cucumber::KeyboardHelpers::UIA_SUPPORTED_CHARS["Return"]
+          enter_char_with_keyboard(code)
         end
 
         def rotate(direction)
