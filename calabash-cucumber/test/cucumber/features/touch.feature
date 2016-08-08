@@ -32,3 +32,10 @@ When the home button is on the top, I can long press
 When the home button is on the right, I can long press
 When the home button is on the left, I can long press
 When the home button is on the bottom, I can long press
+
+Scenario: Two finger tap in any orientation
+Given I am looking at the Tao tab
+When the home button is on the left, I can two-finger tap
+When the home button is on the top, I can two-finger tap
+When the home button is on the right, I can two-finger tap
+When the home button is on the bottom, I can two-finger tap

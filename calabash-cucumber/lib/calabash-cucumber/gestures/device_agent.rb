@@ -92,6 +92,15 @@ args[0] = #{args[0]}
         end
 
         # @!visibility private
+        def two_finger_tap(options)
+          hash = query_for_coordinates(options)
+          device_agent.perform_coordinate_gesture("two_finger_tap",
+                                                  hash[:coordinates][:x],
+                                                  hash[:coordinates][:y])
+          [hash[:view]]
+        end
+
+        # @!visibility private
         def touch_hold(options)
           hash = query_for_coordinates(options)
 

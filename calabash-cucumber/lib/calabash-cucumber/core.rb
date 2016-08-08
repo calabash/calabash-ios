@@ -304,8 +304,8 @@ module Calabash
       #
       # @note This assumes the view is visible and not animating.
       #
-      # If the view is not visible it will fail with an error. If the view is animating
-      # it will *silently* fail.
+      # If the view is not visible it will fail with an error. If the view is
+      # animating it will *silently* fail.
       #
       # By default, taps the center of the view.
       #
@@ -313,9 +313,11 @@ module Calabash
       #   two_finger_tap "view marked:'Third'", offset:{x:100}
       # @param {String} uiquery query describing view to touch.
       # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @return {Array<Hash>} array containing the serialized version of the tapped view.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #  Offset supports an `:x` and `:y` key and causes the touch to be offset
+      #  with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
+      # @return {Array<Hash>} array containing the serialized version of the
+      #  tapped view.
       def two_finger_tap(uiquery,options={})
         query_action_with_options(:two_finger_tap, uiquery, options)
       end

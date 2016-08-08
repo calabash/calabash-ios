@@ -85,3 +85,13 @@ When(/^the home button is on the (top|right|left|bottom), I can long press$/) do
   wait_for_gesture_text("long press", "small button action")
   clear_small_button_action_label
 end
+
+When(/^the home button is on the (top|right|left|bottom), I can two-finger tap$/) do |position|
+  rotate_home_to_and_expect(position)
+  query = "* marked:'two finger tap'"
+  wait_for_view(query)
+  two_finger_tap(query)
+  wait_for_gesture_text("two-finger tap", "complex touches")
+  clear_complex_button_action_label
+end
+
