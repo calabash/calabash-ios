@@ -61,7 +61,8 @@ module Calabash::Launcher
   def self.prepare_physical_device
     return if self.target_is_simulator?
 
-    self.ensure_app_installed
+    # Not yet.
+    #self.ensure_app_installed
     #self.uninstall_cbx_runner
   end
 
@@ -123,5 +124,5 @@ Before do |scenario|
 end
 
 After do |scenario|
-
+  calabash_exit
 end
