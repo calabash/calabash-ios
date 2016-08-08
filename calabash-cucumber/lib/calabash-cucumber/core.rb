@@ -549,6 +549,70 @@ To type strings with more than one character, use keyboard_enter_text.
       end
 
       # @!visibility private
+      #
+      # Enters text into view identified by a query
+      #
+      # This behavior of this method depends on the Gesture::Performer
+      # implementation.
+      #
+      # ### UIAutomation
+      #
+      # defaults to calling 'setValue' in UIAutomation on the UITextField or
+      # UITextView.  This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # To force use of #keyboard_enter_text option :use_keyboard
+      #
+      # ### DeviceAgent
+      #
+      # This method calls #keyboard_enter_text.
+      #
+      # @param [String] uiquery the element to enter text into
+      # @param [String] text the text to enter
+      # @param [Hash] options controls details of text entry
+      # @option options [Boolean] :use_keyboard (false) use the iOS keyboard
+      #   to enter each character separately
+      # @option options [Boolean] :wait (true) call wait_for_element_exists with
+      #   uiquery
+      # @option options [Hash] :wait_options ({}) if :wait pass this as options
+      #   to wait_for_element_exists
+      def enter_text(uiquery, text, options = {})
+        default_opts = {:use_keyboard => false, :wait => true, :wait_options => {}}
+        options = default_opts.merge(options)
+        wait_for_element_exists(uiquery, options[:wait_options]) if options[:wait]
+        touch(uiquery, options)
+        wait_for_keyboard
+        if options[:use_keyboard]
+          keyboard_enter_text(text)
+        else
+          fast_enter_text(text)
+        end
+      end
+
+      # @!visibility private
+      #
+      # Enters text into current text input field
+      #
+      # This behavior of this method depends on the Gesture::Performer
+      # implementation.
+      #
+      # ### UIAutomation
+      #
+      # defaults to calling 'setValue' in UIAutomation on the UITextField or
+      # UITextView.  This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # To force use of #keyboard_enter_text option :use_keyboard
+      #
+      # ### DeviceAgent
+      #
+      # This method calls #keyboard_enter_text.
+      #
+      # @param [String] text the text to enter
+      def fast_enter_text(text)
+        expect_keyboard_visible!
+        launcher.gesture_performer.fast_enter_text(text)
+      end
+
+      # @!visibility private
       # @deprecated
       def cell_swipe(options={})
         if uia_available?
