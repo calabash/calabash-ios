@@ -18,34 +18,6 @@ module Calabash
     # Collection of methods for interacting with the keyboard.
     #
     # We've gone to great lengths to provide the fastest keyboard entry possible.
-    #
-    # If you are having trouble with skipped or are receiving JSON octet
-    # errors when typing, you might be able to resolve the problems by slowing
-    # down the rate of typing.
-    #
-    # Example:  Use keyboard_enter_char + :wait_after_char.
-    #
-    # ```
-    # str.each_char do |char|
-    #   # defaults to 0.05 seconds
-    #   keyboard_enter_char(char, `{wait_after_char:0.5}`)
-    # end
-    # ```
-    #
-    # Example:  Use keyboard_enter_char + POST_ENTER_KEYBOARD
-    #
-    # ```
-    # $ POST_ENTER_KEYBOARD=0.1 bundle exec cucumber
-    # str.each_char do |char|
-    #   # defaults to 0.05 seconds
-    #   keyboard_enter_char(char)
-    # end
-    # ```
-    #
-    # @note
-    #  We have an exhaustive set of keyboard related test.s  The API is reasonably
-    #  stable.  We are fighting against known bugs in Apple's UIAutomation. You
-    #  should only need to fall back to the examples below in unusual situations.
     module KeyboardHelpers
 
       include Calabash::Cucumber::TestsHelpers
@@ -130,7 +102,9 @@ module Calabash
       #
       # @return [Boolean] Returns true if there is a visible keyboard.
       def keyboard_visible?
-        docked_keyboard_visible? or undocked_keyboard_visible? or split_keyboard_visible?
+        docked_keyboard_visible? ||
+          undocked_keyboard_visible? ||
+          split_keyboard_visible?
       end
 
       # Waits for a keyboard to appear and once it does appear waits for
@@ -187,12 +161,14 @@ module Calabash
       #  if you don't want to raise an error.
       # @return [Symbol] Returns one of `{:docked | :undocked | :split | :unknown}`
       def ipad_keyboard_mode(opts = {})
-        raise 'the keyboard mode does not exist on the iphone or ipod' if device_family_iphone?
+        if device_family_iphone?
+          raise "There are no keyboard modes for iPhones or iPods"
+        end
 
         default_opts = {:raise_on_no_visible_keyboard => true}
         merged_opts = default_opts.merge(opts)
         if merged_opts[:raise_on_no_visible_keyboard]
-          screenshot_and_raise 'there is no visible keyboard' unless keyboard_visible?
+          screenshot_and_raise "There is no visible keyboard" unless keyboard_visible?
           return :docked if docked_keyboard_visible?
           return :undocked if undocked_keyboard_visible?
           :split
@@ -331,7 +307,7 @@ module Calabash
 
         if ios9?
           raise KeyboardModeError,
-                'Changing keyboard modes is not supported on iOS 9'
+                "Changing keyboard modes is not supported on iOS 9"
         else
           case mode
             when :split then
@@ -360,7 +336,6 @@ module Calabash
         _wait_for_keyboard_in_mode(:undocked)
       end
 
-
       # Ensures that the iPad keyboard is split.
       #
       # Split means the keyboard is floating in the middle of the view and is
@@ -385,7 +360,7 @@ module Calabash
 
         if ios9?
           raise KeyboardModeError,
-                'Changing keyboard modes is not supported on iOS 9'
+                "Changing keyboard modes is not supported on iOS 9"
         else
           case mode
             when :split then
