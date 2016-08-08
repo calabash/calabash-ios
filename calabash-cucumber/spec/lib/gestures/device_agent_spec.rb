@@ -7,6 +7,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
       def to_s; "#<XCUITest subclass>"; end
       def inspect; to_s; end
       def rotate_home_button_to(_); ; end
+      def perform_coordinate_gesture(_, _, _); ; end
     end.new
   end
 
@@ -118,6 +119,26 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         expect(Calabash::Cucumber::Map).to receive(:raw_map).and_return(response)
 
         expect(device_agent.send(:first_element_for_query, "query")).to be == "a"
+      end
+    end
+
+    context "#touch" do
+      it "performs a touch and returns an array with one element: view that was touched" do
+        hash = {
+          :view => "the view acted on",
+          :coordinates => {
+            :x => 10,
+            :y => 20
+          }
+        }
+
+        options = {}
+
+        expect(device_agent).to receive(:query_for_coordinates).with(options).and_return(hash)
+        expect(device_agent.device_agent).to receive(:perform_coordinate_gesture).with("touch", 10, 20).and_return(true)
+        expected = [hash[:view]]
+
+        expect(device_agent.touch(options)).to be == expected
       end
     end
   end
