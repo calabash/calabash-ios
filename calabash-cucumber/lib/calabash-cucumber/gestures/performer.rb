@@ -65,7 +65,22 @@ module Calabash
         end
 
         # @!visibility private
-        def keyboard_enter_text(string)
+        def enter_text_with_keyboard(string, options={})
+          abstract_method!
+        end
+
+        # @!visibility private
+        def enter_char_with_keyboard(char)
+          abstract_method!
+        end
+
+        # @!visibility private
+        def tap_keyboard_action_key
+          abstract_method!
+        end
+
+        # @!visibility private
+        def tap_keyboard_delete_key
           abstract_method!
         end
 
