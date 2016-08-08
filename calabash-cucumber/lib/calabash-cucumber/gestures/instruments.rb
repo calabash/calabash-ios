@@ -225,6 +225,20 @@ Expected '#{strategy}' to be one of these supported strategies:
         end
 
         # @!visibility private
+        def tap_keyboard_delete_key
+          js_tap_delete = %Q[(function() {
+var deleteElement = uia.keyboard().elements().firstWithName('Delete');
+if (deleteElement.isValid()) {
+  deleteElement.tap();
+} else {
+  uia.keyboard().elements().firstWithName('delete').tap();
+}
+})();].gsub!($-0, "")
+
+          uia(js_tap_delete)
+        end
+
+        # @!visibility private
         #
         # Caller is responsible for limiting calls to iPads and waiting for the
         # keyboard to disappear.
