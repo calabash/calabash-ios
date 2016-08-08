@@ -61,7 +61,7 @@ module Calabash
 
       # @!visibility private
       # noinspection RubyStringKeysInHashInspection
-      UIA_SUPPORTED_CHARS = {
+      SPECIAL_ACTION_CHARS = {
             'Delete' => '\b',
             'Return' => '\n'
             # these are not supported yet and I am pretty sure that they
