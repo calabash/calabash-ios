@@ -68,6 +68,10 @@ args[0] = #{args[0]}
           @device_agent = args[0]
         end
 
+        def session_delete
+          device_agent.send(:session_delete)
+        end
+
         # @!visibility private
         def touch(options)
           hash = query_for_coordinates(options)

@@ -983,8 +983,16 @@ arguments => '#{arguments}'
                      :exit_code => merged_opts[:exit_code]
                }
           )
+
         rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected
           []
+        end
+
+        if launcher.gesture_performer.class.name == :device_agent
+          delay = merged_opts[:post_resign_active_delay] +
+            merged_opts[:post_will_terminate_delay] + 0.4
+          sleep(delay)
+          launcher.gesture_performer.send(:session_delete)
         end
       end
 
