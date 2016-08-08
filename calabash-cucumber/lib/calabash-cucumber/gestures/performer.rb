@@ -92,6 +92,11 @@ module Calabash
         end
 
         # @!visibility private
+        def dismiss_ipad_keyboard
+          abstract_method!
+        end
+
+        # @!visibility private
         def rotate(direction)
           abstract_method!
         end

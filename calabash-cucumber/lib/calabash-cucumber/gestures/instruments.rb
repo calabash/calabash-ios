@@ -224,6 +224,16 @@ Expected '#{strategy}' to be one of these supported strategies:
           enter_char_with_keyboard(code)
         end
 
+        # @!visibility private
+        #
+        # Caller is responsible for limiting calls to iPads and waiting for the
+        # keyboard to disappear.
+        def dismiss_ipad_keyboard
+          js = %Q[#{query_uia_hide_keyboard_button}.tap()]
+          uia(js)
+        end
+
+        # @!visibility private
         def rotate(direction)
           # Caller is responsible for providing a valid direction.
           current_orientation = status_bar_orientation.to_sym
@@ -233,6 +243,7 @@ Expected '#{strategy}' to be one of these supported strategies:
           status_bar_orientation.to_sym
         end
 
+        # @!visibility private
         def rotate_home_button_to(position)
           # Caller is responsible for normalizing and validating the position
           rotate_to_uia_orientation(position)
@@ -351,6 +362,12 @@ Expected '#{strategy}' to be one of these supported strategies:
           value = orientation_for_key(key)
           cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
           uia(cmd)
+        end
+
+        # @!visibility private
+        # Returns a query string for finding the iPad 'Hide keyboard' button.
+        def query_uia_hide_keyboard_button
+          "uia.keyboard().buttons()['Hide keyboard']"
         end
       end
     end

@@ -213,29 +213,6 @@ module Calabash
       end
 
       # @!visibility private
-      # Returns a query string for finding the iPad 'Hide keyboard' button.
-      def _query_uia_hide_keyboard_button
-        "uia.keyboard().buttons()['Hide keyboard']"
-      end
-
-      # Dismisses a iPad keyboard by touching the 'Hide keyboard' button and waits
-      # for the keyboard to disappear.
-      #
-      # @note
-      #  the dismiss keyboard key does not exist on the iPhone or iPod
-      #
-      # @raise [RuntimeError] if the device is not an iPad
-      def dismiss_ipad_keyboard
-        screenshot_and_raise "Cannot dismiss keyboard on iPhone" if device_family_iphone?
-        send_uia_command({:command =>  "#{_query_uia_hide_keyboard_button}.tap()"})
-
-        opts = {:timeout_message => 'keyboard did not disappear'}
-        wait_for(opts) do
-          not keyboard_visible?
-        end
-      end
-
-      # @!visibility private
       # Returns the activation point of the iPad keyboard mode key.
       #
       # The mode key is also known as the 'Hide keyboard' key.
@@ -527,6 +504,13 @@ module Calabash
         return ''
       end
 
+      private
+
+      # @!visibility private
+      # Returns a query string for finding the iPad 'Hide keyboard' button.
+      def _query_uia_hide_keyboard_button
+        "uia.keyboard().buttons()['Hide keyboard']"
+      end
     end
   end
 end

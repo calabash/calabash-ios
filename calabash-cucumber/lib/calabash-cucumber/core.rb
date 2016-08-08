@@ -533,6 +533,14 @@ To type strings with more than one character, use keyboard_enter_text.
         launcher.gesture_performer.tap_keyboard_action_key
       end
 
+      # Touches the keyboard delete key.
+      #
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def tap_keyboard_delete_key
+        expect_keyboard_visible!
+        launcher.gesture_performer.tap_keyboard_delete_key
+      end
+
       # Uses the keyboard to enter text.
       #
       # @param [String] text the text to type.
@@ -610,6 +618,28 @@ To type strings with more than one character, use keyboard_enter_text.
       def fast_enter_text(text)
         expect_keyboard_visible!
         launcher.gesture_performer.fast_enter_text(text)
+      end
+
+      # Dismisses a iPad keyboard by touching the 'Hide keyboard' button and waits
+      # for the keyboard to disappear.
+      #
+      # @note
+      #  the dismiss keyboard key does not exist on the iPhone or iPod
+      #
+      # @raise [RuntimeError] If the device is not an iPad
+      # @raise [Calabash::Cucumber::WaitHelpers::WaitError] If the keyboard does
+      #  not disappear.
+      def dismiss_ipad_keyboard
+        if device_family_iphone?
+          screenshot_and_raise "There is no Hide Keyboard key on an iPhone"
+        end
+
+        launcher.gesture_performer.dismiss_ipad_keyboard
+
+        opts = {:timeout_message => 'Keyboard did not disappear'}
+        wait_for(opts) do
+          not keyboard_visible?
+        end
       end
 
       # @!visibility private
