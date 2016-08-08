@@ -148,18 +148,21 @@ module Calabash
       # @see Calabash::Cucumber::WaitHelpers#wait_for for other options this
       #  method can handle.
       #
-      # @param [Hash] opts controls the `wait_for` behavior
+      # @param [Hash] options controls the `wait_for` behavior
       # @option opts [String] :timeout_message ('keyboard did not appear')
       #  Controls the message that appears in the error.
       # @option opts [Number] :post_timeout (0.3) Controls how long to wait
       #  _after_ the keyboard has appeared.
       #
       # @raise [Calabash::Cucumber::WaitHelpers::WaitError] if no keyboard appears
-      def wait_for_keyboard(opts={})
-        default_opts = {:timeout_message => 'keyboard did not appear',
-                        :post_timeout => 0.3}
-        opts = default_opts.merge(opts)
-        wait_for(opts) do
+      def wait_for_keyboard(options={})
+        default_opts = {
+          :timeout_message => "Keyboard did not appear",
+          :post_timeout => 0.3
+        }
+
+        merged_opts = default_opts.merge(options)
+        wait_for(merged_opts) do
           keyboard_visible?
         end
       end
