@@ -51,15 +51,6 @@ module Calabash
       include Calabash::Cucumber::TestsHelpers
 
       # @!visibility private
-      KEYPLANE_NAMES = {
-          :small_letters => 'small-letters',
-          :capital_letters => 'capital-letters',
-          :numbers_and_punctuation => 'numbers-and-punctuation',
-          :first_alternate => 'first-alternate',
-          :numbers_and_punctuation_alternate => 'numbers-and-punctuation-alternate'
-      }
-
-      # @!visibility private
       # noinspection RubyStringKeysInHashInspection
       SPECIAL_ACTION_CHARS = {
             'Delete' => '\b',
@@ -218,87 +209,6 @@ module Calabash
       def expect_keyboard_visible!
         if !keyboard_visible?
           screenshot_and_raise "Keyboard is not visible"
-        end
-      end
-
-      # @!visibility private
-      # Returns the current keyplane.
-      def _current_keyplane
-        kp_arr = _do_keyplane(
-            lambda { query("view:'UIKBKeyplaneView'", 'keyplane', 'componentName') },
-            lambda { query("view:'UIKBKeyplaneView'", 'keyplane', 'name') })
-        kp_arr.first.downcase
-      end
-
-      # @!visibility private
-      # Searches the available keyplanes for chr and if it is found, types it.
-      #
-      # This is a recursive function.
-      #
-      # @note
-      #   Use the `KEYPLANE_SEARCH_STEP_PAUSE` variable to control how quickly
-      #   the next keyplane is searched.  Increase this value if you encounter
-      #   problems with missed keystrokes.
-      #
-      # @note
-      #   When running under instruments, this method is not called.
-      #
-      # @raise [RuntimeError] if the char cannot be found
-      def _search_keyplanes_and_enter_char(chr, visited=Set.new)
-        cur_kp = _current_keyplane
-        begin
-          keyboard_enter_char(chr, {:should_screenshot => false})
-          return true #found
-        rescue
-          pause = (ENV['KEYPLANE_SEARCH_STEP_PAUSE'] || 0.2).to_f
-          sleep (pause) if pause > 0
-
-          visited.add(cur_kp)
-
-          #figure out keyplane alternates
-          props = _do_keyplane(
-              lambda { query("view:'UIKBKeyplaneView'", 'keyplane', 'properties') },
-              lambda { query("view:'UIKBKeyplaneView'", 'keyplane', 'attributes', 'dict') }
-          ).first
-
-          known = KEYPLANE_NAMES.values
-
-          found = false
-          keyplane_selection_keys = ['shift', 'more']
-          keyplane_selection_keys.each do |key|
-            sleep (pause) if pause > 0
-            plane = props["#{key}-alternate"]
-            if known.member?(plane) and (not visited.member?(plane))
-              keyboard_enter_char(key.capitalize, {:should_screenshot => false})
-              found = _search_keyplanes_and_enter_char(chr, visited)
-              return true if found
-              #not found => try with other keyplane selection key
-              keyplane_selection_keys.delete(key)
-              other_key = keyplane_selection_keys.last
-              keyboard_enter_char(other_key.capitalize, {:should_screenshot => false})
-              found = _search_keyplanes_and_enter_char(chr, visited)
-              return true if found
-            end
-          end
-          return false
-        end
-      end
-
-      # @!visibility private
-      # Process a keyplane.
-      #
-      # @raise [RuntimeError] if there is no visible keyplane
-      def _do_keyplane(kbtree_proc, keyplane_proc)
-        desc = query("view:'UIKBKeyplaneView'", 'keyplane')
-        fail('No keyplane (UIKBKeyplaneView keyplane)') if desc.empty?
-        fail('Several keyplanes (UIKBKeyplaneView keyplane)') if desc.count > 1
-        kp_desc = desc.first
-        if /^<UIKBTree/.match(kp_desc)
-          #ios5+
-          kbtree_proc.call
-        elsif /^<UIKBKeyplane/.match(kp_desc)
-          #ios4
-          keyplane_proc.call
         end
       end
 
