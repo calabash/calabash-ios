@@ -214,31 +214,10 @@ module Calabash
       end
 
       # @!visibility private
-      # Ensures that there is a keyboard to enter text.
-      #
-      # @note
-      # *IMPORTANT* will always raise an error when the keyboard is split and
-      # there is no `run_loop`; i.e. UIAutomation is not available.
-      #
-      # @param [Hash] opts controls screenshot-ing and error raising conditions
-      # @option opts [Boolean] :screenshot (true) raise with a screenshot if
-      #  a keyboard cannot be ensured
-      # @option opts [Boolean] :skip (false) skip any checking (a nop) - used
-      #  when iterating over keyplanes for keys
-      def expect_keyboard_visible!(opts={})
-        default_opts = {:screenshot => true,
-                        :skip => false}
-        opts = default_opts.merge(opts)
-        return if opts[:skip]
-
-        screenshot = opts[:screenshot]
+      # Raises an error ir the keyboard is not visible.
+      def expect_keyboard_visible!
         if !keyboard_visible?
-          msg = "No visible keyboard."
-          if screenshot
-            screenshot_and_raise msg
-          else
-            raise msg
-          end
+          screenshot_and_raise "Keyboard is not visible"
         end
       end
 
