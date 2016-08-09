@@ -569,7 +569,7 @@ To type strings with more than one character, use keyboard_enter_text.
       #
       # ### DeviceAgent
       #
-      # This method calls #keyboard_enter_text.
+      # This method calls #keyboard_enter_text regardless of the options passed.
       #
       # @param [String] uiquery the element to enter text into
       # @param [String] text the text to enter
@@ -580,7 +580,7 @@ To type strings with more than one character, use keyboard_enter_text.
       #   uiquery
       # @option options [Hash] :wait_options ({}) if :wait pass this as options
       #   to wait_for_element_exists
-      def enter_text(uiquery, text, options = {})
+      def enter_text_in(uiquery, text, options = {})
         default_opts = {:use_keyboard => false, :wait => true, :wait_options => {}}
         options = default_opts.merge(options)
         wait_for_element_exists(uiquery, options[:wait_options]) if options[:wait]
@@ -592,6 +592,8 @@ To type strings with more than one character, use keyboard_enter_text.
           fast_enter_text(text)
         end
       end
+
+      alias_method :enter_text, :enter_text_in
 
       # @!visibility private
       #
