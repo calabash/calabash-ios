@@ -65,43 +65,59 @@ module Calabash
         end
 
         # @!visibility private
+        #
+        # It is the caller's responsibility to:
+        # 1. expect the keyboard is visible
+        # 2. escape the existing text
         def enter_text_with_keyboard(string, options={})
           abstract_method!
         end
 
         # @!visibility private
+        # It is the caller's responsibility to ensure the keyboard is visible.
         def enter_char_with_keyboard(char)
           abstract_method!
         end
 
         # @!visibility private
+        # It is the caller's responsibility to ensure the keyboard is visible.
         def tap_keyboard_action_key
           abstract_method!
         end
 
         # @!visibility private
+        # It is the caller's responsibility to ensure the keyboard is visible.
         def tap_keyboard_delete_key
           abstract_method!
         end
 
         # @!visibility private
         #
-        # Legacy API.
+        # Legacy API - can we remove this method?
+        #
+        # It is the caller's responsibility to ensure the keyboard is visible.
         def fast_enter_text(text)
           abstract_method!
         end
 
         # @!visibility private
+        #
+        # Caller is responsible for limiting calls to iPads and waiting for the
+        # keyboard to disappear.
         def dismiss_ipad_keyboard
           abstract_method!
         end
 
         # @!visibility private
+        #
+        # Caller is responsible for providing a valid direction.
         def rotate(direction)
           abstract_method!
         end
 
         # @!visibility private
+        #
+        # Caller is responsible for normalizing and validating the position.
         def rotate_home_button_to(position)
           abstract_method!
         end

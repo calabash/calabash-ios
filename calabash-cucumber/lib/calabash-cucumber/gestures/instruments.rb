@@ -194,19 +194,11 @@ Expected '#{strategy}' to be one of these supported strategies:
         end
 
         # @!visibility private
-        #
-        # It is the caller's responsibility to:
-        # 1. expect the keyboard is visible
-        # 2. escape the existing text
         def enter_text_with_keyboard(string, existing_text="")
           uia_type_string(string, existing_text)
         end
 
         # @!visibility private
-        #
-        # Legacy API - can we remove this method?
-        #
-        # It is the caller's responsibility to ensure the keyboard is visible.
         def fast_enter_text(text)
           uia_set_responder_value(text)
         end
@@ -218,10 +210,9 @@ Expected '#{strategy}' to be one of these supported strategies:
         end
 
         # @!visibility private
-        #
-        # It is the caller's responsibility to ensure the keyboard is visible.
-        #
         # TODO Implement this in JavaScript?
+        # See the device_agent implementation of tap_keyboard_action_key and
+        # the tap_keyboard_delete_key of this class.
         def tap_keyboard_action_key
           code = special_action_char(Instruments.name, "Return")
           enter_char_with_keyboard(code)
@@ -242,17 +233,12 @@ if (deleteElement.isValid()) {
         end
 
         # @!visibility private
-        #
-        # Caller is responsible for limiting calls to iPads and waiting for the
-        # keyboard to disappear.
         def dismiss_ipad_keyboard
           js = %Q[#{query_uia_hide_keyboard_button}.tap()]
           uia(js)
         end
 
         # @!visibility private
-        #
-        # Caller is responsible for providing a valid direction.
         def rotate(direction)
           current_orientation = status_bar_orientation.to_sym
           result = rotate_with_uia(direction, current_orientation)
@@ -262,8 +248,6 @@ if (deleteElement.isValid()) {
         end
 
         # @!visibility private
-        #
-        # Caller is responsible for normalizing and validating the position
         def rotate_home_button_to(position)
           rotate_to_uia_orientation(position)
           recalibrate_after_rotation
