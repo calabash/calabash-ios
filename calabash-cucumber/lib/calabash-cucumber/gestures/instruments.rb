@@ -23,9 +23,6 @@ module Calabash
         require "calabash-cucumber/rotation_helpers"
         include Calabash::Cucumber::RotationHelpers
 
-        require "calabash-cucumber/keyboard_helpers"
-        include Calabash::Cucumber::KeyboardHelpers
-
         require "calabash-cucumber/map"
 
         # @!visibility private
@@ -210,11 +207,16 @@ Expected '#{strategy}' to be one of these supported strategies:
         end
 
         # @!visibility private
+        def char_for_keyboard_action(action_key)
+          SPECIAL_ACTION_CHARS[action_key]
+        end
+
+        # @!visibility private
         # TODO Implement this in JavaScript?
         # See the device_agent implementation of tap_keyboard_action_key and
         # the tap_keyboard_delete_key of this class.
         def tap_keyboard_action_key
-          code = special_action_char(Instruments.name, "Return")
+          code = char_for_keyboard_action("Return")
           enter_char_with_keyboard(code)
         end
 
@@ -372,6 +374,14 @@ if (deleteElement.isValid()) {
         def query_uia_hide_keyboard_button
           "uia.keyboard().buttons()['Hide keyboard']"
         end
+
+        # @!visibility private
+        #
+        # Don't change the single single quotes.
+        SPECIAL_ACTION_CHARS = {
+          "Delete" => '\b',
+          "Return" => '\n'
+        }
       end
     end
   end
