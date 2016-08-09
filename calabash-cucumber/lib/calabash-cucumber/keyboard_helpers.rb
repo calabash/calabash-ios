@@ -1,56 +1,21 @@
-require 'calabash-cucumber/core'
-require 'calabash-cucumber/tests_helpers'
-require 'calabash-cucumber/environment_helpers'
-
 module Calabash
   module Cucumber
-
-    # Raised when there is a problem involving a keyboard mode.  There are
-    # three keyboard modes:  docked, split, and undocked.
-    #
-    # All iPads support these keyboard modes, but the user can disable them
-    # in Settings.app.
-    #
-    # The iPhone 6+ family also supports keyboard modes, but Calabash does
-    # support keyboard modes on these devices.
-    class KeyboardModeError < StandardError; ; end
 
     # Collection of methods for interacting with the keyboard.
     #
     # We've gone to great lengths to provide the fastest keyboard entry possible.
     module KeyboardHelpers
 
-      include Calabash::Cucumber::TestsHelpers
-
-      # @!visibility private
+      # This module is expected to be included in Calabash::Cucumber::Core.
+      # Core includes necessary methods from:
       #
-      # Don't change the single and double quotes.
-      SPECIAL_ACTION_CHARS = {
-            :instruments => {
-              "Delete" => '\b',
-              "Return" => '\n'
-            },
-            :device_agent => {
-              "Delete" => "\b",
-              "Return" => "\n"
-            }
-      }.freeze
+      # StatusBarHelpers
+      # EnvironmentHelpers
+      # WaitHelpers
+      # FailureHelpers
+      # UIA
 
-      # @!visibility private
-      def special_action_char(performer_name, key)
-        performer_chars = SPECIAL_ACTION_CHARS[performer_name]
-        if performer_chars
-          performer_chars[key]
-        else
-          nil
-        end
-      end
-
-      # @!visibility private
-      # Returns a query string for detecting a keyboard.
-      def _qstr_for_keyboard
-        "view:'UIKBKeyplaneView'"
-      end
+      require "calabash-cucumber/map"
 
       # Returns true if a docked keyboard is visible.
       #
@@ -60,21 +25,21 @@ module Calabash
       #
       # @return [Boolean] if a keyboard is visible and docked.
       def docked_keyboard_visible?
-        res = query(_qstr_for_keyboard).first
+        keyboard = _query_for_keyboard
 
-        return false if res.nil?
+        return false if keyboard.nil?
 
         return true if device_family_iphone?
 
-        orientation = status_bar_orientation.to_sym
-        keyboard_height = res['rect']['height']
-        keyboard_y = res['rect']['y']
-        scale = screen_dimensions[:scale]
+        keyboard_height = keyboard['rect']['height']
+        keyboard_y = keyboard['rect']['y']
+        dimensions = screen_dimensions
+        scale = dimensions[:scale]
 
-        if orientation == :left || orientation == :right
-          screen_height = screen_dimensions[:width]/scale
+        if landscape?
+          screen_height = dimensions[:width]/scale
         else
-          screen_height = screen_dimensions[:height]/scale
+          screen_height = dimensions[:height]/scale
         end
 
         screen_height - keyboard_height == keyboard_y
@@ -89,10 +54,10 @@ module Calabash
       def undocked_keyboard_visible?
         return false if device_family_iphone?
 
-        res = query(_qstr_for_keyboard).first
-        return false if res.nil?
+        keyboard = _query_for_keyboard
+        return false if keyboard.nil?
 
-        not docked_keyboard_visible?
+        !docked_keyboard_visible?
       end
 
       # Returns true if a split keyboard is visible.
@@ -104,17 +69,26 @@ module Calabash
       # keyboards on the Phone and iPod are docked and not split.
       def split_keyboard_visible?
         return false if device_family_iphone?
-        query("view:'UIKBKeyView'").count > 0 and
-              element_does_not_exist(_qstr_for_keyboard)
+        _query_for_split_keyboard && !_query_for_keyboard
       end
 
       # Returns true if there is a visible keyboard.
       #
       # @return [Boolean] Returns true if there is a visible keyboard.
       def keyboard_visible?
+        # Order matters!
         docked_keyboard_visible? ||
           undocked_keyboard_visible? ||
           split_keyboard_visible?
+      end
+
+      # @!visibility private
+      # Raises an error ir the keyboard is not visible.
+      def expect_keyboard_visible!
+        if !keyboard_visible?
+          screenshot_and_raise "Keyboard is not visible"
+        end
+        true
       end
 
       # Waits for a keyboard to appear and once it does appear waits for
@@ -140,6 +114,7 @@ module Calabash
         wait_for(merged_opts) do
           keyboard_visible?
         end
+        true
       end
 
       # Waits for a keyboard to disappear.
@@ -162,274 +137,7 @@ module Calabash
         wait_for(merged_opts) do
           !keyboard_visible?
         end
-      end
-
-      # @!visibility private
-      # returns an array of possible ipad keyboard modes
-      def _ipad_keyboard_modes
-        [:docked, :undocked, :split]
-      end
-
-      # Returns the keyboard mode.
-      #
-      # @example How to use in a wait_* function.
-      #  wait_for do
-      #   ipad_keyboard_mode({:raise_on_no_visible_keyboard => false}) == :split
-      #  end
-      #
-      # ```
-      #                   keyboard is pinned to bottom of the view #=> :docked
-      #             keyboard is floating in the middle of the view #=> :undocked
-      #                             keyboard is floating and split #=> :split
-      #     no keyboard and :raise_on_no_visible_keyboard == false #=> :unknown
-      # ```
-      #
-      # @raise [RuntimeError] if the device under test is not an iPad.
-      #
-      # @raise [RuntimeError] if `:raise_on_no_visible_keyboard` is truthy and
-      #  no keyboard is visible.
-      # @param [Hash] opts controls the runtime behavior.
-      # @option opts [Boolean] :raise_on_no_visible_keyboard (true) set to false
-      #  if you don't want to raise an error.
-      # @return [Symbol] Returns one of `{:docked | :undocked | :split | :unknown}`
-      def ipad_keyboard_mode(opts = {})
-        if device_family_iphone?
-          raise "There are no keyboard modes for iPhones or iPods"
-        end
-
-        default_opts = {:raise_on_no_visible_keyboard => true}
-        merged_opts = default_opts.merge(opts)
-        if merged_opts[:raise_on_no_visible_keyboard]
-          screenshot_and_raise "There is no visible keyboard" unless keyboard_visible?
-          return :docked if docked_keyboard_visible?
-          return :undocked if undocked_keyboard_visible?
-          :split
-        else
-          return :docked if docked_keyboard_visible?
-          return :undocked if undocked_keyboard_visible?
-          return :split if split_keyboard_visible?
-          :unknown
-        end
-      end
-
-      # @!visibility private
-      # Raises an error ir the keyboard is not visible.
-      def expect_keyboard_visible!
-        if !keyboard_visible?
-          screenshot_and_raise "Keyboard is not visible"
-        end
-      end
-
-      # @!visibility private
-      # Returns the activation point of the iPad keyboard mode key.
-      #
-      # The mode key is also known as the 'Hide keyboard' key.
-      #
-      # @note
-      #  This is only available when running under instruments.
-      #
-      # @raise [RuntimeError] when the device is not an iPad
-      # @raise [RuntimeError] the app was not launched with instruments
-      def _point_for_ipad_keyboard_mode_key
-        raise "The keyboard mode does not exist on the on the iphone" if device_family_iphone?
-        res = send_uia_command({:command => "#{_query_uia_hide_keyboard_button}.rect()"})
-        origin = res['value']['origin']
-        {:x => origin['x'], :y => origin['y']}
-      end
-
-      # @!visibility private
-      # Touches the bottom option on the popup dialog that is presented when the
-      # the iPad keyboard `mode` key is touched and held.
-      #
-      # The `mode` key is also know as the 'Hide keyboard' key.
-      #
-      # The `mode` key allows the user to undock, dock, or split the keyboard.
-      def _touch_bottom_keyboard_mode_row
-        start_pt = _point_for_ipad_keyboard_mode_key
-        # there are 10 pt btw the key and the popup and the row is 50 pt
-        y_offset = 10 + 25
-        end_pt = {:x => (start_pt[:x] - 40), :y => (start_pt[:y] - y_offset)}
-        uia_pan_offset(start_pt, end_pt, {})
-        sleep(1.0)
-      end
-
-      # Touches the top option on the popup dialog that is presented when the
-      # the iPad keyboard mode key is touched and held.
-      #
-      # The `mode` key is also know as the 'Hide keyboard' key.
-      #
-      # The `mode` key allows the user to undock, dock, or split the keyboard.
-      def _touch_top_keyboard_mode_row
-        start_pt = _point_for_ipad_keyboard_mode_key
-        # there are 10 pt btw the key and the popup and each row is 50 pt
-        # NB: no amount of offsetting seems to allow touching the top row
-        #     when the keyboard is split
-
-        x_offset = 40
-        y_offset = 10 + 50 + 25
-        end_pt = {:x => (start_pt[:x] - x_offset), :y => (start_pt[:y] - y_offset)}
-        uia_pan_offset(start_pt, end_pt, {:duration => 1.0})
-      end
-
-      # Ensures that the iPad keyboard is docked.
-      #
-      # Docked means the keyboard is pinned to bottom of the view.
-      #
-      # If the device is not an iPad, this is behaves like a call to
-      # `wait_for_keyboard`.
-      #
-      # @raise [RuntimeError] if there is no visible keyboard
-      # @raise [RuntimeError] a docked keyboard was not achieved
-      def ensure_docked_keyboard
-        wait_for_keyboard
-
-        return if device_family_iphone?
-
-        mode = ipad_keyboard_mode
-
-        return if mode == :docked
-
-        if ios9?
-          raise KeyboardModeError,
-                'Changing keyboard modes is not supported on iOS 9'
-        else
-          case mode
-            when :split then
-              _touch_bottom_keyboard_mode_row
-            when :undocked then
-              _touch_top_keyboard_mode_row
-            when :docked then
-              # already docked
-            else
-              screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
-          end
-        end
-
-        begin
-          wait_for({:post_timeout => 1.0}) do
-            docked_keyboard_visible?
-          end
-        rescue
-          mode = ipad_keyboard_mode
-          o = status_bar_orientation
-          screenshot_and_raise "expected keyboard to be ':docked' but found '#{mode}' in orientation '#{o}'"
-        end
-      end
-
-      # Ensures that the iPad keyboard is undocked.
-      #
-      # Undocked means the keyboard is floating in the middle of the view.
-      #
-      # If the device is not an iPad, this is behaves like a call to
-      # `wait_for_keyboard`.
-      #
-      # If the device is not an iPad, this is behaves like a call to
-      # `wait_for_keyboard`.
-      #
-      # @raise [RuntimeError] if there is no visible keyboard
-      # @raise [RuntimeError] an undocked keyboard was not achieved
-      def ensure_undocked_keyboard
-        wait_for_keyboard
-
-        return if device_family_iphone?
-
-        mode = ipad_keyboard_mode
-
-        return if mode == :undocked
-
-        if ios9?
-          raise KeyboardModeError,
-                "Changing keyboard modes is not supported on iOS 9"
-        else
-          case mode
-            when :split then
-              # keep these condition separate because even though they do the same
-              # thing, the else condition is a hack
-              if ios5?
-                # iOS 5 has no 'Merge' feature in split keyboard, so dock first then
-                # undock from docked mode
-                _touch_bottom_keyboard_mode_row
-                _wait_for_keyboard_in_mode(:docked)
-              else
-                # in iOS > 5, it seems to be impossible consistently touch the
-                # the top keyboard mode popup button, so we punt
-                _touch_bottom_keyboard_mode_row
-                _wait_for_keyboard_in_mode(:docked)
-              end
-              _touch_top_keyboard_mode_row
-            when :undocked then
-              # already undocked
-            when :docked then
-              _touch_top_keyboard_mode_row
-            else
-              screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
-          end
-        end
-        _wait_for_keyboard_in_mode(:undocked)
-      end
-
-      # Ensures that the iPad keyboard is split.
-      #
-      # Split means the keyboard is floating in the middle of the view and is
-      # split into two sections to enable faster thumb typing.
-      #
-      # If the device is not an iPad, this is behaves like a call to
-      # `wait_for_keyboard`.
-      #
-      # If the device is not an iPad, this is behaves like a call to
-      # `wait_for_keyboard`.
-      #
-      # @raise [RuntimeError] if there is no visible keyboard
-      # @raise [RuntimeError] a split keyboard was not achieved
-      def ensure_split_keyboard
-        wait_for_keyboard
-
-        return if device_family_iphone?
-
-        mode = ipad_keyboard_mode
-
-        return if mode == :split
-
-        if ios9?
-          raise KeyboardModeError,
-                "Changing keyboard modes is not supported on iOS 9"
-        else
-          case mode
-            when :split then
-              # already split
-            when :undocked then
-              _touch_bottom_keyboard_mode_row
-            when :docked then
-              _touch_bottom_keyboard_mode_row
-            else
-              screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
-          end
-        end
-        _wait_for_keyboard_in_mode(:split)
-      end
-
-      # @!visibility private
-      def _wait_for_keyboard_in_mode(mode, opts={})
-        default_opts = {:post_timeout => 1.0}
-        opts = default_opts.merge(opts)
-        begin
-          wait_for(opts) do
-            case mode
-              when :split then
-                split_keyboard_visible?
-              when :undocked
-                undocked_keyboard_visible?
-              when :docked
-                docked_keyboard_visible?
-              else
-                screenshot_and_raise "expected '#{mode}' to be one of #{_ipad_keyboard_modes}"
-            end
-          end
-        rescue
-          actual = ipad_keyboard_mode
-          o = status_bar_orientation
-          screenshot_and_raise "expected keyboard to be '#{mode}' but found '#{actual}' in orientation '#{o}'"
-        end
+        true
       end
 
       # Used for detecting keyboards that are not normally visible to calabash;
@@ -437,14 +145,23 @@ module Calabash
       #
       # @note
       #  IMPORTANT this should only be used when the app does not respond to
-      #  `keyboard_visible?`.
+      #  `keyboard_visible?` and UIAutomation is being used.
       #
       # @see #keyboard_visible?
       #
-      # @raise [RuntimeError] if the app was not launched with instruments
+      # @raise [RuntimeError] If the app was not launched with instruments
       def uia_keyboard_visible?
+        if !uia_available?
+          raise RuntimeError, %Q[
+This method requires UIAutomation and your application was not launched with
+instruments.  UIAutomation is not available for iOS 10 or for Xcode 8.
+
+Use `uia_available?` in your tests to branch on UIAutomation availability.
+
+]
+        end
         res = uia_query_windows(:keyboard)
-        not res.eql?(':nil')
+        res != ":nil"
       end
 
       # Waits for a keyboard that is not normally visible to calabash;
@@ -452,24 +169,35 @@ module Calabash
       #
       # @note
       #  IMPORTANT this should only be used when the app does not respond to
-      #  `keyboard_visible?`.
+      #  `keyboard_visible?` and UIAutomation is being used.
       #
       # @see #keyboard_visible?
       #
       # @raise [RuntimeError] if the app was not launched with instruments
-      def uia_wait_for_keyboard(opts={})
-        default_opts = {:timeout => 10,
-                        :retry_frequency => 0.1,
-                        :post_timeout => 0.5}
-        opts = default_opts.merge(opts)
-        unless opts[:timeout_message]
-          msg = "waited for '#{opts[:timeout]}' for keyboard"
-          opts[:timeout_message] = msg
+      def uia_wait_for_keyboard(options={})
+        if !uia_available?
+          raise RuntimeError, %Q[
+This method requires UIAutomation and your application was not launched with
+instruments.  UIAutomation is not available for iOS 10 or for Xcode 8.
+
+Use `uia_available?` in your tests to branch on UIAutomation availability.
+
+]
         end
 
-        wait_for(opts) do
+        default_opts = {
+          :timeout => 10,
+          :retry_frequency => 0.1,
+          :post_timeout => 0.5,
+          :timeout_message => "Keyboard did not appear"
+        }
+
+        options = default_opts.merge(options)
+
+        wait_for(options) do
           uia_keyboard_visible?
         end
+        true
       end
 
       # Waits for a keyboard to appear and returns the localized name of the
@@ -500,23 +228,46 @@ module Calabash
       # the first responder.
       #
       # @raise [RuntimeError] if there is no visible keyboard
-      def _text_from_first_responder
-        raise 'there must be a visible keyboard' unless keyboard_visible?
+      def text_from_first_responder
+        if !keyboard_visible?
+          screenshot_and_raise "There must be a visible keyboard"
+        end
 
         ['textField', 'textView'].each do |ui_class|
-          res = query("#{ui_class} isFirstResponder:1", :text)
-          return res.first unless res.empty?
+          query = "#{ui_class} isFirstResponder:1"
+          result = _query_wrapper(query, :text)
+          if !result.empty?
+            return result.first
+          end
         end
-        #noinspection RubyUnnecessaryReturnStatement
-        return ''
+        ""
       end
+
+      # @visibility private
+      # TODO Remove in 0.21.0
+      alias_method :_text_from_first_responder, :text_from_first_responder
 
       private
 
       # @!visibility private
-      # Returns a query string for finding the iPad 'Hide keyboard' button.
-      def _query_uia_hide_keyboard_button
-        "uia.keyboard().buttons()['Hide keyboard']"
+      KEYBOARD_QUERY = "view:'UIKBKeyplaneView'"
+
+      # @!visibility private
+      SPLIT_KEYBOARD_QUERY = "view:'UIKBKeyView'"
+
+      # @!visibility private
+      def _query_wrapper(query, *args)
+        Calabash::Cucumber::Map.map(query, :query, *args)
+      end
+
+      # @!visibility private
+      def _query_for_keyboard
+        _query_wrapper(KEYBOARD_QUERY).first
+      end
+
+      # @!visibility private
+      def _query_for_split_keyboard
+        _query_wrapper(SPLIT_KEYBOARD_QUERY).first
       end
     end
   end
