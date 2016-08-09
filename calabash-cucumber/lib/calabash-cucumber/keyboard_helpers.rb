@@ -142,6 +142,28 @@ module Calabash
         end
       end
 
+      # Waits for a keyboard to disappear.
+      #
+      # @see Calabash::Cucumber::WaitHelpers#wait_for for other options this
+      #  method can handle.
+      #
+      # @param [Hash] options controls the `wait_for` behavior
+      # @option opts [String] :timeout_message ('keyboard did not appear')
+      #  Controls the message that appears in the error.
+      #
+      # @raise [Calabash::Cucumber::WaitHelpers::WaitError] If keyboard does
+      #  not disappear.
+      def wait_for_no_keyboard(options={})
+        default_opts = {
+          :timeout_message => "Keyboard is visible",
+        }
+
+        merged_opts = default_opts.merge(options)
+        wait_for(merged_opts) do
+          !keyboard_visible?
+        end
+      end
+
       # @!visibility private
       # returns an array of possible ipad keyboard modes
       def _ipad_keyboard_modes
