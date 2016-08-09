@@ -204,7 +204,7 @@ Expected '#{strategy}' to be one of these supported strategies:
 
         # @!visibility private
         #
-        # Legacy API.
+        # Legacy API - can we remove this method?
         #
         # It is the caller's responsibility to ensure the keyboard is visible.
         def fast_enter_text(text)
@@ -218,7 +218,10 @@ Expected '#{strategy}' to be one of these supported strategies:
         end
 
         # @!visibility private
+        #
         # It is the caller's responsibility to ensure the keyboard is visible.
+        #
+        # TODO Implement this in JavaScript?
         def tap_keyboard_action_key
           code = special_action_char(Instruments.name, "Return")
           enter_char_with_keyboard(code)
@@ -248,8 +251,9 @@ if (deleteElement.isValid()) {
         end
 
         # @!visibility private
+        #
+        # Caller is responsible for providing a valid direction.
         def rotate(direction)
-          # Caller is responsible for providing a valid direction.
           current_orientation = status_bar_orientation.to_sym
           result = rotate_with_uia(direction, current_orientation)
           recalibrate_after_rotation
@@ -258,8 +262,9 @@ if (deleteElement.isValid()) {
         end
 
         # @!visibility private
+        #
+        # Caller is responsible for normalizing and validating the position
         def rotate_home_button_to(position)
-          # Caller is responsible for normalizing and validating the position
           rotate_to_uia_orientation(position)
           recalibrate_after_rotation
           status_bar_orientation.to_sym
