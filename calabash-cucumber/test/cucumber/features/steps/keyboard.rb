@@ -49,6 +49,17 @@ module TestApp
       @last_text_entered = text
     end
 
+    def enter_text_with_keyboard_by_character(text, timeout=15)
+      query = "* marked:'#{'text field'}'"
+      wait_for_view(query)
+      touch(query)
+      wait_for_keyboard({:timeout => timeout})
+      text.each_char do |char|
+        keyboard_enter_char(char, {:wait_after_char => 0})
+      end
+      @last_text_entered = text
+    end
+
     def set_text_with_enter_text(text)
       query = "* marked:'text field'"
       enter_text(query, text)
@@ -198,6 +209,10 @@ When(/^I type "([^\"]*)"$/) do |text|
   enter_text_with_keyboard(text, 0.5)
 end
 
+When(/^I type "([^\"]*)" character by character$/) do |text|
+  enter_text_with_keyboard_by_character(text, 0.5)
+end
+
 Then(/^what I typed appears in the red box$/) do
   tap_keyboard_action_key
   wait_for_no_keyboard
@@ -271,3 +286,52 @@ Then(/^I can dismiss the keyboard by sending a newline$/) do
   dismiss_keyboard_with_newline
 end
 
+When(/^the keyboard is showing, I can ask for the first responder text$/) do
+  enter_text_in_with_keyboard("text field", "some text")
+
+  expect(text_from_first_responder).to be == "some text"
+end
+
+When(/^the keyboard is not showing, asking for the first responder text raises an error$/) do
+  query = "* marked:'text field'"
+  query(query, :resignFirstResponder)
+  wait_for_no_keyboard
+
+  expect do
+    text_from_first_responder
+  end.to raise_error RuntimeError, /There must be a visible keyboard/
+end
+
+When(/^UIA is available, I can use it to check for keyboards$/) do
+  if uia_available?
+    query = "* marked:'text field'"
+    wait_for_view(query)
+    touch(query)
+    uia_wait_for_keyboard
+  end
+end
+
+When(/^UIA is not available, checking for keyboards with UIA raises an error$/) do
+  if !uia_available?
+    expect do
+      uia_wait_for_keyboard
+    end.to raise_error RuntimeError, /This method requires UIAutomation/
+  end
+end
+
+When(/^the keyboard is not visible expect_keyboard_visible! raises an error$/) do
+  query = "* marked:'text field'"
+  query(query, :resignFirstResponder)
+  wait_for_no_keyboard
+
+  expect do
+    expect_keyboard_visible!
+  end.to raise_error RuntimeError, /Keyboard is not visible/
+end
+
+When(/^the keyboard is visible expect_keyboard_visible! does not raise an error$/) do
+  query = "* marked:'text field'"
+  wait_for_view(query)
+  touch(query)
+  expect_keyboard_visible!
+end

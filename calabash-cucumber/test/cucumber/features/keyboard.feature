@@ -31,6 +31,10 @@ Given I typed "Tack, bra."
 And I decide I want to be more emphatic
 Then I replace "." with "!" using the delete key
 
+Scenario: Entering text with keyboard_enter_char
+Given I type "Dobrze, dziękuję." character by character
+Then what I typed appears in the red box
+
 Scenario: Entering text with enter_text method
 Then I use enter_text to enter "Great!"
 And what I typed appears in the red box
@@ -65,3 +69,11 @@ Scenario: Dismissing keyboard by sending "\n"
 And the return key type of the text field is "Done"
 When I touch the text field I see the correct return key
 Then I can dismiss the keyboard by sending a newline
+
+Scenario: API tests
+When the keyboard is showing, I can ask for the first responder text
+And the keyboard is not showing, asking for the first responder text raises an error
+When UIA is available, I can use it to check for keyboards
+When UIA is not available, checking for keyboards with UIA raises an error
+When the keyboard is not visible expect_keyboard_visible! raises an error
+When the keyboard is visible expect_keyboard_visible! does not raise an error
