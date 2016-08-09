@@ -26,6 +26,9 @@ module Calabash
       include Calabash::Cucumber::StatusBarHelpers
       include Calabash::Cucumber::RotationHelpers
 
+      require "calabash-cucumber/keyboard_helpers"
+      include Calabash::Cucumber::KeyboardHelpers
+
       # @!visibility private
       # @deprecated Use Cucumber's step method.
       #
@@ -486,14 +489,15 @@ module Calabash
         default_opts = {:wait_after_char => 0.05}
         merged_options = default_opts.merge(options)
 
-        performer_name = launcher.gesture_performer.class.name
-        special_char = special_action_char(performer_name, char)
+        special_char = launcher.gesture_performer.char_for_keyboard_action(char)
 
-        if special_char || char.length == 1
+        if special_char
           launcher.gesture_performer.enter_char_with_keyboard(special_char)
+        elsif char.length == 1
+          launcher.gesture_performer.enter_char_with_keyboard(char)
         else
           raise ArgumentError, %Q[
-Expected '#{char}' to be a single character or one of these special strings:
+Expected '#{char}' to be a single character or a special string like:
 
 * Return
 * Delete
@@ -504,7 +508,7 @@ To type strings with more than one character, use keyboard_enter_text.
 
         duration = merged_options[:wait_after_char]
         if duration > 0
-          sleep(duration)
+          Kernel.sleep(duration)
         end
 
         []
@@ -544,7 +548,7 @@ To type strings with more than one character, use keyboard_enter_text.
       # @raise [RuntimeError] If the keyboard is not visible.
       def keyboard_enter_text(text)
         expect_keyboard_visible!
-        existing_text = _text_from_first_responder
+        existing_text = text_from_first_responder
         if existing_text && existing_text == ""
           escaped = ""
         else
@@ -629,16 +633,22 @@ To type strings with more than one character, use keyboard_enter_text.
       # @raise [Calabash::Cucumber::WaitHelpers::WaitError] If the keyboard does
       #  not disappear.
       def dismiss_ipad_keyboard
+        # TODO Maybe relax this restriction; turn it into a nop on iPhones?
+        # TODO Support iPhone 6 Plus form factor dismiss keyboard key.
         if device_family_iphone?
-          screenshot_and_raise "There is no Hide Keyboard key on an iPhone"
+          screenshot_and_raise %Q[
+There is no Hide Keyboard key on an iPhone.
+
+Use `ipad?` to branch in your test.
+
+]
         end
+
+        expect_keyboard_visible!
 
         launcher.gesture_performer.dismiss_ipad_keyboard
 
-        opts = {:timeout_message => 'Keyboard did not disappear'}
-        wait_for(opts) do
-          not keyboard_visible?
-        end
+        wait_for_no_keyboard
       end
 
       # @!visibility private

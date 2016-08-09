@@ -26,8 +26,12 @@ describe Calabash::Cucumber::Core do
   let(:world) do
     Class.new do
       include Calabash::Cucumber::Core
+      include Calabash::Cucumber::WaitHelpers
       def to_s; "#<World>"; end
       def inspect; to_s; end
+
+      # The dread Cucumber embed
+      def embed(_, _, _); ; end
     end.new
   end
 
@@ -230,6 +234,204 @@ describe Calabash::Cucumber::Core do
         expect(gesture_performer).to receive(:rotate).with(:left).and_return :orientation
 
         expect(world.rotate("left")).to be == :orientation
+      end
+    end
+  end
+
+  context "interacting with the keyboard" do
+    before do
+      allow(world).to receive(:launcher).and_return(launcher)
+      allow(launcher).to receive(:gesture_performer).and_return(gesture_performer)
+    end
+
+    context "#keyboard_enter_char" do
+
+      before do
+        expect(world).to receive(:expect_keyboard_visible!).and_return(true)
+      end
+
+      it "raises an error if char is not special and is more than a single char" do
+        expect(gesture_performer).to receive(:char_for_keyboard_action).with("abc").and_return(nil)
+
+        expect do
+          world.keyboard_enter_char("abc")
+        end.to raise_error ArgumentError, /to be a single character or a special string/
+      end
+
+      context "valid character" do
+
+        let(:options) { {:wait_after_char => 0 } }
+
+        it "handles specials characters like 'Delete' and 'Return'" do
+          expect(gesture_performer).to(
+            receive(:char_for_keyboard_action).with("Delete").and_return("del")
+          )
+          expect(gesture_performer).to(
+            receive(:enter_char_with_keyboard).with("del").and_return(true)
+          )
+
+          expect(world.keyboard_enter_char("Delete", options)).to be == []
+        end
+
+        it "handles single characters" do
+          expect(gesture_performer).to(
+            receive(:char_for_keyboard_action).with("a").and_return(nil)
+          )
+          expect(gesture_performer).to(
+            receive(:enter_char_with_keyboard).with("a").and_return(true)
+          )
+
+          expect(world.keyboard_enter_char("a", options)).to be == []
+        end
+
+        it "sleeps after typing the char by default" do
+          expect(gesture_performer).to(
+            receive(:char_for_keyboard_action).with("a").and_return(nil)
+          )
+          expect(gesture_performer).to(
+            receive(:enter_char_with_keyboard).with("a").and_return(true)
+          )
+          expect(Kernel).to receive(:sleep).with(0.05).and_return(true)
+
+          expect(world.keyboard_enter_char("a")).to be == []
+        end
+
+        it "merges options" do
+          expect(gesture_performer).to(
+            receive(:char_for_keyboard_action).with("a").and_return(nil)
+          )
+          expect(gesture_performer).to(
+            receive(:enter_char_with_keyboard).with("a").and_return(true)
+          )
+          options[:wait_after_char] = 5.0
+          expect(Kernel).to receive(:sleep).with(5.0).and_return(true)
+
+          expect(world.keyboard_enter_char("a", options)).to be == []
+        end
+      end
+    end
+
+    context "#tap_keyboard_action_key" do
+      it "asks the gesture performer to tap the action key" do
+        expect(world).to receive(:expect_keyboard_visible!).and_return(true)
+        expect(gesture_performer).to receive(:tap_keyboard_action_key).and_return(:success)
+
+        expect(world.tap_keyboard_action_key).to be == :success
+      end
+    end
+
+    context "#tap_keyboard_delete_key" do
+      it "asks the gesture performer to tap the delete key" do
+        expect(world).to receive(:expect_keyboard_visible!).and_return(true)
+        expect(gesture_performer).to receive(:tap_keyboard_delete_key).and_return(:success)
+
+        expect(world.tap_keyboard_delete_key).to be == :success
+      end
+    end
+
+    context "#keyboard_enter_text" do
+
+      before do
+        expect(world).to receive(:expect_keyboard_visible!).and_return(true)
+      end
+
+      it "asks the performer type the text" do
+        expect(world).to receive(:text_from_first_responder).and_return("")
+        expect(gesture_performer).to(
+          receive(:enter_text_with_keyboard).with("hello", "").and_return(:success)
+        )
+
+        expect(world.keyboard_enter_text("hello")).to be == :success
+      end
+
+      it "escapes newlines in existing text" do
+        existing = %Q[abc\nabc\n]
+        escaped = %Q[abc\\nabc\\n]
+        expect(world).to receive(:text_from_first_responder).and_return(existing)
+        expect(gesture_performer).to(
+          receive(:enter_text_with_keyboard).with("hello", escaped).and_return(:success)
+        )
+
+        expect(world.keyboard_enter_text("hello")).to be == :success
+      end
+    end
+
+    context "#enter_text_in" do
+      # Punting on some of these tests; the method was not written to be tested.
+      it "has a method alias: enter_text" do
+        expect(world.respond_to?(:enter_text)).to be_truthy
+      end
+
+      it "waits if the options say so"
+
+      it "passes wait options to to wait_for_elements_exist"
+
+      it "raises an error if query finds no match" do
+        expect(world).to(
+          receive(:wait_for_element_exists).and_raise "Could not find element"
+        )
+
+        expect do
+          world.enter_text_in("query", "text")
+        end.to raise_error RuntimeError, /Could not find element/
+      end
+
+      context "query finds a matching element" do
+
+        before do
+          expect(world).to receive(:wait_for_element_exists).and_return(true)
+          expect(world).to receive(:touch).and_return(true)
+          expect(world).to receive(:wait_for_keyboard).and_return(true)
+        end
+
+        it "passes options to touch"
+
+        it "raises if keyboard does not appear"
+
+        it "calls keyboard_enter_text when options say so" do
+          options = {:use_keyboard => true}
+          expect(world).to receive(:keyboard_enter_text).with("text").and_return(:success)
+
+          expect(world.enter_text_in("query", "text", options)).to be == :success
+        end
+
+        it "calls fast_enter_text by default" do
+          expect(world).to receive(:fast_enter_text).with("text").and_return(:success)
+
+          expect(world.enter_text_in("query", "text")).to be == :success
+        end
+      end
+    end
+
+    context "#fast_enter_text" do
+      it "asks the gesture performer to fast enter text" do
+        expect(world).to receive(:expect_keyboard_visible!).and_return(true)
+        expect(gesture_performer).to(
+          receive(:fast_enter_text).with("text").and_return(:success)
+        )
+
+        expect(world.fast_enter_text("text")).to be == :success
+      end
+    end
+
+    context "#dismiss_ipad_keyboard" do
+      it "raises an error if called on an iPhone or iPad" do
+        expect(world).to receive(:device_family_iphone?).and_return(true)
+        expect(world).to receive(:screenshot).and_return("path/to/screenshot")
+        expect(world).to receive(:embed).and_return(true)
+
+        expect do
+          world.dismiss_ipad_keyboard
+        end.to raise_error RuntimeError, /There is no Hide Keyboard key on an iPhone/
+      end
+
+      it "asks the performer to dismiss the iPad keyboard and waits" do
+        expect(world).to receive(:device_family_iphone?).and_return(false)
+        expect(world).to receive(:expect_keyboard_visible!).and_return(true)
+        expect(world).to receive(:wait_for_no_keyboard).and_return(true)
+        expect(gesture_performer).to receive(:dismiss_ipad_keyboard).and_return(true)
+
+        expect(world.dismiss_ipad_keyboard).to be == true
       end
     end
   end
