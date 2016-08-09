@@ -74,6 +74,13 @@ module Calabash
         end
 
         # @!visibility private
+        #
+        # Respond to keys like 'Delete' or 'Return'.
+        def char_for_keyboard_action(action_key)
+          abstract_method!
+        end
+
+        # @!visibility private
         # It is the caller's responsibility to ensure the keyboard is visible.
         def enter_char_with_keyboard(char)
           abstract_method!
