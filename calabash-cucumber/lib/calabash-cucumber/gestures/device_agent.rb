@@ -20,6 +20,9 @@ module Calabash
         require "calabash-cucumber/rotation_helpers"
         include Calabash::Cucumber::RotationHelpers
 
+        require "calabash-cucumber/environment_helpers"
+        include Calabash::Cucumber::EnvironmentHelpers
+
         # @!visibility private
         def self.expect_valid_args(args)
           if args.nil?
@@ -113,6 +116,57 @@ args[0] = #{args[0]}
         end
 
         # @!visibility private
+        def enter_text_with_keyboard(string, options={})
+          device_agent.enter_text(string)
+        end
+
+        # @!visibility private
+        def enter_char_with_keyboard(char)
+          device_agent.enter_text(char)
+        end
+
+        # @!visibility private
+        def char_for_keyboard_action(action_key)
+          SPECIAL_ACTION_CHARS[action_key]
+        end
+
+        # @!visibility private
+        def tap_keyboard_action_key
+          mark = mark_for_return_key_of_first_responder
+          if mark
+            begin
+              # The underlying query for coordinates always expects results.
+              value = device_agent.touch(mark)
+              return value
+            rescue RuntimeError => e
+              RunLoop.log_debug("Cannot find mark '#{mark}' with query; will send a newline")
+            end
+          else
+            RunLoop.log_debug("Cannot find keyboard return key type; sending a newline")
+          end
+
+          code = char_for_keyboard_action("Return")
+          device_agent.enter_text(code)
+        end
+
+        # @!visibility private
+        def tap_keyboard_delete_key
+          device_agent.touch("delete")
+        end
+
+        # @!visibility private
+        def fast_enter_text(text)
+          device_agent.enter_text(text)
+        end
+
+        # @!visibility private
+        #
+        # Stable across different keyboard languages.
+        def dismiss_ipad_keyboard
+          device_agent.touch("Hide keyboard")
+        end
+
+        # @!visibility private
         def rotate(direction)
           # Caller is responsible for normalizing and verifying direction.
           current_orientation = status_bar_orientation.to_sym
@@ -166,6 +220,72 @@ Try adjusting your query to return at least one view.
           else
             results[0]
           end
+        end
+
+        # @!visibility private
+        #
+        # Don't change the double quotes.
+        SPECIAL_ACTION_CHARS = {
+          "Delete" => "\b",
+          "Return" => "\n"
+        }.freeze
+
+        # @!visibility private
+        #
+        # Keys are from the UIReturnKeyType enum.
+        #
+        # The values are localization independent identifiers - these are
+        # stable across localizations and keyboard languages.  The exception is
+        # Continue which is not stable.
+        RETURN_KEY_TYPE = {
+          0 => "Return",
+          1 => "Go",
+          2 => "Google",
+          # Needs special physical device vs simulator handling.
+          3 => "Join",
+          4 => "Next",
+          5 => "Route",
+          6 => "Search",
+          7 => "Send",
+          8 => "Yahoo",
+          9 => "Done",
+          10 => "Emergency call",
+          # https://xamarin.atlassian.net/browse/TCFW-344
+          # Localized!!! Apple bug.
+          11 => "Continue"
+        }.freeze
+
+        # @!visibility private
+        def mark_for_return_key_type(number)
+          # https://xamarin.atlassian.net/browse/TCFW-361
+          value = RETURN_KEY_TYPE[number]
+          if value == "Join" && !simulator?
+            "Join:"
+          else
+            value
+          end
+        end
+
+        # @!visibility private
+        def return_key_type_of_first_responder
+
+          ['textField', 'textView'].each do |ui_class|
+            query = "#{ui_class} isFirstResponder:1"
+            raw = Calabash::Cucumber::Map.raw_map(query, :query, :returnKeyType)
+            results = raw["results"]
+            if !results.empty?
+              return results.first
+            end
+          end
+
+          RunLoop.log_debug("Cannot find keyboard first responder to ask for its returnKeyType")
+          nil
+        end
+
+        # @!visibility private
+        def mark_for_return_key_of_first_responder
+          number = return_key_type_of_first_responder
+          mark_for_return_key_type(number)
         end
       end
     end
