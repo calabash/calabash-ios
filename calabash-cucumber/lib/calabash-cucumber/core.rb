@@ -486,13 +486,12 @@ module Calabash
         default_opts = {:wait_after_char => 0.05}
         merged_options = default_opts.merge(options)
 
-        if char == "Return"
-          # Legacy.  Cannot change this.
-          tap_keyboard_action_key
-        elsif char == "Delete"
-          # Legacy.  Cannot change this.
-          tap_keyboard_delete_key
-        elsif char.length != 1
+        performer_name = launcher.gesture_performer.class.name
+        special_char = special_action_char(performer_name, char)
+
+        if special_char || char.length == 1
+          launcher.gesture_performer.enter_char_with_keyboard(special_char)
+        else
           raise ArgumentError, %Q[
 Expected '#{char}' to be a single character or one of these special strings:
 
@@ -501,8 +500,6 @@ Expected '#{char}' to be a single character or one of these special strings:
 
 To type strings with more than one character, use keyboard_enter_text.
 ]
-        else
-          launcher.gesture_performer.enter_char_with_keyboard(char)
         end
 
         duration = merged_options[:wait_after_char]

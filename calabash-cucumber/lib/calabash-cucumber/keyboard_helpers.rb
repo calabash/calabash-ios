@@ -23,18 +23,28 @@ module Calabash
       include Calabash::Cucumber::TestsHelpers
 
       # @!visibility private
-      # noinspection RubyStringKeysInHashInspection
+      #
+      # Don't change the single and double quotes.
       SPECIAL_ACTION_CHARS = {
-            'Delete' => '\b',
-            'Return' => '\n'
-            # these are not supported yet and I am pretty sure that they
-            # cannot be touched by passing an escaped character and instead
-            # the must be found using UIAutomation calls.  -jmoody
-            #'Dictation' => nil,
-            #'Shift' => nil,
-            #'International' => nil,
-            #'More' => nil,
-      }
+            :instruments => {
+              "Delete" => '\b',
+              "Return" => '\n'
+            },
+            :device_agent => {
+              "Delete" => "\b",
+              "Return" => "\n"
+            }
+      }.freeze
+
+      # @!visibility private
+      def special_action_char(performer_name, key)
+        performer_chars = SPECIAL_ACTION_CHARS[performer_name]
+        if performer_chars
+          performer_chars[key]
+        else
+          nil
+        end
+      end
 
       # @!visibility private
       # Returns a query string for detecting a keyboard.

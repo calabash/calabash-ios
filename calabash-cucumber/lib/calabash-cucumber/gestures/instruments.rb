@@ -220,7 +220,7 @@ Expected '#{strategy}' to be one of these supported strategies:
         # @!visibility private
         # It is the caller's responsibility to ensure the keyboard is visible.
         def tap_keyboard_action_key
-          code = Calabash::Cucumber::KeyboardHelpers::SPECIAL_ACTION_CHARS["Return"]
+          code = special_action_char(Instruments.name, "Return")
           enter_char_with_keyboard(code)
         end
 
