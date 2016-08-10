@@ -190,8 +190,58 @@ Expected '#{strategy}' to be one of these supported strategies:
           uia_send_app_to_background(secs)
         end
 
+        # @!visibility private
+        def enter_text_with_keyboard(string, existing_text="")
+          uia_type_string(string, existing_text)
+        end
+
+        # @!visibility private
+        def fast_enter_text(text)
+          uia_set_responder_value(text)
+        end
+
+        # @!visibility private
+        # It is the caller's responsibility to ensure the keyboard is visible.
+        def enter_char_with_keyboard(char)
+          uia("uia.keyboard().typeString('#{char}')")
+        end
+
+        # @!visibility private
+        def char_for_keyboard_action(action_key)
+          SPECIAL_ACTION_CHARS[action_key]
+        end
+
+        # @!visibility private
+        # TODO Implement this in JavaScript?
+        # See the device_agent implementation of tap_keyboard_action_key and
+        # the tap_keyboard_delete_key of this class.
+        def tap_keyboard_action_key
+          code = char_for_keyboard_action("Return")
+          enter_char_with_keyboard(code)
+        end
+
+        # @!visibility private
+        def tap_keyboard_delete_key
+          js_tap_delete = %Q[(function() {
+var deleteElement = uia.keyboard().elements().firstWithName('Delete');
+if (deleteElement.isValid()) {
+  deleteElement.tap();
+} else {
+  uia.keyboard().elements().firstWithName('delete').tap();
+}
+})();].gsub!($-0, "")
+
+          uia(js_tap_delete)
+        end
+
+        # @!visibility private
+        def dismiss_ipad_keyboard
+          js = %Q[#{query_uia_hide_keyboard_button}.tap()]
+          uia(js)
+        end
+
+        # @!visibility private
         def rotate(direction)
-          # Caller is responsible for providing a valid direction.
           current_orientation = status_bar_orientation.to_sym
           result = rotate_with_uia(direction, current_orientation)
           recalibrate_after_rotation
@@ -199,8 +249,8 @@ Expected '#{strategy}' to be one of these supported strategies:
           status_bar_orientation.to_sym
         end
 
+        # @!visibility private
         def rotate_home_button_to(position)
-          # Caller is responsible for normalizing and validating the position
           rotate_to_uia_orientation(position)
           recalibrate_after_rotation
           status_bar_orientation.to_sym
@@ -318,6 +368,20 @@ Expected '#{strategy}' to be one of these supported strategies:
           cmd = "UIATarget.localTarget().setDeviceOrientation(#{value})"
           uia(cmd)
         end
+
+        # @!visibility private
+        # Returns a query string for finding the iPad 'Hide keyboard' button.
+        def query_uia_hide_keyboard_button
+          "uia.keyboard().buttons()['Hide keyboard']"
+        end
+
+        # @!visibility private
+        #
+        # Don't change the single single quotes.
+        SPECIAL_ACTION_CHARS = {
+          "Delete" => '\b',
+          "Return" => '\n'
+        }
       end
     end
   end

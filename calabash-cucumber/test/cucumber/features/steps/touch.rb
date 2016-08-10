@@ -1,4 +1,4 @@
-module UnitTestApp
+module TestApp
   module TouchGestures
     def wait_for_gesture_text(text, mark="gesture performed")
       query = "* marked:'#{mark}'"
@@ -34,7 +34,7 @@ Expected: #{text}
   end
 end
 
-World(UnitTestApp::TouchGestures)
+World(TestApp::TouchGestures)
 
 And(/^I clear the touch action label$/) do
   clear_small_button_action_label

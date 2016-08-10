@@ -26,6 +26,9 @@ module Calabash
       include Calabash::Cucumber::StatusBarHelpers
       include Calabash::Cucumber::RotationHelpers
 
+      require "calabash-cucumber/keyboard_helpers"
+      include Calabash::Cucumber::KeyboardHelpers
+
       # @!visibility private
       # @deprecated Use Cucumber's step method.
       #
@@ -460,6 +463,188 @@ module Calabash
       # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
       def pinch(in_out, options={})
         launcher.gesture_performer.pinch(in_out.to_sym,options)
+      end
+
+      # Use keyboard to enter a character.
+      #
+      # @note
+      #  There are several special 'characters', some of which do not appear on
+      #  all keyboards; e.g. `Delete`, `Return`.
+      #
+      # @see #keyboard_enter_text
+      #
+      # @note
+      #  You should prefer to call `keyboard_enter_text`.
+      #
+      # @raise [RuntimeError] If there is no visible keyboard
+      # @raise [RuntimeError] If the keyboard (layout) is not supported
+      #
+      # @param [String] char The character to type
+      # @param [Hash] options Controls the behavior of the method.
+      # @option opts [Numeric] :wait_after_char (0.05) How long to sleep after
+      #  typing a character.
+      def keyboard_enter_char(char, options={})
+        expect_keyboard_visible!
+
+        default_opts = {:wait_after_char => 0.05}
+        merged_options = default_opts.merge(options)
+
+        special_char = launcher.gesture_performer.char_for_keyboard_action(char)
+
+        if special_char
+          launcher.gesture_performer.enter_char_with_keyboard(special_char)
+        elsif char.length == 1
+          launcher.gesture_performer.enter_char_with_keyboard(char)
+        else
+          raise ArgumentError, %Q[
+Expected '#{char}' to be a single character or a special string like:
+
+* Return
+* Delete
+
+To type strings with more than one character, use keyboard_enter_text.
+]
+        end
+
+        duration = merged_options[:wait_after_char]
+        if duration > 0
+          Kernel.sleep(duration)
+        end
+
+        []
+      end
+
+      # Touches the keyboard action key.
+      #
+      # The action key depends on the keyboard.  Some examples include:
+      #
+      # * Return
+      # * Next
+      # * Go
+      # * Join
+      # * Search
+      #
+      # @note
+      #  Not all keyboards have an action key.  For example, numeric keyboards
+      #  do not have an action key.
+      #
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def tap_keyboard_action_key
+        expect_keyboard_visible!
+        launcher.gesture_performer.tap_keyboard_action_key
+      end
+
+      # Touches the keyboard delete key.
+      #
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def tap_keyboard_delete_key
+        expect_keyboard_visible!
+        launcher.gesture_performer.tap_keyboard_delete_key
+      end
+
+      # Uses the keyboard to enter text.
+      #
+      # @param [String] text the text to type.
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def keyboard_enter_text(text)
+        expect_keyboard_visible!
+        existing_text = text_from_first_responder
+        escaped = existing_text.gsub("\n","\\n")
+        launcher.gesture_performer.enter_text_with_keyboard(text, escaped)
+      end
+
+      # @!visibility private
+      #
+      # Enters text into view identified by a query
+      #
+      # This behavior of this method depends on the Gesture::Performer
+      # implementation.
+      #
+      # ### UIAutomation
+      #
+      # defaults to calling 'setValue' in UIAutomation on the UITextField or
+      # UITextView.  This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # To force use of #keyboard_enter_text option :use_keyboard
+      #
+      # ### DeviceAgent
+      #
+      # This method calls #keyboard_enter_text regardless of the options passed.
+      #
+      # @param [String] uiquery the element to enter text into
+      # @param [String] text the text to enter
+      # @param [Hash] options controls details of text entry
+      # @option options [Boolean] :use_keyboard (false) use the iOS keyboard
+      #   to enter each character separately
+      # @option options [Boolean] :wait (true) call wait_for_element_exists with
+      #   uiquery
+      # @option options [Hash] :wait_options ({}) if :wait pass this as options
+      #   to wait_for_element_exists
+      def enter_text_in(uiquery, text, options = {})
+        default_opts = {:use_keyboard => false, :wait => true, :wait_options => {}}
+        options = default_opts.merge(options)
+        wait_for_element_exists(uiquery, options[:wait_options]) if options[:wait]
+        touch(uiquery, options)
+        wait_for_keyboard
+        if options[:use_keyboard]
+          keyboard_enter_text(text)
+        else
+          fast_enter_text(text)
+        end
+      end
+
+      alias_method :enter_text, :enter_text_in
+
+      # @!visibility private
+      #
+      # Enters text into current text input field
+      #
+      # This behavior of this method depends on the Gesture::Performer
+      # implementation.
+      #
+      # ### UIAutomation
+      #
+      # defaults to calling 'setValue' in UIAutomation on the UITextField or
+      # UITextView.  This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # To force use of #keyboard_enter_text option :use_keyboard
+      #
+      # ### DeviceAgent
+      #
+      # This method calls #keyboard_enter_text.
+      #
+      # @param [String] text the text to enter
+      def fast_enter_text(text)
+        expect_keyboard_visible!
+        launcher.gesture_performer.fast_enter_text(text)
+      end
+
+      # Dismisses a iPad keyboard by touching the 'Hide keyboard' button and waits
+      # for the keyboard to disappear.
+      #
+      # @note
+      #  the dismiss keyboard key does not exist on the iPhone or iPod
+      #
+      # @raise [RuntimeError] If the device is not an iPad
+      # @raise [Calabash::Cucumber::WaitHelpers::WaitError] If the keyboard does
+      #  not disappear.
+      def dismiss_ipad_keyboard
+        # TODO Maybe relax this restriction; turn it into a nop on iPhones?
+        # TODO Support iPhone 6 Plus form factor dismiss keyboard key.
+        if device_family_iphone?
+          screenshot_and_raise %Q[
+There is no Hide Keyboard key on an iPhone.
+
+Use `ipad?` to branch in your test.
+
+]
+        end
+
+        expect_keyboard_visible!
+
+        launcher.gesture_performer.dismiss_ipad_keyboard
+
+        wait_for_no_keyboard
       end
 
       # @!visibility private

@@ -222,5 +222,183 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         expect(device_agent.touch_hold(options)).to be == expected
       end
     end
+
+    context "Text Entry" do
+      context "#enter_text_with_keyboard" do
+        it "types a string by calling out to enter_text" do
+          expect(device_agent.device_agent).to receive(:enter_text).with("text").and_return({})
+
+          expect(device_agent.enter_text_with_keyboard("text")).to be == {}
+        end
+      end
+
+      context "#enter_char_with_keyboard" do
+        it "types a char by calling out to enter_text" do
+          expect(device_agent.device_agent).to receive(:enter_text).with("c").and_return({})
+
+          expect(device_agent.enter_text_with_keyboard("c")).to be == {}
+        end
+      end
+
+      context "#char_for_keyboard_action" do
+        let(:hash) { { "action" => "char"  } }
+
+        before do
+          stub_const("Calabash::Cucumber::Gestures::DeviceAgent::SPECIAL_ACTION_CHARS", hash)
+        end
+
+        it "returns the value of the action key" do
+          expect(device_agent.char_for_keyboard_action("action")).to be == "char"
+        end
+
+        it "returns nil if there is no char for the action" do
+          expect(device_agent.char_for_keyboard_action("unknown")).to be == nil
+        end
+      end
+
+      context "#tap_keyboard_action_key" do
+        it "touches the action key using device_agent #touch if mark can be found" do
+          expect(device_agent).to(
+            receive(:mark_for_return_key_of_first_responder)
+          ).and_return("Mark")
+          expect(device_agent.device_agent).to receive(:touch).with("Mark").and_return({})
+
+          expect(device_agent.tap_keyboard_action_key).to be == {}
+        end
+
+        it "touches the action key by typing a newline if the type is unknown" do
+          expect(device_agent).to(
+            receive(:mark_for_return_key_of_first_responder)
+          ).and_return(nil)
+          expect(device_agent).to receive(:char_for_keyboard_action).and_return("\n")
+          expect(device_agent.device_agent).to receive(:enter_text).with("\n").and_return({})
+
+          expect(device_agent.tap_keyboard_action_key).to be == {}
+        end
+
+        it "touches the action key by typing a newline if DeviceAgent can't find a match" do
+          expect(device_agent).to(
+            receive(:mark_for_return_key_of_first_responder)
+          ).and_return("Unmatchable identifier")
+
+          expect(device_agent.device_agent).to(
+            receive(:touch).with("Unmatchable identifier").and_raise(
+              RuntimeError, "No match found")
+          )
+
+          expect(device_agent).to receive(:char_for_keyboard_action).and_return("\n")
+          expect(device_agent.device_agent).to receive(:enter_text).with("\n").and_return({})
+
+          expect(device_agent.tap_keyboard_action_key).to be == {}
+        end
+      end
+
+      context "#tap_keyboard_delete_key" do
+        it "touches the keyboard delete key" do
+          expect(device_agent.device_agent).to receive(:touch).with('delete').and_return({})
+
+          expect(device_agent.tap_keyboard_delete_key).to be == {}
+        end
+      end
+
+      context "#fast_enter_text" do
+        it "calls 'enter_text'" do
+          expect(device_agent.device_agent).to receive(:enter_text).with("text").and_return({})
+
+          expect(device_agent.fast_enter_text("text")).to be == {}
+        end
+      end
+
+      context "#dismiss_ipad_keyboard" do
+        it "touches the hide keyboard key" do
+          expect(device_agent.device_agent).to receive(:touch).with("Hide keyboard").and_return({})
+
+          expect(device_agent.dismiss_ipad_keyboard).to be == {}
+        end
+      end
+
+      context "#mark_for_return_key_type" do
+        let(:hash) { { 1 => "A", 3 => "Join" } }
+
+        before do
+          stub_const("Calabash::Cucumber::Gestures::DeviceAgent::RETURN_KEY_TYPE", hash)
+        end
+
+        it "returns the string value for the text input view returnKeyType" do
+          expect(device_agent.send(:mark_for_return_key_type, 1)).to be == "A"
+        end
+
+        it "returns nil if there is no value the text input view returnKeyType" do
+          expect(device_agent.send(:mark_for_return_key_type, 2)).to be == nil
+        end
+
+        context "handling Join" do
+          it "returns Join for simulators" do
+            expect(device_agent).to receive(:simulator?).and_return(true)
+
+            expect(device_agent.send(:mark_for_return_key_type, 3)).to be == "Join"
+          end
+
+          it "returns Join: for physical devices" do
+            expect(device_agent).to receive(:simulator?).and_return(false)
+
+            expect(device_agent.send(:mark_for_return_key_type, 3)).to be == "Join:"
+          end
+        end
+      end
+
+      context "#return_key_type_of_first_responder" do
+        it "returns the returnKeyType of text field when it is the first responder" do
+          query = "textField isFirstResponder:1"
+          expect(Calabash::Cucumber::Map).to(
+            receive(:raw_map).with(query, :query, :returnKeyType)
+          ).and_return({"results" => [1]})
+
+          actual = device_agent.send(:return_key_type_of_first_responder)
+          expect(actual).to be == 1
+        end
+
+        it "returns the returnKeyType of text view when it is the first responder" do
+          query = "textField isFirstResponder:1"
+          expect(Calabash::Cucumber::Map).to(
+            receive(:raw_map).with(query, :query, :returnKeyType)
+          ).and_return({"results" => []})
+
+          query = "textView isFirstResponder:1"
+          expect(Calabash::Cucumber::Map).to(
+            receive(:raw_map).with(query, :query, :returnKeyType)
+          ).and_return({"results" => [2]})
+
+          actual = device_agent.send(:return_key_type_of_first_responder)
+          expect(actual).to be == 2
+        end
+
+        it "returns nil when no first responder can be found" do
+          query = "textField isFirstResponder:1"
+          expect(Calabash::Cucumber::Map).to(
+            receive(:raw_map).with(query, :query, :returnKeyType)
+          ).and_return({"results" => []})
+
+          query = "textView isFirstResponder:1"
+          expect(Calabash::Cucumber::Map).to(
+            receive(:raw_map).with(query, :query, :returnKeyType)
+          ).and_return({"results" => []})
+
+          actual = device_agent.send(:return_key_type_of_first_responder)
+          expect(actual).to be == nil
+        end
+      end
+
+      context "#mark_for_return_key_of_first_responder" do
+        it "returns the returnKeyType of the first responder" do
+          expect(device_agent).to receive(:return_key_type_of_first_responder).and_return(1)
+          expect(device_agent).to receive(:mark_for_return_key_type).with(1).and_return("Hello")
+
+          actual = device_agent.send(:mark_for_return_key_of_first_responder)
+          expect(actual).to be == "Hello"
+        end
+      end
+    end
   end
 end
+
