@@ -549,11 +549,7 @@ To type strings with more than one character, use keyboard_enter_text.
       def keyboard_enter_text(text)
         expect_keyboard_visible!
         existing_text = text_from_first_responder
-        if existing_text && existing_text == ""
-          escaped = ""
-        else
-          escaped = existing_text.gsub("\n","\\n")
-        end
+        escaped = existing_text.gsub("\n","\\n")
         launcher.gesture_performer.enter_text_with_keyboard(text, escaped)
       end
 
