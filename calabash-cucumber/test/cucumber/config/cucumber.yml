@@ -7,8 +7,8 @@ require "run_loop"
 #SIM_APP = File.join(DEVICE_AGENT_PRODUCTS, "app", "TestApp", "TestApp.app")
 #DEVICE_APP = File.join(DEVICE_AGENT_PRODUCTS, "ipa", "TestApp", "TestApp.app")
 
-SIM_APP = File.expand_path(File.join(".", "aut", "sim", "TestApp.app"))
-DEVICE_APP = File.expand_path(File.join(".", "aut", "device", "TestApp.app"))
+SIM_APP = File.join("aut", "sim", "TestApp.app")
+DEVICE_APP = File.join("aut", "device", "TestApp.app")
 
 # Path to DeviceAgent.iOS repo to support launching CBX-Runner with xcodebuild.
 #
