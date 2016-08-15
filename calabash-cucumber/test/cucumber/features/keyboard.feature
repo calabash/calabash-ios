@@ -32,7 +32,7 @@ And I decide I want to be more emphatic
 Then I replace "." with "!" using the delete key
 
 Scenario: Entering text with keyboard_enter_char
-Given I type "Dobrze, dziękuję." character by character
+Given I type "Fine" character by character
 Then what I typed appears in the red box
 
 Scenario: Entering text with enter_text method
@@ -77,3 +77,4 @@ When UIA is available, I can use it to check for keyboards
 When UIA is not available, checking for keyboards with UIA raises an error
 When the keyboard is not visible expect_keyboard_visible! raises an error
 When the keyboard is visible expect_keyboard_visible! does not raise an error
+And I can dismiss the keyboard with the action key
