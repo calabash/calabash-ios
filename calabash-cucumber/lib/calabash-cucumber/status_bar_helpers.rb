@@ -4,6 +4,11 @@ module Calabash
     # Contains methods for interacting with the status bar.
     module StatusBarHelpers
 
+      require "calabash-cucumber/map"
+
+      require "calabash-cucumber/connection_helpers"
+      include Calabash::Cucumber::ConnectionHelpers
+
       # Returns the device orientation as reported by
       # `[[UIDevice currentDevice] orientation]`.
       #
@@ -36,6 +41,47 @@ module Calabash
         Map.map(nil, :orientation, :status_bar).first
       end
 
+      # Returns details about the status bar like the frame, its visibility,
+      # and orientation.
+      #
+      # Requires calabash server 0.20.0.
+      def status_bar_details
+        result = http({:method => :get, :raw => true, :path => "statusBar"})
+        if result == ""
+          RunLoop::log_debug("status_bar_details is only available in Calabash iOS >= 0.20.0")
+          RunLoop::log_debug("Using default status bar details based on orientation.")
+
+          if portrait?
+            {
+              "frame" => {
+                "y" => 0,
+                "height" => 20,
+                "width" => 375,
+                "x" => 0
+              },
+              "hidden" => false,
+              "orientation" => status_bar_orientation,
+              "warning" => "These are default values.  Update the server to 0.20.0"
+            }
+          else
+            {
+              "frame" => {
+                "y" => 0,
+                "height" => 10,
+                "width" => 375,
+                "x" => 0
+              },
+              "hidden" => false,
+              "orientation" => status_bar_orientation,
+              "warning" => "These are default values.  Update the server to 0.20.0"
+            }
+          end
+        else
+          hash = JSON.parse(result)
+          hash["results"]
+        end
+      end
+
       # Is the device in the portrait orientation?
       #
       # @return [Boolean] Returns true if the device is in the 'up' or 'down'
@@ -53,7 +99,6 @@ module Calabash
         o = status_bar_orientation
         o.eql?('right') or o.eql?('left')
       end
-
     end
   end
 end
