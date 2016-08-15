@@ -116,6 +116,25 @@ args[0] = #{args[0]}
         end
 
         # @!visibility private
+        def pan(from_query, to_query, options)
+          dupped_options = options.dup
+
+          dupped_options[:query] = from_query
+          from_hash = query_for_coordinates(dupped_options)
+          from_point = from_hash[:coordinates]
+
+          dupped_options[:query] = to_query
+          to_hash = query_for_coordinates(dupped_options)
+          to_point = to_hash[:coordinates]
+
+          dupped_options.delete(:query)
+          device_agent.pan_between_coordinates(from_point, to_point,
+                                               dupped_options)
+
+          [from_hash[:view], to_hash[:view]]
+        end
+
+        # @!visibility private
         def enter_text_with_keyboard(string, options={})
           device_agent.enter_text(string)
         end

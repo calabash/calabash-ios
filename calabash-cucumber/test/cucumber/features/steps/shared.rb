@@ -54,4 +54,9 @@ Then(/^I see the (Touch|Pan|Rotate\/Pinch|Misc|Tao) page$/) do |page|
   wait_for_view("* marked:'#{page.downcase} page'")
 end
 
+Given(/^I am looking at the Drag and Drop page$/) do
+  query = "* marked:'drag and drop row'"
+  wait_for_view(query)
+  touch(query)
+  wait_for_view("* marked:'drag and drop page'")
 end
