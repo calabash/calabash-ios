@@ -2,6 +2,11 @@
 
 require "run_loop"
 
+#DEVICE_AGENT_REPO = File.expand_path(File.join("..", "..", "..", "..", "DeviceAgent.iOS"))
+#DEVICE_AGENT_PRODUCTS = File.join(DEVICE_AGENT_REPO, "Products")
+#SIM_APP = File.join(DEVICE_AGENT_PRODUCTS, "app", "TestApp", "TestApp.app")
+#DEVICE_APP = File.join(DEVICE_AGENT_PRODUCTS, "ipa", "TestApp", "TestApp.app")
+
 SIM_APP = File.expand_path(File.join(".", "aut", "sim", "TestApp.app"))
 DEVICE_APP = File.expand_path(File.join(".", "aut", "device", "TestApp.app"))
 
