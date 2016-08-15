@@ -647,15 +647,6 @@ Use `ipad?` to branch in your test.
         wait_for_no_keyboard
       end
 
-      # @!visibility private
-      # @deprecated
-      def cell_swipe(options={})
-        if uia_available?
-          raise 'cell_swipe not supported with instruments, simply use swipe with a query that matches the cell'
-        end
-        playback('cell_swipe', options)
-      end
-
       # Scroll a scroll view in a direction. By default scrolls half the frame size.
       # @example
       #   scroll("UITableView", :down)
