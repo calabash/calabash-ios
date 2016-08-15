@@ -45,4 +45,13 @@ Given(/^I am looking at the (Touch|Pan|Rotate\/Pinch|Misc|Tao) tab$/) do |tabnam
   query = "* marked:'#{tabname}'"
   wait_for_view(query)
   touch(query)
+  wait_for_view("* marked:'#{tabname.downcase} page'")
+  wait_for_none_animating
+end
+
+Then(/^I see the (Touch|Pan|Rotate\/Pinch|Misc|Tao) page$/) do |page|
+  wait_for_none_animating
+  wait_for_view("* marked:'#{page.downcase} page'")
+end
+
 end
