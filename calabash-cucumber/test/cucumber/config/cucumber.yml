@@ -37,18 +37,12 @@ device_list.each do |device|
   devices[device.to_sym] = ht
 end
 
-if ENV["USER"] == "jenkins"
-  formatter = "pretty"
-else
-  formatter = "Slowhandcuke::Formatter"
-end
-
 FileUtils.mkdir_p("./reports")
 
 %>
 
 verbose: DEBUG=1
-formatter: -f <%= formatter %>
+formatter: -f pretty
 cbxws: CBXWS=<%= CBXWS %>
 
 # Launch on default simulator.
@@ -76,4 +70,3 @@ uranus:  -p iphone5S
 hat:     -p iphone6
 denis:   -p iphone6plus
 mercury: -p ipadmini
-
