@@ -39,3 +39,7 @@ When the home button is on the left, I can two-finger tap
 When the home button is on the top, I can two-finger tap
 When the home button is on the right, I can two-finger tap
 When the home button is on the bottom, I can two-finger tap
+
+Scenario: Touch by point
+And I rotate the device so the home button is on the bottom
+Then I can touch by coordinate
