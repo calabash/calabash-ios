@@ -2,7 +2,7 @@ module TestApp
   module TouchGestures
     def wait_for_gesture_text(text, mark="gesture performed")
       query = "* marked:'#{mark}'"
-      actual = wait_for_view(query).first["text"]
+      actual = wait_for_view(query)["text"]
       if actual != text
         fail %Q[
 Expected query:
@@ -42,7 +42,7 @@ end
 
 Then(/^I can touch by coordinate$/) do
   query = "* marked:'touch'"
-  element = wait_for_view(query).first
+  element = wait_for_view(query)
   offset = {
     x: element["rect"]["center_x"],
             y: element["rect"]["center_y"]
@@ -53,7 +53,7 @@ end
 
 Then(/^I can apply an offset to a touch$/) do
   query = "* marked:'gesture performed'"
-  wait_for_view(query).first
+  wait_for_view(query)
   offset = {
     x: -120,
     y: -28
@@ -63,8 +63,8 @@ Then(/^I can apply an offset to a touch$/) do
 
   wait_for_view("* marked:'Mostly Hidden Button'")
   wait_for_animations
-
   touch("* marked:'OK'")
+  wait_for_no_view("* marked:'Mostly Hidden Button'")
 end
 
 When(/^the home button is on the (top|right|left|bottom), I can (double tap|touch)$/) do |position, gesture|
