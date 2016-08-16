@@ -265,6 +265,49 @@ if (deleteElement.isValid()) {
         private
 
         # @!visibility private
+        #
+        # Calls #point_from which applies any :offset supplied in the options.
+        def query_for_coordinates(options)
+          ui_query = options[:query]
+
+          first_element, orientation = first_element_for_query(ui_query)
+
+          if first_element.nil?
+            msg = %Q[
+Could not find any views with query:
+
+#{ui_query}
+
+Try adjusting your query to return at least one view.
+
+]
+            Calabash::Cucumber::Map.new.screenshot_and_raise(msg)
+          else
+
+            normalize_rect_for_orientation!(orientation, first_element)
+
+            {
+              :coordinates => point_from(first_element, options),
+              :view => first_element
+            }
+          end
+        end
+
+        # @!visibility private
+        def first_element_for_query(ui_query)
+          # Will raise if response "outcome" is not SUCCESS
+          raw = Calabash::Cucumber::Map.raw_map(ui_query, :query)
+          results = raw["results"]
+          orientation = raw["status_bar_orientation"]
+
+          if results.empty?
+            return nil, nil
+          else
+            return results[0], orientation
+          end
+        end
+
+        # @!visibility private
         # Data interface
         # options[:query] or options[:offset]
         def query_action(options, action=nil, *args, &block)

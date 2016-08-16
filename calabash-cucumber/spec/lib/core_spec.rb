@@ -277,6 +277,28 @@ describe Calabash::Cucumber::Core do
     end
   end
 
+  context "#flick" do
+    it "performs the flick gesture" do
+      options = { }
+      delta =  {:x => 10, :y => 20}
+      merged = {:delta => delta}.merge(options)
+
+      expect(world).to(
+        receive(:query_action_with_options).with(:flick, "query", merged)
+      ).and_return([:view])
+
+      expect(world.flick("query", delta)).to be == [:view]
+    end
+
+    context "validating arguments" do
+      it "raises an ArgumentError when passed a nil query" do
+        expect do
+          world.flick(nil, :left)
+        end.to raise_error ArgumentError, /Query argument cannot be nil/
+      end
+    end
+  end
+
   context "#rotate_home_button_to" do
     let(:position) { :left }
 

@@ -345,46 +345,6 @@ Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
         query_action_with_options(:two_finger_tap, uiquery, options)
       end
 
-      # Performs the "flick" gesture on the (first) view that matches
-      # query `uiquery`.
-      #
-      # @note This assumes the view is visible and not animating.
-      #
-      # If the view is not visible it will fail with an error. If the view is animating
-      # it will *silently* fail.
-      #
-      # By default, the gesture starts at the center of the view and "flicks" according to `delta`.
-      #
-      # A flick is similar to a swipe.
-      #
-      # @example
-      #   flick("MKMapView", {x:100,y:50})
-      # @note Due to a bug in the iOS Simulator (or UIAutomation on the simulator)
-      #   swiping and other 'advanced' gestures are not supported in certain
-      #   scroll views (e.g. UITableView or UIScrollView). It does work when running
-      #   on physical devices, though, Here is a link to a relevant Stack Overflow post
-      #  http://stackoverflow.com/questions/18792965/uiautomations-draginsidewithoptions-has-no-effect-on-ios7-simulator
-      #   It is not a bug in Calabash itself but rather in UIAutomation and hence we can't just
-      #   fix it. The work around is typically to use the scroll_to_* functions.
-      #
-      # @param {String} uiquery query describing view to touch.
-      # @param {Hash} delta coordinate describing the direction to flick
-      # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option delta {Numeric} :x (0) optional. The force and direction of the flick on the `x`-axis
-      # @option delta {Numeric} :y (0) optional. The force and direction of the flick on the `y`-axis
-      # @return {Array<Hash>} array containing the serialized version of the touched view.
-      def flick(uiquery, delta, options={})
-        uiquery, options = extract_query_and_options(uiquery, options)
-        options[:delta] = delta
-        views_touched = launcher.gesture_performer.flick(options)
-        unless uiquery.nil?
-          screenshot_and_raise "flick could not find view: '#{uiquery}', args: #{options}" if views_touched.empty?
-        end
-        views_touched
-      end
-
       # Performs the "long press" or "touch and hold" gesture on the (first)
       # view that matches query `uiquery`.
       #
@@ -449,6 +409,56 @@ Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
         end
 
         launcher.gesture_performer.swipe(dir.to_sym, merged_options)
+      end
+
+      # Performs the "flick" gesture on the first view that matches `uiquery`.
+      #
+      # If the view is not visible it will fail with an error.
+      #
+      # If the view is animating it will *silently* fail.
+      #
+      # By default, the gesture starts at the center of the view and "flicks"
+      # according to `delta`.
+      #
+      # A flick is a swipe with velocity.
+      #
+      # @example
+      #   # Flick left: move screen to the right
+      #   delta = {:x => -124.0, :y => 0.0}
+      #
+      #   # Flick right: move screen to the left
+      #   delta = {:x => 124.0, :y => 0.0}
+      #
+      #   # Flick up: move screen to the bottom
+      #   delta = {:x => 0, :y => -124.0}
+      #
+      #   # Flick down: move screen to the top
+      #   delta = {:x => 0, :y => 124.0}
+      #
+      #   # Flick up and to the left: move the screen to the lower right corner
+      #   delta = {:x => -88, :y => -88}
+      #
+      #   flick("MKMapView", delta)
+      #
+      # @param {String} uiquery query describing view to flick.
+      # @param {Hash} delta coordinate describing the direction to flick
+      # @param {Hash} options option for modifying the details of the flick.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #   Offset supports an `:x` and `:y` key and causes the first touch to be
+      #   offset with `(x,y)` relative to the center.
+      # @return {Array<Hash>} array containing the serialized version of the touched view.
+      #
+      # @raise [ArgumentError] If query is nil.
+      def flick(uiquery, delta, options={})
+        if uiquery.nil?
+          raise ArgumentError, "Query argument cannot be nil"
+        end
+
+        merged_options = {
+          :delta => delta
+        }.merge(options)
+
+        query_action_with_options(:flick, uiquery, merged_options)
       end
 
       # Performs the pan gesture between two coordinates.
