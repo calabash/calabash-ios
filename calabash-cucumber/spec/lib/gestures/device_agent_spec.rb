@@ -96,7 +96,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
       it "returns a hash with :coordinates and :view" do
         expect(device_agent).to receive(:first_element_for_query).with(query).and_return("a")
-        expect(device_agent).to receive(:point_from).with("a").and_return(:coordinates)
+        expect(device_agent).to receive(:point_from).with("a", options).and_return(:coordinates)
 
         actual = device_agent.send(:query_for_coordinates, options)
         expect(actual[:coordinates]).to be == :coordinates

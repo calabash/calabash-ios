@@ -242,7 +242,7 @@ Make sure your query returns at least one view.
               Calabash::Cucumber::Map.new.screenshot_and_raise(msg)
             else
               {
-                :coordinates => point_from(first_element),
+                :coordinates => point_from(first_element, options),
                 :view => first_element
               }
             end

@@ -51,6 +51,22 @@ Then(/^I can touch by coordinate$/) do
   wait_for_gesture_text("touch", "small button action")
 end
 
+Then(/^I can apply an offset to a touch$/) do
+  query = "* marked:'gesture performed'"
+  wait_for_view(query).first
+  offset = {
+    x: -120,
+    y: -28
+  }
+
+  touch(query, {offset: offset})
+
+  wait_for_view("* marked:'Mostly Hidden Button'")
+  wait_for_animations
+
+  touch("* marked:'OK'")
+end
+
 When(/^the home button is on the (top|right|left|bottom), I can (double tap|touch)$/) do |position, gesture|
   rotate_home_to_and_expect(position)
   if gesture == "double tap"
