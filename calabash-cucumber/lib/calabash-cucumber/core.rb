@@ -276,8 +276,18 @@ module Calabash
       # @raise [ArgumentError] If query is nil and there is no :offset in the
       #  the options.  The offset must contain both an :x and :y value.
       def touch(uiquery, options={})
-        if uiquery.nil? && options[:offset].nil?
-          raise "called touch(nil) without specifying an offset in options (#{options})"
+        if uiquery.nil?
+          offset = options[:offset]
+
+          if !(offset && offset[:x] && offset[:y])
+            raise ArgumentError, %Q[
+If query is nil, there must be a valid offset in the options.
+
+Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
+  Actual: options[:offset] = #{offset ? offset : "nil"}
+
+            ]
+          end
         end
         query_action_with_options(:touch, uiquery, options)
       end
