@@ -32,7 +32,7 @@ module TestApp
 
     def text_from_text_field
       query = "* marked:'text field'"
-      wait_for_view(query).first["text"]
+      wait_for_view(query)["text"]
     end
 
     def wait_for_text_field_reset

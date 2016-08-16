@@ -3,7 +3,7 @@ module TestApp
 
     def wait_for_text_in_view(text, mark)
       query = "* marked:'#{mark}'"
-      actual = wait_for_view(query).first["text"]
+      actual = wait_for_view(query)["text"]
       if actual != text
         fail %Q[
 Expected query:
