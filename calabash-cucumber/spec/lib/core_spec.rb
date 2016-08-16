@@ -69,6 +69,37 @@ describe Calabash::Cucumber::Core do
     end
   end
 
+  context "#touch" do
+    it "calls the gesture performer :touch method" do
+      expect(world).to(
+        receive(:query_action_with_options).with(:touch, "query", {})
+      ).and_return([:view])
+
+      expect(world.touch("query", {})).to be == [:view]
+    end
+
+    context "uiquery is nil" do
+      it "raises an ArgumentError if there is not an :offset" do
+        expect do
+          world.touch(nil, {})
+        end.to raise_error ArgumentError,
+                           /If query is nil, there must be a valid offset/
+      end
+
+      it "raises an ArgumentError if there is not a valid :offset" do
+        expect do
+          world.touch(nil, {offset: { x: 10 }})
+        end.to raise_error ArgumentError,
+                           /If query is nil, there must be a valid offset/
+
+        expect do
+          world.touch(nil, {offset: { y: 10 }})
+        end.to raise_error ArgumentError,
+                           /If query is nil, there must be a valid offset/
+      end
+    end
+  end
+
   describe '#scroll' do
     describe 'handling direction argument' do
       describe 'raises error if invalid' do

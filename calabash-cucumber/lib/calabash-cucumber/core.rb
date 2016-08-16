@@ -252,22 +252,42 @@ module Calabash
       end
 
       # Performs the `tap` gesture on the (first) view that matches
-      # query `uiquery`. Note that `touch` assumes the view is visible and not animating.
-      # If the view is not visible `touch` will fail. If the view is animating
-      # `touch` will *silently* fail.
+      # query `uiquery`. Note that `touch` assumes the view is visible and not
+      # animating. If the view is not visible `touch` will fail. If the view is
+      # animating `touch` will *silently* fail.
+      #
       # By default, taps the center of the view.
       # @see Calabash::Cucumber::WaitHelpers#wait_tap
       # @see Calabash::Cucumber::Operations#tap_mark
       # @see #tap_point
-      # @param {String} uiquery query describing view to tap. Note `nil` is allowed and is interpreted as
-      #   `tap_point(options[:offset][:x],options[:offset][:y])`
+      #
+      # @param {String} uiquery query describing view to tap. If this value is
+      #  `nil` then an :offset must be passed as an option.  This can be used
+      #  to tap a specific coordinate.
       # @param {Hash} options option for modifying the details of the touch
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @return {Array<Hash>} array containing the serialized version of the tapped view.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #  Offset supports an `:x` and `:y` key and causes the touch to be offset
+      #  with `(x,y)` relative to the center.
+      #
+      # @return {Array<Hash>} array containing the serialized version of the
+      # tapped view.
+      #
+      # @raise [RuntimeError] If query is non nil and matches no views.
+      # @raise [ArgumentError] If query is nil and there is no :offset in the
+      #  the options.  The offset must contain both an :x and :y value.
       def touch(uiquery, options={})
-        if uiquery.nil? && options[:offset].nil?
-          raise "called touch(nil) without specifying an offset in options (#{options})"
+        if uiquery.nil?
+          offset = options[:offset]
+
+          if !(offset && offset[:x] && offset[:y])
+            raise ArgumentError, %Q[
+If query is nil, there must be a valid offset in the options.
+
+Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
+  Actual: options[:offset] = #{offset ? offset : "nil"}
+
+            ]
+          end
         end
         query_action_with_options(:touch, uiquery, options)
       end

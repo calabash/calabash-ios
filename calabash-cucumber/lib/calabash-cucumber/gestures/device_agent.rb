@@ -207,32 +207,57 @@ args[0] = #{args[0]}
         #
         # Calls #point_from which applies any :offset supplied in the options.
         def query_for_coordinates(options)
-          ui_query = options[:query]
+          uiquery = options[:query]
 
-          first_element = first_element_for_query(ui_query)
+          if uiquery.nil?
+            offset = options[:offset]
 
-          if first_element.nil?
-            msg = %Q[
+            if offset && offset[:x] && offset[:y]
+              {
+                :coordinates => offset,
+                :view => offset
+              }
+            else
+              raise ArgumentError, %Q[
+If query is nil, there must be a valid offset in the options.
+
+Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
+  Actual: options[:offset] = #{offset ? offset : "nil"}
+
+              ]
+            end
+          else
+
+            first_element = first_element_for_query(uiquery)
+
+            if first_element.nil?
+              msg = %Q[
 Could not find any views with query:
 
-#{ui_query}
+  #{uiquery}
 
-Try adjusting your query to return at least one view.
+Make sure your query returns at least one view.
 
 ]
-            Calabash::Cucumber::Map.new.screenshot_and_raise(msg)
-          else
-            {
-              :coordinates => point_from(first_element),
-              :view => first_element
-            }
+              Calabash::Cucumber::Map.new.screenshot_and_raise(msg)
+            else
+              {
+                :coordinates => point_from(first_element),
+                :view => first_element
+              }
+            end
           end
         end
 
         # @!visibility private
-        def first_element_for_query(ui_query)
+        def first_element_for_query(uiquery)
+
+          if uiquery.nil?
+            raise ArgumentError, "Query cannot be nil"
+          end
+
           # Will raise if response "outcome" is not SUCCESS
-          results = Calabash::Cucumber::Map.raw_map(ui_query, :query)["results"]
+          results = Calabash::Cucumber::Map.raw_map(uiquery, :query)["results"]
 
           if results.empty?
             nil

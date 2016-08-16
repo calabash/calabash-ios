@@ -102,6 +102,35 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         expect(actual[:coordinates]).to be == :coordinates
         expect(actual[:view]).to be == "a"
       end
+
+      context ":query is nil" do
+        it "raises an ArgumentError if there is not an :offset" do
+          expect do
+            device_agent.send(:query_for_coordinates, {})
+          end.to raise_error ArgumentError,
+                             /If query is nil, there must be a valid offset/
+        end
+
+        it "raises an ArgumentError if there is not a valid :offset" do
+          expect do
+            device_agent.send(:query_for_coordinates, {offset: { x: 10 }})
+          end.to raise_error ArgumentError,
+                             /If query is nil, there must be a valid offset/
+
+          expect do
+            device_agent.send(:query_for_coordinates, {offset: { y: 10 }})
+          end.to raise_error ArgumentError,
+                             /If query is nil, there must be a valid offset/
+        end
+
+        it "returns a hash with the :coordinate and :view values the same" do
+          options = {offset: {x: 10, y: 20}}
+
+          actual = device_agent.send(:query_for_coordinates, options)
+          expect(actual[:coordinates]).to be == options[:offset]
+          expect(actual[:view]).to be == options[:offset]
+        end
+      end
     end
 
     context "#first_element_for_query" do
@@ -119,6 +148,12 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         expect(Calabash::Cucumber::Map).to receive(:raw_map).and_return(response)
 
         expect(device_agent.send(:first_element_for_query, "query")).to be == "a"
+      end
+
+      it "raises an ArgumentError if uiquery is nil" do
+        expect do
+          device_agent.send(:first_element_for_query, nil)
+        end.to raise_error ArgumentError, /Query cannot be nil/
       end
     end
 

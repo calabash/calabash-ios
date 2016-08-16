@@ -40,6 +40,17 @@ And(/^I clear the touch action label$/) do
   clear_small_button_action_label
 end
 
+Then(/^I can touch by coordinate$/) do
+  query = "* marked:'touch'"
+  element = wait_for_view(query).first
+  offset = {
+    x: element["rect"]["center_x"],
+            y: element["rect"]["center_y"]
+  }
+  touch(nil, {offset: offset})
+  wait_for_gesture_text("touch", "small button action")
+end
+
 When(/^the home button is on the (top|right|left|bottom), I can (double tap|touch)$/) do |position, gesture|
   rotate_home_to_and_expect(position)
   if gesture == "double tap"
