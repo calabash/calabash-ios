@@ -127,9 +127,12 @@ args[0] = #{args[0]}
           to_hash = query_for_coordinates(dupped_options)
           to_point = to_hash[:coordinates]
 
-          dupped_options.delete(:query)
+          gesture_options = {
+            :duration => dupped_options[:duration]
+          }
+
           device_agent.pan_between_coordinates(from_point, to_point,
-                                               dupped_options)
+                                               gesture_options)
 
           [from_hash[:view], to_hash[:view]]
         end

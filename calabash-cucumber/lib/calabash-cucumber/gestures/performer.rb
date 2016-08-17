@@ -50,6 +50,8 @@ module Calabash
         end
 
         # @!visibility private
+        #
+        # Callers must validate the options.
         def pan(from_query, to_query, options={})
           abstract_method!
         end
