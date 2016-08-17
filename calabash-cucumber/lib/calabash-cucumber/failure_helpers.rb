@@ -5,7 +5,13 @@ module Calabash
 
     # A collection of methods that help you handle Step failures.
     module FailureHelpers
-      require 'fastimage_resize'
+      # FastImage Resize is a solution for resizing images in ruby by using libgd
+      # it should be installed manually since it not required by calabash
+      begin
+        require "fastimage_resize"
+      rescue LoadError
+        # We just won't get securerandom
+      end
 
       # @!visibility private
       DEFAULTS = {
@@ -42,9 +48,11 @@ module Calabash
         File.open(path, 'wb') do |f|
           f.write res
         end
-        if scale != 1 and scale < 1 and scale > 0
-          weight = FastImage.size(path)[0]
-          FastImage.resize(path, weight/scale, 0, :outfile=>path)
+        if defined?(FastImage)
+          if scale != 1 and scale < 1 and scale > 0
+            weight = FastImage.size(path)[0]
+            FastImage.resize(path, weight/scale, 0, :outfile=>path)
+          end
         end
         @@screenshot_count += 1
         path
