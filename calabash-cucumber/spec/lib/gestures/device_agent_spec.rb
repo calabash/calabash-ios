@@ -8,6 +8,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
       def inspect; to_s; end
       def rotate_home_button_to(_); ; end
       def perform_coordinate_gesture(_, _, _, _={}); ; end
+      def pan_between_coordinates(_, _, _={}); ; end
     end.new
   end
 
@@ -255,6 +256,60 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         expected = [hash[:view]]
 
         expect(device_agent.touch_hold(options)).to be == expected
+      end
+    end
+
+    context "#pan" do
+      it "pans between the center of the queries and returns both views" do
+        from_query = "from"
+        to_query = "to"
+        options = {:duration => 1.0}
+
+        from_options = options.merge({:query => from_query})
+        to_options = options.merge({:query => to_query})
+
+        from_hash = {:coordinates => :from_point,
+                     :view => :from_view}
+
+        to_hash = {:coordinates => :to_point,
+                     :view => :to_view}
+
+
+        expect(device_agent).to(
+          receive(:query_for_coordinates).with(from_options).and_return(from_hash)
+        )
+
+        expect(device_agent).to(
+          receive(:query_for_coordinates).with(to_options).and_return(to_hash)
+        )
+
+        expect(device_agent.device_agent).to(
+          receive(:pan_between_coordinates).with(:from_point, :to_point,
+                                                 {:duration => 1.0}).and_return(true)
+        )
+
+        actual = device_agent.pan(from_query, to_query, options)
+        expect(actual[0]).to be == :from_view
+        expect(actual[1]).to be == :to_view
+        expect(actual.count).to be == 2
+      end
+    end
+
+    context "#pan_coordinates" do
+      it "pans between two coordinates" do
+        options = {:duration => 1.0}
+
+        expect(device_agent.device_agent).to(
+          receive(:pan_between_coordinates).with(:from_point, :to_point,
+                                                 {:duration => 1.0}).and_return(true)
+        )
+
+        expect(device_agent).to(
+          receive(:first_element_for_query).with("*").and_return(:view)
+        )
+
+        actual = device_agent.pan_coordinates(:from_point, :to_point, options)
+        expect(actual).to be == [:view]
       end
     end
 

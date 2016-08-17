@@ -178,6 +178,12 @@ Expected '#{strategy}' to be one of these supported strategies:
         end
 
         # @!visibility private
+        def pan_coordinates(from, to, options={})
+          uia_pan_offset(from, to, options)
+          [find_and_normalize("*")]
+        end
+
+        # @!visibility private
         def pinch(in_out, options)
           query_action(options) do |offset|
             options[:duration] = options[:duration] || 0.5

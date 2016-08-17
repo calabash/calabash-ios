@@ -451,21 +451,115 @@ Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
         launcher.gesture_performer.swipe(dir.to_sym, merged_options)
       end
 
-
-      # Performs the "pan" or "drag-n-drop" gesture on from the `from` parameter
-      # to the `to` parameter (both are queries).
+      # Performs the pan gesture between two coordinates.
+      #
+      # Swipes, scrolls, drag-and-drop, and flicks are all pan gestures.
+      #
       # @example
-      #   q1="* marked:'Cell 3' parent tableViewCell descendant tableViewCellReorderControl"
-      #   q2="* marked:'Cell 6' parent tableViewCell descendant tableViewCellReorderControl"
+      #   # Reorder table view rows.
+      #   q1="* marked:'Reorder Apple'"
+      #   q2="* marked:'Reorder Google'"
       #   pan q1, q2, duration:4
-      # @param {String} from query describing view to start the gesture
-      # @param {String} to query describing view to end the gesture
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option options {Numeric} :duration (1) duration of the 'pan'.
-      # @return {Array<Hash>} array containing the serialized version of the touched view.
-      def pan(from, to, options={})
-        launcher.gesture_performer.pan(from, to, options)
+      #
+      # @param {String} from_query query describing view to start the gesture
+      # @param {String} to_query query describing view to end the gesture
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #  Offset supports an `:x` and `:y` key and causes the pan to be offset
+      #  with `(x,y)` relative to the center.
+      # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
+      #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
+      #  duration must be > 0.
+      # @return {Array<Hash>} array containing the serialized version of the
+      #  touched views.  The first element is the first view matched by
+      #  the from_query and the second element is the first view matched by
+      #  the to_query.
+      #
+      # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
+      #  for DeviceAgent.
+      def pan(from_query, to_query, options={})
+        merged_options = {
+          # Minimum value for UIAutomation is 0.5.
+          # DeviceAgent duration must be > 0.
+          :duration => 1.0
+        }.merge(options)
+
+        duration = merged_options[:duration]
+
+        if uia_available? && duration < 0.5
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.5
+
+]
+        elsif duration <= 0.0
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.0.
+
+]
+        end
+
+        launcher.gesture_performer.pan(from_query, to_query, merged_options)
+      end
+
+      # Performs the pan gesture between two coordinates.
+      #
+      # Swipes, scrolls, drag-and-drop, and flicks are all pan gestures.
+      #
+      # @example
+      #   # Pan to go back in UINavigationController
+      #   element = query("*").first
+      #   y = element["rect"]["center_y"]
+      #   pan_coordinates({10, y}, {160, y})
+      #
+      #   # Pan to reveal Today and Notifications
+      #   element = query("*").first
+      #   x = element["rect"]["center_x"]
+      #   pan_coordinates({x, 0}, {x, 240})
+      #
+      #   # Pan to reveal Control Panel
+      #   element = query("*").first
+      #   x = element["rect"]["center_x"]
+      #   y = element["rect"]["height"]
+      #   pan_coordinates({x, height}, {x, 240})
+      #
+      # @param {String} from_point where to start the pan.
+      # @param {String} to_query where to end the pan.
+      # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
+      #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
+      #  duration must be > 0.
+      #
+      # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
+      #  for DeviceAgent.
+      def pan_coordinates(from_point, to_point, options={})
+        merged_options = {
+          # Minimum value for UIAutomation is 0.5.
+          # DeviceAgent duration must be > 0.
+          :duration => 1.0
+        }.merge(options)
+
+        duration = merged_options[:duration]
+
+        if uia_available? && duration < 0.5
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.5
+
+]
+        elsif duration <= 0.0
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.0.
+
+]
+        end
+
+        launcher.gesture_performer.pan_coordinates(from_point, to_point,
+                                                   merged_options)
       end
 
       # Performs a "pinch" gesture.

@@ -29,6 +29,8 @@ Given(/^the app has launched$/) do
     !query("*").empty?
   end
 
+  rotate_home_button_to(:bottom)
+
   if keyboard_visible?
     ['textField', 'textView'].each do |ui_class|
       query = "#{ui_class} isFirstResponder:1"

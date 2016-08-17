@@ -209,6 +209,74 @@ describe Calabash::Cucumber::Core do
     end
   end
 
+  context "#pan" do
+    context "raises an ArgumentError if called with an invalid duration" do
+      let(:options) { {} }
+
+      it "raises if duration < 0.5 with UIAutomation" do
+        expect(world).to receive(:uia_available?).and_return(true)
+        options[:duration] = 0.4
+
+        expect do
+          world.pan("from", "to", options)
+        end.to raise_error ArgumentError, /Invalid duration/
+      end
+
+      it "raises if duration <= 0.0 with DeviceAgent" do
+        expect(world).to receive(:uia_available?).and_return(false)
+        options[:duration] = 0.0
+
+        expect do
+          world.pan("from", "to", options)
+        end.to raise_error ArgumentError, /Invalid duration/
+      end
+    end
+
+    it "calls the gesture performer #pan method" do
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:gesture_performer).and_return(gesture_performer)
+      expect(gesture_performer).to(
+        receive(:pan).with("from", "to", {:duration => 1.0}).and_return(true)
+      )
+
+      expect(world.pan("from", "to")).to be_truthy
+    end
+  end
+
+  context "#pan_coordinates" do
+    context "raises an ArgumentError if called with an invalid duration" do
+      let(:options) { {} }
+
+      it "raises if duration < 0.5 with UIAutomation" do
+        expect(world).to receive(:uia_available?).and_return(true)
+        options[:duration] = 0.4
+
+        expect do
+          world.pan_coordinates("from", "to", options)
+        end.to raise_error ArgumentError, /Invalid duration/
+      end
+
+      it "raises if duration <= 0.0 with DeviceAgent" do
+        expect(world).to receive(:uia_available?).and_return(false)
+        options[:duration] = 0.0
+
+        expect do
+          world.pan_coordinates("from", "to", options)
+        end.to raise_error ArgumentError, /Invalid duration/
+      end
+    end
+
+    it "calls the gesture performer #pan method" do
+      expect(world).to receive(:launcher).and_return(launcher)
+      expect(launcher).to receive(:gesture_performer).and_return(gesture_performer)
+      expect(gesture_performer).to(
+        receive(:pan_coordinates).with("from", "to", {:duration => 1.0}).and_return(true)
+      )
+
+      expect(world.pan_coordinates("from", "to")).to be_truthy
+    end
+  end
+
   context "#rotate_home_button_to" do
     let(:position) { :left }
 

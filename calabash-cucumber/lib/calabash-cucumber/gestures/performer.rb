@@ -50,7 +50,16 @@ module Calabash
         end
 
         # @!visibility private
+        #
+        # Callers must validate the options.
         def pan(from_query, to_query, options={})
+          abstract_method!
+        end
+
+        # @!visibility private
+        #
+        # Callers must validate the options.
+        def pan_coordinates(from_point, to_point, options={})
           abstract_method!
         end
 
