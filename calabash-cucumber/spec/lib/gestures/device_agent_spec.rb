@@ -295,6 +295,24 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
       end
     end
 
+    context "#pan_coordinates" do
+      it "pans between two coordinates" do
+        options = {:duration => 1.0}
+
+        expect(device_agent.device_agent).to(
+          receive(:pan_between_coordinates).with(:from_point, :to_point,
+                                                 {:duration => 1.0}).and_return(true)
+        )
+
+        expect(device_agent).to(
+          receive(:first_element_for_query).with("*").and_return(:view)
+        )
+
+        actual = device_agent.pan_coordinates(:from_point, :to_point, options)
+        expect(actual).to be == [:view]
+      end
+    end
+
     context "Text Entry" do
       context "#enter_text_with_keyboard" do
         it "types a string by calling out to enter_text" do

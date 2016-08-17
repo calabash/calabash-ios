@@ -1,4 +1,5 @@
 @drag_and_drop
+@pan
 Feature: Drag and Drop
 In order to test the Calabash pan API
 As a Calabash developer

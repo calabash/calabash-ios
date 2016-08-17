@@ -451,7 +451,7 @@ Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
         launcher.gesture_performer.swipe(dir.to_sym, merged_options)
       end
 
-      # Performs the "pan" or "drag-n-drop" gesture between two views.
+      # Performs the pan gesture between two coordinates.
       #
       # Swipes, scrolls, drag-and-drop, and flicks are all pan gestures.
       #
@@ -502,6 +502,64 @@ The minimum duration is 0.0.
         end
 
         launcher.gesture_performer.pan(from_query, to_query, merged_options)
+      end
+
+      # Performs the pan gesture between two coordinates.
+      #
+      # Swipes, scrolls, drag-and-drop, and flicks are all pan gestures.
+      #
+      # @example
+      #   # Pan to go back in UINavigationController
+      #   element = query("*").first
+      #   y = element["rect"]["center_y"]
+      #   pan_coordinates({10, y}, {160, y})
+      #
+      #   # Pan to reveal Today and Notifications
+      #   element = query("*").first
+      #   x = element["rect"]["center_x"]
+      #   pan_coordinates({x, 0}, {x, 240})
+      #
+      #   # Pan to reveal Control Panel
+      #   element = query("*").first
+      #   x = element["rect"]["center_x"]
+      #   y = element["rect"]["height"]
+      #   pan_coordinates({x, height}, {x, 240})
+      #
+      # @param {String} from_point where to start the pan.
+      # @param {String} to_query where to end the pan.
+      # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
+      #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
+      #  duration must be > 0.
+      #
+      # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
+      #  for DeviceAgent.
+      def pan_coordinates(from_point, to_point, options={})
+        merged_options = {
+          # Minimum value for UIAutomation is 0.5.
+          # DeviceAgent duration must be > 0.
+          :duration => 1.0
+        }.merge(options)
+
+        duration = merged_options[:duration]
+
+        if uia_available? && duration < 0.5
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.5
+
+]
+        elsif duration <= 0.0
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.0.
+
+]
+        end
+
+        launcher.gesture_performer.pan_coordinates(from_point, to_point,
+                                                   merged_options)
       end
 
       # Performs a "pinch" gesture.

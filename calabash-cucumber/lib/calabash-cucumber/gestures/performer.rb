@@ -57,6 +57,13 @@ module Calabash
         end
 
         # @!visibility private
+        #
+        # Callers must validate the options.
+        def pan_coordinates(from_point, to_point, options={})
+          abstract_method!
+        end
+
+        # @!visibility private
         def pinch(in_or_out, options)
           abstract_method!
         end

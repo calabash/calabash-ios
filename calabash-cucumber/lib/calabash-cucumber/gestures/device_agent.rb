@@ -137,6 +137,17 @@ args[0] = #{args[0]}
           [from_hash[:view], to_hash[:view]]
         end
 
+        def pan_coordinates(from_point, to_point, options)
+
+          gesture_options = {
+            :duration => options[:duration]
+          }
+
+          device_agent.pan_between_coordinates(from_point, to_point,
+                                               gesture_options)
+          [first_element_for_query("*")]
+        end
+
         # @!visibility private
         def enter_text_with_keyboard(string, options={})
           device_agent.enter_text(string)
