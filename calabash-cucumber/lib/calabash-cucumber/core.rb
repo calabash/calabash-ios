@@ -370,45 +370,58 @@ Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
       end
 
       # Performs a "swipe" gesture.
-      # By default, the gesture starts at the center of the screen.
-      #
-      # @todo `swipe` is an old style API which doesn't take a query as its
-      #  first argument. We should migrate this.
-      #
-      # @note Due to a bug in Apple's UIAutomation, swipe is broken on certain
-      #  views in the iOS Simulator. Swiping works on devices.
-      #  {https://github.com/calabash/calabash-ios/issues/253}
       #
       # @example
-      #   swipe :left
-      # @example
-      #   swipe :down, offset:{x:10,y:50}, query:"MKMapView"
-      # @param {String} dir the direction to swipe (symbols can also be used).
-      # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option options {String} :query (nil) if specified, the swipe will be made relative to this query.
-      # @option options [Symbol] :force (nil) Indicates the force of the swipe.
-      #  Valid values are :strong, :normal, :light.
       #
-      # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
-      def swipe(dir, options={})
-        merged_options = options.dup
+      #   # Swipe left on first view match by "*"
+      #   swipe(:left)
+      #
+      #   # Swipe up on 'my scroll view'
+      #   swipe(:up, {:query => "* marked:'my scroll view'"})
+      #
+      # @param {String, Symbol} direction The direction to swipe
+      # @param {Hash} options Options for modifying the details of the swipe.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #  Offset supports an `:x` and `:y` key and causes the touch to be
+      #  offset with `(x,y)` relative to the center.
+      # @option options {String} :query (nil) If specified, the swipe will be
+      #  made on the first view matching this query.  If this option is nil
+      #  (the default), the swipe will happen on the first view matched by "*".
+      # @option options [Symbol] :force (normal) Indicates the force of the
+      #  swipe.  Valid values are :strong, :normal, :light.
+      #
+      # @return {Array<Hash>,String} An array with one element; the view that
+      #  was swiped.
+      #
+      # @raise [ArgumentError] If :force is invalid.
+      # @raise [ArgumentError] If direction is invalid
+      def swipe(direction, options={})
+        merged_options = {
+          :query => nil,
+          :force => :normal
+        }.merge(options)
 
-        # I don't understand why the :status_bar_orientation value is being overwritten
-        unless uia_available?
-          merged_options[:status_bar_orientation] = status_bar_orientation
+        merged_options[:direction] = direction.to_sym
+
+        if ![:up, :down, :left, :right].include?(merged_options[:direction])
+          raise ArgumentError, %Q[
+Invalid direction argument: '#{direction}'.
+
+Valid directions are: :up, :down, :left, and :right
+
+]
         end
 
-        force = merged_options[:force]
-        if force
-          unless [:light, :strong, :normal].include?(force)
-            raise ArgumentError,
-              "Expected :force option '#{force}' to be :light, :strong, or :normal"
-          end
-        end
+         if ![:light, :strong, :normal].include?(merged_options[:force])
+           raise ArgumentError, %Q[
+Invalid force option: '#{merged_options[:force]}'.
 
-        launcher.gesture_performer.swipe(dir.to_sym, merged_options)
+Valid forces are: :strong, :normal, :light
+
+]
+         end
+
+        launcher.gesture_performer.swipe(merged_options)
       end
 
       # Performs the "flick" gesture on the first view that matches `uiquery`.

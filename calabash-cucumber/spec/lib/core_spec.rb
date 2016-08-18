@@ -7,7 +7,7 @@ describe Calabash::Cucumber::Core do
   let(:gesture_performer) do
     Class.new(Calabash::Cucumber::Gestures::Performer) do
       def initialize; ; end
-      def swipe(_, _); :success; end
+      def swipe(_); :success; end
       def to_s; "#<GesturePerformer Interface>"; end
       def inspect; to_s; end
     end.new
@@ -145,66 +145,45 @@ describe Calabash::Cucumber::Core do
     end
   end
 
-  describe '#swipe' do
-    describe 'handling :force options' do
-
-      describe 'valid options' do
-
-        before do
-          expect(world).to receive(:uia_available?).and_return true
-          expect(world).to receive(:launcher).and_return launcher
-          expect(launcher).to receive(:gesture_performer).and_return gesture_performer
-          expect(gesture_performer).to receive(:swipe).and_return :success
-        end
-
-        it ':light' do
-          expect(world.swipe(:left, {:force => :light})).to be == :success
-        end
-
-        it ':normal' do
-          expect(world.swipe(:left, {:force => :light})).to be == :success
-        end
-
-        it ':strong' do
-          expect(world.swipe(:left, {:force => :light})).to be == :success
-        end
+  context "#swipe" do
+    context "it validates its arguments" do
+      it "raises an error if direction is invalid" do
+        expect do
+          world.swipe(:sideways)
+        end.to raise_error ArgumentError, /Invalid direction argument/
       end
 
-      it 'raises error if unknown :force is passed' do
-        expect(world).to receive(:uia_available?).and_return true
-        expect {
-          world.swipe(:left, {:force => :unknown})
-        }.to raise_error ArgumentError
+      it "raises an error if :force option is invalid" do
+        expect do
+          world.swipe(:left, {:force => :majeure})
+        end.to raise_error ArgumentError, /Invalid force option/
       end
     end
 
-    describe 'handling options' do
-
+    context "valid arguments" do
       before do
-        expect(world).to receive(:uia_available?).and_return false
-        expect(world).to receive(:status_bar_orientation).and_return :down
         expect(world).to receive(:launcher).and_return launcher
         expect(launcher).to receive(:gesture_performer).and_return gesture_performer
       end
 
-      describe 'uia is not available' do
-        it 'adds :status_bar_orientation' do
-          options = {}
-          merged = {:status_bar_orientation => :down}
-          expect(gesture_performer).to receive(:swipe).with(:left, merged).and_return :success
+      it "merges the options" do
+        merged = {:force => :strong, :query => "query", :direction => :left}
+        expect(gesture_performer).to(
+          receive(:swipe).with(merged).and_return([:view])
+        )
 
-          expect(world.swipe(:left, options)).to be == :success
-        end
+        actual = world.swipe(:left, {:force => :strong, :query => "query"})
+        expect(actual).to be == [:view]
+      end
 
-        # I don't understand why the :status_bar_orientation value is overwritten.
-        it 'does overwrites :status_bar_orientation' do
-          options = {:status_bar_orientation => :left}
-          merged = {:status_bar_orientation => :down}
+      it "has defaults for :query and :force" do
+        merged = {:force => :normal, :query => nil, :direction => :left}
+        expect(gesture_performer).to(
+          receive(:swipe).with(merged).and_return([:view])
+        )
 
-          expect(gesture_performer).to receive(:swipe).with(:left, merged).and_return :success
-
-          expect(world.swipe(:left, options)).to be == :success
-        end
+        actual = world.swipe(:left)
+        expect(actual).to be == [:view]
       end
     end
   end
