@@ -313,6 +313,31 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
       end
     end
 
+    context "#flick" do
+      let(:gesture_options) { {:duration => 0.2} }
+      let(:delta) { {x: -88.0, y: 88.0} }
+      let(:scaled_delta) { {x: delta[:x] * 2.0, y: delta[:y] * 2.0} }
+      let(:offset) { {:offset => scaled_delta} }
+      let(:options) { {:delta => delta, :query => "query" } }
+
+      it "calls #pan_between_coordinates" do
+        expect(device_agent).to(
+          receive(:query_for_coordinates).with(options).and_return({:coordinates => :point,
+                                                                    :view => :view})
+        )
+
+        expect(device_agent).to receive(:point_from).with(:view).and_return(:start)
+        expect(device_agent).to receive(:point_from).with(:view, offset).and_return(:end)
+
+        expect(device_agent.device_agent).to(
+          receive(:pan_between_coordinates).with(:start, :end, gesture_options).and_return(true)
+        )
+
+        actual = device_agent.flick(options)
+        expect(actual).to be == [:view]
+      end
+    end
+
     context "Text Entry" do
       context "#enter_text_with_keyboard" do
         it "types a string by calling out to enter_text" do

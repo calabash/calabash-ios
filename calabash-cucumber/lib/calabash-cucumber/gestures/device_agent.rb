@@ -149,6 +149,32 @@ args[0] = #{args[0]}
         end
 
         # @!visibility private
+        def flick(options)
+          gesture_options = {
+            duration: 0.2
+          }
+
+          delta = options[:delta]
+
+          # The UIA deltas are too small.
+          scaled_delta = {
+            :x => delta[:x] * 2.0,
+            :y => delta[:y] * 2.0
+          }
+
+          hash = query_for_coordinates(options)
+          view = hash[:view]
+
+          start_point = point_from(view)
+          end_point = point_from(view, {:offset => scaled_delta})
+
+          device_agent.pan_between_coordinates(start_point,
+                                               end_point,
+                                               gesture_options)
+          [view]
+        end
+
+        # @!visibility private
         def enter_text_with_keyboard(string, options={})
           device_agent.enter_text(string)
         end
