@@ -39,7 +39,7 @@ default:  -p simulator_vars -p simulator_tags
 # with env variable there are spaces and parens in the variable.
 device_vars: APP=sh.calaba.TestApp DEVICE_APP=<%= DEVICE_APP %>
 device_tags:  --tags ~@simulator_only --tags ~@simulator
-device:       -p device_tags -p formatter -p device_vars -p cbxws
+device:       -p device_tags -p formatter -p device_vars
 
 iphone5S:    -p device DEVICE_TARGET=<%= devices[:iphone5S][:udid] %>    DEVICE_ENDPOINT=<%= devices[:iphone5S][:ip] %>
 iphone4S:    -p device DEVICE_TARGET=<%= devices[:iphone4S][:udid] %>    DEVICE_ENDPOINT=<%= devices[:iphone4S][:ip] %>
