@@ -49,10 +49,7 @@ args = #{args}
           if !args[0].is_a?(RunLoop::DeviceAgent::Client)
             raise(ArgumentError, %Q[
 Expected first element of args to be a RunLoop::DeviceAgent::Client instance, found:
-
-args[0] = #{args[0]}
-
-])
+args[0] = #{args[0]}])
           end
 
           true
@@ -113,6 +110,11 @@ args[0] = #{args[0]}
                                                   hash[:coordinates][:y],
                                                   {:duration => duration})
           [hash[:view]]
+        end
+
+        def swipe(options)
+          # TODO
+          raise NotImplementedError
         end
 
         # @!visibility private
