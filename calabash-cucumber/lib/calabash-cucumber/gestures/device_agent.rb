@@ -112,9 +112,22 @@ args[0] = #{args[0]}])
           [hash[:view]]
         end
 
-        def swipe(options)
-          # TODO
+        # @!visibility private
+        def swipe(dir, options)
+          dupped_options = options.dup
+          dupped_options.merge(:direction => dir)
+
+          from_hash = query_for_coordinates(dupped_options)
+          from_point = from_hash[:coordinates]
+
+          gesture_options = {
+            :duration => dupped_options[:duration]
+          }
+
           raise NotImplementedError
+          ## TODO
+          # calculate to_point from :force and :direction
+          #device_agent.pan_between_coordinates(from_point, to_point, gesture_options)
         end
 
         # @!visibility private
