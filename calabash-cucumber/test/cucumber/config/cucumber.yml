@@ -2,24 +2,8 @@
 
 require "run_loop"
 
-#DEVICE_AGENT_REPO = File.expand_path(File.join("..", "..", "..", "..", "DeviceAgent.iOS"))
-#DEVICE_AGENT_PRODUCTS = File.join(DEVICE_AGENT_REPO, "Products")
-#SIM_APP = File.join(DEVICE_AGENT_PRODUCTS, "app", "TestApp", "TestApp.app")
-#DEVICE_APP = File.join(DEVICE_AGENT_PRODUCTS, "ipa", "TestApp", "TestApp.app")
-
 SIM_APP = File.join("aut", "sim", "TestApp.app")
 DEVICE_APP = File.join("aut", "device", "TestApp.app")
-
-# Path to DeviceAgent.iOS repo to support launching CBX-Runner with xcodebuild.
-#
-# This will allow you to run cucumbers against non-released versions of DeviceAgent.
-#
-# CBX_LAUNCHER=xcodebuild be cucumber
-CBXWS = begin
-  repo = File.join("..", "..", "..", "..", "DeviceAgent.iOS")
-  workspace = File.join(repo, "CBXDriver.xcworkspace")
-  "#{File.expand_path(workspace)}"
-end
 
 calabash_dir = File.expand_path(File.join(ENV["HOME"], ".calabash"))
 
@@ -43,13 +27,12 @@ FileUtils.mkdir_p("./reports")
 
 verbose: DEBUG=1
 formatter: -f pretty
-cbxws: CBXWS=<%= CBXWS %>
 
 # Launch on default simulator.
 simulator_vars: APP=<%= SIM_APP %>
 simulator_tags: --tags ~@device_only --tags ~@device
 
-default:  -p simulator_vars -p simulator_tags -p cbxws
+default:  -p simulator_vars -p simulator_tags
 
 # Launch on device.
 # DeviceAgent requires CODE_SIGN_IDENTITY; could not make this work as a profile

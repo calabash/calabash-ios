@@ -46,9 +46,9 @@ args = #{args}
 ])
           end
 
-          if !args[0].is_a?(RunLoop::XCUITest)
-            raise(ArgumentError,
-                  %Q[Expected first element of args to be a RunLoop::XCUITest instance, found:
+          if !args[0].is_a?(RunLoop::DeviceAgent::Client)
+            raise(ArgumentError, %Q[
+Expected first element of args to be a RunLoop::DeviceAgent::Client instance, found:
 
 args[0] = #{args[0]}
 
