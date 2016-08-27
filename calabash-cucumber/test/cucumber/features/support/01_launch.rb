@@ -95,24 +95,17 @@ module Calabash
 
     def options
       @options ||= begin
-        env = ENV["CBX_LAUNCHER"]
-        if env
-          cbx_launcher = env.to_sym
-          cbx = {
-            :gesture_performer => :device_agent,
-            :cbx_launcher => cbx_launcher
+        if xcode.version_gte_8?
+          performer = {
+            :gesture_performer => :device_agent
           }
         else
-          cbx = {
+          performer = {
             :gesture_performer => :instruments
           }
         end
 
-        if cbx[:cbx_launcher] == :xcodebuild
-          cbx[:shutdown_device_agent_before_launch] = true
-        end
-
-        cbx.merge(environment)
+        performer.merge(environment)
       end
     end
 
@@ -131,6 +124,9 @@ Before do |scenario|
 
   options = {
     # Add launch options here.
+    # Maintainers can use:
+    #   cbx_launcher => :xcodebuild
+    # when debugging the DeviceAgent
   }
 
   merged_options = options.merge(Calabash::Launchctl.instance.options)
