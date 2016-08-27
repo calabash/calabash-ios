@@ -2,9 +2,9 @@
 describe Calabash::Cucumber::Gestures::DeviceAgent do
 
   let(:xcuitest) do
-    Class.new(RunLoop::XCUITest) do
+    Class.new(RunLoop::DeviceAgent::Client) do
       def initialize; ; end
-      def to_s; "#<XCUITest subclass>"; end
+      def to_s; "#<DeviceAgent::Client subclass>"; end
       def inspect; to_s; end
       def rotate_home_button_to(_); ; end
       def perform_coordinate_gesture(_, _, _, _={}); ; end
@@ -35,11 +35,11 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
       end.to raise_error ArgumentError, /Expected args to be an Array with one element/
     end
 
-    it "raises error if arg[0] is not a RunLoop::XCUITest instance" do
+    it "raises error if arg[0] is not a RunLoop::DeviceAgent::Client instance" do
       expect do
         Calabash::Cucumber::Gestures::DeviceAgent.expect_valid_args(["a"])
       end.to raise_error ArgumentError,
-                         /Expected first element of args to be a RunLoop::XCUITest instance/
+                         /Expected first element of args to be a RunLoop::DeviceAgent::Client instance/
     end
 
     it "returns true if args are valid" do
