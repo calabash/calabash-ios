@@ -117,7 +117,7 @@ args[0] = #{args[0]}])
           dupped_options = options.dup
 
           if dupped_options[:query].nil?
-            raise ArgumentError, "Expected :query parameter"
+            dupped_options[:query] = "*"
           end
 
           from_hash = query_for_coordinates(dupped_options)
