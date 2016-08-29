@@ -113,21 +113,53 @@ args[0] = #{args[0]}])
         end
 
         # @!visibility private
-        def swipe(dir, options)
+        def swipe(options)
           dupped_options = options.dup
-          dupped_options.merge(:direction => dir)
+
+          if dupped_options[:query].nil?
+            raise ArgumentError, "Expected :query parameter"
+          end
 
           from_hash = query_for_coordinates(dupped_options)
           from_point = from_hash[:coordinates]
+          element = from_hash[:view]
 
           gesture_options = {
             :duration => dupped_options[:duration]
           }
 
-          raise NotImplementedError
-          ## TODO
-          # calculate to_point from :force and :direction
-          #device_agent.pan_between_coordinates(from_point, to_point, gesture_options)
+          direction = dupped_options[:direction]
+          case direction
+            when :left
+              degrees = 0
+            when :up
+              degrees = 90
+            when :right
+              degrees = 180
+            when :down
+              degrees = 270
+          end
+          radians = degrees * Math::PI / 180.0
+
+          force = dupped_options[:force]
+          case force
+          when :light
+            scale_radius_by = 0.25
+          when :normal
+            scale_radius_by = 0.333
+          when :strong
+            scale_radius_by = 0.5
+          end
+
+          element_width = element["rect"]["width"]
+          element_height = element["rect"]["height"]
+          x_center = element["rect"]["center_x"]
+          y_center = element["rect"]["center_y"]
+          radius = ([element_width, element_height].min) * scale_radius_by
+          to_x = x_center + (radius * Math.cos(radians))
+          to_y = y_center + (radius * Math.sin(radians))
+          to_point = { :x => to_x, :y => to_y }
+          device_agent.pan_between_coordinates(from_point, to_point, gesture_options)
         end
 
         # @!visibility private
