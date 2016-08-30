@@ -6,3 +6,19 @@ Then(/^I can swipe to go back to the Pan menu$/) do
   wait_for_animations
   wait_for_view("* marked:'pan page'")
 end
+
+And(/^I swipe to delete the '(.*?)' table cell$/) do |cell_title|
+  cell_query = "UILabel marked:'#{cell_title}'"
+  wait_for_view(cell_query) 
+  x_offset = query(cell_query)[0]["rect"]["width"] / 2.0
+  swipe(:left, {:query => cell_query, :duration => 0.5, :force => :strong, :offset => {:x => x_offset, :y => 0}})
+  wait_for_animations
+  touch("UIButton marked:'Delete'")
+end
+
+Then(/^I no longer see the '(.*?)' table cell$/) do |cell_title|
+  wait_for_animations
+  if !query("UILabel marked:'#{cell_title}'").empty?
+    fail "Table cell marked: #{cell_title} still exists"
+  end
+end
