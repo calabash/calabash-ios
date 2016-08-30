@@ -288,7 +288,7 @@ module Calabash
           radius = ([element_width, element_height].min) * scale_radius_by
           to_x = x_center + (radius * Math.cos(radians))
           to_y = y_center + (radius * Math.sin(radians))
-          { :x => to_x, :y => to_y }
+          { :x => -1 * to_x, :y => -1 * to_y }
         end
 
         private
