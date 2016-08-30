@@ -10,7 +10,7 @@ end
 And(/^I swipe to delete the '(.*?)' table cell$/) do |cell_title|
   cell_query = "UILabel marked:'#{cell_title}'"
   wait_for_view(cell_query) 
-  x_offset = query(cell_query)[0]["rect"]["width"] / 2.0
+  x_offset = query(cell_query)[0]["rect"]["width"] / 2.5
   swipe(:left, {:query => cell_query, :duration => 0.5, :force => :strong, :offset => {:x => x_offset, :y => 0}})
   wait_for_animations
   touch("UIButton marked:'Delete'")
