@@ -258,6 +258,39 @@ module Calabash
           }
         end
 
+        # @!visibility private
+        def self.end_point_for_swipe(dir, element, force)
+          case dir
+            when :left
+              degrees = 0
+            when :up
+              degrees = 90
+            when :right
+              degrees = 180
+            when :down
+              degrees = 270
+          end
+          radians = degrees * Math::PI / 180.0
+
+          case force
+          when :light
+            scale_radius_by = 0.25
+          when :normal
+            scale_radius_by = 0.333
+          when :strong
+            scale_radius_by = 0.5
+          end
+
+          element_width = element["rect"]["width"]
+          element_height = element["rect"]["height"]
+          x_center = element["rect"]["center_x"]
+          y_center = element["rect"]["center_y"]
+          radius = ([element_width, element_height].min) * scale_radius_by
+          to_x = x_center + (radius * Math.cos(radians))
+          to_y = y_center + (radius * Math.sin(radians))
+          { :x => to_x, :y => to_y }
+        end
+
         private
 
         # @!visibility private
