@@ -120,9 +120,9 @@ args[0] = #{args[0]}])
             dupped_options[:query] = "*"
           end
 
-          from_hash = query_for_coordinates(dupped_options)
-          from_point = from_hash[:coordinates]
-          element = from_hash[:view]
+          hash = query_for_coordinates(dupped_options)
+          from_point = hash[:coordinates]
+          element = hash[:view]
 
           gesture_options = {
             :duration => dupped_options[:duration]
@@ -132,6 +132,7 @@ args[0] = #{args[0]}])
           force = dupped_options[:force]
           to_point = Coordinates.end_point_for_swipe(direction, element, force)
           device_agent.pan_between_coordinates(from_point, to_point, gesture_options)
+          [hash[:view]]
         end
 
         # @!visibility private
