@@ -163,8 +163,7 @@ Expected '#{strategy}' to be one of these supported strategies:
         end
 
         # @!visibility private
-        def swipe(dir, options={})
-          options = options.merge(:direction => dir)
+        def swipe(options)
           query_action(options, :uia_swipe_offset, options)
         end
 

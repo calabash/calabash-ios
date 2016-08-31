@@ -49,10 +49,7 @@ args = #{args}
           if !args[0].is_a?(RunLoop::DeviceAgent::Client)
             raise(ArgumentError, %Q[
 Expected first element of args to be a RunLoop::DeviceAgent::Client instance, found:
-
-args[0] = #{args[0]}
-
-])
+args[0] = #{args[0]}])
           end
 
           true
@@ -112,6 +109,29 @@ args[0] = #{args[0]}
                                                   hash[:coordinates][:x],
                                                   hash[:coordinates][:y],
                                                   {:duration => duration})
+          [hash[:view]]
+        end
+
+        # @!visibility private
+        def swipe(options)
+          dupped_options = options.dup
+
+          if dupped_options[:query].nil?
+            dupped_options[:query] = "*"
+          end
+
+          hash = query_for_coordinates(dupped_options)
+          from_point = hash[:coordinates]
+          element = hash[:view]
+
+          gesture_options = {
+            :duration => dupped_options[:duration]
+          }
+
+          direction = dupped_options[:direction]
+          force = dupped_options[:force]
+          to_point = Coordinates.end_point_for_swipe(direction, element, force)
+          device_agent.pan_between_coordinates(from_point, to_point, gesture_options)
           [hash[:view]]
         end
 
