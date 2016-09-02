@@ -353,7 +353,7 @@ Resetting physical devices is not supported.
         @launch_args = options
 
         @run_loop = new_run_loop(options)
-        if run_loop.is_a?(Hash)
+        if @run_loop.is_a?(Hash)
           @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(@run_loop)
         elsif @run_loop.is_a?(RunLoop::DeviceAgent::Client)
           @gesture_performer = Calabash::Cucumber::Gestures::DeviceAgent.new(@run_loop)
