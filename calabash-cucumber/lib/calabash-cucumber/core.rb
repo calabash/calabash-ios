@@ -1288,7 +1288,7 @@ arguments => '#{arguments}'
                }
           )
 
-        rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected
+        rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected, SocketError
           []
         end
 
