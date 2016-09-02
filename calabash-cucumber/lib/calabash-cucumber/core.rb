@@ -161,9 +161,7 @@ module Calabash
       #
       # @param [String] uiquery a query specifying which objects to flash
       # @param [Array] args argument is ignored and should be deprecated
-      # @return [Array] an array of that contains the result of calling the
-      #   objc selector `description` on each matching view.
-      #
+      # @return [Array] an array of that contains all the view matched.
       def flash(uiquery, *args)
         # todo deprecate the *args argument in the flash method
         # todo :flash operation should return views as JSON objects
