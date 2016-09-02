@@ -1292,12 +1292,15 @@ arguments => '#{arguments}'
           []
         end
 
-        if launcher.gesture_performer.class.name == :device_agent
-          delay = merged_opts[:post_resign_active_delay] +
-            merged_opts[:post_will_terminate_delay] + 0.4
-          sleep(delay)
-          launcher.gesture_performer.send(:session_delete)
+        if launcher.gesture_performer
+          if launcher.gesture_performer.class.name == :device_agent
+            delay = merged_opts[:post_resign_active_delay] +
+              merged_opts[:post_will_terminate_delay] + 0.4
+            sleep(delay)
+            launcher.gesture_performer.send(:session_delete)
+          end
         end
+        true
       end
 
       # Get the Calabash server log level.
