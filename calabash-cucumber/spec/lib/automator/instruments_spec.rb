@@ -58,7 +58,7 @@ describe Calabash::Cucumber::Automator::Instruments do
           {
             :pid => 10,
             :udid => :udid,
-            :gesture_performer => :instruments,
+            :automator => :instruments,
             :index => 1,
             :log_file => "path/to/log",
             :uia_strategy => Calabash::Cucumber::Automator::Instruments::UIA_STRATEGIES[0]
@@ -66,19 +66,19 @@ describe Calabash::Cucumber::Automator::Instruments do
         end
 
         # Legacy - can be removed once run-loop > 2.1.3 is required.
-        it "is passed a hash with no :gesture_performer" do
-          hash[:gesture_performer] = :client
+        it "is passed a hash with no :@automator" do
+          hash[:automator] = :client
 
           expect do
             Calabash::Cucumber::Automator::Instruments.expect_valid_run_loop(hash)
-          end.to raise_error ArgumentError, /Invalid :gesture_performer/
+          end.to raise_error ArgumentError, /Invalid :@automator/
         end
 
-        it "is passed a hash with an invalid :gesture_performer" do
-          hash[:gesture_performer] = :invalid
+        it "is passed a hash with an invalid :@automator" do
+          hash[:automator] = :invalid
           expect do
             Calabash::Cucumber::Automator::Instruments.expect_valid_run_loop(hash)
-          end.to raise_error ArgumentError, /Invalid :gesture_performer/
+          end.to raise_error ArgumentError, /Invalid :@automator/
         end
 
         it "is passed a hash that does not have a truthy :udid key" do
@@ -180,7 +180,7 @@ describe Calabash::Cucumber::Automator::Instruments do
       {
         :pid => 10,
         :udid => :udid,
-        :gesture_performer => :instruments,
+        :automator => :instruments,
         :index => 1,
         :log_file => "path/to/log",
         :uia_strategy => Calabash::Cucumber::Automator::Instruments::UIA_STRATEGIES[0]

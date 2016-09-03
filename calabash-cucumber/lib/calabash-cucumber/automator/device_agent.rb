@@ -70,6 +70,11 @@ args[0] = #{args[0]}])
         end
 
         # @!visibility private
+        def stop
+          client.send(:shutdown)
+        end
+
+        # @!visibility private
         def session_delete
           client.send(:session_delete)
         end

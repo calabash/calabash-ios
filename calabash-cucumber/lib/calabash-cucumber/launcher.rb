@@ -63,7 +63,7 @@ module Calabash
       attr_reader :run_loop
 
       # @!visibility private
-      attr_reader :gesture_performer
+      attr_reader :automator
 
       # @!visibility private
       attr_accessor :launch_args
@@ -80,18 +80,22 @@ module Calabash
       def to_s
         class_name = "Launcher"
 
-        if !@gesture_performer
-          "#<#{class_name}: not attached to a gesture performer>"
+        if !automator
+          "#<#{class_name}: not attached to an automator>"
         else
-          gestures = "<#{class_name} using #{@gesture_performer.name} gestures"
-          if instruments?
-            "#{gestures} - log: #{@gesture_performer.run_loop[:log_file]}>"
-          elsif @gesture_performer.name == :device_agent
-            device_agent = @gesture_performer.client
-            launcher_name = device_agent.cbx_launcher.name
-            "#{gestures} and #{launcher_name} launcher>"
+          if automator.respond_to?(:name)
+            case automator.name
+              when :instruments
+                log_file =  automator.run_loop[:log_file]
+                "#<#{class_name}: UIAutomation/instruments - #{log_file}>"
+              when :device_agent
+                launcher_name = automator.client.cbx_launcher.name
+                "#<#{class_name}: DeviceAgent/#{launcher_name}>"
+              else
+                "#<#{class_name}: attached to #{automator.name}>"
+            end
           else
-            "#{gestures}>"
+            "#<#{class_name}: attached to #{automator}>"
           end
         end
       end
@@ -151,7 +155,7 @@ module Calabash
       # @see Calabash::Cucumber::Core#console_attach
       def self.attach
         l = launcher
-        return l if l && l.attached_to_gesture_performer?
+        return l if l && l.attached_to_automator?
         l.attach
       end
 
@@ -192,14 +196,14 @@ Try `start_test_server_in_background`
         end
 
         if run_loop[:pid]
-          @gesture_performer = Calabash::Cucumber::Automator::Instruments.new(run_loop)
+          @automator = Calabash::Cucumber::Automator::Instruments.new(run_loop)
         else
           RunLoop.log_warn(
 %Q[
 
 Connected to an app that was not launched by Calabash using instruments.
 
-Queries will work, but gestures will not.
+Queries will work, but gestures and other automator actions will not.
 
 ])
         end
@@ -220,21 +224,20 @@ Queries will work, but gestures will not.
 
       # @!visibility private
       def instruments?
-        attached_to_gesture_performer? &&
-          @gesture_performer.name == :instruments
+        attached_to_automator? &&
+          automator.name == :instruments
       end
 
       # @!visibility private
-      def attached_to_gesture_performer?
-        @gesture_performer != nil
+      def attached_to_automator?
+        automator != nil
       end
 
-      # @deprecated 0.19.3 - replaced with attached_to_gesture_performer?
-      # TODO remove in 0.20.0
+      # TODO remove in 0.21.0
       # @!visibility private
       def active?
-        RunLoop.deprecated("0.19.3", "replaced with attached_to_gesture_performer?")
-        attached_to_gesture_performer?
+        RunLoop.deprecated("0.20.0", "replaced with attached_to_automator?")
+        attached_to_automator?
       end
 
       # A reference to the current launcher (instantiates a new one if needed).
@@ -354,13 +357,13 @@ Resetting physical devices is not supported.
 
         @run_loop = new_run_loop(options)
         if @run_loop.is_a?(Hash)
-          @gesture_performer = Calabash::Cucumber::Automator::Instruments.new(@run_loop)
+          @automator = Calabash::Cucumber::Automator::Instruments.new(@run_loop)
         elsif @run_loop.is_a?(RunLoop::DeviceAgent::Client)
-          @gesture_performer = Calabash::Cucumber::Automator::DeviceAgent.new(@run_loop)
+          @automator = Calabash::Cucumber::Automator::DeviceAgent.new(@run_loop)
         else
           raise ArgumentError, %Q[
 
-Could not determine which gesture performer to use based on the launch arguments:
+Could not determine which automator to use based on the launch arguments:
 
 #{@launch_args.join("$-0")}
 
@@ -404,17 +407,22 @@ RunLoop.run returned:
       # @!visibility private
       # TODO Should call calabash exit route to shutdown the server.
       def stop
-        performer = @gesture_performer
-        return :no_gesture_performer if !performer
+        return :no_automator if !automator
 
-        performer_name = performer.name
-        if performer_name == :instruments
-          RunLoop.stop(performer.run_loop)
-        elsif performer_name == :device_agent
-          performer.client.stop
-        else
-          RunLoop.log_warn("Unknown gesture performer: #{performer_name}")
-          :unknown_performer
+        if !automator.respond_to?(:name)
+          RunLoop.log_warn("Unknown automator: #{automator}")
+          RunLoop.log_warn("Calabash does not know how to stop this automator")
+          return :unknown_automator
+        end
+
+        case automator.name
+          when :instruments, :device_agent
+            automator.stop
+            :stopped
+          else
+            RunLoop.log_warn("Unknown automator: #{automator}")
+            RunLoop.log_warn("Calabash does not know how to stop this automator")
+            :unknown_automator
         end
       end
 

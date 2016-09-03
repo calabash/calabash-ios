@@ -4,21 +4,21 @@ describe Calabash::Cucumber::Core do
     allow(RunLoop::Environment).to receive(:debug?).and_return(true)
   end
 
-  let(:gesture_performer) do
+  let(:automator) do
     Class.new(Calabash::Cucumber::Automator::Automator) do
       def initialize; ; end
       def swipe(_); :success; end
-      def to_s; "#<GesturePerformer Interface>"; end
+      def to_s; "#<Automator RSPEC STUB>"; end
       def inspect; to_s; end
     end.new
   end
 
   let(:launcher) do
     Class.new do
-      def gesture_performer; ; end
+      def automator; ; end
       def run_loop; ; end
       def instruments?; ; end
-      def to_s; "#<Launcher>"; end
+      def to_s; "#<Launcher RSPEC STUB>"; end
       def inspect; to_s; end
     end.new
   end
@@ -27,7 +27,7 @@ describe Calabash::Cucumber::Core do
     Class.new do
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::WaitHelpers
-      def to_s; "#<World>"; end
+      def to_s; "#<World RSPEC STUB>"; end
       def inspect; to_s; end
 
       # The dread Cucumber embed
@@ -70,7 +70,7 @@ describe Calabash::Cucumber::Core do
   end
 
   context "#touch" do
-    it "calls the gesture performer :touch method" do
+    it "calls the automator :touch method" do
       expect(world).to(
         receive(:query_action_with_options).with(:touch, "query", {})
       ).and_return([:view])
@@ -163,12 +163,12 @@ describe Calabash::Cucumber::Core do
     context "valid arguments" do
       before do
         expect(world).to receive(:launcher).and_return launcher
-        expect(launcher).to receive(:gesture_performer).and_return gesture_performer
+        expect(launcher).to receive(:automator).and_return(automator)
       end
 
       it "merges the options" do
         merged = {:force => :strong, :query => "query", :direction => :left}
-        expect(gesture_performer).to(
+        expect(automator).to(
           receive(:swipe).with(merged).and_return([:view])
         )
 
@@ -178,7 +178,7 @@ describe Calabash::Cucumber::Core do
 
       it "has defaults for :query and :force" do
         merged = {:force => :normal, :query => nil, :direction => :left}
-        expect(gesture_performer).to(
+        expect(automator).to(
           receive(:swipe).with(merged).and_return([:view])
         )
 
@@ -211,10 +211,10 @@ describe Calabash::Cucumber::Core do
       end
     end
 
-    it "calls the gesture performer #pan method" do
+    it "calls the automator #pan method" do
       expect(world).to receive(:launcher).and_return(launcher)
-      expect(launcher).to receive(:gesture_performer).and_return(gesture_performer)
-      expect(gesture_performer).to(
+      expect(launcher).to receive(:automator).and_return(automator)
+      expect(automator).to(
         receive(:pan).with("from", "to", {:duration => 1.0}).and_return(true)
       )
 
@@ -245,10 +245,10 @@ describe Calabash::Cucumber::Core do
       end
     end
 
-    it "calls the gesture performer #pan method" do
+    it "calls the automator #pan method" do
       expect(world).to receive(:launcher).and_return(launcher)
-      expect(launcher).to receive(:gesture_performer).and_return(gesture_performer)
-      expect(gesture_performer).to(
+      expect(launcher).to receive(:automator).and_return(automator)
+      expect(automator).to(
         receive(:pan_coordinates).with("from", "to", {:duration => 1.0}).and_return(true)
       )
 
@@ -288,12 +288,12 @@ describe Calabash::Cucumber::Core do
       expect(world.rotate_home_button_to(:left)).to be == :left
     end
 
-    it "calls out to gesture performer to perform the gesture" do
+    it "calls out to automator to perform the gesture" do
       expect(world).to receive(:expect_valid_rotate_home_to_arg).with(:left).and_return(:left)
       expect(world).to receive(:status_bar_orientation).and_return(:right)
       expect(world).to receive(:launcher).and_return(launcher)
-      expect(launcher).to receive(:gesture_performer).and_return(gesture_performer)
-      expect(gesture_performer).to receive(:rotate_home_button_to).with(:left).and_return(:left)
+      expect(launcher).to receive(:automator).and_return(automator)
+      expect(automator).to receive(:rotate_home_button_to).with(:left).and_return(:left)
 
       expect(world.rotate_home_button_to(:left)).to be == :left
     end
@@ -309,29 +309,29 @@ describe Calabash::Cucumber::Core do
     context "valid argument" do
       before do
         expect(world).to receive(:launcher).and_return(launcher)
-        expect(launcher).to receive(:gesture_performer).and_return(gesture_performer)
+        expect(launcher).to receive(:automator).and_return(automator)
       end
 
       it "rotates right when passed :right" do
-        expect(gesture_performer).to receive(:rotate).with(:right).and_return :orientation
+        expect(automator).to receive(:rotate).with(:right).and_return :orientation
 
         expect(world.rotate(:right)).to be == :orientation
       end
 
       it "rotates right when passed 'right'" do
-        expect(gesture_performer).to receive(:rotate).with(:right).and_return :orientation
+        expect(automator).to receive(:rotate).with(:right).and_return :orientation
 
         expect(world.rotate("right")).to be == :orientation
       end
 
       it "rotates left when passed :left" do
-        expect(gesture_performer).to receive(:rotate).with(:left).and_return :orientation
+        expect(automator).to receive(:rotate).with(:left).and_return :orientation
 
         expect(world.rotate(:left)).to be == :orientation
       end
 
       it "rotates left when passed 'left'" do
-        expect(gesture_performer).to receive(:rotate).with(:left).and_return :orientation
+        expect(automator).to receive(:rotate).with(:left).and_return :orientation
 
         expect(world.rotate("left")).to be == :orientation
       end
@@ -341,7 +341,7 @@ describe Calabash::Cucumber::Core do
   context "interacting with the keyboard" do
     before do
       allow(world).to receive(:launcher).and_return(launcher)
-      allow(launcher).to receive(:gesture_performer).and_return(gesture_performer)
+      allow(launcher).to receive(:automator).and_return(automator)
     end
 
     context "#keyboard_enter_char" do
@@ -351,7 +351,7 @@ describe Calabash::Cucumber::Core do
       end
 
       it "raises an error if char is not special and is more than a single char" do
-        expect(gesture_performer).to receive(:char_for_keyboard_action).with("abc").and_return(nil)
+        expect(automator).to receive(:char_for_keyboard_action).with("abc").and_return(nil)
 
         expect do
           world.keyboard_enter_char("abc")
@@ -363,10 +363,10 @@ describe Calabash::Cucumber::Core do
         let(:options) { {:wait_after_char => 0 } }
 
         it "handles specials characters like 'Delete' and 'Return'" do
-          expect(gesture_performer).to(
+          expect(automator).to(
             receive(:char_for_keyboard_action).with("Delete").and_return("del")
           )
-          expect(gesture_performer).to(
+          expect(automator).to(
             receive(:enter_char_with_keyboard).with("del").and_return(true)
           )
 
@@ -374,10 +374,10 @@ describe Calabash::Cucumber::Core do
         end
 
         it "handles single characters" do
-          expect(gesture_performer).to(
+          expect(automator).to(
             receive(:char_for_keyboard_action).with("a").and_return(nil)
           )
-          expect(gesture_performer).to(
+          expect(automator).to(
             receive(:enter_char_with_keyboard).with("a").and_return(true)
           )
 
@@ -385,10 +385,10 @@ describe Calabash::Cucumber::Core do
         end
 
         it "sleeps after typing the char by default" do
-          expect(gesture_performer).to(
+          expect(automator).to(
             receive(:char_for_keyboard_action).with("a").and_return(nil)
           )
-          expect(gesture_performer).to(
+          expect(automator).to(
             receive(:enter_char_with_keyboard).with("a").and_return(true)
           )
           expect(Kernel).to receive(:sleep).with(0.05).and_return(true)
@@ -397,10 +397,10 @@ describe Calabash::Cucumber::Core do
         end
 
         it "merges options" do
-          expect(gesture_performer).to(
+          expect(automator).to(
             receive(:char_for_keyboard_action).with("a").and_return(nil)
           )
-          expect(gesture_performer).to(
+          expect(automator).to(
             receive(:enter_char_with_keyboard).with("a").and_return(true)
           )
           options[:wait_after_char] = 5.0
@@ -412,18 +412,18 @@ describe Calabash::Cucumber::Core do
     end
 
     context "#tap_keyboard_action_key" do
-      it "asks the gesture performer to tap the action key" do
+      it "asks the automator to tap the action key" do
         expect(world).to receive(:expect_keyboard_visible!).and_return(true)
-        expect(gesture_performer).to receive(:tap_keyboard_action_key).and_return(:success)
+        expect(automator).to receive(:tap_keyboard_action_key).and_return(:success)
 
         expect(world.tap_keyboard_action_key).to be == :success
       end
     end
 
     context "#tap_keyboard_delete_key" do
-      it "asks the gesture performer to tap the delete key" do
+      it "asks the automator to tap the delete key" do
         expect(world).to receive(:expect_keyboard_visible!).and_return(true)
-        expect(gesture_performer).to receive(:tap_keyboard_delete_key).and_return(:success)
+        expect(automator).to receive(:tap_keyboard_delete_key).and_return(:success)
 
         expect(world.tap_keyboard_delete_key).to be == :success
       end
@@ -435,9 +435,9 @@ describe Calabash::Cucumber::Core do
         expect(world).to receive(:expect_keyboard_visible!).and_return(true)
       end
 
-      it "asks the performer type the text" do
+      it "asks the automator type the text" do
         expect(world).to receive(:text_from_first_responder).and_return("")
-        expect(gesture_performer).to(
+        expect(automator).to(
           receive(:enter_text_with_keyboard).with("hello", "").and_return(:success)
         )
 
@@ -448,7 +448,7 @@ describe Calabash::Cucumber::Core do
         existing = %Q[abc\nabc\n]
         escaped = %Q[abc\\nabc\\n]
         expect(world).to receive(:text_from_first_responder).and_return(existing)
-        expect(gesture_performer).to(
+        expect(automator).to(
           receive(:enter_text_with_keyboard).with("hello", escaped).and_return(:success)
         )
 
@@ -504,9 +504,9 @@ describe Calabash::Cucumber::Core do
     end
 
     context "#fast_enter_text" do
-      it "asks the gesture performer to fast enter text" do
+      it "asks the automator to fast enter text" do
         expect(world).to receive(:expect_keyboard_visible!).and_return(true)
-        expect(gesture_performer).to(
+        expect(automator).to(
           receive(:fast_enter_text).with("text").and_return(:success)
         )
 
@@ -525,11 +525,11 @@ describe Calabash::Cucumber::Core do
         end.to raise_error RuntimeError, /There is no Hide Keyboard key on an iPhone/
       end
 
-      it "asks the performer to dismiss the iPad keyboard and waits" do
+      it "asks the automator to dismiss the iPad keyboard and waits" do
         expect(world).to receive(:device_family_iphone?).and_return(false)
         expect(world).to receive(:expect_keyboard_visible!).and_return(true)
         expect(world).to receive(:wait_for_no_keyboard).and_return(true)
-        expect(gesture_performer).to receive(:dismiss_ipad_keyboard).and_return(true)
+        expect(automator).to receive(:dismiss_ipad_keyboard).and_return(true)
 
         expect(world.dismiss_ipad_keyboard).to be == true
       end

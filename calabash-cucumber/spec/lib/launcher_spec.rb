@@ -20,18 +20,20 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
-  let(:instruments_performer) do
+  let(:instruments_automator) do
     Class.new do
       def run_loop; {:log_file => "path/to/file.log"}; end
       def name; :instruments; end
+      def stop; :stopped; end
       def to_s; "#<Instruments RSPEC STUB>"; end
       def inspect; to_s; end
     end.new
   end
 
-  let(:device_agent_performer) do
+  let(:device_agent_automator) do
     Class.new do
       def name; :device_agent; end
+      def stop; :stopped; end
       def client
         Class.new do
           def cbx_launcher
@@ -39,7 +41,7 @@ describe 'Calabash Launcher' do
               def name; "iOSDeviceManager"; end
             end.new
           end
-          def stop; :stopped; end
+          def shutdown; :stopped; end
         end.new
       end
       def to_s; "#<DeviceAgent RSPEC STUB>"; end
@@ -47,37 +49,44 @@ describe 'Calabash Launcher' do
     end.new
   end
 
-  let(:unknown_performer) do
+  let(:unknown_automator) do
     Class.new do
-      def name; :performer; end
-      def to_s; "#<Performer RSPEC STUB>"; end
+      def name; :automator; end
+      def to_s; "#<Automator RSPEC STUB>"; end
       def inspect; to_s; end
     end.new
   end
 
   context "#to_s" do
-    it "is not attached to any gesture performer" do
-      expect(launcher.to_s[/not attached to a gesture performer/]).to be_truthy
+    it "is not attached to any automator" do
+      expect(launcher.to_s[/not attached to an automator/]).to be_truthy
     end
 
     it "is attached to instruments" do
-      launcher.instance_variable_set(:@gesture_performer, instruments_performer)
+      allow(launcher).to receive(:automator).and_return(instruments_automator)
 
-      expect(launcher.to_s[/instruments gestures/]).to be_truthy
+      expect(launcher.to_s[/UIAutomation\/instruments/]).to be_truthy
     end
 
     it "is attached to device_agent" do
-      launcher.instance_variable_set(:@gesture_performer, device_agent_performer)
+      allow(launcher).to receive(:automator).and_return(device_agent_automator)
+      launcher.instance_variable_set(:@automator, device_agent_automator)
 
-      expected = "<Launcher using device_agent gestures and iOSDeviceManager launcher>"
+      expect(launcher.to_s[/DeviceAgent\/iOSDeviceManager/]).to be_truthy
+    end
+
+    it "is attached to some other automator" do
+      allow(launcher).to receive(:automator).and_return(unknown_automator)
+
+      expected = "#<Launcher: attached to automator>"
       expect(launcher.to_s).to be == expected
     end
 
-    it "is attached to some other gesture performer" do
-      launcher.instance_variable_set(:@gesture_performer, unknown_performer)
+    it "is attached to some automator that does not respond to #name" do
+      allow(launcher).to receive(:automator).and_return(unknown_automator)
+      expect(unknown_automator).to receive(:respond_to?).with(:name).and_return(false)
 
-      expected = "<Launcher using performer gestures>"
-      expect(launcher.to_s).to be == expected
+      expect(launcher.to_s[/Automator RSPEC STUB/]).to be_truthy
     end
   end
 
@@ -88,37 +97,46 @@ describe 'Calabash Launcher' do
   end
 
   context "#stop" do
-    it "does nothing if launcher does not have a gesture performer" do
-      launcher.instance_variable_set(:@gesture_performer, nil)
+    it "does nothing if launcher does not have an automator"  do
+      allow(launcher).to receive(:automator).and_return(nil)
 
-      expect(launcher.stop).to be == :no_gesture_performer
+      expect(launcher.stop).to be == :no_automator
     end
 
-    it "calls RunLoop.stop if gesture performer is :instruments" do
-      run_loop = instruments_performer.run_loop
-      expect(RunLoop).to receive(:stop).with(run_loop).and_return(:stopped)
+    it "calls RunLoop.stop if automator is :instruments" do
+      allow(launcher).to receive(:automator).and_return(instruments_automator)
+      expect(launcher.stop).to be == :stopped
+    end
 
-      launcher.instance_variable_set(:@gesture_performer, instruments_performer)
+    it "calls #stop if automator is :device_agent" do
+      allow(launcher).to receive(:automator).and_return(device_agent_automator)
 
       expect(launcher.stop).to be == :stopped
     end
 
-    it "calls #stop if gesture performer is :device_agent" do
-      launcher.instance_variable_set(:@gesture_performer, device_agent_performer)
-
-      expect(launcher.stop).to be == :stopped
-    end
-
-    it "logs a warning if the gesture performer is unknown" do
-      launcher.instance_variable_set(:@gesture_performer, unknown_performer)
+    it "logs a warning if the automator is unknown" do
+      allow(launcher).to receive(:automator).and_return(unknown_automator)
 
       actual = nil
       out = capture_stdout do
         actual = launcher.stop
       end.string
 
-      expect(actual).to be == :unknown_performer
-      expect(out[/Unknown gesture performer/]).to be_truthy
+      expect(actual).to be == :unknown_automator
+      expect(out[/Unknown automator/]).to be_truthy
+    end
+
+    it "logs a warning if the automator is unknown and does not respond to #name" do
+      allow(launcher).to receive(:automator).and_return(unknown_automator)
+      expect(unknown_automator).to receive(:respond_to?).with(:name).and_return(false)
+
+      actual = nil
+      out = capture_stdout do
+        actual = launcher.stop
+      end.string
+
+      expect(actual).to be == :unknown_automator
+      expect(out[/Unknown automator/]).to be_truthy
     end
   end
 
@@ -145,22 +163,22 @@ describe 'Calabash Launcher' do
   end
 
   context "#instruments?" do
-    it "returns true if attached to instruments gesture performer" do
-      launcher.instance_variable_set(:@gesture_performer, instruments_performer)
-      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+    it "returns true if attached to instruments automator" do
+      allow(launcher).to receive(:automator).and_return(instruments_automator)
+      expect(launcher).to receive(:attached_to_automator?).and_return(true)
 
       expect(launcher.instruments?).to be_truthy
     end
 
-    it "returns false if not attached to gesture performer" do
-      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(false)
+    it "returns false if not attached to automator" do
+      expect(launcher).to receive(:attached_to_automator?).and_return(false)
 
       expect(launcher.instruments?).to be_falsey
     end
 
-    it "returns false if attached to gesture performer that is not instruments" do
-      launcher.instance_variable_set(:@gesture_performer, device_agent_performer)
-      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+    it "returns false if attached to automator that is not instruments" do
+      allow(launcher).to receive(:automator).and_return(device_agent_automator)
+      expect(launcher).to receive(:attached_to_automator?).and_return(true)
 
       expect(launcher.instruments?).to be_falsey
     end
@@ -224,7 +242,7 @@ describe 'Calabash Launcher' do
         {
           :pid => 10,
           :udid => "identifier",
-          :gesture_performer => :instruments,
+          :automator => :instruments,
           :index => 1,
           :log_file => "path/to/log",
           :uia_strategy => :host
@@ -247,7 +265,7 @@ describe 'Calabash Launcher' do
 
       actual = launcher.attach
 
-      expect(launcher.gesture_performer).to be_a_kind_of(Calabash::Cucumber::Automator::Instruments)
+      expect(launcher.automator).to be_a_kind_of(Calabash::Cucumber::Automator::Instruments)
       expect(actual).to be == launcher
     end
 
@@ -256,7 +274,7 @@ describe 'Calabash Launcher' do
 
       actual = launcher.attach
 
-      expect(launcher.instance_variable_get(:@gesture_performer)).to be == nil
+      expect(launcher.instance_variable_get(:@automator)).to be == nil
       expect(actual).to be_falsey
     end
 
@@ -267,7 +285,7 @@ describe 'Calabash Launcher' do
 
       actual = launcher.attach
 
-      expect(launcher.instance_variable_get(:@gesture_performer)).to be == nil
+      expect(launcher.instance_variable_get(:@automator)).to be == nil
       expect(actual).to be == launcher
     end
 
@@ -534,21 +552,21 @@ describe 'Calabash Launcher' do
   context ".active?" do
     it "is deprecated" do
       expect(RunLoop).to receive(:deprecated).and_call_original
-      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(:attached)
+      expect(launcher).to receive(:attached_to_automator?).and_return(:attached)
 
       expect(launcher.active?).to be == :attached
     end
   end
 
-  context ".attached_to_gesture_performer?" do
-    it "returns true if @gesture_performer is non-nil" do
-      launcher.instance_variable_set(:@gesture_performer, :gesture_performer)
-      expect(launcher.attached_to_gesture_performer?).to be_truthy
+  context ".attached_to_automator?" do
+    it "returns true if #automator is non-nil" do
+      launcher.instance_variable_set(:@automator, :automator)
+      expect(launcher.attached_to_automator?).to be_truthy
     end
 
-    it "returns false if @actions is nil" do
-      launcher.instance_variable_set(:@gesture_performer, nil)
-      expect(launcher.attached_to_gesture_performer?).to be_falsey
+    it "returns false if #automator is nil" do
+      launcher.instance_variable_set(:@automator, nil)
+      expect(launcher.attached_to_automator?).to be_falsey
     end
   end
 end

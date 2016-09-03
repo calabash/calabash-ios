@@ -20,6 +20,11 @@ module Calabash
         end
 
         # @!visibility private
+        def stop
+          abstract_method!
+        end
+
+        # @!visibility private
         def touch(options)
           abstract_method!
         end

@@ -77,13 +77,12 @@ run_loop = #{run_loop} is_a => #{run_loop.class}
 ])
           end
 
-          performer = run_loop[:gesture_performer]
-          # TODO Can remove the performer existence check after run-loop > 2.1.3
-          if performer && performer != :instruments
+          automator = run_loop[:automator]
+          if automator && automator != :instruments
             raise(ArgumentError, %Q[
-Invalid :gesture_performer. Expected :instruments but found:
+Invalid :@automator. Expected :instruments but found:
 
-#{performer}
+#{automator}
 
 in
 
@@ -129,6 +128,11 @@ Expected '#{strategy}' to be one of these supported strategies:
         # @!visibility private
         def name
           :instruments
+        end
+
+        # @!visibility private
+        def stop
+          RunLoop.stop(run_loop)
         end
 
         # @!visibility private
