@@ -3,7 +3,7 @@ module Calabash
     # @!visibility private
     module Gestures
 
-      require "calabash-cucumber/gestures/performer"
+      require "calabash-cucumber/automator/performer"
 
       # @!visibility private
       class Instruments < Calabash::Cucumber::Gestures::Performer

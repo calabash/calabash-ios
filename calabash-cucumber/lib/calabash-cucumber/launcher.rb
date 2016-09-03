@@ -39,9 +39,9 @@ module Calabash
     class Launcher
 
       require "calabash-cucumber/device"
-      require "calabash-cucumber/gestures/performer"
-      require "calabash-cucumber/gestures/instruments"
-      require "calabash-cucumber/gestures/device_agent"
+      require "calabash-cucumber/automator/performer"
+      require "calabash-cucumber/automator/instruments"
+      require "calabash-cucumber/automator/device_agent"
       require "calabash-cucumber/usage_tracker"
       require "calabash-cucumber/dylibs"
       require "calabash-cucumber/environment"

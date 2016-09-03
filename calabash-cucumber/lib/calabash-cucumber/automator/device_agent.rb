@@ -3,7 +3,7 @@ module Calabash
   module Cucumber
     module Gestures
 
-      require "calabash-cucumber/gestures/performer"
+      require "calabash-cucumber/automator/performer"
 
       # @!visibility private
       class DeviceAgent < Calabash::Cucumber::Gestures::Performer
