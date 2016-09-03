@@ -30,7 +30,7 @@ describe 'Calabash Launcher' do
   let(:device_agent_performer) do
     Class.new do
       def self.name; :device_agent; end
-      def device_agent
+      def client
         Class.new do
           def cbx_launcher
             Class.new do

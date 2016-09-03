@@ -54,7 +54,7 @@ module Calabash
         return false
       end
 
-      launcher.gesture_performer.device_agent.running?
+      launcher.gesture_performer.client.running?
     end
 
     def running?

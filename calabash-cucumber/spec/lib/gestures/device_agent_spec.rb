@@ -1,10 +1,10 @@
 
 describe Calabash::Cucumber::Gestures::DeviceAgent do
 
-  let(:xcuitest) do
+  let(:client) do
     Class.new(RunLoop::DeviceAgent::Client) do
       def initialize; ; end
-      def to_s; "#<DeviceAgent::Client subclass>"; end
+      def to_s; "#<DeviceAgent::Client RSPEC>"; end
       def inspect; to_s; end
       def rotate_home_button_to(_); ; end
       def perform_coordinate_gesture(_, _, _, _={}); ; end
@@ -43,23 +43,23 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
     end
 
     it "returns true if args are valid" do
-      args = [xcuitest]
+      args = [client]
       actual = Calabash::Cucumber::Gestures::DeviceAgent.expect_valid_args(args)
       expect(actual).to be_truthy
     end
   end
 
   it ".new" do
-    device_agent = Calabash::Cucumber::Gestures::DeviceAgent.new(xcuitest)
+    device_agent = Calabash::Cucumber::Gestures::DeviceAgent.new(client)
 
     expect(device_agent).to be_truthy
-    expect(device_agent.device_agent).to be == xcuitest
-    expect(device_agent.instance_variable_get(:@device_agent)).to be == xcuitest
+    expect(device_agent.client).to be == client
+    expect(device_agent.instance_variable_get(:@client)).to be == client
   end
 
   context "instance methods" do
     let(:device_agent) do
-      Calabash::Cucumber::Gestures::DeviceAgent.new(xcuitest)
+      Calabash::Cucumber::Gestures::DeviceAgent.new(client)
     end
 
     let(:query) { "query" }
@@ -78,7 +78,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
     context "#rotate_home_button_to" do
       it "rotates and returns the current status bar orientation" do
-        expect(xcuitest).to receive(:rotate_home_button_to).with(:position).and_return true
+        expect(client).to receive(:rotate_home_button_to).with(:position).and_return true
         expect(device_agent).to receive(:status_bar_orientation).and_return("new_orientation")
 
         expect(device_agent.rotate_home_button_to(:position)).to be == :new_orientation
@@ -171,7 +171,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         options = {}
 
         expect(device_agent).to receive(:query_for_coordinates).with(options).and_return(hash)
-        expect(device_agent.device_agent).to(
+        expect(device_agent.client).to(
           receive(:perform_coordinate_gesture).with("touch", 10, 20)).and_return(true)
         expected = [hash[:view]]
 
@@ -192,7 +192,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         options = {}
 
         expect(device_agent).to receive(:query_for_coordinates).with(options).and_return(hash)
-        expect(device_agent.device_agent).to(
+        expect(device_agent.client).to(
           receive(:perform_coordinate_gesture).with("double_tap", 10, 20)).and_return(true)
         expected = [hash[:view]]
 
@@ -213,7 +213,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         options = {}
 
         expect(device_agent).to receive(:query_for_coordinates).with(options).and_return(hash)
-        expect(device_agent.device_agent).to(
+        expect(device_agent.client).to(
           receive(:perform_coordinate_gesture).with("two_finger_tap", 10, 20)).and_return(true)
         expected = [hash[:view]]
 
@@ -236,7 +236,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
       it "performs a long press for 3 seconds and returns an array with one element" do
         expect(device_agent).to receive(:query_for_coordinates).with(options).and_return(hash)
-        expect(device_agent.device_agent).to(
+        expect(device_agent.client).to(
           receive(:perform_coordinate_gesture).with("touch",
                                                     10, 20,
                                                     {:duration => 3 })).and_return(true)
@@ -249,7 +249,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         options[:duration] = 1
 
         expect(device_agent).to receive(:query_for_coordinates).with(options).and_return(hash)
-        expect(device_agent.device_agent).to(
+        expect(device_agent.client).to(
           receive(:perform_coordinate_gesture).with("touch",
                                                     10, 20,
                                                     {:duration => 1 })).and_return(true)
@@ -283,7 +283,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
           receive(:query_for_coordinates).with(to_options).and_return(to_hash)
         )
 
-        expect(device_agent.device_agent).to(
+        expect(device_agent.client).to(
           receive(:pan_between_coordinates).with(:from_point, :to_point,
                                                  {:duration => 1.0}).and_return(true)
         )
@@ -299,7 +299,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
       it "pans between two coordinates" do
         options = {:duration => 1.0}
 
-        expect(device_agent.device_agent).to(
+        expect(client).to(
           receive(:pan_between_coordinates).with(:from_point, :to_point,
                                                  {:duration => 1.0}).and_return(true)
         )
@@ -329,7 +329,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         expect(device_agent).to receive(:point_from).with(:view).and_return(:start)
         expect(device_agent).to receive(:point_from).with(:view, offset).and_return(:end)
 
-        expect(device_agent.device_agent).to(
+        expect(device_agent.client).to(
           receive(:pan_between_coordinates).with(:start, :end, gesture_options).and_return(true)
         )
 
@@ -341,7 +341,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
     context "Text Entry" do
       context "#enter_text_with_keyboard" do
         it "types a string by calling out to enter_text" do
-          expect(device_agent.device_agent).to receive(:enter_text).with("text").and_return({})
+          expect(device_agent.client).to receive(:enter_text).with("text").and_return({})
 
           expect(device_agent.enter_text_with_keyboard("text")).to be == {}
         end
@@ -349,7 +349,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
       context "#enter_char_with_keyboard" do
         it "types a char by calling out to enter_text" do
-          expect(device_agent.device_agent).to receive(:enter_text).with("c").and_return({})
+          expect(device_agent.client).to receive(:enter_text).with("c").and_return({})
 
           expect(device_agent.enter_text_with_keyboard("c")).to be == {}
         end
@@ -376,7 +376,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
           expect(device_agent).to(
             receive(:mark_for_return_key_of_first_responder)
           ).and_return("Mark")
-          expect(device_agent.device_agent).to receive(:touch).with("Mark").and_return({})
+          expect(device_agent.client).to receive(:touch).with("Mark").and_return({})
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -386,7 +386,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
             receive(:mark_for_return_key_of_first_responder)
           ).and_return(nil)
           expect(device_agent).to receive(:char_for_keyboard_action).and_return("\n")
-          expect(device_agent.device_agent).to receive(:enter_text).with("\n").and_return({})
+          expect(device_agent.client).to receive(:enter_text).with("\n").and_return({})
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -396,13 +396,13 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
             receive(:mark_for_return_key_of_first_responder)
           ).and_return("Unmatchable identifier")
 
-          expect(device_agent.device_agent).to(
+          expect(device_agent.client).to(
             receive(:touch).with("Unmatchable identifier").and_raise(
               RuntimeError, "No match found")
           )
 
           expect(device_agent).to receive(:char_for_keyboard_action).and_return("\n")
-          expect(device_agent.device_agent).to receive(:enter_text).with("\n").and_return({})
+          expect(device_agent.client).to receive(:enter_text).with("\n").and_return({})
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -410,7 +410,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
       context "#tap_keyboard_delete_key" do
         it "touches the keyboard delete key" do
-          expect(device_agent.device_agent).to receive(:touch).with('delete').and_return({})
+          expect(device_agent.client).to receive(:touch).with('delete').and_return({})
 
           expect(device_agent.tap_keyboard_delete_key).to be == {}
         end
@@ -418,7 +418,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
       context "#fast_enter_text" do
         it "calls 'enter_text'" do
-          expect(device_agent.device_agent).to receive(:enter_text).with("text").and_return({})
+          expect(device_agent.client).to receive(:enter_text).with("text").and_return({})
 
           expect(device_agent.fast_enter_text("text")).to be == {}
         end
@@ -426,7 +426,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
       context "#dismiss_ipad_keyboard" do
         it "touches the hide keyboard key" do
-          expect(device_agent.device_agent).to receive(:touch).with("Hide keyboard").and_return({})
+          expect(device_agent.client).to receive(:touch).with("Hide keyboard").and_return({})
 
           expect(device_agent.dismiss_ipad_keyboard).to be == {}
         end

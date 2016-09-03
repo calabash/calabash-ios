@@ -73,7 +73,7 @@ describe Calabash::Cucumber::Gestures::Instruments do
 
         # Legacy - can be removed once run-loop > 2.1.3 is required.
         it "is passed a hash with no :gesture_performer" do
-          hash[:gesture_performer] = :device_agent
+          hash[:gesture_performer] = :client
 
           expect do
             Calabash::Cucumber::Gestures::Instruments.expect_valid_run_loop(hash)

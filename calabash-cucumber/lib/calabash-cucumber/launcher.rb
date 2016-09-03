@@ -87,7 +87,7 @@ module Calabash
           if instruments?
             "#{gestures} - log: #{@gesture_performer.run_loop[:log_file]}>"
           elsif @gesture_performer.class.name == :device_agent
-            device_agent = @gesture_performer.device_agent
+            device_agent = @gesture_performer.client
             launcher_name = device_agent.cbx_launcher.name
             "#{gestures} and #{launcher_name} launcher>"
           else
@@ -411,7 +411,7 @@ RunLoop.run returned:
         if performer_name == :instruments
           RunLoop.stop(performer.run_loop)
         elsif performer_name == :device_agent
-          performer.device_agent.stop
+          performer.client.stop
         else
           RunLoop.log_warn("Unknown gesture performer: #{performer_name}")
           :unknown_performer
