@@ -1,12 +1,12 @@
 module Calabash
   module Cucumber
     # @!visibility private
-    module Gestures
+    module Automator
 
-      require "calabash-cucumber/automator/performer"
+      require "calabash-cucumber/automator/automator"
 
       # @!visibility private
-      class Instruments < Calabash::Cucumber::Gestures::Performer
+      class Instruments < Calabash::Cucumber::Automator::Performer
 
         require "calabash-cucumber/uia"
         include Calabash::Cucumber::UIA

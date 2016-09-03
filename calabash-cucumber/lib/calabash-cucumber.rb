@@ -8,7 +8,7 @@ require "calabash-cucumber/usage_tracker.rb"
 require "calabash-cucumber/dylibs"
 require "calabash-cucumber/http/http"
 require "calabash-cucumber/automator/coordinates"
-require "calabash-cucumber/automator/performer"
+require "calabash-cucumber/automator/automator"
 require "calabash-cucumber/automator/instruments"
 require "calabash-cucumber/automator/device_agent"
 require 'calabash-cucumber/keyboard_helpers'

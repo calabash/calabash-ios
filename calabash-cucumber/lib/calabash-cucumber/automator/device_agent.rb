@@ -1,12 +1,12 @@
 # @!visibility private
 module Calabash
   module Cucumber
-    module Gestures
+    module Automator
 
-      require "calabash-cucumber/automator/performer"
+      require "calabash-cucumber/automator/automator"
 
       # @!visibility private
-      class DeviceAgent < Calabash::Cucumber::Gestures::Performer
+      class DeviceAgent < Calabash::Cucumber::Automator::Performer
 
         require "run_loop"
         require "calabash-cucumber/map"

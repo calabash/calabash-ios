@@ -1,5 +1,5 @@
 
-describe Calabash::Cucumber::Gestures::DeviceAgent do
+describe Calabash::Cucumber::Automator::DeviceAgent do
 
   let(:client) do
     Class.new(RunLoop::DeviceAgent::Client) do
@@ -15,38 +15,38 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
   context ".expect_valid_args" do
     it "raises error if args is nil" do
       expect do
-        Calabash::Cucumber::Gestures::DeviceAgent.expect_valid_args(nil)
+        Calabash::Cucumber::Automator::DeviceAgent.expect_valid_args(nil)
       end.to raise_error ArgumentError, /Expected args to be a non-nil Array/
     end
 
     it "raises error if args is not an Array" do
       expect do
-        Calabash::Cucumber::Gestures::DeviceAgent.expect_valid_args({})
+        Calabash::Cucumber::Automator::DeviceAgent.expect_valid_args({})
       end.to raise_error ArgumentError, /Expected args to be an Array,/
     end
 
     it "raises error if args.count != 1" do
       expect do
-        Calabash::Cucumber::Gestures::DeviceAgent.expect_valid_args(["a", "b", "c"])
+        Calabash::Cucumber::Automator::DeviceAgent.expect_valid_args(["a", "b", "c"])
       end.to raise_error ArgumentError, /Expected args to be an Array with one element/
     end
 
     it "raises error if arg[0] is not a RunLoop::DeviceAgent::Client instance" do
       expect do
-        Calabash::Cucumber::Gestures::DeviceAgent.expect_valid_args(["a"])
+        Calabash::Cucumber::Automator::DeviceAgent.expect_valid_args(["a"])
       end.to raise_error ArgumentError,
                          /Expected first element of args to be a RunLoop::DeviceAgent::Client instance/
     end
 
     it "returns true if args are valid" do
       args = [client]
-      actual = Calabash::Cucumber::Gestures::DeviceAgent.expect_valid_args(args)
+      actual = Calabash::Cucumber::Automator::DeviceAgent.expect_valid_args(args)
       expect(actual).to be_truthy
     end
   end
 
   it ".new" do
-    device_agent = Calabash::Cucumber::Gestures::DeviceAgent.new(client)
+    device_agent = Calabash::Cucumber::Automator::DeviceAgent.new(client)
 
     expect(device_agent).to be_truthy
     expect(device_agent.client).to be == client
@@ -55,7 +55,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
   context "instance methods" do
     let(:device_agent) do
-      Calabash::Cucumber::Gestures::DeviceAgent.new(client)
+      Calabash::Cucumber::Automator::DeviceAgent.new(client)
     end
 
     let(:query) { "query" }
@@ -361,7 +361,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         let(:hash) { { "action" => "char"  } }
 
         before do
-          stub_const("Calabash::Cucumber::Gestures::DeviceAgent::SPECIAL_ACTION_CHARS", hash)
+          stub_const("Calabash::Cucumber::Automator::DeviceAgent::SPECIAL_ACTION_CHARS", hash)
         end
 
         it "returns the value of the action key" do
@@ -438,7 +438,7 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
         let(:hash) { { 1 => "A", 3 => "Join" } }
 
         before do
-          stub_const("Calabash::Cucumber::Gestures::DeviceAgent::RETURN_KEY_TYPE", hash)
+          stub_const("Calabash::Cucumber::Automator::DeviceAgent::RETURN_KEY_TYPE", hash)
         end
 
         it "returns the string value for the text input view returnKeyType" do

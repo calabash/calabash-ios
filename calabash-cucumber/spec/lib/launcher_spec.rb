@@ -247,7 +247,7 @@ describe 'Calabash Launcher' do
 
       actual = launcher.attach
 
-      expect(launcher.gesture_performer).to be_a_kind_of(Calabash::Cucumber::Gestures::Instruments)
+      expect(launcher.gesture_performer).to be_a_kind_of(Calabash::Cucumber::Automator::Instruments)
       expect(actual).to be == launcher
     end
 

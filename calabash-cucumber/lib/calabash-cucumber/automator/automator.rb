@@ -1,7 +1,7 @@
 module Calabash
   module Cucumber
     # @!visibility private
-    module Gestures
+    module Automator
       # @!visibility private
       class Performer
 

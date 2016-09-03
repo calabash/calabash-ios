@@ -39,7 +39,7 @@ module Calabash
     class Launcher
 
       require "calabash-cucumber/device"
-      require "calabash-cucumber/automator/performer"
+      require "calabash-cucumber/automator/automator"
       require "calabash-cucumber/automator/instruments"
       require "calabash-cucumber/automator/device_agent"
       require "calabash-cucumber/usage_tracker"
@@ -192,7 +192,7 @@ Try `start_test_server_in_background`
         end
 
         if run_loop[:pid]
-          @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(run_loop)
+          @gesture_performer = Calabash::Cucumber::Automator::Instruments.new(run_loop)
         else
           RunLoop.log_warn(
 %Q[
@@ -354,9 +354,9 @@ Resetting physical devices is not supported.
 
         @run_loop = new_run_loop(options)
         if @run_loop.is_a?(Hash)
-          @gesture_performer = Calabash::Cucumber::Gestures::Instruments.new(@run_loop)
+          @gesture_performer = Calabash::Cucumber::Automator::Instruments.new(@run_loop)
         elsif @run_loop.is_a?(RunLoop::DeviceAgent::Client)
-          @gesture_performer = Calabash::Cucumber::Gestures::DeviceAgent.new(@run_loop)
+          @gesture_performer = Calabash::Cucumber::Automator::DeviceAgent.new(@run_loop)
         else
           raise ArgumentError, %Q[
 
