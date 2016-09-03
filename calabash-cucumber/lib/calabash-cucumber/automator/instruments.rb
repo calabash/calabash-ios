@@ -6,7 +6,7 @@ module Calabash
       require "calabash-cucumber/automator/automator"
 
       # @!visibility private
-      class Instruments < Calabash::Cucumber::Automator::Performer
+      class Instruments < Calabash::Cucumber::Automator::Automator
 
         require "calabash-cucumber/uia"
         include Calabash::Cucumber::UIA
@@ -434,3 +434,4 @@ Try adjusting your query to return at least one view.
     end
   end
 end
+

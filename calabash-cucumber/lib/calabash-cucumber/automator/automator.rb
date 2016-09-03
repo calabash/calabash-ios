@@ -3,7 +3,7 @@ module Calabash
     # @!visibility private
     module Automator
       # @!visibility private
-      class Performer
+      class Automator
 
         require "calabash-cucumber/abstract"
         include Calabash::Cucumber::Abstract

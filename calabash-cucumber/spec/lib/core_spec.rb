@@ -5,7 +5,7 @@ describe Calabash::Cucumber::Core do
   end
 
   let(:gesture_performer) do
-    Class.new(Calabash::Cucumber::Automator::Performer) do
+    Class.new(Calabash::Cucumber::Automator::Automator) do
       def initialize; ; end
       def swipe(_); :success; end
       def to_s; "#<GesturePerformer Interface>"; end

@@ -6,7 +6,7 @@ module Calabash
       require "calabash-cucumber/automator/automator"
 
       # @!visibility private
-      class DeviceAgent < Calabash::Cucumber::Automator::Performer
+      class DeviceAgent < Calabash::Cucumber::Automator::Automator
 
         require "run_loop"
         require "calabash-cucumber/map"
