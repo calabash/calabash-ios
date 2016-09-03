@@ -1304,7 +1304,7 @@ arguments => '#{arguments}'
         end
 
         if launcher.gesture_performer
-          if launcher.gesture_performer.class.name == :device_agent
+          if launcher.gesture_performer.name == :device_agent
             delay = merged_opts[:post_resign_active_delay] +
               merged_opts[:post_will_terminate_delay] + 0.4
             sleep(delay)

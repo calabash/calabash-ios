@@ -1,12 +1,6 @@
 
 describe Calabash::Cucumber::Gestures::Instruments do
 
-  context ".name" do
-    it "returns :instruments" do
-      expect(Calabash::Cucumber::Gestures::Instruments.name).to be == :instruments
-    end
-  end
-
   context ".expect_valid_init_args" do
     context "raises errors when" do
       it "is passed nil" do
@@ -194,6 +188,12 @@ describe Calabash::Cucumber::Gestures::Instruments do
     end
 
     let(:instruments) { Calabash::Cucumber::Gestures::Instruments.new(run_loop) }
+
+    context ".name" do
+      it "returns :instruments" do
+        expect(instruments.name).to be == :instruments
+      end
+    end
 
     context "#rotate_with_uia" do
       it "calls uia with the correct command" do

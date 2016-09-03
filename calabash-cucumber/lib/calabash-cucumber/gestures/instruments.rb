@@ -28,11 +28,6 @@ module Calabash
         # @!visibility private
         UIA_STRATEGIES = [:preferences, :host, :shared_element]
 
-        # @!visibility private
-        def self.name
-          :instruments
-        end
-
         attr_reader :run_loop
 
         # @!visibility private
@@ -129,6 +124,11 @@ Expected '#{strategy}' to be one of these supported strategies:
         def initialize(*args)
           Instruments.expect_valid_init_args(args)
           @run_loop = args[0]
+        end
+
+        # @!visibility private
+        def name
+          :instruments
         end
 
         # @!visibility private

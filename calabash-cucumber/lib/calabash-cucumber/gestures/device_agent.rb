@@ -55,10 +55,6 @@ args[0] = #{args[0]}])
           true
         end
 
-        # @!visibility private
-        def self.name
-          :device_agent
-        end
 
         attr_reader :client
 
@@ -68,6 +64,12 @@ args[0] = #{args[0]}])
           @client = args[0]
         end
 
+        # @!visibility private
+        def name
+          :device_agent
+        end
+
+        # @!visibility private
         def session_delete
           client.send(:session_delete)
         end

@@ -22,14 +22,16 @@ describe 'Calabash Launcher' do
 
   let(:instruments_performer) do
     Class.new do
-      def self.name; :instruments; end
       def run_loop; {:log_file => "path/to/file.log"}; end
+      def name; :instruments; end
+      def to_s; "#<Instruments RSPEC STUB>"; end
+      def inspect; to_s; end
     end.new
   end
 
   let(:device_agent_performer) do
     Class.new do
-      def self.name; :device_agent; end
+      def name; :device_agent; end
       def client
         Class.new do
           def cbx_launcher
@@ -40,12 +42,16 @@ describe 'Calabash Launcher' do
           def stop; :stopped; end
         end.new
       end
+      def to_s; "#<DeviceAgent RSPEC STUB>"; end
+      def inspect; to_s; end
     end.new
   end
 
   let(:unknown_performer) do
     Class.new do
-      def self.name; :performer; end
+      def name; :performer; end
+      def to_s; "#<Performer RSPEC STUB>"; end
+      def inspect; to_s; end
     end.new
   end
 
@@ -139,32 +145,22 @@ describe 'Calabash Launcher' do
   end
 
   context "#instruments?" do
-    let (:gesture_performer) do
-      Class.new do
-        def self.name; ; end
-      end.new
-    end
-
-    before do
-      launcher.instance_variable_set(:@gesture_performer, gesture_performer)
-    end
-
     it "returns true if attached to instruments gesture performer" do
+      launcher.instance_variable_set(:@gesture_performer, instruments_performer)
       expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
-      expect(gesture_performer.class).to receive(:name).and_return(:instruments)
 
       expect(launcher.instruments?).to be_truthy
     end
 
     it "returns false if not attached to gesture performer" do
-      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
+      expect(launcher).to receive(:attached_to_gesture_performer?).and_return(false)
 
       expect(launcher.instruments?).to be_falsey
     end
 
     it "returns false if attached to gesture performer that is not instruments" do
+      launcher.instance_variable_set(:@gesture_performer, device_agent_performer)
       expect(launcher).to receive(:attached_to_gesture_performer?).and_return(true)
-      expect(gesture_performer.class).to receive(:name).and_return(:not_instruments)
 
       expect(launcher.instruments?).to be_falsey
     end

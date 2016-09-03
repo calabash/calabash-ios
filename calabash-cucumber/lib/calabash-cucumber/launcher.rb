@@ -83,10 +83,10 @@ module Calabash
         if !@gesture_performer
           "#<#{class_name}: not attached to a gesture performer>"
         else
-          gestures = "<#{class_name} using #{@gesture_performer.class.name} gestures"
+          gestures = "<#{class_name} using #{@gesture_performer.name} gestures"
           if instruments?
             "#{gestures} - log: #{@gesture_performer.run_loop[:log_file]}>"
-          elsif @gesture_performer.class.name == :device_agent
+          elsif @gesture_performer.name == :device_agent
             device_agent = @gesture_performer.client
             launcher_name = device_agent.cbx_launcher.name
             "#{gestures} and #{launcher_name} launcher>"
@@ -221,7 +221,7 @@ Queries will work, but gestures will not.
       # @!visibility private
       def instruments?
         attached_to_gesture_performer? &&
-          @gesture_performer.class.send(:name) == :instruments
+          @gesture_performer.name == :instruments
       end
 
       # @!visibility private
@@ -407,7 +407,7 @@ RunLoop.run returned:
         performer = @gesture_performer
         return :no_gesture_performer if !performer
 
-        performer_name = performer.class.send(:name)
+        performer_name = performer.name
         if performer_name == :instruments
           RunLoop.stop(performer.run_loop)
         elsif performer_name == :device_agent

@@ -8,14 +8,14 @@ module Calabash
         require "calabash-cucumber/abstract"
         include Calabash::Cucumber::Abstract
 
-        # @!visibility private
-        def self.name
-          raise Calabash::Cucumber::Abstract::AbstractMethodError,
-                "Subclass must implement '.name'"
-        end
 
         # @!visibility private
         def initialize(*args)
+          abstract_method!
+        end
+
+        # @!visibility private
+        def name
           abstract_method!
         end
 

@@ -12,10 +12,6 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
     end.new
   end
 
-  it ".name" do
-    expect(Calabash::Cucumber::Gestures::DeviceAgent.name).to be == :device_agent
-  end
-
   context ".expect_valid_args" do
     it "raises error if args is nil" do
       expect do
@@ -64,6 +60,12 @@ describe Calabash::Cucumber::Gestures::DeviceAgent do
 
     let(:query) { "query" }
     let(:options) { {:query => query} }
+
+    context "#name" do
+      it "returns :device_agent" do
+        expect(device_agent.name).to be == :device_agent
+      end
+    end
 
     context "#rotate" do
       it "rotates the interface based on direction" do
