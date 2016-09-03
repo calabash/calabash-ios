@@ -141,6 +141,11 @@ After("@restart_after") do |_|
   Calabash::Launchctl.instance.shutdown
 end
 
+After("@stop_after") do |_|
+  Calabash::Launchctl.instance.launcher.stop
+  Calabash::Launchctl.instance.shutdown
+end
+
 After do |scenario|
 
 end
