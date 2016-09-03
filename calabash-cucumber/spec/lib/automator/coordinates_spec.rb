@@ -1,5 +1,5 @@
 
-describe Calabash::Cucumber::Gestures::Coordinates do
+describe Calabash::Cucumber::Automator::Coordinates do
 
   let(:window) do
     {
@@ -27,14 +27,14 @@ describe Calabash::Cucumber::Gestures::Coordinates do
     }
   end
 
-  let(:coordinates) { Calabash::Cucumber::Gestures::Coordinates.new(row) }
+  let(:coordinates) { Calabash::Cucumber::Automator::Coordinates.new(row) }
 
   context "class methods" do
 
     context "finding points" do
 
       before do
-        expect(Calabash::Cucumber::Gestures::Coordinates).to(
+        expect(Calabash::Cucumber::Automator::Coordinates).to(
           receive(:instance_without_element).and_return(coordinates)
         )
       end
@@ -43,7 +43,7 @@ describe Calabash::Cucumber::Gestures::Coordinates do
         expect(coordinates).to receive(:min_x).and_return(100)
         expect(coordinates).to receive(:window).and_return({:center_y => 200})
 
-        actual = Calabash::Cucumber::Gestures::Coordinates.left_point_for_full_screen_pan
+        actual = Calabash::Cucumber::Automator::Coordinates.left_point_for_full_screen_pan
         expect(actual[:x]).to be == 100
         expect(actual[:y]).to be == 200
       end
@@ -52,7 +52,7 @@ describe Calabash::Cucumber::Gestures::Coordinates do
         expect(coordinates).to receive(:max_x).and_return(100)
         expect(coordinates).to receive(:window).and_return({:center_y => 200})
 
-        actual = Calabash::Cucumber::Gestures::Coordinates.right_point_for_full_screen_pan
+        actual = Calabash::Cucumber::Automator::Coordinates.right_point_for_full_screen_pan
         expect(actual[:x]).to be == 100
         expect(actual[:y]).to be == 200
       end
@@ -61,7 +61,7 @@ describe Calabash::Cucumber::Gestures::Coordinates do
         expect(coordinates).to receive(:min_y).and_return(100)
         expect(coordinates).to receive(:window).and_return({:center_x => 200})
 
-        actual = Calabash::Cucumber::Gestures::Coordinates.top_point_for_full_screen_pan
+        actual = Calabash::Cucumber::Automator::Coordinates.top_point_for_full_screen_pan
         expect(actual[:x]).to be == 200
         expect(actual[:y]).to be == 100
       end
@@ -70,14 +70,14 @@ describe Calabash::Cucumber::Gestures::Coordinates do
         expect(coordinates).to receive(:max_y).and_return(100)
         expect(coordinates).to receive(:window).and_return({:center_x => 200})
 
-        actual = Calabash::Cucumber::Gestures::Coordinates.bottom_point_for_full_screen_pan
+        actual = Calabash::Cucumber::Automator::Coordinates.bottom_point_for_full_screen_pan
         expect(actual[:x]).to be == 200
         expect(actual[:y]).to be == 100
       end
     end
 
     context ".points_for_full_screen_pan" do
-      let(:klass) { Calabash::Cucumber::Gestures::Coordinates }
+      let(:klass) { Calabash::Cucumber::Automator::Coordinates }
 
       it "raises an exception if direction is not valid" do
         expect do

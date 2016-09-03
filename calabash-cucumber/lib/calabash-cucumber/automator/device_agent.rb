@@ -1,12 +1,12 @@
 # @!visibility private
 module Calabash
   module Cucumber
-    module Gestures
+    module Automator
 
-      require "calabash-cucumber/gestures/performer"
+      require "calabash-cucumber/automator/automator"
 
       # @!visibility private
-      class DeviceAgent < Calabash::Cucumber::Gestures::Performer
+      class DeviceAgent < Calabash::Cucumber::Automator::Automator
 
         require "run_loop"
         require "calabash-cucumber/map"
@@ -55,48 +55,55 @@ args[0] = #{args[0]}])
           true
         end
 
-        # @!visibility private
-        def self.name
-          :device_agent
-        end
 
-        attr_reader :device_agent
+        attr_reader :client
 
         # @!visibility private
         def initialize(*args)
           DeviceAgent.expect_valid_args(args)
-          @device_agent = args[0]
+          @client = args[0]
         end
 
+        # @!visibility private
+        def name
+          :device_agent
+        end
+
+        # @!visibility private
+        def stop
+          client.send(:shutdown)
+        end
+
+        # @!visibility private
         def session_delete
-          device_agent.send(:session_delete)
+          client.send(:session_delete)
         end
 
         # @!visibility private
         def touch(options)
           hash = query_for_coordinates(options)
 
-          device_agent.perform_coordinate_gesture("touch",
-                                                  hash[:coordinates][:x],
-                                                  hash[:coordinates][:y])
+          client.perform_coordinate_gesture("touch",
+                                            hash[:coordinates][:x],
+                                            hash[:coordinates][:y])
           [hash[:view]]
         end
 
         # @!visibility private
         def double_tap(options)
           hash = query_for_coordinates(options)
-          device_agent.perform_coordinate_gesture("double_tap",
-                                                  hash[:coordinates][:x],
-                                                  hash[:coordinates][:y])
+          client.perform_coordinate_gesture("double_tap",
+                                            hash[:coordinates][:x],
+                                            hash[:coordinates][:y])
           [hash[:view]]
         end
 
         # @!visibility private
         def two_finger_tap(options)
           hash = query_for_coordinates(options)
-          device_agent.perform_coordinate_gesture("two_finger_tap",
-                                                  hash[:coordinates][:x],
-                                                  hash[:coordinates][:y])
+          client.perform_coordinate_gesture("two_finger_tap",
+                                            hash[:coordinates][:x],
+                                            hash[:coordinates][:y])
           [hash[:view]]
         end
 
@@ -105,10 +112,10 @@ args[0] = #{args[0]}])
           hash = query_for_coordinates(options)
 
           duration = options[:duration] || 3
-          device_agent.perform_coordinate_gesture("touch",
-                                                  hash[:coordinates][:x],
-                                                  hash[:coordinates][:y],
-                                                  {:duration => duration})
+          client.perform_coordinate_gesture("touch",
+                                            hash[:coordinates][:x],
+                                            hash[:coordinates][:y],
+                                            {:duration => duration})
           [hash[:view]]
         end
 
@@ -131,7 +138,7 @@ args[0] = #{args[0]}])
           direction = dupped_options[:direction]
           force = dupped_options[:force]
           to_point = Coordinates.end_point_for_swipe(direction, element, force)
-          device_agent.pan_between_coordinates(from_point, to_point, gesture_options)
+          client.pan_between_coordinates(from_point, to_point, gesture_options)
           [hash[:view]]
         end
 
@@ -151,8 +158,8 @@ args[0] = #{args[0]}])
             :duration => dupped_options[:duration]
           }
 
-          device_agent.pan_between_coordinates(from_point, to_point,
-                                               gesture_options)
+          client.pan_between_coordinates(from_point, to_point,
+                                         gesture_options)
 
           [from_hash[:view], to_hash[:view]]
         end
@@ -163,8 +170,8 @@ args[0] = #{args[0]}])
             :duration => options[:duration]
           }
 
-          device_agent.pan_between_coordinates(from_point, to_point,
-                                               gesture_options)
+          client.pan_between_coordinates(from_point, to_point,
+                                         gesture_options)
           [first_element_for_query("*")]
         end
 
@@ -188,20 +195,20 @@ args[0] = #{args[0]}])
           start_point = point_from(view)
           end_point = point_from(view, {:offset => scaled_delta})
 
-          device_agent.pan_between_coordinates(start_point,
-                                               end_point,
-                                               gesture_options)
+          client.pan_between_coordinates(start_point,
+                                         end_point,
+                                         gesture_options)
           [view]
         end
 
         # @!visibility private
         def enter_text_with_keyboard(string, options={})
-          device_agent.enter_text(string)
+          client.enter_text(string)
         end
 
         # @!visibility private
         def enter_char_with_keyboard(char)
-          device_agent.enter_text(char)
+          client.enter_text(char)
         end
 
         # @!visibility private
@@ -215,7 +222,7 @@ args[0] = #{args[0]}])
           if mark
             begin
               # The underlying query for coordinates always expects results.
-              value = device_agent.touch(mark)
+              value = client.touch(mark)
               return value
             rescue RuntimeError => e
               RunLoop.log_debug("Cannot find mark '#{mark}' with query; will send a newline")
@@ -225,24 +232,24 @@ args[0] = #{args[0]}])
           end
 
           code = char_for_keyboard_action("Return")
-          device_agent.enter_text(code)
+          client.enter_text(code)
         end
 
         # @!visibility private
         def tap_keyboard_delete_key
-          device_agent.touch("delete")
+          client.touch("delete")
         end
 
         # @!visibility private
         def fast_enter_text(text)
-          device_agent.enter_text(text)
+          client.enter_text(text)
         end
 
         # @!visibility private
         #
         # Stable across different keyboard languages.
         def dismiss_ipad_keyboard
-          device_agent.touch("Hide keyboard")
+          client.touch("Hide keyboard")
         end
 
         # @!visibility private
@@ -257,7 +264,7 @@ args[0] = #{args[0]}])
         # @!visibility private
         def rotate_home_button_to(position)
           # Caller is responsible for normalizing and verifying position.
-          @device_agent.rotate_home_button_to(position)
+          client.rotate_home_button_to(position)
           status_bar_orientation.to_sym
         end
 

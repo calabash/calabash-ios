@@ -1,21 +1,26 @@
 module Calabash
   module Cucumber
     # @!visibility private
-    module Gestures
+    module Automator
       # @!visibility private
-      class Performer
+      class Automator
 
         require "calabash-cucumber/abstract"
         include Calabash::Cucumber::Abstract
 
-        # @!visibility private
-        def self.name
-          raise Calabash::Cucumber::Abstract::AbstractMethodError,
-                "Subclass must implement '.name'"
-        end
 
         # @!visibility private
         def initialize(*args)
+          abstract_method!
+        end
+
+        # @!visibility private
+        def name
+          abstract_method!
+        end
+
+        # @!visibility private
+        def stop
           abstract_method!
         end
 

@@ -31,7 +31,7 @@ module Calabash
     def shutdown
       # Might not be necessary?
       launcher.instance_variable_set(:@run_loop, nil)
-      launcher.instance_variable_set(:@gesture_performer, nil)
+      launcher.instance_variable_set(:@automator, nil)
       @first_launch = true
     end
 
@@ -50,17 +50,17 @@ module Calabash
         raise RuntimeError, "Don't call this method if you are running with Instruments"
       end
 
-      if launcher.gesture_performer.nil?
+      if launcher.automator.nil?
         return false
       end
 
-      launcher.gesture_performer.device_agent.running?
+      launcher.automator.client.running?
     end
 
     def running?
       return false if first_launch
       return false if !launcher.run_loop
-      return false if !launcher.gesture_performer
+      return false if !launcher.automator
 
       return false if !lp_server_running?
 
@@ -96,16 +96,16 @@ module Calabash
     def options
       @options ||= begin
         if xcode.version_gte_8?
-          performer = {
-            :gesture_performer => :device_agent
+          automator = {
+            :automator => :device_agent
           }
         else
-          performer = {
-            :gesture_performer => :instruments
+          automator = {
+            :automator => :instruments
           }
         end
 
-        performer.merge(environment)
+        automator.merge(environment)
       end
     end
 
@@ -138,6 +138,11 @@ end
 
 After("@restart_after") do |_|
   calabash_exit
+  Calabash::Launchctl.instance.shutdown
+end
+
+After("@stop_after") do |_|
+  Calabash::Launchctl.instance.launcher.stop
   Calabash::Launchctl.instance.shutdown
 end
 

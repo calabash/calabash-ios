@@ -1,12 +1,12 @@
 module Calabash
   module Cucumber
     # @!visibility private
-    module Gestures
+    module Automator
 
-      require "calabash-cucumber/gestures/performer"
+      require "calabash-cucumber/automator/automator"
 
       # @!visibility private
-      class Instruments < Calabash::Cucumber::Gestures::Performer
+      class Instruments < Calabash::Cucumber::Automator::Automator
 
         require "calabash-cucumber/uia"
         include Calabash::Cucumber::UIA
@@ -27,11 +27,6 @@ module Calabash
 
         # @!visibility private
         UIA_STRATEGIES = [:preferences, :host, :shared_element]
-
-        # @!visibility private
-        def self.name
-          :instruments
-        end
 
         attr_reader :run_loop
 
@@ -82,13 +77,12 @@ run_loop = #{run_loop} is_a => #{run_loop.class}
 ])
           end
 
-          performer = run_loop[:gesture_performer]
-          # TODO Can remove the performer existence check after run-loop > 2.1.3
-          if performer && performer != :instruments
+          automator = run_loop[:automator]
+          if automator && automator != :instruments
             raise(ArgumentError, %Q[
-Invalid :gesture_performer. Expected :instruments but found:
+Invalid :@automator. Expected :instruments but found:
 
-#{performer}
+#{automator}
 
 in
 
@@ -129,6 +123,16 @@ Expected '#{strategy}' to be one of these supported strategies:
         def initialize(*args)
           Instruments.expect_valid_init_args(args)
           @run_loop = args[0]
+        end
+
+        # @!visibility private
+        def name
+          :instruments
+        end
+
+        # @!visibility private
+        def stop
+          RunLoop.stop(run_loop)
         end
 
         # @!visibility private
@@ -434,3 +438,4 @@ Try adjusting your query to return at least one view.
     end
   end
 end
+

@@ -222,7 +222,7 @@ module Calabash
 
         return current_orientation if current_orientation == normalized_symbol
 
-        launcher.gesture_performer.send(:rotate_home_button_to, normalized_symbol)
+        launcher.automator.send(:rotate_home_button_to, normalized_symbol)
       end
 
       # Rotates the device in the direction indicated by `direction`.
@@ -246,7 +246,7 @@ module Calabash
                 "Expected '#{direction}' to be :left or :right"
         end
 
-        launcher.gesture_performer.send(:rotate, as_symbol)
+        launcher.automator.send(:rotate, as_symbol)
       end
 
       # Performs the `tap` gesture on the (first) view that matches
@@ -419,7 +419,7 @@ Valid forces are: :strong, :normal, :light
 ]
          end
 
-        launcher.gesture_performer.swipe(merged_options)
+        launcher.automator.swipe(merged_options)
       end
 
       # Performs the "flick" gesture on the first view that matches `uiquery`.
@@ -522,7 +522,7 @@ The minimum duration is 0.0.
 ]
         end
 
-        launcher.gesture_performer.pan(from_query, to_query, merged_options)
+        launcher.automator.pan(from_query, to_query, merged_options)
       end
 
       # Performs the pan gesture between two coordinates.
@@ -579,8 +579,8 @@ The minimum duration is 0.0.
 ]
         end
 
-        launcher.gesture_performer.pan_coordinates(from_point, to_point,
-                                                   merged_options)
+        launcher.automator.pan_coordinates(from_point, to_point,
+                                           merged_options)
       end
 
       # Performs a "pinch" gesture.
@@ -597,7 +597,7 @@ The minimum duration is 0.0.
       # @option options {String} :query (nil) if specified, the pinch will be made relative to this query.
       # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
       def pinch(in_out, options={})
-        launcher.gesture_performer.pinch(in_out.to_sym,options)
+        launcher.automator.pinch(in_out.to_sym, options)
       end
 
       # Use keyboard to enter a character.
@@ -624,12 +624,12 @@ The minimum duration is 0.0.
         default_opts = {:wait_after_char => 0.05}
         merged_options = default_opts.merge(options)
 
-        special_char = launcher.gesture_performer.char_for_keyboard_action(char)
+        special_char = launcher.automator.char_for_keyboard_action(char)
 
         if special_char
-          launcher.gesture_performer.enter_char_with_keyboard(special_char)
+          launcher.automator.enter_char_with_keyboard(special_char)
         elsif char.length == 1
-          launcher.gesture_performer.enter_char_with_keyboard(char)
+          launcher.automator.enter_char_with_keyboard(char)
         else
           raise ArgumentError, %Q[
 Expected '#{char}' to be a single character or a special string like:
@@ -666,7 +666,7 @@ To type strings with more than one character, use keyboard_enter_text.
       # @raise [RuntimeError] If the keyboard is not visible.
       def tap_keyboard_action_key
         expect_keyboard_visible!
-        launcher.gesture_performer.tap_keyboard_action_key
+        launcher.automator.tap_keyboard_action_key
       end
 
       # Touches the keyboard delete key.
@@ -674,7 +674,7 @@ To type strings with more than one character, use keyboard_enter_text.
       # @raise [RuntimeError] If the keyboard is not visible.
       def tap_keyboard_delete_key
         expect_keyboard_visible!
-        launcher.gesture_performer.tap_keyboard_delete_key
+        launcher.automator.tap_keyboard_delete_key
       end
 
       # Uses the keyboard to enter text.
@@ -685,7 +685,7 @@ To type strings with more than one character, use keyboard_enter_text.
         expect_keyboard_visible!
         existing_text = text_from_first_responder
         escaped = existing_text.gsub("\n","\\n")
-        launcher.gesture_performer.enter_text_with_keyboard(text, escaped)
+        launcher.automator.enter_text_with_keyboard(text, escaped)
       end
 
       # @!visibility private
@@ -751,7 +751,7 @@ To type strings with more than one character, use keyboard_enter_text.
       # @param [String] text the text to enter
       def fast_enter_text(text)
         expect_keyboard_visible!
-        launcher.gesture_performer.fast_enter_text(text)
+        launcher.automator.fast_enter_text(text)
       end
 
       # Dismisses a iPad keyboard by touching the 'Hide keyboard' button and waits
@@ -777,7 +777,7 @@ Use `ipad?` to branch in your test.
 
         expect_keyboard_visible!
 
-        launcher.gesture_performer.dismiss_ipad_keyboard
+        launcher.automator.dismiss_ipad_keyboard
 
         wait_for_no_keyboard
       end
@@ -1303,12 +1303,12 @@ arguments => '#{arguments}'
           []
         end
 
-        if launcher.gesture_performer
-          if launcher.gesture_performer.class.name == :device_agent
+        if launcher.automator
+          if launcher.automator.name == :device_agent
             delay = merged_opts[:post_resign_active_delay] +
               merged_opts[:post_will_terminate_delay] + 0.4
             sleep(delay)
-            launcher.gesture_performer.send(:session_delete)
+            launcher.automator.send(:session_delete)
           end
         end
         true
@@ -1628,7 +1628,7 @@ arguments => '#{arguments}'
       # @!visibility private
       def query_action_with_options(action, uiquery, options)
         uiquery, options = extract_query_and_options(uiquery, options)
-        views_touched = launcher.gesture_performer.send(action, options)
+        views_touched = launcher.automator.send(action, options)
         unless uiquery.nil?
           msg = "#{action} could not find view: '#{uiquery}', args: #{options}"
           Map.assert_map_results(views_touched, msg)

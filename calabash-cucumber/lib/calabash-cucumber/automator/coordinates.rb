@@ -1,7 +1,7 @@
 
 module Calabash
   module Cucumber
-    module Gestures
+    module Automator
       # @!visibility private
       class Coordinates
 

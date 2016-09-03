@@ -62,3 +62,7 @@ Given(/^I am looking at the Drag and Drop page$/) do
   touch(query)
   wait_for_view("* marked:'drag and drop page'")
 end
+
+Then(/^I am done testing so I want to stop$/) do
+  # Empty on purpose; it is the @stop_after we are testing.
+end

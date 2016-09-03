@@ -7,10 +7,10 @@ require "calabash-cucumber/store/preferences"
 require "calabash-cucumber/usage_tracker.rb"
 require "calabash-cucumber/dylibs"
 require "calabash-cucumber/http/http"
-require "calabash-cucumber/gestures/coordinates"
-require "calabash-cucumber/gestures/performer"
-require "calabash-cucumber/gestures/instruments"
-require "calabash-cucumber/gestures/device_agent"
+require "calabash-cucumber/automator/coordinates"
+require "calabash-cucumber/automator/automator"
+require "calabash-cucumber/automator/instruments"
+require "calabash-cucumber/automator/device_agent"
 require 'calabash-cucumber/keyboard_helpers'
 require 'calabash-cucumber/keychain_helpers'
 require 'calabash-cucumber/wait_helpers'

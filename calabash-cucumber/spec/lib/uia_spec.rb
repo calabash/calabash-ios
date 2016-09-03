@@ -79,7 +79,7 @@ describe Calabash::Cucumber::UIA do
           launcher = Calabash::Cucumber::Launcher.new
           expect(launcher).to receive(:run_loop).and_return({:uia_strategy => :preferences})
           expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
-          expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
+          expect(launcher).to receive(:attached_to_automator?).and_return true
           expect(test_obj).to receive(:http).and_return('')
 
           expect do
@@ -95,7 +95,7 @@ describe Calabash::Cucumber::UIA do
           launcher = Calabash::Cucumber::Launcher.new
           expect(launcher).to receive(:run_loop).and_return({:uia_strategy => :host})
           expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
-          expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
+          expect(launcher).to receive(:attached_to_automator?).and_return true
 
           run_loop_response =
                 {
@@ -115,7 +115,7 @@ describe Calabash::Cucumber::UIA do
             launcher = Calabash::Cucumber::Launcher.new
             expect(launcher).to receive(:run_loop).and_return({:uia_strategy => :host})
             expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
-            expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
+            expect(launcher).to receive(:attached_to_automator?).and_return true
 
             run_loop_response =
                   {
@@ -134,7 +134,7 @@ describe Calabash::Cucumber::UIA do
             launcher = Calabash::Cucumber::Launcher.new
             expect(launcher).to receive(:run_loop).and_return({:uia_strategy => :host})
             expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
-            expect(launcher).to receive(:attached_to_gesture_performer?).and_return true
+            expect(launcher).to receive(:attached_to_automator?).and_return true
 
             run_loop_response =
               {
