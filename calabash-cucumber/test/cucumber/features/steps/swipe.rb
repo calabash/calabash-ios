@@ -4,7 +4,6 @@ Then(/^I can swipe to go back to the Pan menu$/) do
   # to open menu this behavior could probably also be changed in the test app.
   swipe(:right, {
     :query => "*",
-    :duration => 0.7,
     :offset => {:x => x_offset, :y => 0},
     :force => :strong,
 
@@ -20,7 +19,9 @@ And(/^I swipe to delete the '(.*?)' table cell$/) do |cell_title|
   cell_query = "UILabel marked:'#{cell_title}'"
   wait_for_view(cell_query)
   x_offset = query(cell_query)[0]["rect"]["width"] / 2.5
-  swipe(:left, {:query => cell_query, :duration => 0.5, :force => :strong, :offset => {:x => x_offset, :y => 0}})
+  swipe(:left, {:query => cell_query,
+                :force => :strong,
+                :offset => {:x => x_offset, :y => 0}})
   wait_for_animations
   touch("UIButton marked:'Delete'")
 end
