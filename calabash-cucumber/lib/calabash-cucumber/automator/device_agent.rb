@@ -131,12 +131,25 @@ args[0] = #{args[0]}])
           from_point = hash[:coordinates]
           element = hash[:view]
 
+          # DeviceAgent does not understand the :force. Does anyone?
+          force = dupped_options[:force]
+          case force
+            when :strong
+              duration = 0.2
+            when :normal
+              duration = 0.4
+            when :light
+              duration = 0.7
+            else
+              # Caller is responsible for validating the :force option.
+              duration = 0.5
+          end
+
           gesture_options = {
-            :duration => dupped_options[:duration]
+            :duration => duration
           }
 
           direction = dupped_options[:direction]
-          force = dupped_options[:force]
           to_point = Coordinates.end_point_for_swipe(direction, element, force)
           client.pan_between_coordinates(from_point, to_point, gesture_options)
           [hash[:view]]

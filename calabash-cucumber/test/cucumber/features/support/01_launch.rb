@@ -147,5 +147,7 @@ After("@stop_after") do |_|
 end
 
 After do |scenario|
-
+  if scenario.failed?
+    exit!(1)
+  end
 end
