@@ -222,7 +222,7 @@ args[0] = #{args[0]}])
           if mark
             begin
               # The underlying query for coordinates always expects results.
-              value = client.touch(mark)
+              value = client.touch({marked: mark})
               return value
             rescue RuntimeError => e
               RunLoop.log_debug("Cannot find mark '#{mark}' with query; will send a newline")
@@ -237,7 +237,7 @@ args[0] = #{args[0]}])
 
         # @!visibility private
         def tap_keyboard_delete_key
-          client.touch("delete")
+          client.touch({marked: "delete"})
         end
 
         # @!visibility private
@@ -249,7 +249,7 @@ args[0] = #{args[0]}])
         #
         # Stable across different keyboard languages.
         def dismiss_ipad_keyboard
-          client.touch("Hide keyboard")
+          client.touch({marked: "Hide keyboard"})
         end
 
         # @!visibility private

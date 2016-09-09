@@ -378,7 +378,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           expect(device_agent).to(
             receive(:mark_for_return_key_of_first_responder)
           ).and_return("Mark")
-          expect(device_agent.client).to receive(:touch).with("Mark").and_return({})
+          expect(device_agent.client).to receive(:touch).with({marked: "Mark"}).and_return({})
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -399,7 +399,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           ).and_return("Unmatchable identifier")
 
           expect(device_agent.client).to(
-            receive(:touch).with("Unmatchable identifier").and_raise(
+            receive(:touch).with({marked: "Unmatchable identifier"}).and_raise(
               RuntimeError, "No match found")
           )
 
@@ -412,7 +412,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
       context "#tap_keyboard_delete_key" do
         it "touches the keyboard delete key" do
-          expect(device_agent.client).to receive(:touch).with('delete').and_return({})
+          expect(device_agent.client).to receive(:touch).with({marked: 'delete'}).and_return({})
 
           expect(device_agent.tap_keyboard_delete_key).to be == {}
         end
@@ -428,7 +428,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
       context "#dismiss_ipad_keyboard" do
         it "touches the hide keyboard key" do
-          expect(device_agent.client).to receive(:touch).with("Hide keyboard").and_return({})
+          expect(device_agent.client).to receive(:touch).with({marked: "Hide keyboard"}).and_return({})
 
           expect(device_agent.dismiss_ipad_keyboard).to be == {}
         end
