@@ -23,6 +23,8 @@ module Calabash
         require "calabash-cucumber/environment_helpers"
         include Calabash::Cucumber::EnvironmentHelpers
 
+        require "calabash-cucumber/automator/coordinates"
+
         # @!visibility private
         def self.expect_valid_args(args)
           if args.nil?
@@ -54,7 +56,6 @@ args[0] = #{args[0]}])
 
           true
         end
-
 
         attr_reader :client
 
