@@ -1580,6 +1580,66 @@ arguments => '#{arguments}'
         launcher.attach({:uia_strategy => uia_strategy})
       end
 
+      def device_agent
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        if !launcher
+          raise RuntimeError, %Q[
+There is no launcher.
+
+If you are in the Calabash console, you can try to attach to an already running
+Calabash test using:
+
+> console_attach
+
+If you are running from Cucumber or rspec, call Launcher#relaunch before calling
+this method.
+
+]
+        end
+
+        if !launcher.automator
+          raise RuntimeError, %Q[
+The launcher is not attached to an automator.
+
+If you are in the Calabash console, you can try to attach to an already running
+Calabash test using:
+
+> console_attach
+
+If you are running from Cucumber or rspec, call Launcher#relaunch before calling
+this method.
+
+]
+        end
+
+        if launcher.automator.name != :device_agent
+          raise RuntimeError, %Q[
+The launcher automator is not DeviceAgent:
+
+#{launcher.automator}
+
+#device_agent is only available for Xcode 8.
+
+In your tests, use this pattern to branch on the availability of DeviceAgent.
+
+if uia_available?
+   # Make a UIA call
+else
+   # Make a DeviceAgent call
+end
+
+]
+        end
+        automator = launcher.automator
+
+        if !automator.running?
+          raise RuntimeError, %Q[The DeviceAgent is not running.]
+        else
+          require "calabash-cucumber/device_agent"
+          Calabash::Cucumber::DeviceAgent.new(automator.client, self)
+        end
+      end
+
       # @!visibility private
       # TODO should be private
       def launcher
