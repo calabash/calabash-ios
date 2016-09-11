@@ -386,6 +386,9 @@ RunLoop.run returned:
 ]
         end
 
+        Calabash::Cucumber::UIA.rewrite_instance_methods_if_necessary(options[:xcode],
+                                                                      automator)
+
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
           check_server_gem_compatibility
