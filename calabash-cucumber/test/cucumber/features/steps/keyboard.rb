@@ -315,7 +315,7 @@ When(/^UIA is not available, checking for keyboards with UIA raises an error$/) 
   if !uia_available?
     expect do
       uia_wait_for_keyboard
-    end.to raise_error RuntimeError, /This method requires UIAutomation/
+    end.to raise_error RuntimeError, /UIAutomation is not available in Xcode >= 8.0/
   end
 end
 
