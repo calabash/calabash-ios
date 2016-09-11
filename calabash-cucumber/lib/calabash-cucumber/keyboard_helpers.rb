@@ -140,66 +140,6 @@ module Calabash
         true
       end
 
-      # Used for detecting keyboards that are not normally visible to calabash;
-      # e.g. the keyboard on the `MFMailComposeViewController`
-      #
-      # @note
-      #  IMPORTANT this should only be used when the app does not respond to
-      #  `keyboard_visible?` and UIAutomation is being used.
-      #
-      # @see #keyboard_visible?
-      #
-      # @raise [RuntimeError] If the app was not launched with instruments
-      def uia_keyboard_visible?
-        if !uia_available?
-          raise RuntimeError, %Q[
-This method requires UIAutomation and your application was not launched with
-instruments.  UIAutomation is not available for iOS 10 or for Xcode 8.
-
-Use `uia_available?` in your tests to branch on UIAutomation availability.
-
-]
-        end
-        res = uia_query_windows(:keyboard)
-        res != ":nil"
-      end
-
-      # Waits for a keyboard that is not normally visible to calabash;
-      # e.g. the keyboard on `MFMailComposeViewController`.
-      #
-      # @note
-      #  IMPORTANT this should only be used when the app does not respond to
-      #  `keyboard_visible?` and UIAutomation is being used.
-      #
-      # @see #keyboard_visible?
-      #
-      # @raise [RuntimeError] if the app was not launched with instruments
-      def uia_wait_for_keyboard(options={})
-        if !uia_available?
-          raise RuntimeError, %Q[
-This method requires UIAutomation and your application was not launched with
-instruments.  UIAutomation is not available for iOS 10 or for Xcode 8.
-
-Use `uia_available?` in your tests to branch on UIAutomation availability.
-
-]
-        end
-
-        default_opts = {
-          :timeout => 10,
-          :retry_frequency => 0.1,
-          :post_timeout => 0.5,
-          :timeout_message => "Keyboard did not appear"
-        }
-
-        options = default_opts.merge(options)
-
-        wait_for(options) do
-          uia_keyboard_visible?
-        end
-        true
-      end
-
       # Waits for a keyboard to appear and returns the localized name of the
       # `key_code` signifier
       #

@@ -307,6 +307,47 @@ module Calabash
         uia("target.setDeviceOrientation(#{uia_orientation})")
       end
 
+      # Used for detecting keyboards that are not normally visible to calabash;
+      # e.g. the keyboard on the `MFMailComposeViewController`
+      #
+      # @note
+      #  IMPORTANT this should only be used when the app does not respond to
+      #  `keyboard_visible?` and UIAutomation is being used.
+      #
+      # @see #keyboard_visible?
+      #
+      # @raise [RuntimeError] If the app was not launched with instruments
+      def uia_keyboard_visible?
+        res = uia_query_windows(:keyboard)
+        res != ":nil"
+      end
+
+      # Waits for a keyboard that is not normally visible to calabash;
+      # e.g. the keyboard on `MFMailComposeViewController`.
+      #
+      # @note
+      #  IMPORTANT this should only be used when the app does not respond to
+      #  `keyboard_visible?` and UIAutomation is being used.
+      #
+      # @see #keyboard_visible?
+      #
+      # @raise [RuntimeError] if the app was not launched with instruments
+      def uia_wait_for_keyboard(options={})
+        default_opts = {
+          :timeout => 10,
+          :retry_frequency => 0.1,
+          :post_timeout => 0.5,
+          :timeout_message => "Keyboard did not appear"
+        }
+
+        options = default_opts.merge(options)
+
+        wait_for(options) do
+          uia_keyboard_visible?
+        end
+        true
+      end
+
       # @!visibility private
       def uia_type_string(string, opt_text_before='', escape=true)
         result = uia_handle_command(:typeString, string, opt_text_before)
@@ -459,6 +500,7 @@ module Calabash
       end
 
       private
+
       def validate_hash_is_location!(options)
         return if options[:latitude] and options[:longitude]
         if (options[:latitude] and not options[:longitude]) ||

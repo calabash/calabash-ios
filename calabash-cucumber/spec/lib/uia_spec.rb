@@ -8,6 +8,9 @@ describe Calabash::Cucumber::UIA do
       include Calabash::Cucumber::WaitHelpers
       def to_s; "#<World RSPEC STUB>"; end
       def inspect; to_s; end
+
+      # The dread Cucumber embed
+      def embed(_, _, _); ; end
     end.new
   end
 
@@ -67,6 +70,53 @@ describe Calabash::Cucumber::UIA do
         expect(world).to receive(:uia_handle_command).and_return(mocked_value)
         expect { world.uia_type_string 'foo' }.to raise_error RuntimeError
       end
+    end
+  end
+
+  context "#uia_keyboard_visible?" do
+    it "returns true if UIA window query is != ':nil'" do
+      expect(world).to receive(:uia_query_windows).with(:keyboard).and_return("anything by :nil")
+
+      expect(world.uia_keyboard_visible?).to be_truthy
+    end
+
+    it "returns false if UIA window query is == ':nil'" do
+      expect(world).to receive(:uia_query_windows).with(:keyboard).and_return(":nil")
+
+      expect(world.uia_keyboard_visible?).to be_falsey
+    end
+  end
+
+  context "#uia_wait_for_keyboard" do
+    it "waits for keyboard to appear" do
+      expect(world).to receive(:uia_keyboard_visible?).and_return(false, false, true)
+
+      options = { :retry_frequency => 0, :post_timeout => 0.0}
+      expect(world.uia_wait_for_keyboard(options)).to be_truthy
+    end
+
+    it "raises an error if keyboard does not appear" do
+      expect(world).to receive(:uia_keyboard_visible?).at_least(:once).and_return(false)
+      expect(world).to receive(:screenshot).and_return(true)
+      expect(world).to receive(:embed).and_return(true)
+
+      options = { :retry_frequency => 0, :timeout => 0.05 }
+      expect do
+        world.uia_wait_for_keyboard(options)
+      end.to raise_error Calabash::Cucumber::WaitHelpers::WaitError,
+                         /Keyboard did not appear/
+    end
+
+    it "merges the options it passes to wait_for" do
+      options = {
+        :post_timeout => 100,
+        :timeout_message => "Alternative message",
+        :retry_frequency => 0.1,
+        :timeout => 100
+      }
+      expect(world).to receive(:wait_for).with(options).and_return(true)
+
+      expect(world.uia_wait_for_keyboard(options)).to be_truthy
     end
   end
 
