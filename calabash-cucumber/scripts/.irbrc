@@ -84,5 +84,8 @@ def enable_usage_tracking(level="system_info")
   level
 end
 
+xcode = RunLoop::Xcode.new
+Calabash::Cucumber::UIA.rewrite_instance_methods_if_necessary(xcode)
+
 puts_console_details
 puts_message_of_the_day
