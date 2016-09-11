@@ -27,21 +27,21 @@ describe Calabash::Cucumber::UIA do
       end
     end
 
-    context ".rewrite_instance_methods_if_necessary" do
+    context ".redefine_instance_methods_if_necessary" do
       it "does not rewrite on the XTC" do
         expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
 
-        actual = Calabash::Cucumber::UIA.rewrite_instance_methods_if_necessary(xcode, automator)
+        actual = Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(xcode, automator)
         expect(actual).to be_falsey
       end
 
       it "rewrites if Xcode >= 8" do
         expect(xcode).to receive(:version_gte_8?).and_return(true)
         expect(Calabash::Cucumber::UIA).to(
-          receive(:rewrite_instance_methods_to_raise).and_return(true)
+          receive(:redefine_instance_methods_to_raise).and_return(true)
         )
 
-        actual = Calabash::Cucumber::UIA.rewrite_instance_methods_if_necessary(xcode, automator)
+        actual = Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(xcode, automator)
         expect(actual).to be_truthy
       end
 
@@ -52,39 +52,39 @@ describe Calabash::Cucumber::UIA do
         end
 
         it "does not rewrite if the automator arg is nil" do
-          expect(Calabash::Cucumber::UIA).not_to receive(:rewrite_instance_methods_to_raise)
+          expect(Calabash::Cucumber::UIA).not_to receive(:redefine_instance_methods_to_raise)
 
-          actual = Calabash::Cucumber::UIA.rewrite_instance_methods_if_necessary(xcode, nil)
+          actual = Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(xcode, nil)
           expect(actual).to be_falsey
         end
 
         it "does not rewrite if the automator is not DeviceAgent" do
-          expect(Calabash::Cucumber::UIA).not_to receive(:rewrite_instance_methods_to_raise)
+          expect(Calabash::Cucumber::UIA).not_to receive(:redefine_instance_methods_to_raise)
           expect(automator).to receive(:name).and_return(:instruments)
 
-          actual = Calabash::Cucumber::UIA.rewrite_instance_methods_if_necessary(xcode, automator)
+          actual = Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(xcode, automator)
           expect(actual).to be_falsey
         end
 
         it "rewrites if the automator is DeviceAgent" do
           expect(Calabash::Cucumber::UIA).to(
-            receive(:rewrite_instance_methods_to_raise).and_return(true)
+            receive(:redefine_instance_methods_to_raise).and_return(true)
           )
           expect(automator).to receive(:name).and_return(:device_agent)
 
-          actual = Calabash::Cucumber::UIA.rewrite_instance_methods_if_necessary(xcode, automator)
+          actual = Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(xcode, automator)
           expect(actual).to be_truthy
         end
       end
     end
 
-    context ".rewrite_instance_methods_to_raise" do
+    context ".redefine_instance_methods_to_raise" do
       let(:reason) { "Why did this raise" }
 
       it "rewrites all the UIA instance methods to raise" do
         methods = Calabash::Cucumber::UIA.instance_methods
 
-        actual = Calabash::Cucumber::UIA.rewrite_instance_methods_to_raise(reason)
+        actual = Calabash::Cucumber::UIA.redefine_instance_methods_to_raise(reason)
         expect(actual).to be_truthy
 
         methods.each do |method_name|

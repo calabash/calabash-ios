@@ -528,22 +528,22 @@ end
 module Calabash::Cucumber::UIA
 
   # @!visibility private
-  def self.rewrite_instance_methods_if_necessary(xcode, automator=nil)
+  def self.redefine_instance_methods_if_necessary(xcode, automator=nil)
     return if Calabash::Cucumber::Environment.xtc?
 
     if xcode.version_gte_8?
       reason = "UIAutomation is not available in Xcode >= 8.0."
-      return self.rewrite_instance_methods_to_raise(reason)
+      return self.redefine_instance_methods_to_raise(reason)
     end
 
     if automator && automator.name == :device_agent
       reason = "UIAutomation is not available when testing with DeviceAgent."
-      return self.rewrite_instance_methods_to_raise(reason)
+      return self.redefine_instance_methods_to_raise(reason)
     end
   end
 
   # @!visibility private
-  def self.rewrite_instance_methods_to_raise(reason)
+  def self.redefine_instance_methods_to_raise(reason)
     methods = Calabash::Cucumber::UIA.instance_methods
     methods.each do |method_name|
       Calabash::Cucumber::UIA.send(:remove_method, method_name)
