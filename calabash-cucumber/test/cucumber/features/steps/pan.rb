@@ -94,8 +94,8 @@ Then(/^I can pull up to see the Control Panel page$/) do
 
   element = wait_for_view("*")
   x = element["rect"]["center_x"]
-  start_y = element["rect"]["height"]
-  final_y = element["rect"]["center_x"] + (element["rect"]["height"]/2)
+  start_y = element["rect"]["height"] - 10
+  final_y = element["rect"]["center_y"] + (element["rect"]["height"]/4)
   pan_coordinates({:x => x, :y => start_y},
                   {:x => x, :y => final_y},
                   {duration: 0.5})
@@ -111,7 +111,7 @@ Then(/^I can pull up to see the Control Panel page$/) do
     end
 
     # This will dismiss the control panel by touching the navigation bar.
-    touch("* marked:'Pan'")
+    touch("* marked:'Pan Menu'")
   else
     # Control Panel view is invisible to the LPServer and the DeviceAgent queries.
     # Try to touch a row that is hidden by the page and expect no transition.
