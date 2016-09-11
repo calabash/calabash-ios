@@ -600,6 +600,8 @@ The minimum duration is 0.0.
         launcher.automator.pinch(in_out.to_sym, options)
       end
 
+      # @deprecated 0.21.0 Use #keyboard_enter_text
+      #
       # Use keyboard to enter a character.
       #
       # @note
@@ -607,9 +609,6 @@ The minimum duration is 0.0.
       #  all keyboards; e.g. `Delete`, `Return`.
       #
       # @see #keyboard_enter_text
-      #
-      # @note
-      #  You should prefer to call `keyboard_enter_text`.
       #
       # @raise [RuntimeError] If there is no visible keyboard
       # @raise [RuntimeError] If the keyboard (layout) is not supported
@@ -1347,11 +1346,14 @@ arguments => '#{arguments}'
         launcher
       end
 
-      # Helper method to easily create page object instances from a cucumber execution context.
-      # The advantage of using `page` to instantiate a page object class is that it
-      # will automatically store a reference to the current Cucumber world
-      # which is needed in the page object methods to call Cucumber-specific methods
-      # like puts or embed.
+      # Helper method to easily create page object instances from a cucumber
+      # execution context.
+      #
+      # The advantage of using `page` to instantiate a page object class is that
+      # it will automatically store a reference to the current Cucumber world
+      # which is needed in the page object methods to call Cucumber-specific
+      # methods like puts or embed.
+      #
       # @example Instantiating a `LoginPage` from a step definition
       #   Given(/^I am about to login to a self-hosted site$/) do
       #       @current_page = page(LoginPage).await(timeout: 30)
@@ -1359,9 +1361,12 @@ arguments => '#{arguments}'
       #   end
       #
       # @see Calabash::IBase
-      # @param {Class} clz the page object class to instantiate (passing the cucumber world and `args`)
-      # @param {Array} args optional additional arguments to pass to the page object constructor
-      # @return {Object} a fresh instance of `Class clz` which has been passed a reference to the cucumber World object.
+      # @param {Class} clz the page object class to instantiate (passing the
+      #  Cucumber world and `args`)
+      # @param {Array} args optional additional arguments to pass to the page
+      #  object constructor
+      # @return {Object} a fresh instance of `Class clz` which has been passed
+      #  a reference to the cucumber World object.
       def page(clz,*args)
         clz.new(self,*args)
       end
