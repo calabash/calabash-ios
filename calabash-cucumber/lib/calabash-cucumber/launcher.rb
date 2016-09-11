@@ -172,6 +172,18 @@ module Calabash
 
         @run_loop = RunLoop::HostCache.default.read
 
+        if @run_loop[:automator] == :device_agent
+          # TODO Attach to DeviceAgent - run-loop supports this!
+          # TODO Rewrite UIA methods to raise in the context of UIA
+          raise RuntimeError, %Q[
+
+Cannot attach to DeviceAgent automator.
+
+This behavior is not implemented yet.
+
+]
+        end
+
         begin
           Calabash::Cucumber::HTTP.ensure_connectivity(merged_options)
         rescue Calabash::Cucumber::ServerNotRespondingError => _
@@ -373,6 +385,9 @@ RunLoop.run returned:
 
 ]
         end
+
+        Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(options[:xcode],
+                                                                       automator)
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
