@@ -14,6 +14,7 @@ require "calabash-cucumber/automator/device_agent"
 require 'calabash-cucumber/keyboard_helpers'
 require 'calabash-cucumber/keychain_helpers'
 require 'calabash-cucumber/wait_helpers'
+require "calabash-cucumber/device_agent"
 require 'calabash-cucumber/operations'
 require 'calabash-cucumber/core'
 require 'calabash-cucumber/tests_helpers'
