@@ -10,6 +10,7 @@ module Calabash
 
         require "run_loop"
         require "calabash-cucumber/map"
+        require "calabash-cucumber/automator/coordinates"
 
         require "calabash-cucumber/query_helpers"
         include Calabash::Cucumber::QueryHelpers
@@ -129,7 +130,12 @@ args[0] = #{args[0]}])
           end
 
           hash = query_for_coordinates(dupped_options)
-          from_point = hash[:coordinates]
+
+          from_point = if !options[:offset].nil? && options[:query].nil?
+                         options[:offset]
+                       else
+                         hash[:coordinates]
+                       end
           element = hash[:view]
 
           # DeviceAgent does not understand the :force. Does anyone?
