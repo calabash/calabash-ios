@@ -11,16 +11,19 @@ module Calabash
     class Preferences
       require "calabash-cucumber/dot_dir"
 
+      # @!visibility private
       def initialize
         dot_dir = Calabash::Cucumber::DotDir.directory
         @path = File.join(dot_dir, "preferences", "preferences.json")
       end
 
+      # @!visibility private
       def to_s
         puts "Preferences:"
         ap read
       end
 
+      # @!visibility private
       def inspect
         to_s
       end

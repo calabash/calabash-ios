@@ -546,8 +546,8 @@ The minimum duration is 0.0.
       #   y = element["rect"]["height"]
       #   pan_coordinates({x, height}, {x, 240})
       #
-      # @param {String} from_point where to start the pan.
-      # @param {String} to_query where to end the pan.
+      # @param {Hash} from_point where to start the pan.
+      # @param {Hash} to_point where to end the pan.
       # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
       #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
       #  duration must be > 0.
@@ -1580,6 +1580,23 @@ arguments => '#{arguments}'
         launcher.attach({:uia_strategy => uia_strategy})
       end
 
+      # Returns an object that provides an interface to the DeviceAgent
+      # public query and gesture API.
+      #
+      # @see Calabash::Cucumber::DeviceAgent
+      #
+      # @example
+      #   device_agent.query({marked: "Cancel"})
+      #   device_agent.touch({marked: "Cancel"})
+      #
+      # @return [Calabash::Cucumber::DeviceAgent]
+      #
+      # @raise [RuntimeError] If the application has not been launched.
+      # @raise [RuntimeError] If there is no automator attached to the
+      #   current launcher
+      # @raise [RuntimeError] If the automator attached the current
+      #   launcher is not DeviceAgent
+      # @raise [RuntimeError] If the automator is not running.
       def device_agent
         launcher = Calabash::Cucumber::Launcher.launcher_if_used
         if !launcher

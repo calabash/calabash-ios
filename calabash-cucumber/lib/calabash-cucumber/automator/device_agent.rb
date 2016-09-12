@@ -183,6 +183,7 @@ args[0] = #{args[0]}])
           [from_hash[:view], to_hash[:view]]
         end
 
+        # @!visibility private
         def pan_coordinates(from_point, to_point, options)
 
           gesture_options = {

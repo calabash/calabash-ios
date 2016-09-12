@@ -27,7 +27,7 @@ module Calabash
       # If `method_name` maps to no LPOperation, then it is treated a selector
       # and is performed on any view that matches `query`.
       #
-      # @examples
+      # @example
       #
       #   # Calls 'text' on any visible UITextField, because :text is not a defined operation.
       #   > map("textField", :text)

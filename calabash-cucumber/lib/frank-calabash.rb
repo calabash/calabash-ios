@@ -3,14 +3,15 @@ require 'calabash-cucumber/core'
 require 'calabash-cucumber/operations'
 require 'calabash-cucumber/launcher'
 
-# base module for Frank-Calabash
+# @!visibility private
 module Calabash
   module Cucumber
     module Map
+      # @!visibility private
       def raw_map(query, method_name, *method_args)
         operation_map = {
-            :method_name => method_name,
-            :arguments => method_args
+          :method_name => method_name,
+          :arguments => method_args
         }
         res = http({:method => :post, :path => 'cal_map'},
                    {:query => query, :operation => operation_map})
@@ -26,8 +27,11 @@ module Calabash
   end
 end
 
+# @!visibility private
 module Frank
+  # @!visibility private
   module Calabash
+    # @!visibility private
     def launch(options={})
       launcher = ::Calabash::Cucumber::Launcher.launcher
       #noinspection RubyResolve
@@ -37,17 +41,19 @@ module Frank
       launcher.relaunch(options)
     end
 
+    # @!visibility private
     def calabash_client
       Client.new
     end
 
+    # @!visibility private
     module Operations
       include ::Calabash::Cucumber::Operations
     end
 
+    # @!visibility private
     class Client
       include Operations
     end
-
   end
 end

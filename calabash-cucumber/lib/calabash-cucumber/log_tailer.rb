@@ -1,6 +1,7 @@
 
 module Calabash
   module Cucumber
+    # @!visibility private
     class LogTailer
 
       # @!visibility private

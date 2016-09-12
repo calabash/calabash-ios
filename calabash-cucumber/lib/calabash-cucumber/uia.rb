@@ -378,6 +378,7 @@ module Calabash
         end
       end
 
+      # @!visibility private
       def uia_type_string_raw(str)
         uia("uia.keyboard().typeString('#{str}')")
       end

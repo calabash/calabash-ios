@@ -1,6 +1,7 @@
 
 module Calabash
   module Cucumber
+    # @!visibility private
     module Abstract
 
       # @!visibility private

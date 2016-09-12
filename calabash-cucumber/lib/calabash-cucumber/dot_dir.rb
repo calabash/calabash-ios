@@ -4,6 +4,7 @@ module Calabash
     module DotDir
       require "run_loop"
 
+      # @!visibility private
       def self.directory
         home = RunLoop::Environment.user_home_directory
         dir = File.join(home, ".calabash")
