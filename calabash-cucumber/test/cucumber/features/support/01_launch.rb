@@ -147,7 +147,15 @@ After("@stop_after") do |_|
 end
 
 After do |scenario|
-  if scenario.failed?
-    exit!(1)
+
+  case :shutdown
+  when :shutdown
+    if scenario.failed?
+      calabash_exit
+    end
+  when :exit
+    if scenario.failed?
+      exit!(1)
+    end
   end
 end

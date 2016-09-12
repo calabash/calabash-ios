@@ -778,6 +778,72 @@ describe Calabash::Cucumber::Core do
     end
   end
 
+  context "#device_agent" do
+    it "raises an error if launcher is nil" do
+      expect(Calabash::Cucumber::Launcher).to(
+        receive(:launcher_if_used).and_return(nil)
+      )
+      expect do
+        world.device_agent
+      end.to raise_error RuntimeError, /There is no launcher/
+    end
+
+    it "raises an error if launcher automator is nil" do
+      expect(Calabash::Cucumber::Launcher).to(
+        receive(:launcher_if_used).and_return(launcher)
+      )
+      expect(launcher).to receive(:automator).and_return(nil)
+
+      expect do
+        world.device_agent
+      end.to raise_error RuntimeError, /The launcher is not attached to an automator/
+    end
+
+    it "raises an error if launcher.gesture_performer is not device_agent" do
+      expect(Calabash::Cucumber::Launcher).to(
+        receive(:launcher_if_used).and_return(launcher)
+      )
+      allow(launcher).to receive(:automator).and_return(automator)
+      allow(automator).to receive(:name).and_return(:not_device_agent)
+
+      expect do
+        world.device_agent
+      end.to raise_error RuntimeError, /The launcher automator is not DeviceAgent/
+
+    end
+
+    context "gesture performer is a DeviceAgent instance" do
+      let(:run_loop_client) { "RunLoop::DeviceAgent::Client" }
+      let(:device_agent_api) { "DeviceAgent API" }
+
+      before do
+        expect(Calabash::Cucumber::Launcher).to(
+          receive(:launcher_if_used).and_return(launcher)
+        )
+        allow(launcher).to receive(:automator).and_return(automator)
+        allow(automator).to receive(:name).and_return(:device_agent)
+        allow(automator).to receive(:client).and_return(run_loop_client)
+      end
+
+      it "raises an error if client is not running" do
+        expect(automator).to receive(:running?).and_return(false)
+
+        expect do
+          world.device_agent
+        end.to raise_error RuntimeError, /The DeviceAgent is not running/
+      end
+
+      it "returns the device_agent.client" do
+        expect(automator).to receive(:running?).and_return(true)
+        expect(Calabash::Cucumber::DeviceAgent).to(
+          receive(:new).with(run_loop_client, world).and_return(device_agent_api)
+        )
+
+        expect(world.device_agent).to be == device_agent_api
+      end
+    end
+  end
+
   context "#launcher" do
     it "returns @@launcher" do
       expect(Calabash::Cucumber::Launcher).to receive(:launcher).and_return(launcher)

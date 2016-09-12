@@ -76,6 +76,11 @@ args[0] = #{args[0]}])
         end
 
         # @!visibility private
+        def running?
+          client.send(:running?)
+        end
+
+        # @!visibility private
         def session_delete
           client.send(:session_delete)
         end
@@ -238,7 +243,7 @@ args[0] = #{args[0]}])
               # The underlying query for coordinates always expects results.
               value = client.touch({marked: mark})
               return value
-            rescue RuntimeError => e
+            rescue RuntimeError => _
               RunLoop.log_debug("Cannot find mark '#{mark}' with query; will send a newline")
             end
           else

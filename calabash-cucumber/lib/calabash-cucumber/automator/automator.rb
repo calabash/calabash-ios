@@ -25,6 +25,16 @@ module Calabash
         end
 
         # @!visibility private
+        def running?
+          abstract_method!
+        end
+
+        # @!visibility private
+        def client
+          abstract_method!
+        end
+
+        # @!visibility private
         def touch(options)
           abstract_method!
         end
