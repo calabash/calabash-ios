@@ -338,7 +338,7 @@ PRIVATE
         begin
           block.call
         rescue => e
-          world.send(:fail, e.class, e.message)
+          world.send(:fail, e.message)
         end
       end
     end
