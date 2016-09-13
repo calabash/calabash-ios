@@ -1,5 +1,7 @@
+
 module Calabash
   module Cucumber
+    # @!visibility private
     class UsageTracker
       require "calabash-cucumber/store/preferences"
       require "calabash-cucumber/logging"

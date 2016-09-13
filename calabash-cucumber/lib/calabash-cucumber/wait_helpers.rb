@@ -7,6 +7,8 @@ module Calabash
 
     # A collection of methods that help you wait for things.
     module WaitHelpers
+
+      # TODO This should not include Core!!!  It should be included _by_ Core.
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::TestsHelpers
 

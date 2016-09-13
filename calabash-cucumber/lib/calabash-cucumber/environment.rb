@@ -1,5 +1,6 @@
 module Calabash
   module Cucumber
+    # @!visibility private
     module Environment
 
       require "run_loop"

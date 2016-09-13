@@ -167,11 +167,6 @@ Please run again without bundle exec.\033[0m
 
         log_info('Installed frank plugin to ./staticlib/libFrankCalabash.a')
 
-        if Luffa::Environment.travis_ci?
-          log_info('Skipping dylib creation on Travis CI; no codesigning environment')
-          exit 0
-        end
-
         unless system('make', 'dylibs')
           log_error("There was an error executing 'make dylibs'")
           exit 1

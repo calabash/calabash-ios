@@ -1,23 +1,31 @@
-class CoreIncluded
-  include Calabash::Cucumber::Core
-end
 
 describe Calabash::Cucumber::Core do
 
   let(:launcher) { Calabash::Cucumber::Launcher.new }
-  let(:core_instance) { CoreIncluded.new }
+  let(:world) do
+    Class.new do
+      include Calabash::Cucumber::Core
+      def to_s; "#<World>"; end
+      def inspect; "#<World>"; end
+    end.new
+  end
 
-  describe '#calabash_exit' do
-    it 'targeting simulators' do
+  context "#calabash_exit" do
+
+    it "does not raise an error when the LPServer is not running" do
+      expect { world.calabash_exit }.not_to raise_error
+    end
+
+    it "does not raise an error when LPServer is running" do
       options =
-            {
-                  :app => Resources.shared.app_bundle_path(:cal_smoke_app),
-                  :device_target =>  'simulator',
-                  :launch_retries => Luffa::Retry.instance.launch_retries
-            }
+        {
+          :app => Resources.shared.app_bundle_path(:cal_smoke_app),
+          :device_target =>  "simulator",
+          :launch_retries => Luffa::Retry.instance.launch_retries
+        }
       launcher.relaunch(options)
       expect(launcher.run_loop).not_to be == nil
-      expect { core_instance.calabash_exit }.not_to raise_error
+      expect { world.calabash_exit }.not_to raise_error
     end
   end
 end

@@ -27,7 +27,7 @@ module Calabash
       # If `method_name` maps to no LPOperation, then it is treated a selector
       # and is performed on any view that matches `query`.
       #
-      # @examples
+      # @example
       #
       #   # Calls 'text' on any visible UITextField, because :text is not a defined operation.
       #   > map("textField", :text)
@@ -55,6 +55,12 @@ module Calabash
       #
       # @todo Calabash LPOperations should return 'views touched' in JSON format
       def self.map(query, method_name, *method_args)
+        require "calabash-cucumber/launcher"
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        if launcher && launcher.automator && launcher.automator.name == :device_agent
+          launcher.automator.client.send(:_dismiss_springboard_alerts)
+        end
+
         self.raw_map(query, method_name, *method_args)['results']
       end
 

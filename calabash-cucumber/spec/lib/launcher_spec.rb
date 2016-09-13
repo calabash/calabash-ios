@@ -20,6 +20,170 @@ describe 'Calabash Launcher' do
     RunLoop::SimControl.terminate_all_sims
   }
 
+  let(:instruments_automator) do
+    Class.new do
+      def run_loop; {:log_file => "path/to/file.log"}; end
+      def name; :instruments; end
+      def stop; :stopped; end
+      def to_s; "#<Instruments RSPEC STUB>"; end
+      def inspect; to_s; end
+    end.new
+  end
+
+  let(:device_agent_automator) do
+    Class.new do
+      def name; :device_agent; end
+      def stop; :stopped; end
+      def client
+        Class.new do
+          def cbx_launcher
+            Class.new do
+              def name; "iOSDeviceManager"; end
+            end.new
+          end
+          def shutdown; :stopped; end
+        end.new
+      end
+      def to_s; "#<DeviceAgent RSPEC STUB>"; end
+      def inspect; to_s; end
+    end.new
+  end
+
+  let(:unknown_automator) do
+    Class.new do
+      def name; :automator; end
+      def to_s; "#<Automator RSPEC STUB>"; end
+      def inspect; to_s; end
+    end.new
+  end
+
+  context "#to_s" do
+    it "is not attached to any automator" do
+      expect(launcher.to_s[/not attached to an automator/]).to be_truthy
+    end
+
+    it "is attached to instruments" do
+      allow(launcher).to receive(:automator).and_return(instruments_automator)
+
+      expect(launcher.to_s[/UIAutomation\/instruments/]).to be_truthy
+    end
+
+    it "is attached to device_agent" do
+      allow(launcher).to receive(:automator).and_return(device_agent_automator)
+      launcher.instance_variable_set(:@automator, device_agent_automator)
+
+      expect(launcher.to_s[/DeviceAgent\/iOSDeviceManager/]).to be_truthy
+    end
+
+    it "is attached to some other automator" do
+      allow(launcher).to receive(:automator).and_return(unknown_automator)
+
+      expected = "#<Launcher: attached to automator>"
+      expect(launcher.to_s).to be == expected
+    end
+
+    it "is attached to some automator that does not respond to #name" do
+      allow(launcher).to receive(:automator).and_return(unknown_automator)
+      expect(unknown_automator).to receive(:respond_to?).with(:name).and_return(false)
+
+      expect(launcher.to_s[/Automator RSPEC STUB/]).to be_truthy
+    end
+  end
+
+  context "#inspect" do
+    it "is the same as to_s" do
+      expect(launcher.inspect).to be == launcher.to_s
+    end
+  end
+
+  context "#stop" do
+    it "does nothing if launcher does not have an automator"  do
+      allow(launcher).to receive(:automator).and_return(nil)
+
+      expect(launcher.stop).to be == :no_automator
+    end
+
+    it "calls RunLoop.stop if automator is :instruments" do
+      allow(launcher).to receive(:automator).and_return(instruments_automator)
+      expect(launcher.stop).to be == :stopped
+    end
+
+    it "calls #stop if automator is :device_agent" do
+      allow(launcher).to receive(:automator).and_return(device_agent_automator)
+
+      expect(launcher.stop).to be == :stopped
+    end
+
+    it "logs a warning if the automator is unknown" do
+      allow(launcher).to receive(:automator).and_return(unknown_automator)
+
+      actual = nil
+      out = capture_stdout do
+        actual = launcher.stop
+      end.string
+
+      expect(actual).to be == :unknown_automator
+      expect(out[/Unknown automator/]).to be_truthy
+    end
+
+    it "logs a warning if the automator is unknown and does not respond to #name" do
+      allow(launcher).to receive(:automator).and_return(unknown_automator)
+      expect(unknown_automator).to receive(:respond_to?).with(:name).and_return(false)
+
+      actual = nil
+      out = capture_stdout do
+        actual = launcher.stop
+      end.string
+
+      expect(actual).to be == :unknown_automator
+      expect(out[/Unknown automator/]).to be_truthy
+    end
+  end
+
+  context ".instruments?" do
+    it "returns true if @@launcher defined and is attached to :instruments" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return true
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_truthy
+    end
+
+    it "returns false if @@launcher is not defined" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(nil)
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_falsey
+    end
+
+    it "returns false if @@launcher is defined, but not attached to :instruments" do
+      expect(Calabash::Cucumber::Launcher).to receive(:launcher_if_used).and_return(launcher)
+      expect(launcher).to receive(:instruments?).and_return false
+
+      expect(Calabash::Cucumber::Launcher.instruments?).to be_falsey
+    end
+  end
+
+  context "#instruments?" do
+    it "returns true if attached to instruments automator" do
+      allow(launcher).to receive(:automator).and_return(instruments_automator)
+      expect(launcher).to receive(:attached_to_automator?).and_return(true)
+
+      expect(launcher.instruments?).to be_truthy
+    end
+
+    it "returns false if not attached to automator" do
+      expect(launcher).to receive(:attached_to_automator?).and_return(false)
+
+      expect(launcher.instruments?).to be_falsey
+    end
+
+    it "returns false if attached to automator that is not instruments" do
+      allow(launcher).to receive(:automator).and_return(device_agent_automator)
+      expect(launcher).to receive(:attached_to_automator?).and_return(true)
+
+      expect(launcher.instruments?).to be_falsey
+    end
+  end
+
   describe "device attribute" do
 
     # Legacy API. This is a required method.  Do not remove.
@@ -75,10 +239,14 @@ describe 'Calabash Launcher' do
 
   describe "#attach" do
     let(:run_loop) do
-      {
-        :udid => "identifier",
-        :pid => 1
-      }
+        {
+          :pid => 10,
+          :udid => "identifier",
+          :automator => :instruments,
+          :index => 1,
+          :log_file => "path/to/log",
+          :uia_strategy => :host
+        }
     end
 
     let(:cache) do
@@ -92,32 +260,32 @@ describe 'Calabash Launcher' do
       allow(cache).to receive(:read).and_return(run_loop)
     end
 
-    it "the happy path" do
+    it "attaches to an instruments run-loop" do
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
 
       actual = launcher.attach
 
-      expect(launcher.actions).to be_a_kind_of(Calabash::Cucumber::InstrumentsActions)
+      expect(launcher.automator).to be_a_kind_of(Calabash::Cucumber::Automator::Instruments)
       expect(actual).to be == launcher
     end
 
-    it "cannot connect to http server" do
+    it "raises error if it cannot connect to LPServer" do
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_raise(Calabash::Cucumber::ServerNotRespondingError)
 
       actual = launcher.attach
 
-      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(launcher.instance_variable_get(:@automator)).to be == nil
       expect(actual).to be_falsey
     end
 
-    it "cannot establish communication with instruments" do
+    it "raises if it cannot communication with instruments" do
       run_loop[:pid] = nil
 
       expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
 
       actual = launcher.attach
 
-      expect(launcher.instance_variable_get(:@actions)).to be == nil
+      expect(launcher.instance_variable_get(:@automator)).to be == nil
       expect(actual).to be == launcher
     end
 
@@ -378,6 +546,27 @@ describe 'Calabash Launcher' do
       expect(launcher.send(:detect_inject_dylib_option,
                            {:inject_dylib => expected})).to be == expected
 
+    end
+  end
+
+  context ".active?" do
+    it "is deprecated" do
+      expect(RunLoop).to receive(:deprecated).and_call_original
+      expect(launcher).to receive(:attached_to_automator?).and_return(:attached)
+
+      expect(launcher.active?).to be == :attached
+    end
+  end
+
+  context ".attached_to_automator?" do
+    it "returns true if #automator is non-nil" do
+      launcher.instance_variable_set(:@automator, :automator)
+      expect(launcher.attached_to_automator?).to be_truthy
+    end
+
+    it "returns false if #automator is nil" do
+      launcher.instance_variable_set(:@automator, nil)
+      expect(launcher.attached_to_automator?).to be_falsey
     end
   end
 end

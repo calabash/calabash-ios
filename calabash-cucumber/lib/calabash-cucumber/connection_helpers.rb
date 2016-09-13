@@ -3,6 +3,7 @@ require 'calabash-cucumber/connection'
 module Calabash
   module Cucumber
 
+    # @!visibility private
     class ResponseError < RuntimeError ; end
 
     # @!visibility private

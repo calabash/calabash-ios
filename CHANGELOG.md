@@ -1,3 +1,64 @@
+### 0.20.0
+
+This release provides support for iOS 9 and iOS 10 with Xcode 8.
+
+If you need to test iOS 8, you must have Xcode 7 installed. macOS Sierra
+does not support Xcode 7, so keep that in mind when making your macOS
+upgrade plans.
+
+### DeviceAgent
+
+Apple has removed UIAutomation from Xcode 8. Our replacement for UIAutomation
+is DeviceAgent. DeviceAgent is based on Apple's XCUITest framework.
+
+Our goal for this transition is 100% backward compatibility with
+UIAutomation.  We think we are close, but we need your help to discover
+what is missing.  Since UIAutomation is not available, all `uia_*` calls
+now raise an error when tests are run with DeviceAgent.  The text of the
+error will have workarounds and examples to help you transition your
+tests.  When you find something you cannot do with DeviceAgent, please
+create a GitHub issue.
+
+Please see the
+[DeviceAgent](https://github.com/calabash/calabash-ios/wiki/DeviceAgent)
+on the Calabash iOS Wiki for more details.
+
+### CODE\_SIGN\_IDENTITY
+
+Testing on physical devices now has an additional requirement:
+code signing.
+
+```
+# Find the valid code signing identities
+$ xcrun security find-identity -v -p codesigning
+  1) 18<snip>84 "iPhone Developer: Your Name (ABCDEF1234)"
+  2) 23<snip>33 "iPhone Distribution: Your Company Name (A1B2C3D4EF)"
+  3) 38<snip>11 "iPhone Developer: Your Colleage (1234ABCDEF)"
+
+# Chose an "iPhone Developer" certificate.
+
+$ CODE_SIGN_IDENTITY="iPhone Developer: Your Name (ABCDEF1234)" \
+   DEVICE_TARGET=< udid | name> \
+   DEVICE_ENDPOINT=http://< ip >:37265 \
+   bundle exec cucumber
+```
+
+Many thanks to: @ark-konopacki, @TeresaPeters, @JoeSSS,
+@MortenGregersen, @haocuihc, and every else on
+[Gitter](https://gitter.im/calabash/calabash0x?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
+who has helped test.
+
+And a big thank you to @nicholasbarron for his clutch PR.
+
+* Map: dismiss SpringBoard alerts when DeviceAgent is available #1151
+* Public query and gesture API for DeviceAgent. #1150
+* UIA methods will raise an error with examples if called when running
+  with DeviceAgent #1148
+* Replaced calls to touch() to use Hash argument instead of String #1144
+  @nicholasbarron
+* calabash\_exit does not raise an error if the server is not running #1139
+* Added missing word 'on' in message #1122 @ark-konopacki
+
 ### 0.19.2
 
 This is a server only release.  The gem behavior has not changed.
