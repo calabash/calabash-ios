@@ -33,7 +33,7 @@ code signing.
 $ xcrun security find-identity -v -p codesigning
   1) 18<snip>84 "iPhone Developer: Your Name (ABCDEF1234)"
   2) 23<snip>33 "iPhone Distribution: Your Company Name (A1B2C3D4EF)"
-  3) 38<snip>11 "iPhone Developer: Your Colleage (1234ABCDEF)"
+  3) 38<snip>11 "iPhone Developer: Your Colleague (1234ABCDEF)"
 
 # Chose an "iPhone Developer" certificate.
 
