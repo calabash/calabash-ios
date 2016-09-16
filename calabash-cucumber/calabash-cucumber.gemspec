@@ -55,8 +55,7 @@ Gem::Specification.new do |s|
   s.add_dependency('edn', '>= 1.0.6', '< 2.0')
   s.add_dependency('slowhandcuke', '~> 0.0.3')
   s.add_dependency('geocoder', '>= 1.1.8', '< 2.0')
-  # Match the Calabash Android gem.
-  s.add_dependency('httpclient', '>= 2.3.2', '< 3.0')
+  s.add_dependency('httpclient', '>= 2.7.1', '< 3.0')
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
   s.add_dependency("clipboard", "~> 1.0")
