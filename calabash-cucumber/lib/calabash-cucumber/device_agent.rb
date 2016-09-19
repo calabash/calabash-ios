@@ -126,7 +126,7 @@ module Calabash
       #
       # @raise [RuntimeError] if no view matches the uiquery after waiting.
       def query_for_coordinate(uiquery)
-        fail_with_screenshot { client.query_for_coordinate(uiquery) }
+        with_screenshot_on_failure { client.query_for_coordinate(uiquery) }
       end
 
       # Perform a touch on the center of the first view matched the uiquery.
@@ -140,7 +140,7 @@ module Calabash
       #
       # @raise [RuntimeError] if no view matches the uiquery after waiting.
       def touch(uiquery)
-        fail_with_screenshot { client.touch(uiquery) }
+        with_screenshot_on_failure { client.touch(uiquery) }
       end
 
       # Perform a touch at a coordinate.
@@ -173,7 +173,7 @@ module Calabash
       #
       # @raise [RuntimeError] if no view matches the uiquery after waiting.
       def double_tap(uiquery)
-        fail_with_screenshot { client.double_tap(uiquery) }
+        with_screenshot_on_failure { client.double_tap(uiquery) }
       end
 
       # Perform a two finger tap on the center of the first view matched the uiquery.
@@ -187,7 +187,7 @@ module Calabash
       #
       # @raise [RuntimeError] if no view matches the uiquery after waiting.
       def two_finger_tap(uiquery)
-        fail_with_screenshot { client.two_finger_tap(uiquery) }
+        with_screenshot_on_failure { client.two_finger_tap(uiquery) }
       end
 
       # Perform a long press on the center of the first view matched the uiquery.
@@ -202,7 +202,7 @@ module Calabash
       #
       # @raise [RuntimeError] if no view matches the uiquery after waiting.
       def long_press(uiquery, duration)
-        fail_with_screenshot { client.long_press(uiquery, {:duration => duration}) }
+        with_screenshot_on_failure { client.long_press(uiquery, {:duration => duration}) }
       end
 
       # Returns true if there is a keyboard visible.
@@ -228,7 +228,7 @@ module Calabash
       # @raise [RuntimeError] if there is no visible keyboard.
       # @deprecated 0.21.0 Use Core#enter_text
       def enter_text(text)
-        fail_with_screenshot { client.enter_text(text) }
+        with_screenshot_on_failure { client.enter_text(text) }
       end
 
       # Enter text into the first view matched by uiquery.
@@ -244,7 +244,7 @@ module Calabash
       #
       # @deprecated 0.21.0 Use Core#enter_text
       def enter_text_in(uiquery, text)
-        fail_with_screenshot do
+        with_screenshot_on_failure do
           client.touch(uiquery)
           client.wait_for_keyboard
           client.enter_text(text)
@@ -312,20 +312,6 @@ module Calabash
       end
 
 =begin
-PROTECTED
-=end
-      protected
-
-      # @!visibility private
-      def method_missing(name, *args, &block)
-        if world.respond_to?(name)
-          world.send(name, *args, &block)
-        else
-          super
-        end
-      end
-
-=begin
 PRIVATE
 =end
       private
@@ -334,7 +320,7 @@ PRIVATE
       attr_reader :client, :world
 
       # @!visibility private
-      def fail_with_screenshot(&block)
+      def with_screenshot_on_failure(&block)
         begin
           block.call
         rescue => e
