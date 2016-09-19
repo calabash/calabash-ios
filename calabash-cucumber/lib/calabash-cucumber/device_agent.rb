@@ -312,20 +312,6 @@ module Calabash
       end
 
 =begin
-PROTECTED
-=end
-      protected
-
-      # @!visibility private
-      def method_missing(name, *args, &block)
-        if world.respond_to?(name)
-          world.send(name, *args, &block)
-        else
-          super
-        end
-      end
-
-=begin
 PRIVATE
 =end
       private
