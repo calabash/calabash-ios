@@ -24,7 +24,7 @@ module Calabash
         @world = world
       end
 
-      # @!visibility private
+      # Query the UI for elements.
       #
       # @example
       #  query({id: "login", :type "Button"})
