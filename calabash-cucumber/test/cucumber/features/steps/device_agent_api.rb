@@ -160,11 +160,9 @@ Then(/^I can see Control Panel page elements$/) do
       end
     end
   elsif ios10?
-    # We have to swipe from Welcome view after sim reset.
+    # We have to tap on Continue button from Welcome view after sim reset.
     if !device_agent.query({marked: 'Continue'}).empty?
-      swipe :left, {force: :strong}
-      wait_for_external_animations
-      swipe :right, {force: :strong}
+      device.agent.touch({marked: 'Continue'})
       wait_for_external_animations
     end
     wait_for(options_or_timeout=3) do
