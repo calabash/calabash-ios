@@ -757,7 +757,7 @@ To type strings with more than one character, use keyboard_enter_text.
       # for the keyboard to disappear.
       #
       # @note
-      #  the dismiss keyboard key does not exist on the iPhone or iPod
+      #  The dismiss keyboard key does not exist on the iPhone or iPod
       #
       # @raise [RuntimeError] If the device is not an iPad
       # @raise [Calabash::Cucumber::WaitHelpers::WaitError] If the keyboard does
