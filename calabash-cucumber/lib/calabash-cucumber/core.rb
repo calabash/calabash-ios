@@ -1009,6 +1009,9 @@ with options:
 
       # Scrolls to an item in a section of a UICollectionView.
       #
+      # Make sure your query matches exactly one UICollectionView.  If multiple
+      # views are matched, the results can be unpredictable.
+      #
       # @note item and section are zero-indexed
       #
       # @example Scroll to item 0 in section 2 to top.
@@ -1020,12 +1023,12 @@ with options:
       # @example The following are the allowed :scroll_position values.
       #  {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
       #
-      # @param [Integer] item the index of the item to scroll to
-      # @param [Integer] section the section of the item to scroll to
-      # @param [Hash] opts options for controlling the collection view query
+      # @param [Integer] item_index the index of the item to scroll to.  Must be >= 0.
+      # @param [Integer] section_index the section of the item to scroll to. Must be > 0.
+      # @param [Hash] options options for controlling the collection view query
       #  and scroll behavior
       #
-      # @option opts [String] :query ('collectionView')
+      # @option opts [String] :query ("UICollectionView index:0")
       #  the query that is used to identify which collection view to scroll
       #
       # @option opts [Symbol] :scroll_position (top)
@@ -1034,41 +1037,78 @@ with options:
       # @option opts [Boolean] :animate (true)
       #  should the scrolling be animated
       #
-      # @option opts [String] :failed_message (nil)
+      # @option opts [String] :failure_message (nil)
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
       # @raise [RuntimeError] if the scroll cannot be performed
       # @raise [RuntimeError] :query finds no collection view
       # @raise [RuntimeError] the collection view does not contain a cell at item/section
-      # @raise [RuntimeError] :scroll_position is invalid
-      def scroll_to_collection_view_item(item, section, opts={})
-        default_options = {:query => 'collectionView',
+      # @raise [ArgumentError] :scroll_position is invalid
+      # @raise [ArgumentError] item or section is < 0.
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_collection_view_item(item_index, section_index, options={})
+        default_options = {:query => "UICollectionView index:0",
                            :scroll_position => :top,
                            :animate => true,
-                           :failed_message => nil}
-        opts = default_options.merge(opts)
-        uiquery = opts[:query]
+                           :failure_message => nil}
+        merged_options = default_options.merge(options)
+        uiquery = merged_options[:query]
 
-        scroll_position = opts[:scroll_position]
-        candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
-        unless candidates.include?(scroll_position)
-          raise "scroll_position '#{scroll_position}' is not one of '#{candidates}'"
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
         end
 
-        animate = opts[:animate]
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        if item_index < 0
+          raise ArgumentError, "Invalid item index: '#{item_index}' - must be >= 0"
+        end
+
+        if section_index < 0
+          raise ArgumentError, "Invalid section index: '#{section_index}' - must be >= 0"
+        end
+
+        scroll_position = merged_options[:scroll_position]
+        candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
+        if !candidates.include?(scroll_position)
+          raise ArgumentError, %Q[
+
+Invalid :scroll_position option '#{scroll_position}'.  Valid options are:
+
+#{candidates.join(", ")}
+
+          ]
+        end
+
+        animate = merged_options[:animate]
 
         views_touched = Map.map(uiquery, :collectionViewScroll,
-                                item.to_i, section.to_i,
+                                item_index.to_i, section_index.to_i,
                                 scroll_position, animate)
 
-        if opts[:failed_message]
-          msg = opts[:failed_message]
-        else
-          msg = "unable to scroll: '#{uiquery}' to item '#{item}' in section '#{section}'"
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to item index '#{item_index}' in section index '#{section_index}'
+in CollectionView matched by:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
         end
 
-        Map.assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 
