@@ -102,7 +102,7 @@ module Calabash
           "Uti, non abuti.",
           "Non Satis Scire",
           "Nullius in verba",
-          "Det ka æn jå væer ei jált"
+          "Det ka æn jå væer ei jált",
           "No to Frugo",
           "a może frytki do tego?",
           "Dzień dobry",
