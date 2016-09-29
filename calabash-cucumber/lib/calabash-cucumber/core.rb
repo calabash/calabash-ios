@@ -886,23 +886,27 @@ Unable to scroll to mark '#{mark}' in UIScrollView matching #{uiquery}"
         views_touched
       end
 
-      # Scroll a table view to a section and row. Table view can have multiple sections.
+      # Scroll a table view to a section and row.
+      #
+      # Make sure your query matches exactly one UITableView.  If multiple views
+      # are matched, the results can be unpredictable.
       #
       # @todo should expose a non-option first argument query and required parameters `section`, `row`
       #
       # @see #scroll_to_row
       # @example
-      #   scroll_to_cell query:"UITableView", row:4, section:0, animate: false
-      # @note this is implemented by calling the Obj-C `scrollToRowAtIndexPath:atScrollPosition:animated:` method
-      #   and can do things users cant.
+      #   scroll_to_cell  row:4, section:0, animate: false
       #
       # @param {Hash} options specifies details of the scroll
-      # @option options {String} :query ('tableView') query specifying which table view to scroll
+      # @option options {String} :query ("UITableView index:0") query specifying
+      #   which table view to scroll
       # @option options {Fixnum} :section section to scroll to
       # @option options {Fixnum} :row row to scroll to
       # @option options {String} :scroll_position position to scroll to
       # @option options {Boolean} :animated (true) animate or not
-      def scroll_to_cell(options={:query => 'tableView',
+      # @raise [ArgumentError] If row or section is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_cell(options={:query => "UITableView index:0",
                                   :row => 0,
                                   :section => 0,
                                   :scroll_position => :top,
@@ -910,8 +914,8 @@ Unable to scroll to mark '#{mark}' in UIScrollView matching #{uiquery}"
         uiquery = options[:query] || 'tableView'
         row = options[:row]
         sec = options[:section]
-        if row.nil? or sec.nil?
-          raise 'You must supply both :row and :section keys to scroll_to_cell'
+        if row.nil? || sec.nil?
+          raise ArgumentError, 'You must supply both :row and :section keys to scroll_to_cell'
         end
 
         args = []
