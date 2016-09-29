@@ -802,6 +802,72 @@ Use `ipad?` to branch in your test.
         views_touched
       end
 
+      # Scrolls to a mark in a UIScrollView.
+      #
+      # Make sure your query matches exactly one UIScrollView.  If multiple
+      # scroll views are matched, the results can be unpredictable.
+      #
+      # @example
+      #  scroll_to_mark("settings")
+      #  scroll_to_mark("Android", {:animated => false})
+      #  scroll_to_mark("Alarm", {:query => "UIScrollView marked:'Settings'"})
+      #
+      # @see #scroll_to_row_with_mark
+      # @see #scroll_to_collection_view_item_with_mark
+      #
+      # @param [String] mark an accessibility label or identifier or text
+      # @param [Hash] options controls the query and and scroll behavior
+      # @option options [String] :query ("UIScrollView index:0") A query to
+      #  uniquely identify the scroll view if there are multiple scroll views.
+      # @option options [Boolean] :animate (true) should the scrolling be animated
+      # @option options [String] :failure_message (nil) If nil, a default failure
+      #  message will be shown if this scroll scroll cannot be performed.
+      #
+      # @raise [RuntimeError] If the scroll cannot be performed
+      # @raise [RuntimeError] If the :query finds no scroll view
+      # @raise [ArgumentError] If the mark is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_mark(mark, options={})
+        if mark.nil?
+          raise ArgumentError, "The mark cannot be nil"
+        end
+
+        merged_options = {:query => "UIScrollView index:0",
+                          :animate => true,
+                          :failure_message => nil}.merge(options)
+
+        uiquery = merged_options[:query]
+
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
+        end
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        args = [merged_options[:animate]]
+
+        views_touched = Map.map(uiquery, :scrollToMark, mark, *args)
+
+        message = merged_options[:failure_message]
+
+        if !message
+          message = %Q[
+
+Unable to scroll to mark '#{mark}' in UIScrollView matching #{uiquery}"
+
+]
+        end
+
+        Map.assert_map_results(views_touched, message)
+        views_touched
+      end
+
       # Scroll a table view to a row. Table view should have only one section.
       # @see #scroll_to_cell
       # @example
