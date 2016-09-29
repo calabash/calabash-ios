@@ -1028,5 +1028,91 @@ describe Calabash::Cucumber::Core do
       end.to raise_error RuntimeError, /Unable to scroll to mark/
     end
   end
+
+  context "#scroll_to_row_with_mark" do
+    let(:options) do
+      {
+        :query => "query",
+        :scroll_position => :top,
+        :animate => :animate,
+        :failure_message => "custom failure message"
+      }
+    end
+
+    let(:success) { ["a non nil result"] }
+    let(:failure) { [ nil ] }
+    let(:map) { Calabash::Cucumber::Map.new }
+
+    before do
+      allow(Calabash::Cucumber::Map).to receive(:map_factory).and_return(map)
+      allow(map).to receive(:screenshot).and_return("path/to/screenshot")
+    end
+
+    it "raises an ArgumentError if mark is nil" do
+      expect do
+        world.scroll_to_row_with_mark(nil)
+      end.to raise_error ArgumentError, /The mark cannot be nil/
+    end
+
+    context "validates the :query option" do
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_row_with_mark(:mark, {:query => nil})
+        end.to raise_error ArgumentError, /query option cannot be nil/
+      end
+
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_row_with_mark(:mark, {:query => ""})
+        end.to raise_error ArgumentError, /query option cannot be the empty string/
+      end
+
+      it "raises an ArgumentError if query is *" do
+        expect do
+          world.scroll_to_row_with_mark(:mark, {:query => "*"})
+        end.to raise_error ArgumentError, /query option cannot be the wildcard/
+      end
+    end
+
+    context "merges options correctly and asserts results" do
+      it "calls map with the correct variables" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :scrollToRowWithMark, :mark, :top, :animate).and_return(success)
+        )
+
+        actual = world.scroll_to_row_with_mark(:mark, options)
+        expect(actual).to be == success
+      end
+
+      it "fails with the right error message" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :scrollToRowWithMark, :mark, :top, :animate).and_return(failure)
+        )
+
+        expect do
+          world.scroll_to_row_with_mark(:mark, options)
+        end.to raise_error RuntimeError, /#{options[:failure_message]}/
+      end
+    end
+
+    it "calls Map with the correct defaults" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UITableView index:0", :scrollToRowWithMark, :mark, :middle, true).and_return(success)
+      )
+
+      actual = world.scroll_to_row_with_mark(:mark)
+      expect(actual).to be == success
+    end
+
+    it "fails with a good default message" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UITableView index:0", :scrollToRowWithMark, :mark, :middle, true).and_return(failure)
+      )
+
+      expect do
+        world.scroll_to_row_with_mark(:mark)
+      end.to raise_error RuntimeError, /Unable to scroll to mark/
+    end
+  end
 end
 

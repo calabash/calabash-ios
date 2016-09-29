@@ -935,14 +935,16 @@ Unable to scroll to mark '#{mark}' in UIScrollView matching #{uiquery}"
 
       # Scrolls to a mark in a UITableView.
       #
+      # Make sure your query matches exactly one UITableView.  If multiple
+      # views are matched, the results can be unpredictable.
+      #
       # @example Scroll to the top of the item with the given mark.
       #  scroll_to_row_with_mark('settings', {:scroll_position => :top})
       #
       # @example Scroll to the bottom of the item with the given mark.
       #  scroll_to_row_with_mark('about', {:scroll_position => :bottom})
       #
-      # @param [String] mark an accessibility `{label | identifier}` or text in
-      #  or on the row
+      # @param [String] mark an accessibility label or identifier or text in row
       # @param [Hash] options controls the query and and scroll behavior
       #
       # @option options [String] :query ('tableView')
@@ -952,33 +954,56 @@ Unable to scroll to mark '#{mark}' in UIScrollView matching #{uiquery}"
       #  `{:middle | :top | :bottom}`
       # @option options [Boolean] :animate (true)
       #  should the scrolling be animated
+      # @option options [String] :failure_message (nil) If nil, a default failure
+      #  message will be shown if this scroll scroll cannot be performed.
       #
       # @raise [RuntimeError] if the scroll cannot be performed
-      # @raise [RuntimeError] if the mark is nil
       # @raise [RuntimeError] if the table query finds no table view
       # @raise [RuntimeError] if the scroll position is invalid
-      def scroll_to_row_with_mark(mark, options={:query => 'tableView',
-                                                 :scroll_position => :middle,
-                                                 :animate => true})
+      # @raise [ArgumentError] if the mark is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_row_with_mark(mark, options={})
+        merged_options = {:query => "UITableView index:0",
+                          :scroll_position => :middle,
+                          :animate => true,
+                          :failure_message => nil}.merge(options)
+
         if mark.nil?
-          screenshot_and_raise 'mark argument cannot be nil'
+          raise ArgumentError, "The mark cannot be nil"
         end
 
-        uiquery = options[:query] || 'tableView'
+        uiquery = merged_options[:query]
 
-        args = []
-        if options.has_key?(:scroll_position)
-          args << options[:scroll_position]
-        else
-          args << 'middle'
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
         end
-        if options.has_key?(:animate)
-          args << options[:animate]
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
         end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        args = [merged_options[:scroll_position], merged_options[:animate]]
 
         views_touched = Map.map(uiquery, :scrollToRowWithMark, mark, *args)
-        msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
-        Map.assert_map_results(views_touched, msg)
+
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to mark: '#{mark}' in table view matched by query:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
+        end
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 
