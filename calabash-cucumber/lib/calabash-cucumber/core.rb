@@ -1114,6 +1114,9 @@ with options:
 
       # Scrolls to mark in a UICollectionView.
       #
+      # Make sure your query matches exactly one UICollectionView.  If multiple
+      # views are matched, the results can be unpredictable.
+      #
       # @example Scroll to the top of the item with the given mark.
       #  scroll_to_collection_view_item_with_mark('cat', {:scroll_position => :top})
       #
@@ -1125,7 +1128,7 @@ with options:
       #
       # @param [String] mark an accessibility `{label | identifier}` or text in
       #  or on the item
-      # @param [Hash] opts options for controlling the collection view query
+      # @param [Hash] options options for controlling the collection view query
       #  and scroll behavior
       #
       # @option opts [String] :query ('collectionView')
@@ -1134,43 +1137,74 @@ with options:
       #   the position in the collection view to scroll the item to
       # @option opts [Boolean] :animate (true) should the scroll
       #   be animated
-      # @option opts [String] :failed_message (nil)
-      #  a custom error message to display if the scrolling fails - if not
-      #  specified, a generic failure will be displayed
+      # @option opts [String] :failure_message (nil) a custom error message to
+      #   display if the scrolling fails - if not specified, a generic failure
+      #   will be displayed
       #
       # @raise [RuntimeError] if the scroll cannot be performed
-      # @raise [RuntimeError] if the mark is nil
       # @raise [RuntimeError] :query finds no collection view
       # @raise [RuntimeError] the collection view does not contain a cell
       #  with the mark
       # @raise [RuntimeError] :scroll_position is invalid
-      def scroll_to_collection_view_item_with_mark(mark, opts={})
-        default_options = {:query => 'collectionView',
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      # @raise [ArgumentError] if the mark is nil
+      def scroll_to_collection_view_item_with_mark(mark, options={})
+        default_options = {:query => "UICollectionView index:0",
                            :scroll_position => :top,
                            :animate => true,
-                           :failed_message => nil}
-        opts = default_options.merge(opts)
-        uiquery = opts[:query]
+                           :failure_message => nil}
+        merged_options = default_options.merge(options)
+        uiquery = merged_options[:query]
 
         if mark.nil?
-          raise 'mark argument cannot be nil'
+          raise ArgumentError, "The mark cannot be nil"
         end
 
-        args = []
-        scroll_position = opts[:scroll_position]
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
+        end
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        scroll_position = merged_options[:scroll_position]
         candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
-        unless candidates.include?(scroll_position)
-          raise "scroll_position '#{scroll_position}' is not one of '#{candidates}'"
+        if !candidates.include?(scroll_position)
+          raise ArgumentError, %Q[
+
+Invalid :scroll_position option '#{scroll_position}'.  Valid options are:
+
+#{candidates.join(", ")}
+
+          ]
         end
 
-        args << scroll_position
-        args << opts[:animate]
+        args = [scroll_position, merged_options[:animate]]
 
-        views_touched = Map.map(uiquery, :collectionViewScrollToItemWithMark,
+        views_touched = Map.map(uiquery,
+                                :collectionViewScrollToItemWithMark,
                                 mark, *args)
 
-        msg = opts[:failed_message] || "Unable to scroll: '#{uiquery}' to cell with mark: '#{mark}' with #{opts}"
-        Map.assert_map_results(views_touched, msg)
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to item with mark '#{mark}' in UICollectionView matching query:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
+        end
+
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 
