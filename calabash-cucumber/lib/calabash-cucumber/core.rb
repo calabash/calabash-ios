@@ -869,16 +869,19 @@ Unable to scroll to mark '#{mark}' in UIScrollView matching #{uiquery}"
       end
 
       # Scroll a table view to a row. Table view should have only one section.
-      # @see #scroll_to_cell
-      # @example
-      #   scroll_to_row "UITableView", 2
-      # @note this is implemented by calling the Obj-C `scrollToRowAtIndexPath:atScrollPosition:animated:` method
-      #   and can do things users cant.
       #
-      # @param {String} uiquery query describing view scroll (should be  UIScrollView or a web view).
+      # Make sure your query matches exactly one UITableView.  If multiple views
+      # are matched, the results can be unpredictable.
+      #
+      # @see #scroll_to_cell
+      #
+      # @example
+      #   scroll_to_row "UITableView index:0", 2
+      #
+      # @param {String} uiquery Should match a UITableView
       def scroll_to_row(uiquery, number)
         views_touched = Map.map(uiquery, :scrollToRow, number)
-        msg = "unable to scroll: '#{uiquery}' to: #{number}"
+        msg = "Unable to scroll to row #{number} in table view with '#{uiquery}'"
         Map.assert_map_results(views_touched, msg)
         views_touched
       end
