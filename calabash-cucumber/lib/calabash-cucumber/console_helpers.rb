@@ -103,12 +103,8 @@ module Calabash
           "Non Satis Scire",
           "Nullius in verba",
           "Det ka æn jå væer ei jált",
-          "No to Frugo",
-          "a może frytki do tego?",
           "Dzień dobry",
-          "Jestem tu by ocalić świat",
-          "Andrzeju nie denerwuj się",
-          "Kierowniku śmigu-migu, 3 minutki i naprawione..."
+          "Jestem tu by ocalić świat"
         ]
         puts RunLoop::Color.green("Calabash says, \"#{messages.shuffle.first}\"")
       end
