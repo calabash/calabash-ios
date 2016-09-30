@@ -102,7 +102,9 @@ module Calabash
           "Uti, non abuti.",
           "Non Satis Scire",
           "Nullius in verba",
-          "Det ka æn jå væer ei jált"
+          "Det ka æn jå væer ei jált",
+          "Dzień dobry",
+          "Jestem tu by ocalić świat"
         ]
         puts RunLoop::Color.green("Calabash says, \"#{messages.shuffle.first}\"")
       end
