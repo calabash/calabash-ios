@@ -145,7 +145,7 @@ details: #{hash["details"]}
       def self.assert_map_results(map_results, msg)
         compact = map_results.compact
         if compact.empty? or compact.member? '<VOID>' or compact.member? '*****'
-          Map.new.screenshot_and_raise msg
+          self.map_factory.screenshot_and_raise msg
         end
       end
 
