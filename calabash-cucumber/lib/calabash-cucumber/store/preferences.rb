@@ -77,6 +77,33 @@ module Calabash
         write(preferences)
       end
 
+      # !@visibility private
+      def distinct_id
+        preferences = read
+        unless valid_user_id?(preferences[:distinct_id])
+          if valid_user_id?(preferences[:user_id])
+            preferences[:distinct_id] = user_id
+            write(preferences)
+          else
+            preferences[:distinct_id] = SecureRandom.uuid
+            write(preferences)
+          end
+        end
+        preferences[:distinct_id]
+      end
+
+      # !@visibility private
+      def distinct_id=(value)
+        if !valid_user_id?(value)
+          raise ArgumentError,
+                "Expected '#{value}' to not be nil and not an empty string"
+        end
+
+        preferences = read
+        preferences[:distinct_id] = value
+        write(preferences)
+      end
+
       private
 
       # @!visibility private
@@ -86,6 +113,11 @@ module Calabash
 
       # @!visibility private
       def valid_user_id?(value)
+        !value.nil? && value != "" && value.is_a?(String)
+      end
+
+      # @!visibility private
+      def valid_distinct_id?(value)
         !value.nil? && value != "" && value.is_a?(String)
       end
 
