@@ -28,9 +28,9 @@ describe Calabash::Cucumber::UsageTracker do
   it "#user_id" do
     prefs = Calabash::Cucumber::Preferences.new
     expect(tracker).to receive(:preferences).and_return prefs
-    expect(prefs).to receive(:distinct_id).and_return "distinct id"
+    expect(prefs).to receive(:user_id).and_return "user id"
 
-    expect(tracker.send(:distinct_id)).to be == "distinct id"
+    expect(tracker.send(:user_id)).to be == "user id"
   end
 
   it "#info_we_are_allowed_to_track" do
@@ -119,25 +119,25 @@ describe Calabash::Cucumber::UsageTracker do
 
     it "returns only events if allowed == events" do
       expect(tracker).to receive(:info_we_are_allowed_to_track).and_return "events"
-      expect(tracker).to receive(:distinct_id).and_return "distinct id"
+      expect(tracker).to receive(:user_id).and_return "user id"
 
       hash = tracker.send(:info)
       expect(hash.count).to be == 3
       expect(hash[:event_name]).to be == "session"
       expect(hash[:data_version]).to be_truthy
-      expect(hash[:distinct_id]).to be == "distinct id"
+      expect(hash[:distinct_id]).to be == "user id"
     end
 
     it "returns events and system info if allowed == system_info" do
       expect(tracker).to receive(:info_we_are_allowed_to_track).and_return "system_info"
-      expect(tracker).to receive(:distinct_id).and_return "distinct id"
+      expect(tracker).to receive(:user_id).and_return "user id"
 
       hash = tracker.send(:info)
 
       expect(hash.count).to be == 17
       expect(hash[:event_name]).to be == "session"
       expect(hash[:data_version]).to be_truthy
-      expect(hash[:distinct_id]).to be == "distinct id"
+      expect(hash[:distinct_id]).to be == "user id"
 
       expect(hash[:platform]).to be == "iOS"
       expect(hash[:host_os]).to be_truthy
