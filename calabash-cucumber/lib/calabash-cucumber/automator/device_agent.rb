@@ -180,7 +180,7 @@ args[0] = #{args[0]}])
             :duration => duration
           }
 
-          client.perform_coordinate_gesture("pinch", 
+          client.perform_coordinate_gesture("pinch",
                                             hash[:coordinates][:x],
                                             hash[:coordinates][:y],
                                             gesture_options)
