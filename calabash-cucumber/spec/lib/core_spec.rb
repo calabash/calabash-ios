@@ -256,6 +256,83 @@ describe Calabash::Cucumber::Core do
     end
   end
 
+  context "pinch" do
+    context "performs the pinch gesture" do
+      let(:merged_options) do
+        {
+          :query => nil,
+          :amount => 100,
+          :duration => 0.5
+        }
+      end
+
+      before do
+        expect(world).to receive(:launcher).and_return(launcher)
+        expect(launcher).to receive(:automator).and_return(automator)
+      end
+
+      it "allows :in" do
+        expect(automator).to(
+          receive(:pinch).with(:in, merged_options).and_return(true)
+        )
+
+        expect(world.pinch(:in)).to be_truthy
+      end
+
+      it "allows 'in'" do
+        expect(automator).to(
+          receive(:pinch).with(:in, merged_options).and_return(true)
+        )
+
+        expect(world.pinch("in")).to be_truthy
+      end
+
+      it "allows :out" do
+        expect(automator).to(
+          receive(:pinch).with(:out, merged_options).and_return(true)
+        )
+
+        expect(world.pinch(:out)).to be_truthy
+      end
+
+      it "allows 'out'" do
+        expect(automator).to(
+          receive(:pinch).with(:out, merged_options).and_return(true)
+        )
+
+        expect(world.pinch("out")).to be_truthy
+      end
+    end
+
+    it "raises an error if in_out argument is invalid" do
+      expect do
+        world.pinch(:invalid)
+      end.to raise_error ArgumentError, /Invalid pinch direction/
+    end
+
+    context "validates duration option" do
+      let(:options) { {} }
+
+      it "raises if duration < 0.5 with UIAutomation" do
+        expect(world).to receive(:uia_available?).and_return(true)
+        options[:duration] = 0.4
+
+        expect do
+          world.pinch(:in, options)
+        end.to raise_error ArgumentError, /Invalid duration/
+      end
+
+      it "raises if duration <= 0.0 with DeviceAgent" do
+        expect(world).to receive(:uia_available?).and_return(false)
+        options[:duration] = 0.0
+
+        expect do
+          world.pinch(:in, options)
+        end.to raise_error ArgumentError, /Invalid duration/
+      end
+    end
+  end
+
   context "#flick" do
     it "performs the flick gesture" do
       options = { }

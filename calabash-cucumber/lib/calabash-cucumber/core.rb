@@ -611,7 +611,43 @@ The minimum duration is 0.0.
       #  for DeviceAgent.
       # @raise [ArgumentError] If in_out argument is invalid.
       def pinch(in_out, options={})
-        launcher.automator.pinch(in_out.to_sym, options)
+        merged_options = {
+          :query => nil,
+          # Ignored by UIAutomation
+          :amount => 100,
+          :duration => 0.5
+        }.merge(options)
+
+        symbol = in_out.to_sym
+
+        if ![:in, :out].include?(symbol)
+          raise ArgumentError, %Q[
+Invalid pinch direction: '#{symbol}'.  Valid directions are:
+
+"in", "out", :in, :out
+
+]
+        end
+
+        duration = merged_options[:duration]
+
+        if uia_available? && duration < 0.5
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.5
+
+]
+        elsif duration <= 0.0
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.0.
+
+]
+        end
+
+        launcher.automator.pinch(in_out.to_sym, merged_options)
       end
 
       # @deprecated 0.21.0 Use #keyboard_enter_text
