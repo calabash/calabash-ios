@@ -382,13 +382,13 @@ Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
       # @option options {Hash} :offset (nil) optional offset to touch point.
       #  Offset supports an `:x` and `:y` key and causes the touch to be
       #  offset with `(x,y)` relative to the center.
-      # @option options {String} :query (nil) If specified, the swipe will be
-      #  made on the first view matching this query.  If this option is nil
-      #  (the default), the swipe will happen on the first view matched by "*".
       # @option options [Symbol] :force (normal) Indicates the force of the
       #  swipe.  Valid values are :strong, :normal, :light.
+      # @option options {String} :query (nil) If specified, the swipe will be
+      #  made on the first view matching this query.  If this option is nil
+      #  (the default), the swipe will happen at the center of the screen.
       #
-      # @return {Array<Hash>,String} An array with one element; the view that
+      # @return {Array<Hash>} An array with one element; the view that
       #  was swiped.
       #
       # @raise [ArgumentError] If :force is invalid.
@@ -604,7 +604,7 @@ The minimum duration is 0.0.
       # @option options {Numeric} :duration (1.0) duration of the 'pinch'.  The
       #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
       #  duration must be > 0.
-      # @return {Array<Hash>,String} array containing the serialized version of
+      # @return {Array<Hash>} array containing the serialized version of
       #  the view touched.
       #
       # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
