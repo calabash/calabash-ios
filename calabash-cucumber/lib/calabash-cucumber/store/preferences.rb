@@ -90,11 +90,6 @@ module Calabash
       end
 
       # @!visibility private
-      def valid_distinct_id?(value)
-        !value.nil? && value != "" && value.is_a?(String)
-      end
-
-      # @!visibility private
       #
       # The preferences version
       VERSION = "1.0"

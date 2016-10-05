@@ -71,11 +71,6 @@ module Calabash
       end
 
       # @!visibility private
-      def distinct_id
-        preferences.distinct_id
-      end
-
-      # @!visibility private
       def info_we_are_allowed_to_track
         preferences.usage_tracking
       end
