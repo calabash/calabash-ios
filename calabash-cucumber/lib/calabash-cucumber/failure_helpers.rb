@@ -10,13 +10,8 @@ module Calabash
       begin
         require "fastimage_resize"
       rescue LoadError
-        # We just won't get securerandom
+        # We just won't get error
       end
-
-      # @!visibility private
-      DEFAULTS = {
-          :screen_shot_scale => 1
-      }
 
       # Generates a screenshot of the app UI and saves to a file (prefer `screenshot_embed`).
       # Increments a global counter of screenshots and adds the count to the filename (to ensure uniqueness).
@@ -31,7 +26,7 @@ module Calabash
       def screenshot(options={:prefix => nil, :name => nil, :scale => nil})
         prefix = options[:prefix]
         name = options[:name]
-        scale = options[:scale] || DEFAULTS[:screen_shot_scale]
+        scale = options[:scale]
 
         @@screenshot_count ||= 0
         res = http({:method => :get, :path => 'screenshot'})
@@ -49,9 +44,11 @@ module Calabash
           f.write res
         end
         if defined?(FastImage)
-          if scale != 1 and scale < 1 and scale > 0
-            weight = FastImage.size(path)[0]
-            FastImage.resize(path, weight/scale, 0, :outfile=>path)
+          unless scale.nil?
+            if scale != 1 and scale < 1 and scale > 0
+              weight = FastImage.size(path)[0]
+              FastImage.resize(path, weight/scale, 0, :outfile=>path)
+            end
           end
         end
         @@screenshot_count += 1
