@@ -125,7 +125,7 @@ describe Calabash::Cucumber::UsageTracker do
       expect(hash.count).to be == 3
       expect(hash[:event_name]).to be == "session"
       expect(hash[:data_version]).to be_truthy
-      expect(hash[:user_id]).to be == "user id"
+      expect(hash[:distinct_id]).to be == "user id"
     end
 
     it "returns events and system info if allowed == system_info" do
@@ -137,7 +137,7 @@ describe Calabash::Cucumber::UsageTracker do
       expect(hash.count).to be == 19
       expect(hash[:event_name]).to be == "session"
       expect(hash[:data_version]).to be_truthy
-      expect(hash[:user_id]).to be == "user id"
+      expect(hash[:distinct_id]).to be == "user id"
 
       expect(hash[:platform]).to be == "iOS"
       expect(hash[:host_os]).to be_truthy
