@@ -79,6 +79,8 @@ module Calabash
         end
 
         # @!visibility private
+        #
+        # Callers must validate the options.
         def pinch(in_or_out, options)
           abstract_method!
         end

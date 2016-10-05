@@ -584,18 +584,32 @@ The minimum duration is 0.0.
       end
 
       # Performs a "pinch" gesture.
+      #
       # By default, the gesture starts at the center of the screen.
-      # @todo `pinch` is an old style API which doesn't take a query as its first argument. We should migrate this.
+      #
       # @example
+      #   # Zoom in
       #   pinch :out
-      # @example
+      #
+      #   # Zoom out
       #   pinch :in, query:"MKMapView", offset:{x:42}
-      # @param {String} in_out the direction to pinch ('in' or 'out') (symbols can also be used).
+      #
+      # @param {String, Symbol} in_out the direction to pinch ('in' or 'out')
       # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option options {String} :query (nil) if specified, the pinch will be made relative to this query.
-      # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      # @option options {String} :query (nil) The view to pinch on.  If this
+      #  value is nil, the pinch happens at the center of the screen.
+      # @option options {Numeric} :amount (100) How large (in points) the
+      #  pinch should be.  This option is ignored when running with UIAutomation.
+      # @option options {Numeric} :duration (1.0) duration of the 'pinch'.  The
+      #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
+      #  duration must be > 0.
+      # @return {Array<Hash>,String} array containing the serialized version of
+      #  the view touched.
+      #
+      # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
+      #  for DeviceAgent.
+      # @raise [ArgumentError] If in_out argument is invalid.
       def pinch(in_out, options={})
         launcher.automator.pinch(in_out.to_sym, options)
       end
