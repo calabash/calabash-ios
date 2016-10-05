@@ -132,11 +132,11 @@ module Calabash
       #
       # +1 for tools to ask physical devices about attributes.
       def device
-        @device ||= lambda do
+        @device ||= begin
           _, body = Calabash::Cucumber::HTTP.ensure_connectivity
           endpoint = Calabash::Cucumber::Environment.device_endpoint
           Calabash::Cucumber::Device.new(endpoint, body)
-        end.call
+        end
       end
 
       # @!visibility private
