@@ -167,13 +167,17 @@ args[0] = #{args[0]}])
           dupped_options = options.dup
 
           if dupped_options[:query].nil?
-            dupped_options[:query] = "*"
+            element = element_for_device_screen
+            coordinates = point_from(element, options)
+          else
+            hash = query_for_coordinates(dupped_options)
+            element = hash[:view]
+            coordinates = hash[:coordinates]
           end
 
-          hash = query_for_coordinates(dupped_options)
           in_out = in_out.to_s
-          duration = dupped_options[:duration] || 0.5
-          amount = dupped_options[:amount] || 100
+          duration = dupped_options[:duration]
+          amount = dupped_options[:amount]
 
           gesture_options = {
             :pinch_direction => in_out,
@@ -182,12 +186,11 @@ args[0] = #{args[0]}])
           }
 
           client.perform_coordinate_gesture("pinch",
-                                            hash[:coordinates][:x],
-                                            hash[:coordinates][:y],
+                                            coordinates[:x],
+                                            coordinates[:y],
                                             gesture_options)
 
-
-          [hash[:view]]
+          [element]
         end
 
         # @!visibility private

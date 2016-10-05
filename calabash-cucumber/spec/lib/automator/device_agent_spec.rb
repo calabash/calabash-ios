@@ -397,6 +397,70 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       end
     end
 
+    context "#pinch" do
+      let(:direction) { :out }
+      let(:duration) { 0.5 }
+      let(:amount) { 100 }
+      let(:gesture_options) do
+        { duration: duration, amount: amount, pinch_direction: direction.to_s }
+      end
+
+      context "nil query" do
+        let(:options) do
+          dupped = gesture_options.dup
+          dupped[:query] = nil
+          dupped
+        end
+
+        it "performs the gesture using screen coordinates" do
+          element = {
+            "screen" => true,
+            "rect" => {
+              "height" => 200,
+              "width" => 100,
+              "center_x" => 50,
+              "center_y" => 100
+            }
+          }
+
+          coordinates = {x: 50, y: 100}
+
+          expect(device_agent).to receive(:element_for_device_screen).and_return(element)
+          expect(device_agent).to receive(:point_from).and_return(coordinates)
+
+          expect(device_agent.client).to(
+            receive(:perform_coordinate_gesture).with("pinch", 50, 100, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.pinch(direction, options)).to be == [element]
+        end
+      end
+
+      context "non-nil query" do
+        let(:options) do
+          dupped = gesture_options.dup
+          dupped[:query] = "query"
+          dupped
+        end
+
+        it "performs the gesture using query coordinates" do
+          element = {:view => true}
+          hash = {
+            :coordinates => {x: 50, y: 100},
+            :view => element
+          }
+
+          expect(device_agent).to receive(:query_for_coordinates).and_return(hash)
+
+          expect(device_agent.client).to(
+            receive(:perform_coordinate_gesture).with("pinch", 50, 100, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.pinch(direction, options)).to be == [element]
+        end
+      end
+    end
+
     context "#flick" do
       let(:gesture_options) { {:duration => 0.2} }
       let(:delta) { {x: -88.0, y: 88.0} }
