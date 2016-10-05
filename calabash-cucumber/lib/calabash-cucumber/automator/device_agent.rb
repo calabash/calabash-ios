@@ -162,6 +162,34 @@ args[0] = #{args[0]}])
         end
 
         # @!visibility private
+        def pinch(in_out, options)
+          dupped_options = options.dup
+
+          if dupped_options[:query].nil?
+            dupped_options[:query] = "*"
+          end
+
+          hash = query_for_coordinates(dupped_options)
+          in_out = in_out.to_s
+          duration = dupped_options[:duration] || 0.5
+          amount = dupped_options[:amount] || 100
+
+          gesture_options = {
+            :pinch_direction => in_out,
+            :amount => amount,
+            :duration => duration
+          }
+
+          client.perform_coordinate_gesture("pinch", 
+                                            hash[:coordinates][:x],
+                                            hash[:coordinates][:y],
+                                            gesture_options)
+
+
+          [hash[:view]]
+        end
+
+        # @!visibility private
         def pan(from_query, to_query, options)
           dupped_options = options.dup
 
