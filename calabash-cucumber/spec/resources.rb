@@ -88,7 +88,6 @@ class Resources
 
   def device_for_mocking
     endpoint = 'http://localhost:37265/'
-    # noinspection RubyStringKeysInHashInspection
     version_data =
     {
           'outcome' => 'SUCCESS',
@@ -104,10 +103,10 @@ class Resources
                 'revision' => 'e494e30'
           },
           'screen_dimensions' => {
-                'scale' => 2,
-                'width' => 640,
-                'sample' => 1,
-                'height' => 1136
+            'scale' => 2,
+            'width' => 640,
+            'sample' => 1,
+            'height' => 1136
           },
           'app_version' => '1.4.0',
           'iOS_version' => '8.0',
