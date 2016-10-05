@@ -334,6 +334,69 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       end
     end
 
+    context "#swipe" do
+      let(:force) { :strong }
+      let(:direction) { :left }
+      let(:gesture_options) { { duration: 0.2 } }
+
+      context "nil query" do
+        let(:options) { { force: force, direction: direction, query: nil } }
+
+        it "performs the gesture using screen coordinates" do
+          element = {
+            "screen" => true,
+            "rect" => {
+              "height" => 200,
+              "width" => 100,
+              "center_x" => 50,
+              "center_y" => 100
+            }
+          }
+
+          from_point = {x: 50, y: 100}
+          to_point = {x: 75, y: 125 }
+
+          expect(device_agent).to receive(:element_for_device_screen).and_return(element)
+          expect(device_agent).to receive(:point_from).and_return(from_point)
+          expect(Calabash::Cucumber::Automator::Coordinates).to(
+            receive(:end_point_for_swipe).with(:left, element, :strong).and_return(to_point)
+          )
+
+          expect(device_agent.client).to(
+            receive(:pan_between_coordinates).with(from_point, to_point, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.swipe(options)).to be == [element]
+        end
+      end
+
+      context "non-nil query" do
+        let(:options) { { force: force, direction: direction, query: "query" } }
+
+        it "performs the gesture using query coordinates" do
+          element = {:view => true}
+          hash = {
+            :coordinates => {x: 50, y: 100},
+            :view => element
+          }
+
+          to_point = {x: 75, y: 125 }
+          from_point = hash[:coordinates]
+
+          expect(device_agent).to receive(:query_for_coordinates).and_return(hash)
+          expect(Calabash::Cucumber::Automator::Coordinates).to(
+            receive(:end_point_for_swipe).with(:left, element, :strong).and_return(to_point)
+          )
+
+          expect(device_agent.client).to(
+            receive(:pan_between_coordinates).with(from_point, to_point, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.swipe(options)).to be == [element]
+        end
+      end
+    end
+
     context "#flick" do
       let(:gesture_options) { {:duration => 0.2} }
       let(:delta) { {x: -88.0, y: 88.0} }

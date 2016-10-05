@@ -130,12 +130,13 @@ args[0] = #{args[0]}])
           dupped_options = options.dup
 
           if dupped_options[:query].nil?
-            dupped_options[:query] = "*"
+            element = element_for_device_screen
+            from_point = point_from(element, options)
+          else
+            hash = query_for_coordinates(dupped_options)
+            from_point = hash[:coordinates]
+            element = hash[:view]
           end
-
-          hash = query_for_coordinates(dupped_options)
-          from_point = hash[:coordinates]
-          element = hash[:view]
 
           # DeviceAgent does not understand the :force. Does anyone?
           force = dupped_options[:force]
@@ -158,7 +159,7 @@ args[0] = #{args[0]}])
           direction = dupped_options[:direction]
           to_point = Coordinates.end_point_for_swipe(direction, element, force)
           client.pan_between_coordinates(from_point, to_point, gesture_options)
-          [hash[:view]]
+          [element]
         end
 
         # @!visibility private
