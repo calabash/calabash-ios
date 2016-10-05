@@ -382,6 +382,27 @@ Make sure your query returns at least one view.
         end
 
         # @!visibility private
+        def element_for_device_screen
+          screen_dimensions = device.screen_dimensions
+
+          scale = screen_dimensions[:scale]
+          height = (screen_dimensions[:height]/scale).to_i
+          center_y = (height/2)
+          width = (screen_dimensions[:width]/scale).to_i
+          center_x = (width/2)
+
+          {
+            "screen" => true,
+            "rect" => {
+              "height" => height,
+              "width" => width,
+              "center_x" => center_x,
+              "center_y" => center_y
+            }
+          }
+        end
+
+        # @!visibility private
         #
         # Don't change the double quotes.
         SPECIAL_ACTION_CHARS = {

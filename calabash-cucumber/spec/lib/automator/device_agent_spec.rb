@@ -160,6 +160,25 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       end
     end
 
+    context "#element_for_device_screen" do
+      it "returns a Hash representation of device_screen" do
+        device = Resources.shared.device_for_mocking
+        expect(device_agent).to receive(:device).and_return(device)
+        expected = {
+          "screen" => true,
+          "rect" => {
+            "height" => 568,
+            "width" => 320,
+            "center_x" => 160,
+            "center_y" => 284
+          }
+        }
+
+        actual = device_agent.send(:element_for_device_screen)
+        expect(actual).to be == expected
+      end
+    end
+
     context "#touch" do
       it "performs a touch and returns an array with one element" do
         hash = {
