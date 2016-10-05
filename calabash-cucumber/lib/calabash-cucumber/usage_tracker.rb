@@ -178,6 +178,9 @@ module Calabash
               :used_cucumber => used_cucumber?,
 
               :version => Calabash::Cucumber::VERSION,
+              :run_loop_version => RunLoop::VERSION,
+
+              :xcode_version => RunLoop::Xcode.new.version,
 
               :ci => RunLoop::Environment.ci?,
               :jenkins => RunLoop::Environment.jenkins?,
