@@ -160,6 +160,25 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       end
     end
 
+    context "#element_for_device_screen" do
+      it "returns a Hash representation of device_screen" do
+        device = Resources.shared.device_for_mocking
+        expect(device_agent).to receive(:device).and_return(device)
+        expected = {
+          "screen" => true,
+          "rect" => {
+            "height" => 568,
+            "width" => 320,
+            "center_x" => 160,
+            "center_y" => 284
+          }
+        }
+
+        actual = device_agent.send(:element_for_device_screen)
+        expect(actual).to be == expected
+      end
+    end
+
     context "#touch" do
       it "performs a touch and returns an array with one element" do
         hash = {
@@ -312,6 +331,133 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
         actual = device_agent.pan_coordinates(:from_point, :to_point, options)
         expect(actual).to be == [:view]
+      end
+    end
+
+    context "#swipe" do
+      let(:force) { :strong }
+      let(:direction) { :left }
+      let(:gesture_options) { { duration: 0.2 } }
+
+      context "nil query" do
+        let(:options) { { force: force, direction: direction, query: nil } }
+
+        it "performs the gesture using screen coordinates" do
+          element = {
+            "screen" => true,
+            "rect" => {
+              "height" => 200,
+              "width" => 100,
+              "center_x" => 50,
+              "center_y" => 100
+            }
+          }
+
+          from_point = {x: 50, y: 100}
+          to_point = {x: 75, y: 125 }
+
+          expect(device_agent).to receive(:element_for_device_screen).and_return(element)
+          expect(device_agent).to receive(:point_from).and_return(from_point)
+          expect(Calabash::Cucumber::Automator::Coordinates).to(
+            receive(:end_point_for_swipe).with(:left, element, :strong).and_return(to_point)
+          )
+
+          expect(device_agent.client).to(
+            receive(:pan_between_coordinates).with(from_point, to_point, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.swipe(options)).to be == [element]
+        end
+      end
+
+      context "non-nil query" do
+        let(:options) { { force: force, direction: direction, query: "query" } }
+
+        it "performs the gesture using query coordinates" do
+          element = {:view => true}
+          hash = {
+            :coordinates => {x: 50, y: 100},
+            :view => element
+          }
+
+          to_point = {x: 75, y: 125 }
+          from_point = hash[:coordinates]
+
+          expect(device_agent).to receive(:query_for_coordinates).and_return(hash)
+          expect(Calabash::Cucumber::Automator::Coordinates).to(
+            receive(:end_point_for_swipe).with(:left, element, :strong).and_return(to_point)
+          )
+
+          expect(device_agent.client).to(
+            receive(:pan_between_coordinates).with(from_point, to_point, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.swipe(options)).to be == [element]
+        end
+      end
+    end
+
+    context "#pinch" do
+      let(:direction) { :out }
+      let(:duration) { 0.5 }
+      let(:amount) { 100 }
+      let(:gesture_options) do
+        { duration: duration, amount: amount, pinch_direction: direction.to_s }
+      end
+
+      context "nil query" do
+        let(:options) do
+          dupped = gesture_options.dup
+          dupped[:query] = nil
+          dupped
+        end
+
+        it "performs the gesture using screen coordinates" do
+          element = {
+            "screen" => true,
+            "rect" => {
+              "height" => 200,
+              "width" => 100,
+              "center_x" => 50,
+              "center_y" => 100
+            }
+          }
+
+          coordinates = {x: 50, y: 100}
+
+          expect(device_agent).to receive(:element_for_device_screen).and_return(element)
+          expect(device_agent).to receive(:point_from).and_return(coordinates)
+
+          expect(device_agent.client).to(
+            receive(:perform_coordinate_gesture).with("pinch", 50, 100, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.pinch(direction, options)).to be == [element]
+        end
+      end
+
+      context "non-nil query" do
+        let(:options) do
+          dupped = gesture_options.dup
+          dupped[:query] = "query"
+          dupped
+        end
+
+        it "performs the gesture using query coordinates" do
+          element = {:view => true}
+          hash = {
+            :coordinates => {x: 50, y: 100},
+            :view => element
+          }
+
+          expect(device_agent).to receive(:query_for_coordinates).and_return(hash)
+
+          expect(device_agent.client).to(
+            receive(:perform_coordinate_gesture).with("pinch", 50, 100, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.pinch(direction, options)).to be == [element]
+        end
       end
     end
 

@@ -35,6 +35,28 @@ module Calabash
         end
 
         # @!visibility private
+        #
+        # This code is redundant.  It would be easy to pass the Launcher
+        # device instance to the automator, but that would require an XTC patch.
+        #
+        # This code is also duplicated in the EnvironmentHelpers.
+        #
+        # We need the device screen size to support full-screen pan gestures.
+        #
+        # Asking for the top-most view is not good enough and asking for the
+        # largest UIWindow is not specific enough (map apps have a huge window).
+        def device
+          @device ||= begin
+            require "calabash-cucumber/http/http"
+            require "calabash-cucumber/environment"
+            require "calabash-cucumber/device"
+            _, body = Calabash::Cucumber::HTTP.ensure_connectivity
+            endpoint = Calabash::Cucumber::Environment.device_endpoint
+            Calabash::Cucumber::Device.new(endpoint, body)
+          end
+        end
+
+        # @!visibility private
         def touch(options)
           abstract_method!
         end

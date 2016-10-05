@@ -130,12 +130,13 @@ args[0] = #{args[0]}])
           dupped_options = options.dup
 
           if dupped_options[:query].nil?
-            dupped_options[:query] = "*"
+            element = element_for_device_screen
+            from_point = point_from(element, options)
+          else
+            hash = query_for_coordinates(dupped_options)
+            from_point = hash[:coordinates]
+            element = hash[:view]
           end
-
-          hash = query_for_coordinates(dupped_options)
-          from_point = hash[:coordinates]
-          element = hash[:view]
 
           # DeviceAgent does not understand the :force. Does anyone?
           force = dupped_options[:force]
@@ -158,7 +159,7 @@ args[0] = #{args[0]}])
           direction = dupped_options[:direction]
           to_point = Coordinates.end_point_for_swipe(direction, element, force)
           client.pan_between_coordinates(from_point, to_point, gesture_options)
-          [hash[:view]]
+          [element]
         end
 
         # @!visibility private
@@ -166,13 +167,17 @@ args[0] = #{args[0]}])
           dupped_options = options.dup
 
           if dupped_options[:query].nil?
-            dupped_options[:query] = "*"
+            element = element_for_device_screen
+            coordinates = point_from(element, options)
+          else
+            hash = query_for_coordinates(dupped_options)
+            element = hash[:view]
+            coordinates = hash[:coordinates]
           end
 
-          hash = query_for_coordinates(dupped_options)
           in_out = in_out.to_s
-          duration = dupped_options[:duration] || 0.5
-          amount = dupped_options[:amount] || 100
+          duration = dupped_options[:duration]
+          amount = dupped_options[:amount]
 
           gesture_options = {
             :pinch_direction => in_out,
@@ -181,12 +186,11 @@ args[0] = #{args[0]}])
           }
 
           client.perform_coordinate_gesture("pinch",
-                                            hash[:coordinates][:x],
-                                            hash[:coordinates][:y],
+                                            coordinates[:x],
+                                            coordinates[:y],
                                             gesture_options)
 
-
-          [hash[:view]]
+          [element]
         end
 
         # @!visibility private
@@ -379,6 +383,27 @@ Make sure your query returns at least one view.
           else
             results[0]
           end
+        end
+
+        # @!visibility private
+        def element_for_device_screen
+          screen_dimensions = device.screen_dimensions
+
+          scale = screen_dimensions[:scale]
+          height = (screen_dimensions[:height]/scale).to_i
+          center_y = (height/2)
+          width = (screen_dimensions[:width]/scale).to_i
+          center_x = (width/2)
+
+          {
+            "screen" => true,
+            "rect" => {
+              "height" => height,
+              "width" => width,
+              "center_x" => center_x,
+              "center_y" => center_y
+            }
+          }
         end
 
         # @!visibility private
