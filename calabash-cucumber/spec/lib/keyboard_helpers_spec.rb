@@ -23,7 +23,7 @@ describe Calabash::Cucumber::KeyboardHelpers do
     end.new
   end
 
-  context "#docked_keyboard_visibile" do
+  context "#docked_keyboard_visible?" do
     it "returns false if keyboard query returns nil" do
       expect(world).to receive(:_query_for_keyboard).and_return(nil)
 
