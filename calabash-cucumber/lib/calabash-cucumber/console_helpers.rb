@@ -150,6 +150,19 @@ module Calabash
         puts ""
       end
 
+      # @!visibility private
+      # Do not call this method directly.
+      def _try_to_attach
+        begin
+          Calabash::Cucumber::HTTP.ping_app
+          launcher = Calabash::Cucumber::Launcher.new
+          launcher.attach
+          puts(RunLoop::Color.green("Attached to: #{launcher}"))
+          launcher
+        rescue => _
+        end
+      end
+
       private
 
       # List the visible element with given mark(s).
