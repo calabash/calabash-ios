@@ -15,7 +15,7 @@ describe 'Launcher:  #console_attach' do
     }
 
     def calabash_console_with_strategy(strategy)
-        attach_cmd = 'console_attach'
+      attach_cmd = 'console_attach'
 
       # :host strategy is hard to automate.
       #
@@ -64,39 +64,55 @@ describe 'Launcher:  #console_attach' do
     end
 
     describe 'can connect to launched apps' do
-
-      before(:each) { FileUtils.rm_rf(RunLoop::HostCache.default_directory) }
-
-      if Luffa::Environment.travis_ci?
-        # :host is failing on Travis ~ 33% of the time.
-        puts puts "\033[31mWARN: skipping :host on Travis CI - fails 33% of the time.\033[0m"
-        strategies = [:preferences]
-      else
-        strategies = [:preferences, :host, :shared_element]
-      end
-
-      strategies.each do |strategy|
-        it strategy do
-
-          launch_options[:uia_strategy] = strategy
-
+      if Resources.shared.xcode.version_gte_8?
+        it "attaches to DeviceAgent" do
           launcher.relaunch(launch_options)
           expect(launcher.run_loop).not_to be == nil
 
           other_launcher.attach
 
           expect(other_launcher.run_loop).not_to be nil
-          expect(other_launcher.run_loop[:uia_strategy]).to be == strategy
 
-          calabash_console_with_strategy(strategy) do |stdout, stderr|
+          calabash_console_with_strategy(nil) do |stdout, stderr|
             puts "stdout => #{stdout}"
             puts "stderr => #{stderr}"
             expect(stdout[/Error/,0]).to be == nil
             expect(stderr).to be == ''
           end
         end
+      else
+
+        before(:each) { FileUtils.rm_rf(RunLoop::HostCache.default_directory) }
+
+        if Luffa::Environment.travis_ci?
+          # host and shared_element do not like Travis
+          strategies = [:preferences]
+        else
+          strategies = [:preferences, :host, :shared_element]
+        end
+
+        strategies.each do |strategy|
+          it strategy do
+
+            launch_options[:uia_strategy] = strategy
+
+            launcher.relaunch(launch_options)
+            expect(launcher.run_loop).not_to be == nil
+
+            other_launcher.attach
+
+            expect(other_launcher.run_loop).not_to be nil
+            expect(other_launcher.run_loop[:uia_strategy]).to be == strategy
+
+            calabash_console_with_strategy(strategy) do |stdout, stderr|
+              puts "stdout => #{stdout}"
+              puts "stderr => #{stderr}"
+              expect(stdout[/Error/,0]).to be == nil
+              expect(stderr).to be == ''
+            end
+          end
+        end
       end
     end
   end
 end
-

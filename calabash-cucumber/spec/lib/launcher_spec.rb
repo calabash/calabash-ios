@@ -237,40 +237,19 @@ describe 'Calabash Launcher' do
     end
   end
 
-  describe "#attach" do
-    let(:run_loop) do
-        {
-          :pid => 10,
-          :udid => "identifier",
-          :automator => :instruments,
-          :index => 1,
-          :log_file => "path/to/log",
-          :uia_strategy => :host
-        }
-    end
+  context "#attach" do
 
-    let(:cache) do
-      Class.new do
-        def read ; end
-      end.new
-    end
+    it "raises an error on Test Cloud" do
+      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
 
-    before do
-      allow(RunLoop::HostCache).to receive(:default).and_return(cache)
-      allow(cache).to receive(:read).and_return(run_loop)
-    end
-
-    it "attaches to an instruments run-loop" do
-      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
-
-      actual = launcher.attach
-
-      expect(launcher.automator).to be_a_kind_of(Calabash::Cucumber::Automator::Instruments)
-      expect(actual).to be == launcher
+      expect do
+        launcher.attach
+      end.to raise_error RuntimeError, /This method is not available/
     end
 
     it "raises error if it cannot connect to LPServer" do
-      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_raise(Calabash::Cucumber::ServerNotRespondingError)
+      error_class = Calabash::Cucumber::ServerNotRespondingError
+      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_raise(error_class)
 
       actual = launcher.attach
 
@@ -278,24 +257,87 @@ describe 'Calabash Launcher' do
       expect(actual).to be_falsey
     end
 
-    it "raises if it cannot communication with instruments" do
-      run_loop[:pid] = nil
+    context "attach to automator" do
+      let(:cache) do
+        Class.new do
+          def read ; end
+        end.new
+      end
 
-      expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
+      before do
+        expect(RunLoop::HostCache).to receive(:default).and_return(cache)
+        expect(Calabash::Cucumber::HTTP).to receive(:ensure_connectivity).and_return(true)
+      end
 
-      actual = launcher.attach
+      it "attach to instruments" do
+        run_loop_cache = {
+          :pid => 10,
+          :udid => "identifier",
+          :automator => :instruments,
+          :index => 1,
+          :log_file => "path/to/log",
+          :uia_strategy => :host
+        }
+        expect(cache).to receive(:read).and_return(run_loop_cache)
 
-      expect(launcher.instance_variable_get(:@automator)).to be == nil
-      expect(actual).to be == launcher
+        actual = launcher.attach
+
+        automator = launcher.automator
+        expect(automator).to be_a_kind_of(Calabash::Cucumber::Automator::Instruments)
+        expect(launcher.instance_variable_get(:@automator)).to be == automator
+        expect(launcher.instance_variable_get(:@run_loop)).to be == run_loop_cache
+        expect(actual).to be == launcher
+      end
+
+      it "attach to DeviceAgent" do
+        run_loop_cache = { :automator => :device_agent }
+        expect(cache).to receive(:read).and_return(run_loop_cache)
+        expect(launcher).to(
+          receive(:_attach_to_device_agent!).with(run_loop_cache).and_return(:automator)
+        )
+
+        actual = launcher.attach
+
+        automator = launcher.automator
+        expect(automator).to be == :automator
+        expect(launcher.instance_variable_get(:@automator)).to be == automator
+        expect(actual).to be == launcher
+      end
     end
 
-    it "raises an error on the XTC" do
-      expect(Calabash::Cucumber::Environment).to receive(:xtc?).and_return(true)
+    context "_attach_to_device_agent!" do
+      it "returns a Automator::DeviceAgent and sets the @run_loop variable" do
 
-      expect do
-        launcher.attach
-      end.to raise_error RuntimeError,
-        /This method is not available on the Xamarin Test Cloud/
+        # Speed up execution
+        xcode = Resources.shared.xcode
+        instruments = Resources.shared.instruments
+        simctl = Resources.shared.simctl
+
+        expect(Calabash::Cucumber::Environment).to receive(:simctl).and_return(simctl)
+        expect(Calabash::Cucumber::Environment).to receive(:instruments).and_return(instruments)
+        expect(Calabash::Cucumber::Environment).to receive(:xcode).and_return(xcode)
+
+        udid = RunLoop::Core.default_simulator(xcode)
+        bundle_id = "com.apple.Preferences"
+        hash = {
+          app: bundle_id,
+          udid: udid,
+          launcher: :ios_device_manager,
+          launcher_options: {
+            code_sign_identity: "identity",
+            device_agent_install_timeout: 10,
+            shutdown_device_agent_before_launch: false,
+            dylib_injection_details: {:inject_dylib => false }
+          }
+        }
+
+        actual = launcher.send(:_attach_to_device_agent!, hash)
+
+        expect(actual).to be_a_kind_of(Calabash::Cucumber::Automator::DeviceAgent)
+        expect(launcher.instance_variable_get(:@run_loop)).to(
+           be_a_kind_of(RunLoop::DeviceAgent::Client)
+        )
+      end
     end
   end
 
