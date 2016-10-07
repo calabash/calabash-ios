@@ -89,3 +89,4 @@ Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(xcode)
 
 puts_console_details
 puts_message_of_the_day
+_try_to_attach
