@@ -228,7 +228,7 @@ module Calabash
       # @raise [RuntimeError] if there is no visible keyboard.
       # @deprecated 0.21.0 Use Core#enter_text
       def enter_text(text)
-        with_screenshot_on_failure { client.enter_text(text) }
+        with_screenshot_on_failure { client.enter_text_without_keyboard_check(text) }
       end
 
       # Enter text into the first view matched by uiquery.
@@ -246,8 +246,7 @@ module Calabash
       def enter_text_in(uiquery, text)
         with_screenshot_on_failure do
           client.touch(uiquery)
-          client.wait_for_keyboard
-          client.enter_text(text)
+          client.enter_text_without_keyboard_check(text)
         end
       end
 
