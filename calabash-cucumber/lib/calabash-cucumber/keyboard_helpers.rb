@@ -173,14 +173,19 @@ module Calabash
           screenshot_and_raise "There must be a visible keyboard"
         end
 
-        ['textField', 'textView'].each do |ui_class|
-          query = "#{ui_class} isFirstResponder:1"
-          result = _query_wrapper(query, :text)
-          if !result.empty?
-            return result.first
-          end
-        end
-        ""
+        query = "* isFirstResponder:1"
+        elements = _query_wrapper(query, :text)
+
+        return "" if elements.count == 0
+
+        text = elements[0]
+
+        # first responder did not respond to :text selector
+        return "" if text == "*****"
+
+        return "" if text.nil?
+
+        text
       end
 
       # @visibility private

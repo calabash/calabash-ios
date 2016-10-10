@@ -288,13 +288,13 @@ describe Calabash::Cucumber::KeyboardHelpers do
     end
 
     context "visible keyboard" do
+      let(:query) { "* isFirstResponder:1" }
 
       before do
         expect(world).to receive(:keyboard_visible?).and_return(true)
       end
 
-      it "returns the text of a text field when it is the first responder" do
-        query = "textField isFirstResponder:1"
+      it "returns the text of the first responder" do
         expect(world).to(
           receive(:_query_wrapper).with(query, :text)
         ).and_return(["text field text"])
@@ -303,28 +303,25 @@ describe Calabash::Cucumber::KeyboardHelpers do
         expect(actual).to be == "text field text"
       end
 
-      it "returns the test of text view when it is the first responder" do
-        query = "textField isFirstResponder:1"
+      it "returns the empty string when the query has no results" do
         expect(world).to(
           receive(:_query_wrapper).with(query, :text)
         ).and_return([])
-
-        query = "textView isFirstResponder:1"
-        expect(world).to(
-          receive(:_query_wrapper).with(query, :text)
-        ).and_return(["text view text"])
 
         actual = world.text_from_first_responder
-        expect(actual).to be == "text view text"
+        expect(actual).to be == ""
       end
 
-      it "returns an empty string when no first responder can be found" do
-        query = "textField isFirstResponder:1"
+      it "returns an empty string when the first responder does not respond to :text" do
         expect(world).to(
           receive(:_query_wrapper).with(query, :text)
-        ).and_return([])
+        ).and_return(["*****"])
 
-        query = "textView isFirstResponder:1"
+        actual = world.text_from_first_responder
+        expect(actual).to be == ""
+      end
+
+      it "returns the empty string when the first responder text is nil" do
         expect(world).to(
           receive(:_query_wrapper).with(query, :text)
         ).and_return([])
