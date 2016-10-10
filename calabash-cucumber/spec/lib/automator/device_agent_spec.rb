@@ -9,6 +9,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       def rotate_home_button_to(_); ; end
       def perform_coordinate_gesture(_, _, _, _={}); ; end
       def pan_between_coordinates(_, _, _={}); ; end
+      def enter_text_without_keyboard_check(_); ; end
     end.new
   end
 
@@ -489,7 +490,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
     context "Text Entry" do
       context "#enter_text_with_keyboard" do
         it "types a string by calling out to enter_text" do
-          expect(device_agent.client).to receive(:enter_text).with("text").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("text").and_return({})
+          )
 
           expect(device_agent.enter_text_with_keyboard("text")).to be == {}
         end
@@ -497,7 +500,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
       context "#enter_char_with_keyboard" do
         it "types a char by calling out to enter_text" do
-          expect(device_agent.client).to receive(:enter_text).with("c").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("c").and_return({})
+          )
 
           expect(device_agent.enter_text_with_keyboard("c")).to be == {}
         end
@@ -534,7 +539,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
             receive(:mark_for_return_key_of_first_responder)
           ).and_return(nil)
           expect(device_agent).to receive(:char_for_keyboard_action).and_return("\n")
-          expect(device_agent.client).to receive(:enter_text).with("\n").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("\n").and_return({})
+          )
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -550,7 +557,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           )
 
           expect(device_agent).to receive(:char_for_keyboard_action).and_return("\n")
-          expect(device_agent.client).to receive(:enter_text).with("\n").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("\n").and_return({})
+          )
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -566,7 +575,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
       context "#fast_enter_text" do
         it "calls 'enter_text'" do
-          expect(device_agent.client).to receive(:enter_text).with("text").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("text").and_return({})
+          )
 
           expect(device_agent.fast_enter_text("text")).to be == {}
         end

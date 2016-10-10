@@ -255,12 +255,12 @@ args[0] = #{args[0]}])
 
         # @!visibility private
         def enter_text_with_keyboard(string, options={})
-          client.enter_text(string)
+          client.enter_text_without_keyboard_check(string)
         end
 
         # @!visibility private
         def enter_char_with_keyboard(char)
-          client.enter_text(char)
+          client.enter_text_without_keyboard_check(char)
         end
 
         # @!visibility private
@@ -284,7 +284,7 @@ args[0] = #{args[0]}])
           end
 
           code = char_for_keyboard_action("Return")
-          client.enter_text(code)
+          client.enter_text_without_keyboard_check(code)
         end
 
         # @!visibility private
@@ -294,7 +294,7 @@ args[0] = #{args[0]}])
 
         # @!visibility private
         def fast_enter_text(text)
-          client.enter_text(text)
+          client.enter_text_without_keyboard_check(text)
         end
 
         # @!visibility private
