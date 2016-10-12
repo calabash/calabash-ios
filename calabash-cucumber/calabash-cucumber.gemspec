@@ -76,6 +76,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
+  s.add_development_dependency "rb-readline"
   s.add_development_dependency 'guard-rspec'
   s.add_development_dependency 'guard-bundler'
   # Pin to 3.0.6; >= 3.1.0 requires ruby 2.2. This is guard dependency.
