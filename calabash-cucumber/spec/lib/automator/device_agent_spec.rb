@@ -529,7 +529,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           expect(device_agent).to(
             receive(:mark_for_return_key_of_first_responder)
           ).and_return("Mark")
-          expect(device_agent.client).to receive(:touch).with({marked: "Mark"}).and_return({})
+          expect(device_agent.client).to receive(:touch).with({:type=>"Button", marked: "Mark"}).and_return({})
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -552,7 +552,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           ).and_return("Unmatchable identifier")
 
           expect(device_agent.client).to(
-            receive(:touch).with({marked: "Unmatchable identifier"}).and_raise(
+            receive(:touch).with({:type=>"Button", marked: "Unmatchable identifier"}).and_raise(
               RuntimeError, "No match found")
           )
 

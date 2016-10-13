@@ -274,7 +274,7 @@ args[0] = #{args[0]}])
           if mark
             begin
               # The underlying query for coordinates always expects results.
-              value = client.touch({marked: mark})
+              value = client.touch({type: "Button", marked: mark})
               return value
             rescue RuntimeError => _
               RunLoop.log_debug("Cannot find mark '#{mark}' with query; will send a newline")
