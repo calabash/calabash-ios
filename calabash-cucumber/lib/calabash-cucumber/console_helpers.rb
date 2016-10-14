@@ -102,7 +102,9 @@ module Calabash
           "Uti, non abuti.",
           "Non Satis Scire",
           "Nullius in verba",
-          "Det ka æn jå væer ei jált"
+          "Det ka æn jå væer ei jált",
+          "Dzień dobry",
+          "Jestem tu by ocalić świat"
         ]
         puts RunLoop::Color.green("Calabash says, \"#{messages.shuffle.first}\"")
       end
@@ -146,6 +148,19 @@ module Calabash
         puts RunLoop::Color.cyan("    copy => Copy console commands to clipboard.")
         puts RunLoop::Color.cyan("   clear => Clear the console.")
         puts ""
+      end
+
+      # @!visibility private
+      # Do not call this method directly.
+      def _try_to_attach
+        begin
+          Calabash::Cucumber::HTTP.ping_app
+          launcher = Calabash::Cucumber::Launcher.new
+          launcher.attach
+          puts(RunLoop::Color.green("Attached to: #{launcher}"))
+          launcher
+        rescue => _
+        end
       end
 
       private

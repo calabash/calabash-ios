@@ -192,6 +192,14 @@ module Calabash
        _default_device_or_create.ios9?
       end
 
+      # Is the device under test running iOS 10?
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 9
+      def ios10?
+       _default_device_or_create.ios10?
+      end
+
       # Is the app that is being tested an iPhone app emulated on an iPad?
       #
       # @see Calabash::Cucumber::IPad

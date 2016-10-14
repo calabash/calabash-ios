@@ -132,11 +132,11 @@ module Calabash
       #
       # +1 for tools to ask physical devices about attributes.
       def device
-        @device ||= lambda do
+        @device ||= begin
           _, body = Calabash::Cucumber::HTTP.ensure_connectivity
           endpoint = Calabash::Cucumber::Environment.device_endpoint
           Calabash::Cucumber::Device.new(endpoint, body)
-        end.call
+        end
       end
 
       # @!visibility private
@@ -170,20 +170,6 @@ module Calabash
                            :http_connection_timeout => 10}
         merged_options = default_options.merge(options)
 
-        @run_loop = RunLoop::HostCache.default.read
-
-        if @run_loop[:automator] == :device_agent
-          # TODO Attach to DeviceAgent - run-loop supports this!
-          # TODO Rewrite UIA methods to raise in the context of UIA
-          raise RuntimeError, %Q[
-
-Cannot attach to DeviceAgent automator.
-
-This behavior is not implemented yet.
-
-]
-        end
-
         begin
           Calabash::Cucumber::HTTP.ensure_connectivity(merged_options)
         rescue Calabash::Cucumber::ServerNotRespondingError => _
@@ -207,13 +193,22 @@ Try `start_test_server_in_background`
           return false
         end
 
-        if run_loop[:pid]
-          @automator = Calabash::Cucumber::Automator::Instruments.new(run_loop)
+        # TODO check that the :pid is alive - no sense attaching if Automator
+        # is not running.
+        run_loop_cache = RunLoop::HostCache.default.read
+
+        if run_loop_cache[:automator] == :device_agent
+          # Sets the @run_loop variable to a new RunLoop::DeviceAgent::Client
+          # instance.
+          @automator = _attach_to_device_agent!(run_loop_cache)
+        elsif run_loop_cache[:automator] == :instruments
+          @run_loop = run_loop_cache
+          @automator = Calabash::Cucumber::Automator::Instruments.new(run_loop_cache)
         else
           RunLoop.log_warn(
 %Q[
 
-Connected to an app that was not launched by Calabash using instruments.
+Connected to an app that was not launched by Calabash using instruments or DeviceAgent.
 
 Queries will work, but gestures and other automator actions will not.
 
@@ -626,6 +621,28 @@ true.  Please remove this method call from your hooks.
           # User supplied a path
           value
         end
+      end
+
+      # @!visibility private
+      def _attach_to_device_agent!(hash)
+        simctl = Calabash::Cucumber::Environment.simctl
+        instruments = Calabash::Cucumber::Environment.instruments
+        xcode = Calabash::Cucumber::Environment.xcode
+
+        options = { simctl: simctl, instruments: instruments, xcode: xcode}
+        device = RunLoop::Device.device_with_identifier(hash[:udid], options)
+        bundle_id = hash[:app]
+
+        options = { cbx_launcher: hash[:launcher] }
+        cbx_launcher = RunLoop::DeviceAgent::Client.detect_cbx_launcher(options, device)
+        launcher_options = hash[:launcher_options]
+
+        device_agent_client = RunLoop::DeviceAgent::Client.new(bundle_id,
+                                                               device,
+                                                               cbx_launcher,
+                                                               launcher_options)
+        @run_loop = device_agent_client
+        Calabash::Cucumber::Automator::DeviceAgent.new(@run_loop)
       end
     end
   end

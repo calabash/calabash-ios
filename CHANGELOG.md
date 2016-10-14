@@ -1,3 +1,39 @@
+### 0.20.3
+
+This release, combined with DeviceAgent 1.0.2, and run-loop 2.2.2,
+fixes several critical bugs related to:
+
+1. Code signing the DeviceAgent-Runner.app for physical devices
+2. Text entry and keyboard interactions
+
+0.20.0 shipped with a mistake in the `Calabash::Cucumber::DeviceAgent`
+API.  That module incorrect forwarded missing methods to `Core`.  Some
+users will experience failing tests if they are making calls to `Core`
+methods through the `Core::device_agent` method.  You should only be
+calling `Core#device_agent` if absolutely necessary.  As time goes on,
+we are finding edge cases were the DeviceAgent query engine is extremely
+slow to respond.
+
+* Automator::DeviceAgent: search for any first responder for return key
+  type #1204
+* Automator::DeviceAgent#tap\_keyboard\_action\_key should operate on
+  button only #1202 @ark-konopacki
+* Keyboard: Keyboard: text from first responders should check other views
+  #1199
+* DeviceAgent: automator skips keyboard visible checks #1197
+* Console attach for DeviceAgent + automatic console\_attach #1192
+* Full screen gestures should use screen dimensions #1190
+* Update the Core#scroll methods #1189
+* Capture run\_loop and xcode versions in tracker #1188 @ark-konopacki
+* Replace user\_id with distinct\_id #1187 @ark-konopacki
+* Adds device agent implementation for pinch #1186 @jescriba
+* Added polish "message of day" #1184 @ark-konopacki
+* 2x-bridge: pass string to fail method (as Calabash 0.x does) #1174
+  @JoeSSS
+* Refactor DeviceAgent public API screenshot and fail #1170
+* Gem: force httpclient 2.7.1 or higher #1165
+* Core: add #ios10?
+
 ### 0.20.0
 
 This release provides support for iOS 9 and iOS 10 with Xcode 8.
@@ -33,7 +69,7 @@ code signing.
 $ xcrun security find-identity -v -p codesigning
   1) 18<snip>84 "iPhone Developer: Your Name (ABCDEF1234)"
   2) 23<snip>33 "iPhone Distribution: Your Company Name (A1B2C3D4EF)"
-  3) 38<snip>11 "iPhone Developer: Your Colleage (1234ABCDEF)"
+  3) 38<snip>11 "iPhone Developer: Your Colleague (1234ABCDEF)"
 
 # Chose an "iPhone Developer" certificate.
 
