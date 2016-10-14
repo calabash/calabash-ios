@@ -622,8 +622,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       end
 
       context "#return_key_type_of_first_responder" do
-        it "returns the returnKeyType of text field when it is the first responder" do
-          query = "textField isFirstResponder:1"
+        let(:query) { "* isFirstResponder:1" }
+
+        it "returns the returnKeyType of the first responder" do
           expect(Calabash::Cucumber::Map).to(
             receive(:raw_map).with(query, :query, :returnKeyType)
           ).and_return({"results" => [1]})
@@ -632,31 +633,28 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           expect(actual).to be == 1
         end
 
-        it "returns the returnKeyType of text view when it is the first responder" do
-          query = "textField isFirstResponder:1"
+        it "returns nil if returnKeyType result is empty" do
           expect(Calabash::Cucumber::Map).to(
             receive(:raw_map).with(query, :query, :returnKeyType)
           ).and_return({"results" => []})
-
-          query = "textView isFirstResponder:1"
-          expect(Calabash::Cucumber::Map).to(
-            receive(:raw_map).with(query, :query, :returnKeyType)
-          ).and_return({"results" => [2]})
 
           actual = device_agent.send(:return_key_type_of_first_responder)
-          expect(actual).to be == 2
+          expect(actual).to be == nil
         end
 
-        it "returns nil when no first responder can be found" do
-          query = "textField isFirstResponder:1"
+        it "returns nil if first responder does not respond to :returnKeyType" do
           expect(Calabash::Cucumber::Map).to(
             receive(:raw_map).with(query, :query, :returnKeyType)
-          ).and_return({"results" => []})
+          ).and_return({"results" => ["*****"]})
 
-          query = "textView isFirstResponder:1"
+          actual = device_agent.send(:return_key_type_of_first_responder)
+          expect(actual).to be == nil
+        end
+
+        it "returns nil if first responder :returnKeyType is nil" do
           expect(Calabash::Cucumber::Map).to(
             receive(:raw_map).with(query, :query, :returnKeyType)
-          ).and_return({"results" => []})
+          ).and_return({"results" => [nil]})
 
           actual = device_agent.send(:return_key_type_of_first_responder)
           expect(actual).to be == nil

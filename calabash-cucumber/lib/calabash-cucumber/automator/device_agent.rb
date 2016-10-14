@@ -453,17 +453,25 @@ Make sure your query returns at least one view.
         # @!visibility private
         def return_key_type_of_first_responder
 
-          ['textField', 'textView'].each do |ui_class|
-            query = "#{ui_class} isFirstResponder:1"
-            raw = Calabash::Cucumber::Map.raw_map(query, :query, :returnKeyType)
-            results = raw["results"]
-            if !results.empty?
-              return results.first
-            end
+          query = "* isFirstResponder:1"
+          raw = Calabash::Cucumber::Map.raw_map(query, :query, :returnKeyType)
+          elements = raw["results"]
+          return nil if elements.count == 0
+
+          return_key_type = elements[0]
+
+          # first responder did not respond to :text selector
+          if return_key_type == "*****"
+            RunLoop.log_debug("First responder does not respond to :returnKeyType")
+            return nil
           end
 
-          RunLoop.log_debug("Cannot find keyboard first responder to ask for its returnKeyType")
-          nil
+          if return_key_type.nil?
+            RunLoop.log_debug("First responder has nil :returnKeyType")
+            return nil
+          end
+
+          return_key_type
         end
 
         # @!visibility private
