@@ -189,7 +189,7 @@ module Calabash
       end
 
       # @!visibility private
-      # Returns the keyboard type as a symbol
+      # Returns the keyboard type as a symbol from the specified query
       #
       # UIKeyboardTypeDefault => :default
       # UIKeyboardTypeASCIICapable => :ascii_capable
@@ -204,12 +204,12 @@ module Calabash
       # UIKeyboardTypeWebSearch => :web_search
       #
       # @raise [RuntimeError] if there is no visible keyboard
-      def keyboard_type
+      def keyboard_type(query = {})
         if !keyboard_visible?
           screenshot_and_raise "There must be a visible keyboard"
         end
 
-        keyboard_type = _query_for_keyboard
+        keyboard_type = _query_wrapper(query, :keyboardType).first
         if keyboard_type.is_a?(Fixnum)
           return KEYBOARD_TYPES[keyboard_type]
         else
