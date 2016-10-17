@@ -188,11 +188,56 @@ module Calabash
         text
       end
 
+      # @!visibility private
+      # Returns the keyboard type as a symbol
+      #
+      # UIKeyboardTypeDefault => :default
+      # UIKeyboardTypeASCIICapable => :ascii_capable
+      # UIKeyboardTypeNumbersAndPunctuation => :numbers_and_punctuation
+      # UIKeyboardTypeURL => :url
+      # UIKeyboardTypeNumberPad => :number_pad
+      # UIKeyboardTypePhonePad => :phone_pad
+      # UIKeyboardTypeNamePhonePad => :name_phone_pad
+      # UIKeyboardTypeEmailAddress => :email
+      # UIKeyboardTypeDecimalPad => :decimal
+      # UIKeyboardTypeTwitter => :twitter
+      # UIKeyboardTypeWebSearch => :web_search
+      #
+      # @raise [RuntimeError] if there is no visible keyboard
+      def keyboard_type
+        if !keyboard_visible?
+          screenshot_and_raise "There must be a visible keyboard"
+        end
+
+        keyboard_type = _query_for_keyboard
+        if keyboard_type.is_a?(Fixnum)
+          return KEYBOARD_TYPES[keyboard_type]
+        else
+          screenshot_and_raise "Invalid keyboard type"
+        end
+      end
+
       # @visibility private
       # TODO Remove in 0.21.0
       alias_method :_text_from_first_responder, :text_from_first_responder
 
       private
+
+      # @!visbility private
+      KEYBOARD_TYPES = {
+          0 => :default,
+          1 => :ascii_capable,
+          2 => :numbers_and_punctuation,
+          3 => :url,
+          4 => :number_pad,
+          5 => :phone_pad,
+          6 => :name_phone_pad,
+          7 => :email,
+          8 => :decimal,
+          9 => :twitter,
+          10 => :web_search
+        }
+
 
       # @!visibility private
       KEYBOARD_QUERY = "view:'UIKBKeyplaneView'"
