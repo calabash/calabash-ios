@@ -115,6 +115,11 @@ module Calabash
         client.query(uiquery)
       end
 
+      # Perform a clear text on the active view
+      def clear_text
+        client.clear_text
+      end
+
       # Query for the center of a view.
       #
       # @see #query
