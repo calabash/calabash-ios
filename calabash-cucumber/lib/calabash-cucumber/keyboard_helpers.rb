@@ -204,21 +204,21 @@ module Calabash
       # UIKeyboardTypeWebSearch => :web_search
       #
       # @raise [RuntimeError] if there is no visible keyboard
-      def keyboard_type(query)
+      def keyboard_type(query = "* isFirstResponder:1")
         if !keyboard_visible?
           screenshot_and_raise "There must be a visible keyboard"
         end
 
-        if query.nil? || query.empty?
-          # Default to first responder
-          query = "* isFirstResponder:1"
+        query_result = _query_wrapper(query, :keyboardType).first
+        keyboard_type = KEYBOARD_TYPES[query_result]
+
+        if !keyboard_type 
+          RunLoop.log_debug("Found query_result:#{query_result}, but expected
+                            to match key in #{KEYBOARD_TYPES}")
+          keyboard_type = :unknown
         end
-        keyboard_type = _query_wrapper(query, :keyboardType).first
-        if keyboard_type.is_a?(Fixnum)
-          return KEYBOARD_TYPES[keyboard_type]
-        else
-          screenshot_and_raise "Invalid keyboard type"
-        end
+
+        keyboard_type
       end
 
       # @visibility private
