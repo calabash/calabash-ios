@@ -10,6 +10,7 @@ describe Calabash::Cucumber::Core do
       def swipe(_); :success; end
       def to_s; "#<Automator RSPEC STUB>"; end
       def inspect; to_s; end
+      def name; :automator; end
     end.new
   end
 
