@@ -1,6 +1,8 @@
 ### 0.20.4
 
-This release, combined with DeviceAgent 1.0.3 and run-loop 2.2.2
+< NOT RELEASED YET >
+
+This release, combined with DeviceAgent 1.0.3 and run-loop 2.2.3
 fixes several critical bugs related to:
 
 1. Code signing the DeviceAgent-Runner.app for physical devices
