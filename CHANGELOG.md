@@ -1,12 +1,11 @@
 ### 0.20.4
 
-< NOT RELEASED YET >
-
-This release, combined with DeviceAgent 1.0.3 and run-loop 2.2.3
+This release, combined with DeviceAgent 1.0.4 and run-loop 2.2.4
 fixes several critical bugs related to:
 
 1. Code signing the DeviceAgent-Runner.app for physical devices
 2. Text entry and keyboard interactions
+3. Dismissing SpringBoard alerts
 
 Definining a `CODE_SIGN_IDENTITY` is no longer necessary, but is
 supported if for some reason you require a specific identity for
@@ -16,6 +15,7 @@ We have identified a flaw in text entry on i386 simulators and armv7
 devices.  At the moment, we have no fail-proof solution.  We recommend
 that you do not test on i386 simulators or armv7 devices.
 
+* HTTP: dismiss SpringBoard alerts before and after most LPServer calls #1245
 * DeviceAgent:API: #to\_s and #inspect #1215
 * Implement Automator::DeviceAgent#clear\_text #1205
 * Calabash can return the type of the visible keyboard #1207
