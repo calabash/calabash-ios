@@ -19,6 +19,8 @@ module Calabash
 
       # @!visibility private
       def http(options, data=nil)
+        _private_dismiss_springboard_alerts
+
         options[:uri] = url_for(options[:path])
         options[:method] = options[:method] || :get
         if data
@@ -30,6 +32,9 @@ module Calabash
         end
         res = make_http_request(options)
         res.force_encoding("UTF-8") if res.respond_to?(:force_encoding)
+
+        _private_dismiss_springboard_alerts
+
         res
       end
 
@@ -101,6 +106,18 @@ module Calabash
         http
       end
 
+      private
+
+      # @!visibility private
+      #
+      # Do not call this method.
+      def _private_dismiss_springboard_alerts
+        require "calabash-cucumber/launcher"
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        if launcher && launcher.automator && launcher.automator.name == :device_agent
+          launcher.automator.client.send(:_dismiss_springboard_alerts)
+        end
+      end
     end
   end
 end
