@@ -24,6 +24,28 @@ module Calabash
         @world = world
       end
 
+      # @!visibility private
+      def to_s
+        if client.running?
+          version = client.server_version["bundle_short_version"]
+        else
+          version = "not connected!"
+        end
+        "#<DeviceAgent API: #{version}>"
+      end
+
+      # @!visibility private
+      def inspect
+        to_s
+      end
+
+      # @!visibility private
+      # https://github.com/awesome-print/awesome_print/pull/253
+      # Awesome print patch for BasicObject
+      def ai(_)
+        to_s
+      end
+
       # Query the UI for elements.
       #
       # @example
@@ -113,6 +135,11 @@ module Calabash
       # @return [Array<Hash>] An array of elements matching the `uiquery`.
       def query(uiquery)
         client.query(uiquery)
+      end
+
+      # Perform a clear text on the active view
+      def clear_text
+        client.clear_text
       end
 
       # Query for the center of a view.
