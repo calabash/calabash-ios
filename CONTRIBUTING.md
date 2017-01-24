@@ -25,7 +25,7 @@ on how to make a good commit message.
 Xamarin has a two additional support channels for you.  If your question or bug report is UITest or Test Cloud related, your best chance of quick, accurate response will be on one of these channels.
 
 1. [Post your question on the Xamarin Forums](http://forums.xamarin.com/categories/xamarin-test-cloud).
-2. [mailto:support@example.org](Send and email to support@xamarin.com)
+2. [Send and email to support@xamarin.com](mailto:support@xamarin.com)
 
 ### CI Environments (Travis, Jenkins, Bamboo, Team City)
 
