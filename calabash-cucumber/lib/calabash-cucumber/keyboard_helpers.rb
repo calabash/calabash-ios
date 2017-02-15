@@ -227,7 +227,7 @@ module Calabash
 
       private
 
-      # @!visbility private
+      # @!visibility private
       KEYBOARD_TYPES = {
           0 => :default,
           1 => :ascii_capable,
