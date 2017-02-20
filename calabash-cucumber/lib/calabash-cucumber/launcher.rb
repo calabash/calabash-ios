@@ -492,7 +492,7 @@ RunLoop.run returned:
         RunLoop.log_warn(%Q[
 Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
 environment variable has been removed from Calabash.  This always returns
-true.  Please remove this method call from your hooks.
+false.  Please remove this method call from your hooks.
 ])
         false
       end
