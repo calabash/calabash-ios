@@ -114,12 +114,12 @@ module Calabash
       # @raise [Calabash::Cucumber::WaitHelpers::WaitError] when the timeout is exceeded
       def wait_for(options_or_timeout=DEFAULT_OPTS, &block)
         #note Hash is preferred, number acceptable for backwards compat
-        default_timeout = 30
+        default_timeout = DEFAULT_OPTS[:timeout]
         timeout = options_or_timeout || default_timeout
-        post_timeout=0
-        retry_frequency=0.3
-        timeout_message = nil
-        screenshot_on_error = true
+        post_timeout = DEFAULT_OPTS[:post_timeout]
+        retry_frequency = DEFAULT_OPTS[:retry_frequency]
+        timeout_message = DEFAULT_OPTS[:timeout_message]
+        screenshot_on_error = DEFAULT_OPTS[:screenshot_on_error]
 
         if options_or_timeout.is_a?(Hash)
           timeout = options_or_timeout[:timeout] || default_timeout
