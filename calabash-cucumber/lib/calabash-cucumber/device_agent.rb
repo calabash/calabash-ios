@@ -338,6 +338,74 @@ module Calabash
         client.springboard_alert
       end
 
+      # EXPERIMENTAL: This API may change.
+      #
+      # Disables Calabash's ability to dismiss SpringBoard alerts automatically.
+      def dismiss_springboard_alerts_automatically!
+        client.set_dismiss_springboard_alerts_automatically(true)
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Enables Calabash's ability to dismiss SpringBoard alerts automatically.
+      def dismiss_springboard_alerts_manually!
+        client.set_dismiss_springboard_alerts_automatically(false)
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Enables or disables Calabash's ability to dismiss SpringBoard alerts
+      # automatically.
+      #
+      # @param true_or_false
+      def set_dismiss_springboard_alerts_automatically(true_or_false)
+        client.set_dismiss_springboard_alerts_automatically(true_or_false)
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Wait for a SpringBoard alert to appear.
+      def wait_for_springboard_alert(timeout=nil)
+        if timeout
+          client.wait_for_springboard_alert(timeout)
+        else
+          client.wait_for_springboard_alert
+        end
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Wait for a SpringBoard alert to disappear.
+      def wait_for_no_springboard_alert(timeout=nil)
+        if timeout
+          client.wait_for_no_springboard_alert(timeout)
+        else
+          client.wait_for_no_springboard_alert
+        end
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # @param [String] button_title The title of the button to touch.
+      #
+      # Please pay attention to non-ASCII characters in button titles.
+      #
+      # "Don’t Allow" => UTF-8 single quote in Don't
+      # "Don't Allow" => ASCII single quote in Don't
+      #
+      # Only UTF-8 string will match the button title.
+      #
+      # @return true if a SpringBoard alert is dismissed.
+      #
+      # @raise RuntimeError If there is no SpringBoard alert visible
+      # @raise RuntimeError If the SpringBoard alert does not have a button
+      #   matching button_title.
+      # @raise RuntimeError If there is an error dismissing the SpringBoard
+      #   alert.
+      def dismiss_springboard_alert(button_title)
+         client.dismiss_springboard_alert(button_title)
+      end
+
 =begin
 PRIVATE
 =end
