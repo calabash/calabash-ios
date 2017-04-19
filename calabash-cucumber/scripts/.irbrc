@@ -1,6 +1,17 @@
-require "irb/completion"
-require "irb/ext/save-history"
-require "benchmark"
+begin
+  require "irb/completion"
+  require "irb/ext/save-history"
+rescue LoadError => e
+  puts %Q[
+Caught a LoadError while requiring an irb module.
+
+#{e}
+
+An error like this usually means your ruby installation is corrupt.
+
+]
+  exit(1)
+end
 
 begin
   require "awesome_print"
@@ -24,6 +35,8 @@ $ gem install calabash-cucumber
 ]
   exit(1)
 end
+
+require "benchmark"
 
 AwesomePrint.irb!
 

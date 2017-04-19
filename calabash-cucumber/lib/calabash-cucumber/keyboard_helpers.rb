@@ -212,7 +212,7 @@ module Calabash
         query_result = _query_wrapper(query, :keyboardType).first
         keyboard_type = KEYBOARD_TYPES[query_result]
 
-        if !keyboard_type 
+        if !keyboard_type
           RunLoop.log_debug("Found query_result:#{query_result}, but expected
                             to match key in #{KEYBOARD_TYPES}")
           keyboard_type = :unknown
@@ -227,7 +227,7 @@ module Calabash
 
       private
 
-      # @!visbility private
+      # @!visibility private
       KEYBOARD_TYPES = {
           0 => :default,
           1 => :ascii_capable,
