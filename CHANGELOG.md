@@ -1,3 +1,18 @@
+### 0.20.5
+
+This release adds a public API for manually managing SpringBoard alerts.
+This behavior is only available when running with Xcode 8.x. See this
+pull-request for API examples: [run\_loop#611](https://github.com/calabash/run_loop/pull/611).
+
+This release does not require a server update.
+
+* IRB: rescue LoadError on require 'irb/\*' #1294
+* DeviceAgent: add public API for managing SpringBoard alerts #1292
+* Fix logical inconsistency in warning emitted by
+  Launcher#calabash\_no\_launch? #1275 @duboviy
+* Fix typo in contributing doc #1264 @acroos
+* Update Calabash.podspec #1253 @nadzeya
+
 ### 0.20.4
 
 This release, combined with DeviceAgent 1.0.4 and run-loop 2.2.4
