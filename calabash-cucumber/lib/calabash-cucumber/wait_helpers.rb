@@ -80,6 +80,24 @@ module Calabash
         touch(uiquery, options)
       end
 
+      # Allows users to override key/value pairs in `DEFAULT_OPTS`.
+      #
+      # @param [String] key The key for the value you want to change.
+      # @param [Object] value The value for the key you want to change.
+      # @return [Hash] The `Calabash::Cucumber::WaitHelpers::DEFAULTS_OPTS hash.
+      def self.override_default_option(key, value)
+        duplicate = Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS.dup
+        duplicate[key] = value
+        begin
+          out = StringIO.new
+          $stderr = out
+          Calabash::Cucumber::WaitHelpers.const_set('DEFAULT_OPTS', duplicate)
+        ensure
+          $stderr = STDERR
+        end
+        Calabash::Cucumber::WaitHelpers::DEFAULT_OPTS
+      end
+
       # Waits for a condition to be true. The condition is specified by a given block that is called repeatedly.
       # If the block returns a 'trueish' value the condition is considered true and
       # `wait_for` immediately returns.
