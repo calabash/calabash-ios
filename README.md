@@ -25,7 +25,7 @@ We recommend that you use the most recent released version of Xcode, MacOS, and 
 * ruby >= 2.0 (latest is preferred)
 
 For the best Ruby experience we recommend that you use a managed Ruby
-like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/)).
+like [rbenv](https://github.com/rbenv/rbenv) or [rvm](https://rvm.io/)).
 
 If you are just getting started or don't want to commit to a managed Ruby, we
 recommend you install and use the [Calabash Sandbox](https://github.com/calabash/install).
@@ -113,7 +113,7 @@ We recommend using scripts and/or changing the location where Xcode stages build
 |-------|-------------|
 | [Getting Started](https://github.com/calabash/calabash-ios/wiki/Getting-Started) | A more in-depth tutorial using the LPSimpleExample. |
 | [Testing on Physical Devices](https://github.com/calabash/calabash-ios/wiki/Testing-on-Physical-Devices) | Everything you need to know about testing on physical devices. |
-| [API Docs](http://calabashapi.xamarin.com/ios) | The Calabash iOS ruby API |
+| [API Docs](http://calabashapi.xamarin.com/ios/) | The Calabash iOS ruby API |
 | [iOS Smoke Test App](https://github.com/calabash/ios-smoke-test-app) | Demonstrates advanced features, setups, and workflows|
 | [iOS WebView Test App](https://github.com/calabash/ios-webview-test-app) | Demonstrates how to interact with UIWebView and WKWebView|
 | [Getting Help](https://github.com/calabash/calabash-ios/wiki) | The Calabash iOS Wiki |
