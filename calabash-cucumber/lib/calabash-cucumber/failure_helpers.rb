@@ -5,6 +5,13 @@ module Calabash
 
     # A collection of methods that help you handle Step failures.
     module FailureHelpers
+      # FastImage Resize is a solution for resizing images in ruby by using libgd
+      # it should be installed manually since it not required by calabash
+      begin
+        require "fastimage_resize"
+      rescue LoadError
+        # We just won't get error
+      end
 
       # Generates a screenshot of the app UI and saves to a file (prefer `screenshot_embed`).
       # Increments a global counter of screenshots and adds the count to the filename (to ensure uniqueness).
@@ -16,9 +23,10 @@ module Calabash
       # @option options {String} :name ('screenshot') the base name and extension of the file (e.g. 'login.png')
       # @return {String} path to the generated screenshot
       # @todo deprecated the current behavior of SCREENSHOT_PATH; it is confusing
-      def screenshot(options={:prefix => nil, :name => nil})
+      def screenshot(options={:prefix => nil, :name => nil, :scale => nil})
         prefix = options[:prefix]
         name = options[:name]
+        scale = options[:scale]
 
         @@screenshot_count ||= 0
         res = http({:method => :get, :path => 'screenshot'})
@@ -34,6 +42,14 @@ module Calabash
         path = "#{prefix}#{name}_#{@@screenshot_count}.png"
         File.open(path, 'wb') do |f|
           f.write res
+        end
+        if defined?(FastImage)
+          unless scale.nil?
+            if scale != 1 and scale < 1 and scale > 0
+              weight = FastImage.size(path)[0]
+              FastImage.resize(path, weight*scale, 0, :outfile=>path)
+            end
+          end
         end
         @@screenshot_count += 1
         path
