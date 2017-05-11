@@ -72,8 +72,11 @@ class Calabash::IBase
   # @raise [RuntimeError] if the subclass does not respond to `title` or
   #  the subclass does not override the `trait` method
   def trait
-    raise "You should define a trait method or a title method" unless respond_to?(:title)
-    "navigationItemView marked:'#{self.title}'"
+    if respond_to?(:title)
+      "navigationItemView marked:'#{self.title}'"
+    else
+      raise NotImplementedError, "Subclasses must implement a 'trait' or 'title' method"
+    end
   end
 
   # Returns true if the current view shows this page's `trait`.
@@ -116,7 +119,7 @@ class Calabash::IBase
   # @return {IBase} self
   def await(wait_opts={})
     wait_for_elements_exist([trait], wait_opts)
-    unless wait_opts.has_key?(:await_animation) && !wait_opts[:await_animation]
+    if wait_opts[:await_animation]
       sleep(transition_duration)
     end
     self
@@ -170,17 +173,20 @@ class Calabash::IBase
   # @raise [RuntimeError] if `transition_options` does not include a non-nil
   #  :tap or :action key
   def transition(transition_options={})
-    uiquery = transition_options[:tap]
-    action = transition_options[:action]
-    page_arg = transition_options[:page]
-    should_await = transition_options.has_key?(:await) ? transition_options[:await] : true
+    default_opts = {:await => true}
+    merged_transitions_opts = default_opts.merge(transition_options)
+
+    uiquery = merged_transitions_opts[:tap]
+    action = merged_transitions_opts[:action]
+    page_arg = merged_transitions_opts[:page]
+    should_await = merged_transitions_opts[:await]
 
     if action.nil? && uiquery.nil?
-      raise "Called transition without providing a gesture (:tap or :action) #{transition_options}"
+      raise(ArgumentError, "Called transition without providing a gesture (:tap or :action) #{transition_options}")
     end
 
     if uiquery
-      tap_options = transition_options[:tap_options] || {}
+      tap_options = merged_transitions_opts[:tap_options] || {}
       touch(uiquery, tap_options)
     else
       action.call()
@@ -190,9 +196,9 @@ class Calabash::IBase
     page_obj ||= self
 
     if should_await
-      wait_opts = transition_options[:wait_options] || {}
+      wait_opts = merged_transitions_opts[:wait_options] || {}
       if page_obj == self
-        unless wait_opts.has_key?(:await_animation) && !wait_opts[:await_animation]
+        if wait_opts[:await_animation]
           sleep(transition_duration)
         end
       else
