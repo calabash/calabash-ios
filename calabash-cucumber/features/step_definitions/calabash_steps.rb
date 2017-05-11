@@ -113,6 +113,7 @@ Then /^I use the native keyboard to enter "([^\"]*)" into the "([^\"]*)" (?:text
   macro %(I touch the "#{field_name}" text field)
   wait_for_keyboard
   keyboard_enter_text(text_to_type)
+  done
   sleep(STEP_PAUSE)
 end
 
@@ -135,6 +136,7 @@ Then /^I use the native keyboard to enter "([^\"]*)" into (?:input|text) field n
   macro %(I touch text field number #{index})
   wait_for_keyboard
   keyboard_enter_text(text_to_type)
+  done
   sleep(STEP_PAUSE)
 end
 
