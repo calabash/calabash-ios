@@ -147,11 +147,13 @@ end
 ### See ###
 Then /^I wait to see "([^\"]*)"$/ do |expected_mark|
   wait_for(WAIT_TIMEOUT) { view_with_mark_exists(expected_mark) }
+  wait_for_none_animating()
 end
 
 Then /^I wait until I don't see "([^\"]*)"$/ do |expected_mark|
   sleep 1 # wait for previous screen to disappear
   wait_for(WAIT_TIMEOUT) { !element_exists("view marked: '#{expected_mark}'") }
+  wait_for_none_animating()
 end
 
 Then /^I wait to not see "([^\"]*)"$/ do |expected_mark|
@@ -164,6 +166,7 @@ end
 
 Then /^I wait for the "([^\"]*)" button to appear$/ do |name|
   wait_for(WAIT_TIMEOUT) { element_exists("button marked: '#{name}'") }
+  wait_for_none_animating()
 end
 
 Then /^I wait to see a navigation bar titled "([^\"]*)"$/ do |expected_mark|
@@ -174,6 +177,7 @@ Then /^I wait to see a navigation bar titled "([^\"]*)"$/ do |expected_mark|
     non_button_items = all_items.delete_if { |item| button_items.include?(item) }
     !non_button_items.empty?
   end
+  wait_for_none_animating()
 end
 
 Then /^I wait for the "([^\"]*)" (?:input|text) field$/ do |placeholder_or_view_mark|
@@ -181,10 +185,12 @@ Then /^I wait for the "([^\"]*)" (?:input|text) field$/ do |placeholder_or_view_
     element_exists("textField placeholder: '#{placeholder_or_view_mark}'") ||
     element_exists("textField marked: '#{placeholder_or_view_mark}'")
   end
+  wait_for_none_animating()
 end
 
 Then /^I wait for (\d+) (?:input|text) field(?:s)?$/ do |count|
   wait_for(WAIT_TIMEOUT) { query(:textField).count >= count.to_i }
+  wait_for_none_animating()
 end
 
 Then /^I wait$/ do
@@ -433,3 +439,4 @@ Then(/^I change the date picker date to "([^"]*)" at "([^"]*)"$/) do |date_str, 
   macro %(I change the date picker time to "#{time_str}")
   macro %(I change the date picker date to "#{date_str}")
 end
+
