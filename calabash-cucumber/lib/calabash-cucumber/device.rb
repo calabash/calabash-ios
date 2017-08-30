@@ -239,6 +239,18 @@ module Calabash
         ios_version_object.major.to_s
       end
 
+      # Is this device running iOS 11?
+      # @return [Boolean] true if the major version of the OS is 11
+      def ios_gte_11?
+        ios_version_object.major >= 11
+      end
+
+      # Is this device running iOS 11?
+      # @return [Boolean] true if the major version of the OS is 11
+      def ios11?
+        ios_version_object.major == 11
+      end
+
       # Is this device running iOS 10?
       # @return [Boolean] true if the major version of the OS is 10
       def ios10?
