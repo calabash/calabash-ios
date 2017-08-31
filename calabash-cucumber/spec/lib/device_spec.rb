@@ -130,9 +130,9 @@ describe Calabash::Cucumber::Device do
   end
 
   describe 'iOS version' do
-    let(:twelve) { RunLoop::Version.new("12.0") }
-    let(:eleven) { RunLoop::Version.new("11.0") }
-    let(:ten) { RunLoop::Version.new("10.0") }
+    let(:twelve) { RunLoop::Version.new('12.0') }
+    let(:eleven) { RunLoop::Version.new('11.0') }
+    let(:ten) { RunLoop::Version.new('10.0') }
     let(:nine) { RunLoop::Version.new('9.0') }
     let(:eight) { RunLoop::Version.new('8.0') }
     let(:seven) { RunLoop::Version.new('7.0') }
