@@ -195,9 +195,25 @@ module Calabash
       # Is the device under test running iOS 10?
       #
       # @raise [RuntimeError] if the server cannot be reached
-      # @return [Boolean] true if device under test is running iOS 9
+      # @return [Boolean] true if device under test is running iOS 10
       def ios10?
        _default_device_or_create.ios10?
+      end
+
+      # Is the device under test running iOS 11?
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 11
+      def ios11?
+        _default_device_or_create.ios11?
+      end
+
+      # Is the device under test running iOS 11 or greater?
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 11 or greater
+      def ios_gte_11?
+        _default_device_or_create.ios_gte_11?
       end
 
       # Is the app that is being tested an iPhone app emulated on an iPad?
