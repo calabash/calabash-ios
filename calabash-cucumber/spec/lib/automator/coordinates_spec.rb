@@ -430,7 +430,7 @@ describe Calabash::Cucumber::Automator::Coordinates do
       expect(coordinates).to receive(:window).and_return({:width => 100})
 
       actual = coordinates.send(:max_x)
-      expect(actual).to be == 90
+      expect(actual).to be == 98
       expect(coordinates.instance_variable_get(:@max_x)).to be == actual
     end
   end
