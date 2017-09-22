@@ -73,7 +73,11 @@ class Calabash::IBase
   #  the subclass does not override the `trait` method
   def trait
     raise "You should define a trait method or a title method" unless respond_to?(:title)
-    "navigationItemView marked:'#{self.title}'"
+    if ios_gte_11?
+      "view:'_UINavigationItemView' label marked:'#{self.title}'"
+    else
+      "navigationItemView marked:'#{self.title}'"
+    end
   end
 
   # Returns true if the current view shows this page's `trait`.

@@ -130,10 +130,27 @@ describe Calabash::Cucumber::Device do
   end
 
   describe 'iOS version' do
-    let(:ten) { RunLoop::Version.new("10.0") }
+    let(:twelve) { RunLoop::Version.new('12.0') }
+    let(:eleven) { RunLoop::Version.new('11.0') }
+    let(:ten) { RunLoop::Version.new('10.0') }
     let(:nine) { RunLoop::Version.new('9.0') }
     let(:eight) { RunLoop::Version.new('8.0') }
     let(:seven) { RunLoop::Version.new('7.0') }
+
+    it "#ios_gte_11?" do
+      expect(device).to receive(:ios_version_object).and_return(twelve, eleven, ten)
+
+      expect(device.ios_gte_11?).to be_truthy
+      expect(device.ios_gte_11?).to be_truthy
+      expect(device.ios_gte_11?).to be_falsey
+    end
+
+    it "#ios11?" do
+      expect(device).to receive(:ios_version_object).and_return(eleven, ten)
+
+      expect(device.ios11?).to be_truthy
+      expect(device.ios11?).to be_falsey
+    end
 
     it "#ios10?" do
       expect(device).to receive(:ios_version_object).and_return(ten, nine)

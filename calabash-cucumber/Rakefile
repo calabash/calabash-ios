@@ -110,7 +110,7 @@ Please run again without bundle exec.\033[0m
 
       calabash_server_dir = find_server_repo_or_raise
 
-      expect_server_is_on_master_branch(calabash_server_dir)
+      expect_server_is_on_tagged_branch(calabash_server_dir)
 
       log_warning_about_skipping_dylibs
 
@@ -174,7 +174,7 @@ Please run again without bundle exec.\033[0m
 
         ['libCalabashDynSim.dylib',
          'libCalabashDyn.dylib',
-         'libCalabashDynFAT.dylib'].each do |dylib|
+         'libCalabashFAT.dylib'].each do |dylib|
 
            source = File.join('calabash-dylibs', dylib)
            target = File.join(gem_dylibs_dir, dylib)
@@ -238,17 +238,17 @@ or set CALABASH_SERVER_PATH to point to your local copy of the server.
       calabash_server_dir
     end
 
-    def expect_server_is_on_master_branch(calabash_server_dir)
+    def expect_server_is_on_tagged_branch(calabash_server_dir)
       branch = `git -C #{calabash_server_dir} rev-parse --abbrev-ref HEAD`.chomp
-      unless branch == 'master'
+      if !branch[/tag/]
         raise %Q{\033[31m
 Expected git branch of of the server repo at:
 
         #{File.expand_path(calabash_server_dir)}
 
-to be 'master' but found '#{branch}'.
+to be a tag/ topic branch, but found '#{branch}'.
 
-The server must be built from the master branch.\033[0m
+The server must be built from a tag/ branch.\033[0m
 
         }
       end

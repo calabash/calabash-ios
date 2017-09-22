@@ -71,7 +71,7 @@ Expected direction '#{direction}' to be one of:
       flick_delta_from_degrees(degrees, element)
     end
 
-    def flick_to(direction, container_view_query, view_query, times, sleep=0.5)
+    def flick_to(direction, container_view_query, view_query, times, sleep=1.0)
       return if !query(view_query).empty?
 
       found = false

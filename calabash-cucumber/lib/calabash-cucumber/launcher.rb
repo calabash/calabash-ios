@@ -389,7 +389,13 @@ RunLoop.run returned:
           check_server_gem_compatibility
         end
 
-        usage_tracker.post_usage_async
+        # What was Calabash tracking? Read this post for information
+        # No private data (like ip addresses) were collected
+        # https://github.com/calabash/calabash-android/issues/655
+        #
+        # Removing usage tracking to avoid problems with EU General Data
+        # Protection Regulation which takes effect in 2018.
+        # usage_tracker.post_usage_async
 
         # :on_launch to the Cucumber World if:
         # * the Launcher is part of the World (it is not by default).

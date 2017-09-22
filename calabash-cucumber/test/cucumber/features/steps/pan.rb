@@ -47,44 +47,49 @@ end
 
 Then(/^I can pull down to see the Today and Notifications page$/) do
   if ipad?
-    puts "Test is not stable on iPad; skipping"
-  end
-
-  element = wait_for_view("*")
-  x = element["rect"]["center_x"]
-  final_y = element["rect"]["center_y"] + (element["rect"]["height"]/2)
-  pan_coordinates({:x => x, :y => 0},
-                  {:x => x, :y => final_y},
-                  {duration: 0.5})
-
-  # Waiting for animations is not good enough - the animation is outside of
-  # the AUT's view hierarchy
-  wait_for_external_animations
-
-  # Screenshots will not show the iOS Today and Notifications page.
-  if uia_available?
-    if uia_call_windows([:button, {marked: 'Today'}], :isVisible) != 1
-      fail("Expected to see the iOS Today and Notifications page.")
-    end
+    $stdout.puts "Test is not stable on iPad; skipping"
+    $stdout.flush
+  elsif ios11?
+    $stdout.puts "Skipping test on iOS 11, test needs to be written"
+    $stdout.puts "due to changes in the Notification Center"
+    $stdout.flush
   else
-    # Today and Notifications view is invisible to the LPServer and the
-    # DeviceAgent queries.  Try to touch a row that is hidden by the page and
-    # expect no transition.
-    touch("* marked:'pan palette row'")
-    wait_for_animations
-    if !query("* marked:'pan palette page'").empty?
-      fail("Expected to see the iOS Today and Notifications page.")
+    element = wait_for_view("*")
+    x = element["rect"]["center_x"]
+    final_y = element["rect"]["center_y"] + (element["rect"]["height"]/2)
+    pan_coordinates({:x => x, :y => 0},
+                    {:x => x, :y => final_y},
+                    {duration: 0.5})
+
+    # Waiting for animations is not good enough - the animation is outside of
+    # the AUT's view hierarchy
+    wait_for_external_animations
+
+    # Screenshots will not show the iOS Today and Notifications page.
+    if uia_available?
+      if uia_call_windows([:button, {marked: 'Today'}], :isVisible) != 1
+        fail("Expected to see the iOS Today and Notifications page.")
+      end
+    else
+      # Today and Notifications view is invisible to the LPServer and the
+      # DeviceAgent queries.  Try to touch a row that is hidden by the page and
+      # expect no transition.
+      touch("* marked:'pan palette row'")
+      wait_for_animations
+      if !query("* marked:'pan palette page'").empty?
+        fail("Expected to see the iOS Today and Notifications page.")
+      end
     end
+
+    y = element["rect"]["height"] - 20
+    touch(nil, {offset: {x: x, y: y}})
+    wait_for_external_animations
+
+    wait_for_view("* marked:'table row'")
+    touch("* marked:'table row'")
+    wait_for_view("* marked:'table page'")
+    wait_for_animations
   end
-
-  y = element["rect"]["height"] - 20
-  touch(nil, {offset: {x: x, y: y}})
-  wait_for_external_animations
-
-  wait_for_view("* marked:'table row'")
-  touch("* marked:'table row'")
-  wait_for_view("* marked:'table page'")
-  wait_for_animations
 end
 
 Then(/^I can pull up to see the Control Panel page$/) do

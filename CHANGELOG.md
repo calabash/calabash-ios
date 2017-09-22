@@ -1,3 +1,9 @@
+### 0.21.1
+
+* Coordinates: full-screen pans start and end closer to screen edge #1329
+* Support the new view hierarchy of the navigation bar on iOS 11 #1325 @MortenGregersen
+* Remove usage tracking to comply with EU GDPR 2018 #1320
+
 ### 0.20.5
 
 This release adds a public API for manually managing SpringBoard alerts.

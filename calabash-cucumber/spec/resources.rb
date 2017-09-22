@@ -68,8 +68,10 @@ class Resources
   def simulator_identifier_with_name(name)
     @simulators ||= simctl.simulators
 
+    min_ios_version = RunLoop::Version.new("#{xcode.version.major + 2}.0")
+
     match = @simulators.find do |simulator|
-      simulator.name == name
+      simulator.name == name && simulator.version >= min_ios_version
     end
     match.instruments_identifier(xcode)
   end
