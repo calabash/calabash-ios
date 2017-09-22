@@ -93,6 +93,11 @@ Then(/^I can query by text$/) do
 end
 
 Then(/^I query for Same as views by mark using id$/) do
+  query = "* marked:'query row'"
+  wait_for_view(query)
+  touch(query)
+  wait_for_none_animating
+
   uia = -> { uia_query(:view, {marked: "same as"}) }
   da = -> { device_agent.query({marked: "same as"}) }
 

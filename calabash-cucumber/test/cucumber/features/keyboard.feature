@@ -3,7 +3,7 @@ Feature: Keyboard
 
 Background: App has launched
 Given the app has launched
-And I am looking at the Misc tab
+And I am looking at the Text Input page
 And the text field and question label are reset
 And the return key type of the text field is "Done"
 
