@@ -23,7 +23,7 @@ And(/^I swipe to delete the '(.*?)' table cell$/) do |cell_title|
                 :force => :strong,
                 :offset => {:x => x_offset, :y => 0}})
   wait_for_animations
-  touch("UIButton marked:'Delete'")
+  touch("* marked:'Delete'")
 end
 
 Then(/^I no longer see the '(.*?)' table cell$/) do |cell_title|

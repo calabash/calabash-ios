@@ -168,6 +168,16 @@ end
 
 World(TestApp::Keyboard)
 
+And(/^I am looking at the Text Input page$/) do
+  touch("* marked:'Misc'")
+  sleep(0.4)
+  touch("* marked:'Misc'")
+  wait_for_none_animating
+  touch("* marked:'text input row'")
+  wait_for_view("* marked:'text input page'")
+  wait_for_none_animating
+end
+
 And(/^the text field and question label are reset$/) do
   query = "* marked:'question'"
   wait_for_view(query)
