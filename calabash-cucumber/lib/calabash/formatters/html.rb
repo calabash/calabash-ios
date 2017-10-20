@@ -2,9 +2,13 @@ require "cucumber/formatter/html"
 require "uri"
 require "pathname"
 
+# @!visibility private
 module Calabash
+  # @!visibility private
   module Formatters
+    # @!visibility private
     class Html < ::Cucumber::Formatter::Html
+      # @!visibility private
       def embed_image(src, label)
         if _output_relative? && _relative_uri?(src)
           output_dir = Pathname.new(File.dirname(@io.path))
@@ -16,13 +20,14 @@ module Calabash
         end
       end
 
+      # @!visibility private
       def _relative_uri?(src)
         uri = URI.parse(src)
         return false if uri.scheme
         not Pathname.new(src).absolute?
       end
 
-
+      # @!visibility private
       def _output_relative?
         if @io.is_a?(File)
           path = @io.path

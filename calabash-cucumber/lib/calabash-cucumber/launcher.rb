@@ -39,7 +39,9 @@ module Calabash
     class Launcher
 
       require "calabash-cucumber/device"
-      require "calabash-cucumber/actions/instruments_actions"
+      require "calabash-cucumber/automator/automator"
+      require "calabash-cucumber/automator/instruments"
+      require "calabash-cucumber/automator/device_agent"
       require "calabash-cucumber/usage_tracker"
       require "calabash-cucumber/dylibs"
       require "calabash-cucumber/environment"
@@ -58,10 +60,10 @@ module Calabash
       @@launcher = nil
 
       # @!visibility private
-      attr_accessor :run_loop
+      attr_reader :run_loop
 
       # @!visibility private
-      attr_accessor :actions
+      attr_reader :automator
 
       # @!visibility private
       attr_accessor :launch_args
@@ -76,15 +78,26 @@ module Calabash
 
       # @!visibility private
       def to_s
-        msg = ["#{self.class}"]
-        if self.run_loop
-          msg << "Log file: #{self.run_loop[:log_file]}"
+        class_name = "Launcher"
+
+        if !automator
+          "#<#{class_name}: not attached to an automator>"
         else
-          msg << "Not attached to instruments."
-          msg << "Start your app with `start_test_server_in_background`"
-          msg << "If you app is already running, try `console_attach`"
+          if automator.respond_to?(:name)
+            case automator.name
+              when :instruments
+                log_file =  automator.run_loop[:log_file]
+                "#<#{class_name}: UIAutomation/instruments - #{log_file}>"
+              when :device_agent
+                launcher_name = automator.client.cbx_launcher.name
+                "#<#{class_name}: DeviceAgent/#{launcher_name}>"
+              else
+                "#<#{class_name}: attached to #{automator.name}>"
+            end
+          else
+            "#<#{class_name}: attached to #{automator}>"
+          end
         end
-        msg.join("\n")
       end
 
       # @!visibility private
@@ -119,11 +132,11 @@ module Calabash
       #
       # +1 for tools to ask physical devices about attributes.
       def device
-        @device ||= lambda do
+        @device ||= begin
           _, body = Calabash::Cucumber::HTTP.ensure_connectivity
           endpoint = Calabash::Cucumber::Environment.device_endpoint
           Calabash::Cucumber::Device.new(endpoint, body)
-        end.call
+        end
       end
 
       # @!visibility private
@@ -139,16 +152,10 @@ module Calabash
       end
 
       # @!visibility private
-      def actions
-        attach if @actions.nil?
-        @actions
-      end
-
-      # @!visibility private
       # @see Calabash::Cucumber::Core#console_attach
       def self.attach
         l = launcher
-        return l if l && l.active?
+        return l if l && l.attached_to_automator?
         l.attach
       end
 
@@ -162,8 +169,6 @@ module Calabash
         default_options = {:http_connection_retry => 1,
                            :http_connection_timeout => 10}
         merged_options = default_options.merge(options)
-
-        self.run_loop = RunLoop::HostCache.default.read
 
         begin
           Calabash::Cucumber::HTTP.ensure_connectivity(merged_options)
@@ -188,19 +193,27 @@ Try `start_test_server_in_background`
           return false
         end
 
-        if self.run_loop[:pid]
-          self.actions = Calabash::Cucumber::InstrumentsActions.new
+        # TODO check that the :pid is alive - no sense attaching if Automator
+        # is not running.
+        run_loop_cache = RunLoop::HostCache.default.read
+
+        if run_loop_cache[:automator] == :device_agent
+          # Sets the @run_loop variable to a new RunLoop::DeviceAgent::Client
+          # instance.
+          @automator = _attach_to_device_agent!(run_loop_cache)
+        elsif run_loop_cache[:automator] == :instruments
+          @run_loop = run_loop_cache
+          @automator = Calabash::Cucumber::Automator::Instruments.new(run_loop_cache)
         else
           RunLoop.log_warn(
 %Q[
 
-Connected to an app that was not launched by Calabash using instruments.
+Connected to an app that was not launched by Calabash using instruments or DeviceAgent.
 
-Queries will work, but gestures will not.
+Queries will work, but gestures and other automator actions will not.
 
 ])
         end
-
         self
       end
 
@@ -208,19 +221,30 @@ Queries will work, but gestures will not.
       #
       # @return {Boolean} true if we're using instruments to launch
       def self.instruments?
-        l = launcher_if_used
-        return false unless l
-        l.instruments?
+        launcher = Launcher::launcher_if_used
+        if !launcher
+          false
+        else
+          launcher.instruments?
+        end
       end
 
       # @!visibility private
       def instruments?
-        !!(active? && run_loop[:pid])
+        attached_to_automator? &&
+          automator.name == :instruments
       end
 
       # @!visibility private
+      def attached_to_automator?
+        automator != nil
+      end
+
+      # TODO remove in 0.21.0
+      # @!visibility private
       def active?
-        not run_loop.nil?
+        RunLoop.deprecated("0.20.0", "replaced with attached_to_automator?")
+        attached_to_automator?
       end
 
       # A reference to the current launcher (instantiates a new one if needed).
@@ -336,17 +360,42 @@ Resetting physical devices is not supported.
         options[:xcode] = xcode || Calabash::Cucumber::Environment.xcode
         options[:inject_dylib] = detect_inject_dylib_option(launch_options)
 
-        self.launch_args = options
+        @launch_args = options
 
-        self.run_loop = new_run_loop(options)
-        self.actions= Calabash::Cucumber::InstrumentsActions.new
+        @run_loop = new_run_loop(options)
+        if @run_loop.is_a?(Hash)
+          @automator = Calabash::Cucumber::Automator::Instruments.new(@run_loop)
+        elsif @run_loop.is_a?(RunLoop::DeviceAgent::Client)
+          @automator = Calabash::Cucumber::Automator::DeviceAgent.new(@run_loop)
+        else
+          raise ArgumentError, %Q[
+
+Could not determine which automator to use based on the launch arguments:
+
+#{@launch_args.join("$-0")}
+
+RunLoop.run returned:
+
+#{@run_loop}
+
+]
+        end
+
+        Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(options[:xcode],
+                                                                       automator)
 
         if !options[:calabash_lite]
           Calabash::Cucumber::HTTP.ensure_connectivity
           check_server_gem_compatibility
         end
 
-        usage_tracker.post_usage_async
+        # What was Calabash tracking? Read this post for information
+        # No private data (like ip addresses) were collected
+        # https://github.com/calabash/calabash-android/issues/655
+        #
+        # Removing usage tracking to avoid problems with EU General Data
+        # Protection Regulation which takes effect in 2018.
+        # usage_tracker.post_usage_async
 
         # :on_launch to the Cucumber World if:
         # * the Launcher is part of the World (it is not by default).
@@ -374,7 +423,23 @@ Resetting physical devices is not supported.
       # @!visibility private
       # TODO Should call calabash exit route to shutdown the server.
       def stop
-        RunLoop.stop(run_loop) if run_loop && run_loop[:pid]
+        return :no_automator if !automator
+
+        if !automator.respond_to?(:name)
+          RunLoop.log_warn("Unknown automator: #{automator}")
+          RunLoop.log_warn("Calabash does not know how to stop this automator")
+          return :unknown_automator
+        end
+
+        case automator.name
+          when :instruments, :device_agent
+            automator.stop
+            :stopped
+          else
+            RunLoop.log_warn("Unknown automator: #{automator}")
+            RunLoop.log_warn("Calabash does not know how to stop this automator")
+            :unknown_automator
+        end
       end
 
       # Should Calabash quit the app under test after a Scenario?
@@ -418,6 +483,7 @@ Resetting physical devices is not supported.
       end
 
       # @deprecated 0.19.0 - replaced with #quit_app_after_scenario?
+      # TODO remove in 0.20.0
       # @!visibility private
       def calabash_no_stop?
         # Not yet.  Save for 0.20.0.
@@ -427,17 +493,19 @@ Resetting physical devices is not supported.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def calabash_no_launch?
         RunLoop.log_warn(%Q[
 Calabash::Cucumber::Launcher #calabash_no_launch? and support for the NO_LAUNCH
 environment variable has been removed from Calabash.  This always returns
-true.  Please remove this method call from your hooks.
+false.  Please remove this method call from your hooks.
 ])
         false
       end
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement.
+      # TODO remove in 0.20.0
       def default_uia_strategy(launch_args, sim_control, instruments)
         RunLoop::deprecated("0.19.0", "This method has been removed.")
         :host
@@ -445,6 +513,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def detect_connected_device?
         RunLoop.deprecated("0.19.0", "No replacement")
         false
@@ -452,6 +521,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def default_launch_args
         RunLoop.deprecated("0.19.0", "No replacement")
         {}
@@ -459,6 +529,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def discover_device_target(launch_args)
         RunLoop.deprecated("0.19.0", "No replacement")
         nil
@@ -466,6 +537,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def app_path
         RunLoop.deprecated("0.19.0", "No replacement")
         nil
@@ -473,6 +545,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def xcode
         RunLoop.deprecated("0.19.0", "Use Calabash::Cucumber::Environment.xcode")
         Calabash::Cucumber::Environment.xcode
@@ -480,6 +553,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def ensure_connectivity
         RunLoop.deprecated("0.19.0", "No replacement")
         Calabash::Cucumber::HTTP.ensure_connectivity
@@ -491,12 +565,14 @@ true.  Please remove this method call from your hooks.
       # #relaunch will now send ":on_launch" to the Cucumber World if:
       # * the Launcher is part of the World (it is not by default).
       # * Cucumber responds to :on_launch.
+      # TODO remove in 0.20.0
       def calabash_notify(_)
         false
       end
 
       # @!visibility private
       # @deprecated 0.19.0  - no replacement.
+      # TODO remove in 0.20.0
       def server_version_from_server
         RunLoop.deprecated("0.19.0", "No replacement")
         server_version
@@ -504,6 +580,7 @@ true.  Please remove this method call from your hooks.
 
       # @!visibility private
       # @deprecated 0.19.0 - no replacement
+      # TODO remove in 0.20.0
       def server_version_from_bundle(app_bundle_path)
         RunLoop.deprecated("0.19.0", "No replacement")
         options = {:app => app_bundle_path }
@@ -550,6 +627,28 @@ true.  Please remove this method call from your hooks.
           # User supplied a path
           value
         end
+      end
+
+      # @!visibility private
+      def _attach_to_device_agent!(hash)
+        simctl = Calabash::Cucumber::Environment.simctl
+        instruments = Calabash::Cucumber::Environment.instruments
+        xcode = Calabash::Cucumber::Environment.xcode
+
+        options = { simctl: simctl, instruments: instruments, xcode: xcode}
+        device = RunLoop::Device.device_with_identifier(hash[:udid], options)
+        bundle_id = hash[:app]
+
+        options = { cbx_launcher: hash[:launcher] }
+        cbx_launcher = RunLoop::DeviceAgent::Client.detect_cbx_launcher(options, device)
+        launcher_options = hash[:launcher_options]
+
+        device_agent_client = RunLoop::DeviceAgent::Client.new(bundle_id,
+                                                               device,
+                                                               cbx_launcher,
+                                                               launcher_options)
+        @run_loop = device_agent_client
+        Calabash::Cucumber::Automator::DeviceAgent.new(@run_loop)
       end
     end
   end

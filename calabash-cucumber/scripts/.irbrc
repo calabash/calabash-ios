@@ -1,6 +1,17 @@
-require "irb/completion"
-require "irb/ext/save-history"
-require "benchmark"
+begin
+  require "irb/completion"
+  require "irb/ext/save-history"
+rescue LoadError => e
+  puts %Q[
+Caught a LoadError while requiring an irb module.
+
+#{e}
+
+An error like this usually means your ruby installation is corrupt.
+
+]
+  exit(1)
+end
 
 begin
   require "awesome_print"
@@ -25,6 +36,8 @@ $ gem install calabash-cucumber
   exit(1)
 end
 
+require "benchmark"
+
 AwesomePrint.irb!
 
 ARGV.concat ["--readline", "--prompt-mode", "simple"]
@@ -34,8 +47,9 @@ IRB.conf[:HISTORY_FILE] = ".irb-history"
 
 begin
   require "pry"
-  Pry.config.history.should_save = false
-  Pry.config.history.should_load = false
+  Pry.config.history.should_save = true
+  Pry.config.history.should_load = true
+  Pry.config.history.file = ".pry-history"
   require "pry-nav"
 rescue LoadError => _
 
@@ -83,5 +97,9 @@ def enable_usage_tracking(level="system_info")
   level
 end
 
+xcode = RunLoop::Xcode.new
+Calabash::Cucumber::UIA.redefine_instance_methods_if_necessary(xcode)
+
 puts_console_details
 puts_message_of_the_day
+_try_to_attach

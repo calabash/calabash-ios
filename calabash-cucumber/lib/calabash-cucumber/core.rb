@@ -26,6 +26,9 @@ module Calabash
       include Calabash::Cucumber::StatusBarHelpers
       include Calabash::Cucumber::RotationHelpers
 
+      require "calabash-cucumber/keyboard_helpers"
+      include Calabash::Cucumber::KeyboardHelpers
+
       # @!visibility private
       # @deprecated Use Cucumber's step method.
       #
@@ -158,9 +161,7 @@ module Calabash
       #
       # @param [String] uiquery a query specifying which objects to flash
       # @param [Array] args argument is ignored and should be deprecated
-      # @return [Array] an array of that contains the result of calling the
-      #   objc selector `description` on each matching view.
-      #
+      # @return [Array] an array of that contains all the view matched.
       def flash(uiquery, *args)
         # todo deprecate the *args argument in the flash method
         # todo :flash operation should return views as JSON objects
@@ -180,23 +181,111 @@ module Calabash
         Calabash::Cucumber::VERSION
       end
 
+      # Rotates the home button to a position relative to the status bar.
+      #
+      # @example portrait
+      #  rotate_home_button_to :down
+      #
+      # @example upside down
+      #  rotate_home_button_to :up
+      #
+      # @example landscape with left home button AKA: _right_ landscape
+      #  rotate_home_button_to :left
+      #
+      # @example landscape with right home button AKA: _left_ landscape
+      #  rotate_home_button_to :right
+      #
+      # Refer to Apple's documentation for clarification about left vs.
+      # right landscape orientations.
+      #
+      # For legacy support the `dir` argument can be a String or Symbol.
+      # Please update your code to pass a Symbol.
+      #
+      # For legacy support `:top` and `top` are synonyms for `:up`.
+      # Please update your code to pass `:up`.
+      #
+      # For legacy support `:bottom` and `bottom` are synonyms for `:down`.
+      # Please update your code to pass `:down`.
+      #
+      # @param [Symbol] position The position of the home button after the rotation.
+      #  Can be one of `{:down | :left | :right | :up }`.
+      #
+      # @note A rotation will only occur if your view controller and application
+      #  support the target orientation.
+      #
+      # @return [Symbol] The position of the home button relative to the status
+      #  bar when all rotations have been completed.
+      def rotate_home_button_to(position)
+
+        normalized_symbol = expect_valid_rotate_home_to_arg(position)
+        current_orientation = status_bar_orientation.to_sym
+
+        return current_orientation if current_orientation == normalized_symbol
+
+        launcher.automator.send(:rotate_home_button_to, normalized_symbol)
+      end
+
+      # Rotates the device in the direction indicated by `direction`.
+      #
+      # @example rotate left
+      #  rotate :left
+      #
+      # @example rotate right
+      #  rotate :right
+      #
+      # @param [Symbol] direction The direction to rotate. Can be :left or :right.
+      #
+      # @return [Symbol] The position of the home button relative to the status
+      #   bar after the rotation.  Will be one of `{:down | :left | :right | :up }`.
+      # @raise [ArgumentError] If direction is not :left or :right.
+      def rotate(direction)
+        as_symbol = direction.to_sym
+
+        if as_symbol != :left && as_symbol != :right
+          raise ArgumentError,
+                "Expected '#{direction}' to be :left or :right"
+        end
+
+        launcher.automator.send(:rotate, as_symbol)
+      end
+
       # Performs the `tap` gesture on the (first) view that matches
-      # query `uiquery`. Note that `touch` assumes the view is visible and not animating.
-      # If the view is not visible `touch` will fail. If the view is animating
-      # `touch` will *silently* fail.
+      # query `uiquery`. Note that `touch` assumes the view is visible and not
+      # animating. If the view is not visible `touch` will fail. If the view is
+      # animating `touch` will *silently* fail.
+      #
       # By default, taps the center of the view.
       # @see Calabash::Cucumber::WaitHelpers#wait_tap
       # @see Calabash::Cucumber::Operations#tap_mark
       # @see #tap_point
-      # @param {String} uiquery query describing view to tap. Note `nil` is allowed and is interpreted as
-      #   `tap_point(options[:offset][:x],options[:offset][:y])`
+      #
+      # @param {String} uiquery query describing view to tap. If this value is
+      #  `nil` then an :offset must be passed as an option.  This can be used
+      #  to tap a specific coordinate.
       # @param {Hash} options option for modifying the details of the touch
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @return {Array<Hash>} array containing the serialized version of the tapped view.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #  Offset supports an `:x` and `:y` key and causes the touch to be offset
+      #  with `(x,y)` relative to the center.
+      #
+      # @return {Array<Hash>} array containing the serialized version of the
+      # tapped view.
+      #
+      # @raise [RuntimeError] If query is non nil and matches no views.
+      # @raise [ArgumentError] If query is nil and there is no :offset in the
+      #  the options.  The offset must contain both an :x and :y value.
       def touch(uiquery, options={})
-        if uiquery.nil? && options[:offset].nil?
-          raise "called touch(nil) without specifying an offset in options (#{options})"
+        if uiquery.nil?
+          offset = options[:offset]
+
+          if !(offset && offset[:x] && offset[:y])
+            raise ArgumentError, %Q[
+If query is nil, there must be a valid offset in the options.
+
+Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
+  Actual: options[:offset] = #{offset ? offset : "nil"}
+
+            ]
+          end
         end
         query_action_with_options(:touch, uiquery, options)
       end
@@ -236,8 +325,8 @@ module Calabash
       #
       # @note This assumes the view is visible and not animating.
       #
-      # If the view is not visible it will fail with an error. If the view is animating
-      # it will *silently* fail.
+      # If the view is not visible it will fail with an error. If the view is
+      # animating it will *silently* fail.
       #
       # By default, taps the center of the view.
       #
@@ -245,60 +334,22 @@ module Calabash
       #   two_finger_tap "view marked:'Third'", offset:{x:100}
       # @param {String} uiquery query describing view to touch.
       # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @return {Array<Hash>} array containing the serialized version of the tapped view.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #  Offset supports an `:x` and `:y` key and causes the touch to be offset
+      #  with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
+      # @return {Array<Hash>} array containing the serialized version of the
+      #  tapped view.
       def two_finger_tap(uiquery,options={})
         query_action_with_options(:two_finger_tap, uiquery, options)
       end
 
-      # Performs the "flick" gesture on the (first) view that matches
-      # query `uiquery`.
+      # Performs the "long press" or "touch and hold" gesture on the (first)
+      # view that matches query `uiquery`.
       #
       # @note This assumes the view is visible and not animating.
       #
-      # If the view is not visible it will fail with an error. If the view is animating
-      # it will *silently* fail.
-      #
-      # By default, the gesture starts at the center of the view and "flicks" according to `delta`.
-      #
-      # A flick is similar to a swipe.
-      #
-      # @example
-      #   flick("MKMapView", {x:100,y:50})
-      # @note Due to a bug in the iOS Simulator (or UIAutomation on the simulator)
-      #   swiping and other 'advanced' gestures are not supported in certain
-      #   scroll views (e.g. UITableView or UIScrollView). It does work when running
-      #   on physical devices, though, Here is a link to a relevant Stack Overflow post
-      #  http://stackoverflow.com/questions/18792965/uiautomations-draginsidewithoptions-has-no-effect-on-ios7-simulator
-      #   It is not a bug in Calabash itself but rather in UIAutomation and hence we can't just
-      #   fix it. The work around is typically to use the scroll_to_* functions.
-      #
-      # @param {String} uiquery query describing view to touch.
-      # @param {Hash} delta coordinate describing the direction to flick
-      # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option delta {Numeric} :x (0) optional. The force and direction of the flick on the `x`-axis
-      # @option delta {Numeric} :y (0) optional. The force and direction of the flick on the `y`-axis
-      # @return {Array<Hash>} array containing the serialized version of the touched view.
-      def flick(uiquery, delta, options={})
-        uiquery, options = extract_query_and_options(uiquery, options)
-        options[:delta] = delta
-        views_touched = launcher.actions.flick(options)
-        unless uiquery.nil?
-          screenshot_and_raise "flick could not find view: '#{uiquery}', args: #{options}" if views_touched.empty?
-        end
-        views_touched
-      end
-
-      # Performs the "long press" or "touch and hold" gesture on the (first) view that matches
-      # query `uiquery`.
-      #
-      # @note This assumes the view is visible and not animating.
-      #
-      # If the view is not visible it will fail with an error. If the view is animating
-      # it will *silently* fail.
+      # If the view is not visible it will fail with an error. If the view is
+      # animating it will *silently* fail.
       #
       # By default, the gesture starts at the center of the view.
       #
@@ -306,97 +357,478 @@ module Calabash
       #   touch_hold "webView css:'input'", duration:10, offset:{x: -40}
       # @param {String} uiquery query describing view to touch.
       # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #   Offset supports an `:x` and `:y` key and causes the touch to be offset
+      #   with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
       # @option options {Numeric} :duration (3) duration of the 'hold'.
-      # @return {Array<Hash>} array containing the serialized version of the touched view.
+      # @return {Array<Hash>} array containing the serialized version of the
+      #  touched view.
       def touch_hold(uiquery, options={})
         query_action_with_options(:touch_hold, uiquery, options)
       end
 
       # Performs a "swipe" gesture.
-      # By default, the gesture starts at the center of the screen.
-      #
-      # @todo `swipe` is an old style API which doesn't take a query as its
-      #  first argument. We should migrate this.
-      #
-      # @note Due to a bug in Apple's UIAutomation, swipe is broken on certain
-      #  views in the iOS Simulator. Swiping works on devices.
-      #  {https://github.com/calabash/calabash-ios/issues/253}
       #
       # @example
-      #   swipe :left
-      # @example
-      #   swipe :down, offset:{x:10,y:50}, query:"MKMapView"
-      # @param {String} dir the direction to swipe (symbols can also be used).
-      # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option options {String} :query (nil) if specified, the swipe will be made relative to this query.
-      # @option options [Symbol] :force (nil) Indicates the force of the swipe.
-      #  Valid values are :strong, :normal, :light.
       #
-      # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
-      def swipe(dir, options={})
-        merged_options = options.dup
+      #   # Swipe left on first view match by "*"
+      #   swipe(:left)
+      #
+      #   # Swipe up on 'my scroll view'
+      #   swipe(:up, {:query => "* marked:'my scroll view'"})
+      #
+      # @param {String, Symbol} direction The direction to swipe
+      # @param {Hash} options Options for modifying the details of the swipe.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #  Offset supports an `:x` and `:y` key and causes the touch to be
+      #  offset with `(x,y)` relative to the center.
+      # @option options [Symbol] :force (normal) Indicates the force of the
+      #  swipe.  Valid values are :strong, :normal, :light.
+      # @option options {String} :query (nil) If specified, the swipe will be
+      #  made on the first view matching this query.  If this option is nil
+      #  (the default), the swipe will happen at the center of the screen.
+      #
+      # @return {Array<Hash>} An array with one element; the view that
+      #  was swiped.
+      #
+      # @raise [ArgumentError] If :force is invalid.
+      # @raise [ArgumentError] If direction is invalid
+      def swipe(direction, options={})
+        merged_options = {
+          :query => nil,
+          :force => :normal
+        }.merge(options)
 
-        # I don't understand why the :status_bar_orientation value is being overwritten
-        unless uia_available?
-          merged_options[:status_bar_orientation] = status_bar_orientation
+        merged_options[:direction] = direction.to_sym
+
+        if ![:up, :down, :left, :right].include?(merged_options[:direction])
+          raise ArgumentError, %Q[
+Invalid direction argument: '#{direction}'.
+
+Valid directions are: :up, :down, :left, and :right
+
+]
         end
 
-        force = merged_options[:force]
-        if force
-          unless [:light, :strong, :normal].include?(force)
-            raise ArgumentError,
-              "Expected :force option '#{force}' to be :light, :strong, or :normal"
-          end
-        end
+         if ![:light, :strong, :normal].include?(merged_options[:force])
+           raise ArgumentError, %Q[
+Invalid force option: '#{merged_options[:force]}'.
 
-        launcher.actions.swipe(dir.to_sym, merged_options)
+Valid forces are: :strong, :normal, :light
+
+]
+         end
+
+        launcher.automator.swipe(merged_options)
       end
 
-
-      # Performs the "pan" or "drag-n-drop" gesture on from the `from` parameter
-      # to the `to` parameter (both are queries).
+      # Performs the "flick" gesture on the first view that matches `uiquery`.
+      #
+      # If the view is not visible it will fail with an error.
+      #
+      # If the view is animating it will *silently* fail.
+      #
+      # By default, the gesture starts at the center of the view and "flicks"
+      # according to `delta`.
+      #
+      # A flick is a swipe with velocity.
+      #
       # @example
-      #   q1="* marked:'Cell 3' parent tableViewCell descendant tableViewCellReorderControl"
-      #   q2="* marked:'Cell 6' parent tableViewCell descendant tableViewCellReorderControl"
-      #   pan q1, q2, duration:4
-      # @param {String} from query describing view to start the gesture
-      # @param {String} to query describing view to end the gesture
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option options {Numeric} :duration (1) duration of the 'pan'.
+      #   # Flick left: move screen to the right
+      #   delta = {:x => -124.0, :y => 0.0}
+      #
+      #   # Flick right: move screen to the left
+      #   delta = {:x => 124.0, :y => 0.0}
+      #
+      #   # Flick up: move screen to the bottom
+      #   delta = {:x => 0, :y => -124.0}
+      #
+      #   # Flick down: move screen to the top
+      #   delta = {:x => 0, :y => 124.0}
+      #
+      #   # Flick up and to the left: move the screen to the lower right corner
+      #   delta = {:x => -88, :y => -88}
+      #
+      #   flick("MKMapView", delta)
+      #
+      # @param {String} uiquery query describing view to flick.
+      # @param {Hash} delta coordinate describing the direction to flick
+      # @param {Hash} options option for modifying the details of the flick.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #   Offset supports an `:x` and `:y` key and causes the first touch to be
+      #   offset with `(x,y)` relative to the center.
       # @return {Array<Hash>} array containing the serialized version of the touched view.
-      def pan(from, to, options={})
-        launcher.actions.pan(from, to, options)
+      #
+      # @raise [ArgumentError] If query is nil.
+      def flick(uiquery, delta, options={})
+        if uiquery.nil?
+          raise ArgumentError, "Query argument cannot be nil"
+        end
+
+        merged_options = {
+          :delta => delta
+        }.merge(options)
+
+        query_action_with_options(:flick, uiquery, merged_options)
+      end
+
+      # Performs the pan gesture between two coordinates.
+      #
+      # Swipes, scrolls, drag-and-drop, and flicks are all pan gestures.
+      #
+      # @example
+      #   # Reorder table view rows.
+      #   q1="* marked:'Reorder Apple'"
+      #   q2="* marked:'Reorder Google'"
+      #   pan q1, q2, duration:4
+      #
+      # @param {String} from_query query describing view to start the gesture
+      # @param {String} to_query query describing view to end the gesture
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      #  Offset supports an `:x` and `:y` key and causes the pan to be offset
+      #  with `(x,y)` relative to the center.
+      # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
+      #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
+      #  duration must be > 0.
+      # @return {Array<Hash>} array containing the serialized version of the
+      #  touched views.  The first element is the first view matched by
+      #  the from_query and the second element is the first view matched by
+      #  the to_query.
+      #
+      # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
+      #  for DeviceAgent.
+      def pan(from_query, to_query, options={})
+        merged_options = {
+          # Minimum value for UIAutomation is 0.5.
+          # DeviceAgent duration must be > 0.
+          :duration => 1.0
+        }.merge(options)
+
+        duration = merged_options[:duration]
+
+        if uia_available? && duration < 0.5
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.5
+
+]
+        elsif duration <= 0.0
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.0.
+
+]
+        end
+
+        launcher.automator.pan(from_query, to_query, merged_options)
+      end
+
+      # Performs the pan gesture between two coordinates.
+      #
+      # Swipes, scrolls, drag-and-drop, and flicks are all pan gestures.
+      #
+      # @example
+      #   # Pan to go back in UINavigationController
+      #   element = query("*").first
+      #   y = element["rect"]["center_y"]
+      #   pan_coordinates({10, y}, {160, y})
+      #
+      #   # Pan to reveal Today and Notifications
+      #   element = query("*").first
+      #   x = element["rect"]["center_x"]
+      #   pan_coordinates({x, 0}, {x, 240})
+      #
+      #   # Pan to reveal Control Panel
+      #   element = query("*").first
+      #   x = element["rect"]["center_x"]
+      #   y = element["rect"]["height"]
+      #   pan_coordinates({x, height}, {x, 240})
+      #
+      # @param {Hash} from_point where to start the pan.
+      # @param {Hash} to_point where to end the pan.
+      # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
+      #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
+      #  duration must be > 0.
+      #
+      # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
+      #  for DeviceAgent.
+      def pan_coordinates(from_point, to_point, options={})
+        merged_options = {
+          # Minimum value for UIAutomation is 0.5.
+          # DeviceAgent duration must be > 0.
+          :duration => 1.0
+        }.merge(options)
+
+        duration = merged_options[:duration]
+
+        if uia_available? && duration < 0.5
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.5
+
+]
+        elsif duration <= 0.0
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.0.
+
+]
+        end
+
+        launcher.automator.pan_coordinates(from_point, to_point,
+                                           merged_options)
       end
 
       # Performs a "pinch" gesture.
+      #
       # By default, the gesture starts at the center of the screen.
-      # @todo `pinch` is an old style API which doesn't take a query as its first argument. We should migrate this.
+      #
       # @example
+      #   # Zoom in
       #   pinch :out
-      # @example
+      #
+      #   # Zoom out
       #   pinch :in, query:"MKMapView", offset:{x:42}
-      # @param {String} in_out the direction to pinch ('in' or 'out') (symbols can also be used).
+      #
+      # @param {String, Symbol} in_out the direction to pinch ('in' or 'out')
       # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option options {String} :query (nil) if specified, the pinch will be made relative to this query.
-      # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      # @option options {String} :query (nil) The view to pinch on.  If this
+      #  value is nil, the pinch happens at the center of the screen.
+      # @option options {Numeric} :amount (100) How large (in points) the
+      #  pinch should be.  This option is ignored when running with UIAutomation.
+      # @option options {Numeric} :duration (1.0) duration of the 'pinch'.  The
+      #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
+      #  duration must be > 0.
+      # @return {Array<Hash>} array containing the serialized version of
+      #  the view touched.
+      #
+      # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
+      #  for DeviceAgent.
+      # @raise [ArgumentError] If in_out argument is invalid.
       def pinch(in_out, options={})
-        launcher.actions.pinch(in_out.to_sym,options)
+        merged_options = {
+          :query => nil,
+          # Ignored by UIAutomation
+          :amount => 100,
+          :duration => 0.5
+        }.merge(options)
+
+        symbol = in_out.to_sym
+
+        if ![:in, :out].include?(symbol)
+          raise ArgumentError, %Q[
+Invalid pinch direction: '#{symbol}'.  Valid directions are:
+
+"in", "out", :in, :out
+
+]
+        end
+
+        duration = merged_options[:duration]
+
+        if uia_available? && duration < 0.5
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.5
+
+]
+        elsif duration <= 0.0
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.0.
+
+]
+        end
+
+        launcher.automator.pinch(in_out.to_sym, merged_options)
+      end
+
+      # @deprecated 0.21.0 Use #keyboard_enter_text
+      #
+      # Use keyboard to enter a character.
+      #
+      # @note
+      #  There are several special 'characters', some of which do not appear on
+      #  all keyboards; e.g. `Delete`, `Return`.
+      #
+      # @see #keyboard_enter_text
+      #
+      # @raise [RuntimeError] If there is no visible keyboard
+      # @raise [RuntimeError] If the keyboard (layout) is not supported
+      #
+      # @param [String] char The character to type
+      # @param [Hash] options Controls the behavior of the method.
+      # @option opts [Numeric] :wait_after_char (0.05) How long to sleep after
+      #  typing a character.
+      def keyboard_enter_char(char, options={})
+        expect_keyboard_visible!
+
+        default_opts = {:wait_after_char => 0.05}
+        merged_options = default_opts.merge(options)
+
+        special_char = launcher.automator.char_for_keyboard_action(char)
+
+        if special_char
+          launcher.automator.enter_char_with_keyboard(special_char)
+        elsif char.length == 1
+          launcher.automator.enter_char_with_keyboard(char)
+        else
+          raise ArgumentError, %Q[
+Expected '#{char}' to be a single character or a special string like:
+
+* Return
+* Delete
+
+To type strings with more than one character, use keyboard_enter_text.
+]
+        end
+
+        duration = merged_options[:wait_after_char]
+        if duration > 0
+          Kernel.sleep(duration)
+        end
+
+        []
+      end
+
+      # Touches the keyboard action key.
+      #
+      # The action key depends on the keyboard.  Some examples include:
+      #
+      # * Return
+      # * Next
+      # * Go
+      # * Join
+      # * Search
+      #
+      # @note
+      #  Not all keyboards have an action key.  For example, numeric keyboards
+      #  do not have an action key.
+      #
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def tap_keyboard_action_key
+        expect_keyboard_visible!
+        launcher.automator.tap_keyboard_action_key
+      end
+
+      # Touches the keyboard delete key.
+      #
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def tap_keyboard_delete_key
+        expect_keyboard_visible!
+        launcher.automator.tap_keyboard_delete_key
+      end
+
+      # Uses the keyboard to enter text.
+      #
+      # @param [String] text the text to type.
+      # @raise [RuntimeError] If the keyboard is not visible.
+      def keyboard_enter_text(text)
+        expect_keyboard_visible!
+        existing_text = text_from_first_responder
+        escaped = existing_text.gsub("\n","\\n")
+        launcher.automator.enter_text_with_keyboard(text, escaped)
       end
 
       # @!visibility private
-      # @deprecated
-      def cell_swipe(options={})
-        if uia_available?
-          raise 'cell_swipe not supported with instruments, simply use swipe with a query that matches the cell'
+      #
+      # Enters text into view identified by a query
+      #
+      # This behavior of this method depends on the Gesture::Performer
+      # implementation.
+      #
+      # ### UIAutomation
+      #
+      # defaults to calling 'setValue' in UIAutomation on the UITextField or
+      # UITextView.  This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # To force use of #keyboard_enter_text option :use_keyboard
+      #
+      # ### DeviceAgent
+      #
+      # This method calls #keyboard_enter_text regardless of the options passed.
+      #
+      # @param [String] uiquery the element to enter text into
+      # @param [String] text the text to enter
+      # @param [Hash] options controls details of text entry
+      # @option options [Boolean] :use_keyboard (false) use the iOS keyboard
+      #   to enter each character separately
+      # @option options [Boolean] :wait (true) call wait_for_element_exists with
+      #   uiquery
+      # @option options [Hash] :wait_options ({}) if :wait pass this as options
+      #   to wait_for_element_exists
+      def enter_text_in(uiquery, text, options = {})
+        default_opts = {:use_keyboard => false, :wait => true, :wait_options => {}}
+        options = default_opts.merge(options)
+        wait_for_element_exists(uiquery, options[:wait_options]) if options[:wait]
+        touch(uiquery, options)
+        wait_for_keyboard
+        if options[:use_keyboard]
+          keyboard_enter_text(text)
+        else
+          fast_enter_text(text)
         end
-        playback('cell_swipe', options)
+      end
+
+      alias_method :enter_text, :enter_text_in
+
+      # @!visibility private
+      #
+      # Enters text into current text input field
+      #
+      # This behavior of this method depends on the Gesture::Performer
+      # implementation.
+      #
+      # ### UIAutomation
+      #
+      # defaults to calling 'setValue' in UIAutomation on the UITextField or
+      # UITextView.  This is fast, but in some cases might result in slightly
+      # different behaviour than using `keyboard_enter_text`.
+      # To force use of #keyboard_enter_text option :use_keyboard
+      #
+      # ### DeviceAgent
+      #
+      # This method calls #keyboard_enter_text.
+      #
+      # @param [String] text the text to enter
+      def fast_enter_text(text)
+        expect_keyboard_visible!
+        launcher.automator.fast_enter_text(text)
+      end
+
+      # Dismisses a iPad keyboard by touching the 'Hide keyboard' button and waits
+      # for the keyboard to disappear.
+      #
+      # @note
+      #  The dismiss keyboard key does not exist on the iPhone or iPod
+      #
+      # @raise [RuntimeError] If the device is not an iPad
+      # @raise [Calabash::Cucumber::WaitHelpers::WaitError] If the keyboard does
+      #  not disappear.
+      def dismiss_ipad_keyboard
+        # TODO Maybe relax this restriction; turn it into a nop on iPhones?
+        # TODO Support iPhone 6 Plus form factor dismiss keyboard key.
+        if device_family_iphone?
+          screenshot_and_raise %Q[
+There is no Hide Keyboard key on an iPhone.
+
+Use `ipad?` to branch in your test.
+
+]
+        end
+
+        expect_keyboard_visible!
+
+        launcher.automator.dismiss_ipad_keyboard
+
+        wait_for_no_keyboard
       end
 
       # Scroll a scroll view in a direction. By default scrolls half the frame size.
@@ -420,38 +852,111 @@ module Calabash
         views_touched
       end
 
-      # Scroll a table view to a row. Table view should have only one section.
-      # @see #scroll_to_cell
-      # @example
-      #   scroll_to_row "UITableView", 2
-      # @note this is implemented by calling the Obj-C `scrollToRowAtIndexPath:atScrollPosition:animated:` method
-      #   and can do things users cant.
+      # Scrolls to a mark in a UIScrollView.
       #
-      # @param {String} uiquery query describing view scroll (should be  UIScrollView or a web view).
+      # Make sure your query matches exactly one UIScrollView.  If multiple
+      # scroll views are matched, the results can be unpredictable.
+      #
+      # @example
+      #  scroll_to_mark("settings")
+      #  scroll_to_mark("Android", {:animated => false})
+      #  scroll_to_mark("Alarm", {:query => "UIScrollView marked:'Settings'"})
+      #
+      # @see #scroll_to_row_with_mark
+      # @see #scroll_to_collection_view_item_with_mark
+      #
+      # @param [String] mark an accessibility label or identifier or text
+      # @param [Hash] options controls the query and and scroll behavior
+      # @option options [String] :query ("UIScrollView index:0") A query to
+      #  uniquely identify the scroll view if there are multiple scroll views.
+      # @option options [Boolean] :animate (true) should the scrolling be animated
+      # @option options [String] :failure_message (nil) If nil, a default failure
+      #  message will be shown if this scroll scroll cannot be performed.
+      #
+      # @raise [RuntimeError] If the scroll cannot be performed
+      # @raise [RuntimeError] If the :query finds no scroll view
+      # @raise [ArgumentError] If the mark is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_mark(mark, options={})
+        if mark.nil?
+          raise ArgumentError, "The mark cannot be nil"
+        end
+
+        merged_options = {:query => "UIScrollView index:0",
+                          :animate => true,
+                          :failure_message => nil}.merge(options)
+
+        uiquery = merged_options[:query]
+
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
+        end
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        args = [merged_options[:animate]]
+
+        views_touched = Map.map(uiquery, :scrollToMark, mark, *args)
+
+        message = merged_options[:failure_message]
+
+        if !message
+          message = %Q[
+
+Unable to scroll to mark '#{mark}' in UIScrollView matching #{uiquery}"
+
+]
+        end
+
+        Map.assert_map_results(views_touched, message)
+        views_touched
+      end
+
+      # Scroll a table view to a row. Table view should have only one section.
+      #
+      # Make sure your query matches exactly one UITableView.  If multiple views
+      # are matched, the results can be unpredictable.
+      #
+      # @see #scroll_to_cell
+      #
+      # @example
+      #   scroll_to_row "UITableView index:0", 2
+      #
+      # @param {String} uiquery Should match a UITableView
       def scroll_to_row(uiquery, number)
         views_touched = Map.map(uiquery, :scrollToRow, number)
-        msg = "unable to scroll: '#{uiquery}' to: #{number}"
+        msg = "Unable to scroll to row #{number} in table view with '#{uiquery}'"
         Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
-      # Scroll a table view to a section and row. Table view can have multiple sections.
+      # Scroll a table view to a section and row.
+      #
+      # Make sure your query matches exactly one UITableView.  If multiple views
+      # are matched, the results can be unpredictable.
       #
       # @todo should expose a non-option first argument query and required parameters `section`, `row`
       #
       # @see #scroll_to_row
       # @example
-      #   scroll_to_cell query:"UITableView", row:4, section:0, animate: false
-      # @note this is implemented by calling the Obj-C `scrollToRowAtIndexPath:atScrollPosition:animated:` method
-      #   and can do things users cant.
+      #   scroll_to_cell  row:4, section:0, animate: false
       #
       # @param {Hash} options specifies details of the scroll
-      # @option options {String} :query ('tableView') query specifying which table view to scroll
+      # @option options {String} :query ("UITableView index:0") query specifying
+      #   which table view to scroll
       # @option options {Fixnum} :section section to scroll to
       # @option options {Fixnum} :row row to scroll to
       # @option options {String} :scroll_position position to scroll to
       # @option options {Boolean} :animated (true) animate or not
-      def scroll_to_cell(options={:query => 'tableView',
+      # @raise [ArgumentError] If row or section is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_cell(options={:query => "UITableView index:0",
                                   :row => 0,
                                   :section => 0,
                                   :scroll_position => :top,
@@ -459,8 +964,8 @@ module Calabash
         uiquery = options[:query] || 'tableView'
         row = options[:row]
         sec = options[:section]
-        if row.nil? or sec.nil?
-          raise 'You must supply both :row and :section keys to scroll_to_cell'
+        if row.nil? || sec.nil?
+          raise ArgumentError, 'You must supply both :row and :section keys to scroll_to_cell'
         end
 
         args = []
@@ -480,14 +985,16 @@ module Calabash
 
       # Scrolls to a mark in a UITableView.
       #
+      # Make sure your query matches exactly one UITableView.  If multiple
+      # views are matched, the results can be unpredictable.
+      #
       # @example Scroll to the top of the item with the given mark.
       #  scroll_to_row_with_mark('settings', {:scroll_position => :top})
       #
       # @example Scroll to the bottom of the item with the given mark.
       #  scroll_to_row_with_mark('about', {:scroll_position => :bottom})
       #
-      # @param [String] mark an accessibility `{label | identifier}` or text in
-      #  or on the row
+      # @param [String] mark an accessibility label or identifier or text in row
       # @param [Hash] options controls the query and and scroll behavior
       #
       # @option options [String] :query ('tableView')
@@ -497,37 +1004,63 @@ module Calabash
       #  `{:middle | :top | :bottom}`
       # @option options [Boolean] :animate (true)
       #  should the scrolling be animated
+      # @option options [String] :failure_message (nil) If nil, a default failure
+      #  message will be shown if this scroll scroll cannot be performed.
       #
       # @raise [RuntimeError] if the scroll cannot be performed
-      # @raise [RuntimeError] if the mark is nil
       # @raise [RuntimeError] if the table query finds no table view
       # @raise [RuntimeError] if the scroll position is invalid
-      def scroll_to_row_with_mark(mark, options={:query => 'tableView',
-                                                 :scroll_position => :middle,
-                                                 :animate => true})
+      # @raise [ArgumentError] if the mark is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_row_with_mark(mark, options={})
+        merged_options = {:query => "UITableView index:0",
+                          :scroll_position => :middle,
+                          :animate => true,
+                          :failure_message => nil}.merge(options)
+
         if mark.nil?
-          screenshot_and_raise 'mark argument cannot be nil'
+          raise ArgumentError, "The mark cannot be nil"
         end
 
-        uiquery = options[:query] || 'tableView'
+        uiquery = merged_options[:query]
 
-        args = []
-        if options.has_key?(:scroll_position)
-          args << options[:scroll_position]
-        else
-          args << 'middle'
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
         end
-        if options.has_key?(:animate)
-          args << options[:animate]
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
         end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        args = [merged_options[:scroll_position], merged_options[:animate]]
 
         views_touched = Map.map(uiquery, :scrollToRowWithMark, mark, *args)
-        msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
-        Map.assert_map_results(views_touched, msg)
+
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to mark: '#{mark}' in table view matched by query:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
+        end
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 
       # Scrolls to an item in a section of a UICollectionView.
+      #
+      # Make sure your query matches exactly one UICollectionView.  If multiple
+      # views are matched, the results can be unpredictable.
       #
       # @note item and section are zero-indexed
       #
@@ -540,12 +1073,12 @@ module Calabash
       # @example The following are the allowed :scroll_position values.
       #  {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
       #
-      # @param [Integer] item the index of the item to scroll to
-      # @param [Integer] section the section of the item to scroll to
-      # @param [Hash] opts options for controlling the collection view query
+      # @param [Integer] item_index the index of the item to scroll to.  Must be >= 0.
+      # @param [Integer] section_index the section of the item to scroll to. Must be > 0.
+      # @param [Hash] options options for controlling the collection view query
       #  and scroll behavior
       #
-      # @option opts [String] :query ('collectionView')
+      # @option opts [String] :query ("UICollectionView index:0")
       #  the query that is used to identify which collection view to scroll
       #
       # @option opts [Symbol] :scroll_position (top)
@@ -554,45 +1087,85 @@ module Calabash
       # @option opts [Boolean] :animate (true)
       #  should the scrolling be animated
       #
-      # @option opts [String] :failed_message (nil)
+      # @option opts [String] :failure_message (nil)
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
       # @raise [RuntimeError] if the scroll cannot be performed
       # @raise [RuntimeError] :query finds no collection view
       # @raise [RuntimeError] the collection view does not contain a cell at item/section
-      # @raise [RuntimeError] :scroll_position is invalid
-      def scroll_to_collection_view_item(item, section, opts={})
-        default_options = {:query => 'collectionView',
+      # @raise [ArgumentError] :scroll_position is invalid
+      # @raise [ArgumentError] item or section is < 0.
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_collection_view_item(item_index, section_index, options={})
+        default_options = {:query => "UICollectionView index:0",
                            :scroll_position => :top,
                            :animate => true,
-                           :failed_message => nil}
-        opts = default_options.merge(opts)
-        uiquery = opts[:query]
+                           :failure_message => nil}
+        merged_options = default_options.merge(options)
+        uiquery = merged_options[:query]
 
-        scroll_position = opts[:scroll_position]
-        candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
-        unless candidates.include?(scroll_position)
-          raise "scroll_position '#{scroll_position}' is not one of '#{candidates}'"
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
         end
 
-        animate = opts[:animate]
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        if item_index < 0
+          raise ArgumentError, "Invalid item index: '#{item_index}' - must be >= 0"
+        end
+
+        if section_index < 0
+          raise ArgumentError, "Invalid section index: '#{section_index}' - must be >= 0"
+        end
+
+        scroll_position = merged_options[:scroll_position]
+        candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
+        if !candidates.include?(scroll_position)
+          raise ArgumentError, %Q[
+
+Invalid :scroll_position option '#{scroll_position}'.  Valid options are:
+
+#{candidates.join(", ")}
+
+          ]
+        end
+
+        animate = merged_options[:animate]
 
         views_touched = Map.map(uiquery, :collectionViewScroll,
-                                item.to_i, section.to_i,
+                                item_index.to_i, section_index.to_i,
                                 scroll_position, animate)
 
-        if opts[:failed_message]
-          msg = opts[:failed_message]
-        else
-          msg = "unable to scroll: '#{uiquery}' to item '#{item}' in section '#{section}'"
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to item index '#{item_index}' in section index '#{section_index}'
+in CollectionView matched by:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
         end
 
-        Map.assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 
       # Scrolls to mark in a UICollectionView.
+      #
+      # Make sure your query matches exactly one UICollectionView.  If multiple
+      # views are matched, the results can be unpredictable.
       #
       # @example Scroll to the top of the item with the given mark.
       #  scroll_to_collection_view_item_with_mark('cat', {:scroll_position => :top})
@@ -605,7 +1178,7 @@ module Calabash
       #
       # @param [String] mark an accessibility `{label | identifier}` or text in
       #  or on the item
-      # @param [Hash] opts options for controlling the collection view query
+      # @param [Hash] options options for controlling the collection view query
       #  and scroll behavior
       #
       # @option opts [String] :query ('collectionView')
@@ -614,50 +1187,81 @@ module Calabash
       #   the position in the collection view to scroll the item to
       # @option opts [Boolean] :animate (true) should the scroll
       #   be animated
-      # @option opts [String] :failed_message (nil)
-      #  a custom error message to display if the scrolling fails - if not
-      #  specified, a generic failure will be displayed
+      # @option opts [String] :failure_message (nil) a custom error message to
+      #   display if the scrolling fails - if not specified, a generic failure
+      #   will be displayed
       #
       # @raise [RuntimeError] if the scroll cannot be performed
-      # @raise [RuntimeError] if the mark is nil
       # @raise [RuntimeError] :query finds no collection view
       # @raise [RuntimeError] the collection view does not contain a cell
       #  with the mark
       # @raise [RuntimeError] :scroll_position is invalid
-      def scroll_to_collection_view_item_with_mark(mark, opts={})
-        default_options = {:query => 'collectionView',
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      # @raise [ArgumentError] if the mark is nil
+      def scroll_to_collection_view_item_with_mark(mark, options={})
+        default_options = {:query => "UICollectionView index:0",
                            :scroll_position => :top,
                            :animate => true,
-                           :failed_message => nil}
-        opts = default_options.merge(opts)
-        uiquery = opts[:query]
+                           :failure_message => nil}
+        merged_options = default_options.merge(options)
+        uiquery = merged_options[:query]
 
         if mark.nil?
-          raise 'mark argument cannot be nil'
+          raise ArgumentError, "The mark cannot be nil"
         end
 
-        args = []
-        scroll_position = opts[:scroll_position]
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
+        end
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        scroll_position = merged_options[:scroll_position]
         candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
-        unless candidates.include?(scroll_position)
-          raise "scroll_position '#{scroll_position}' is not one of '#{candidates}'"
+        if !candidates.include?(scroll_position)
+          raise ArgumentError, %Q[
+
+Invalid :scroll_position option '#{scroll_position}'.  Valid options are:
+
+#{candidates.join(", ")}
+
+          ]
         end
 
-        args << scroll_position
-        args << opts[:animate]
+        args = [scroll_position, merged_options[:animate]]
 
-        views_touched = Map.map(uiquery, :collectionViewScrollToItemWithMark,
+        views_touched = Map.map(uiquery,
+                                :collectionViewScrollToItemWithMark,
                                 mark, *args)
 
-        msg = opts[:failed_message] || "Unable to scroll: '#{uiquery}' to cell with mark: '#{mark}' with #{opts}"
-        Map.assert_map_results(views_touched, msg)
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to item with mark '#{mark}' in UICollectionView matching query:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
+        end
+
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 
       # Sends the app to the background.
       #
       # Sending the app to the background for more than 60 seconds may
-      # cause unpredicatable results.
+      # cause unpredictable results.
       #
       # @param [Numeric] seconds How long to send the app to the background.
       # @raise [ArgumentError] if `seconds` argument is < 1.0
@@ -915,9 +1519,20 @@ arguments => '#{arguments}'
                      :exit_code => merged_opts[:exit_code]
                }
           )
-        rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected
+
+        rescue Errno::ECONNREFUSED, HTTPClient::KeepAliveDisconnected, SocketError
           []
         end
+
+        if launcher.automator
+          if launcher.automator.name == :device_agent
+            delay = merged_opts[:post_resign_active_delay] +
+              merged_opts[:post_will_terminate_delay] + 0.4
+            sleep(delay)
+            launcher.automator.send(:session_delete)
+          end
+        end
+        true
       end
 
       # Get the Calabash server log level.
@@ -953,11 +1568,14 @@ arguments => '#{arguments}'
         launcher
       end
 
-      # Helper method to easily create page object instances from a cucumber execution context.
-      # The advantage of using `page` to instantiate a page object class is that it
-      # will automatically store a reference to the current Cucumber world
-      # which is needed in the page object methods to call Cucumber-specific methods
-      # like puts or embed.
+      # Helper method to easily create page object instances from a cucumber
+      # execution context.
+      #
+      # The advantage of using `page` to instantiate a page object class is that
+      # it will automatically store a reference to the current Cucumber world
+      # which is needed in the page object methods to call Cucumber-specific
+      # methods like puts or embed.
+      #
       # @example Instantiating a `LoginPage` from a step definition
       #   Given(/^I am about to login to a self-hosted site$/) do
       #       @current_page = page(LoginPage).await(timeout: 30)
@@ -965,9 +1583,12 @@ arguments => '#{arguments}'
       #   end
       #
       # @see Calabash::IBase
-      # @param {Class} clz the page object class to instantiate (passing the cucumber world and `args`)
-      # @param {Array} args optional additional arguments to pass to the page object constructor
-      # @return {Object} a fresh instance of `Class clz` which has been passed a reference to the cucumber World object.
+      # @param {Class} clz the page object class to instantiate (passing the
+      #  Cucumber world and `args`)
+      # @param {Array} args optional additional arguments to pass to the page
+      #  object constructor
+      # @return {Object} a fresh instance of `Class clz` which has been passed
+      #  a reference to the cucumber World object.
       def page(clz,*args)
         clz.new(self,*args)
       end
@@ -1181,42 +1802,137 @@ arguments => '#{arguments}'
         launcher.attach({:uia_strategy => uia_strategy})
       end
 
+      # Returns an object that provides an interface to the DeviceAgent
+      # public query and gesture API.
+      #
+      # @see Calabash::Cucumber::DeviceAgent
+      #
+      # @example
+      #   device_agent.query({marked: "Cancel"})
+      #   device_agent.touch({marked: "Cancel"})
+      #
+      # @return [Calabash::Cucumber::DeviceAgent]
+      #
+      # @raise [RuntimeError] If the application has not been launched.
+      # @raise [RuntimeError] If there is no automator attached to the
+      #   current launcher
+      # @raise [RuntimeError] If the automator attached the current
+      #   launcher is not DeviceAgent
+      # @raise [RuntimeError] If the automator is not running.
+      def device_agent
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        if !launcher
+          raise RuntimeError, %Q[
+There is no launcher.
+
+If you are in the Calabash console, you can try to attach to an already running
+Calabash test using:
+
+> console_attach
+
+If you are running from Cucumber or rspec, call Launcher#relaunch before calling
+this method.
+
+]
+        end
+
+        if !launcher.automator
+          raise RuntimeError, %Q[
+The launcher is not attached to an automator.
+
+If you are in the Calabash console, you can try to attach to an already running
+Calabash test using:
+
+> console_attach
+
+If you are running from Cucumber or rspec, call Launcher#relaunch before calling
+this method.
+
+]
+        end
+
+        if launcher.automator.name != :device_agent
+          raise RuntimeError, %Q[
+The launcher automator is not DeviceAgent:
+
+#{launcher.automator}
+
+#device_agent is only available for Xcode 8.
+
+In your tests, use this pattern to branch on the availability of DeviceAgent.
+
+if uia_available?
+   # Make a UIA call
+else
+   # Make a DeviceAgent call
+end
+
+]
+        end
+        automator = launcher.automator
+
+        if !automator.running?
+          raise RuntimeError, %Q[The DeviceAgent is not running.]
+        else
+          require "calabash-cucumber/device_agent"
+          Calabash::Cucumber::DeviceAgent.new(automator.client, self)
+        end
+      end
+
       # @!visibility private
+      # TODO should be private
       def launcher
         Calabash::Cucumber::Launcher.launcher
       end
 
       # @!visibility private
+      # TODO should be private
       def run_loop
-        l = Calabash::Cucumber::Launcher.launcher_if_used
-        l && l.run_loop
+        launcher = Calabash::Cucumber::Launcher.launcher_if_used
+        if launcher
+          launcher.run_loop
+        else
+          nil
+        end
       end
 
       # @!visibility private
       def tail_run_loop_log
-        l = run_loop
-        unless l
-          raise 'Unable to tail run_loop since there is not active run_loop...'
+        if !run_loop
+          raise "Unable to tail instruments log because there is no active run-loop"
         end
-        cmd = %Q[osascript -e 'tell application "Terminal" to do script "tail -n 10000 -f #{l[:log_file]} | grep -v \\"Default: \\\\*\\""']
-        raise "Unable to " unless system(cmd)
+
+        require "calabash-cucumber/log_tailer"
+
+        if launcher.instruments?
+          Calabash::Cucumber::LogTailer.tail_in_terminal(run_loop[:log_file])
+        else
+          # TODO Tail the .run_loop/xcuitest/<launcher>.log?
+          raise "Cannot tail a non-instruments run-loop"
+        end
       end
 
       # @!visibility private
       def dump_run_loop_log
-        l = run_loop
-        unless l
-          raise 'Unable to dump run_loop since there is not active run_loop...'
+        if !run_loop
+          raise "Unable to dump run-loop log because there is no active run-loop"
         end
-        cmd = %Q[cat "#{l[:log_file]}" | grep -v "Default: \\*\\*\\*"]
-        puts `#{cmd}`
-      end
 
+        if launcher.instruments?
+          cmd = %Q[cat "#{run_loop[:log_file]}" | grep -v "Default: \\*\\*\\*"]
+          RunLoop.log_unix_cmd(cmd)
+          puts `#{cmd}`
+          true
+        else
+          # TODO What should we dump in non-instruments runs?
+          raise "Cannot dump non-instruments run-loop"
+        end
+      end
 
       # @!visibility private
       def query_action_with_options(action, uiquery, options)
         uiquery, options = extract_query_and_options(uiquery, options)
-        views_touched = launcher.actions.send(action, options)
+        views_touched = launcher.automator.send(action, options)
         unless uiquery.nil?
           msg = "#{action} could not find view: '#{uiquery}', args: #{options}"
           Map.assert_map_results(views_touched, msg)

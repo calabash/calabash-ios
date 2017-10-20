@@ -4,7 +4,13 @@ module Calabash
     # Contains methods for interacting with the status bar.
     module StatusBarHelpers
 
-      # Returns the device orientation as reported by `[[UIDevice currentDevice] orientation]`.
+      require "calabash-cucumber/map"
+
+      require "calabash-cucumber/connection_helpers"
+      include Calabash::Cucumber::ConnectionHelpers
+
+      # Returns the device orientation as reported by
+      # `[[UIDevice currentDevice] orientation]`.
       #
       # @note This method is not used internally by the gem.  It is provided
       #  as an alternative to `status_bar_orientation`.  We recommend that you
@@ -16,25 +22,10 @@ module Calabash
       # @see #status_bar_orientation
       # @see Calabash::Cucumber::RotationHelpers#rotate_home_button_to
       #
-      # @param [Boolean] force_down if true, do rotations until a down
-      #  orientation is achieved
       # @return [Symbol] Returns the device orientation as one of
-      #  `{:down, :up, :left, :right}`.
-      def device_orientation(force_down=false)
-        res = Map.map(nil, :orientation, :device).first
-
-        if ['face up', 'face down'].include?(res)
-          if force_down
-            puts "WARN  found orientation '#{res}' - will rotate to force orientation to 'down'"
-          end
-
-          return res unless force_down
-          return rotate_home_button_to :down
-        end
-
-        return res unless res.eql?('unknown')
-        return res unless force_down
-        rotate_home_button_to(:down)
+      #  `{'down', 'up', 'left', 'right', 'face up', 'face down', 'unknown'}`.
+      def device_orientation
+        Map.map(nil, :orientation, :device).first
       end
 
       # Returns the home button position relative to the status bar.
@@ -48,6 +39,47 @@ module Calabash
       #  `{'down' | 'up' | 'left' | 'right'}`.
       def status_bar_orientation
         Map.map(nil, :orientation, :status_bar).first
+      end
+
+      # Returns details about the status bar like the frame, its visibility,
+      # and orientation.
+      #
+      # Requires calabash server 0.20.0.
+      def status_bar_details
+        result = http({:method => :get, :raw => true, :path => "statusBar"})
+        if result == ""
+          RunLoop::log_debug("status_bar_details is only available in Calabash iOS >= 0.20.0")
+          RunLoop::log_debug("Using default status bar details based on orientation.")
+
+          if portrait?
+            {
+              "frame" => {
+                "y" => 0,
+                "height" => 20,
+                "width" => 375,
+                "x" => 0
+              },
+              "hidden" => false,
+              "orientation" => status_bar_orientation,
+              "warning" => "These are default values.  Update the server to 0.20.0"
+            }
+          else
+            {
+              "frame" => {
+                "y" => 0,
+                "height" => 10,
+                "width" => 375,
+                "x" => 0
+              },
+              "hidden" => false,
+              "orientation" => status_bar_orientation,
+              "warning" => "These are default values.  Update the server to 0.20.0"
+            }
+          end
+        else
+          hash = JSON.parse(result)
+          hash["results"]
+        end
       end
 
       # Is the device in the portrait orientation?
@@ -67,7 +99,6 @@ module Calabash
         o = status_bar_orientation
         o.eql?('right') or o.eql?('left')
       end
-
     end
   end
 end

@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = 'Calabash'
-  s.version      = '0.19.0'
+  s.version      = '0.20.4'
   s.license      = { :type => 'Eclipse Public License 1.0', :text => <<-LICENSE
     Calabash-ios Copyright (2016) Xamarin. All rights reserved.
     The use and distribution terms for this software are covered by the
@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
   s.prepare_command = "\t\t\ttar xzf data.tar.gz\n\t\t\tunzip staticlib/calabash.framework.zip\n"
   s.preserve_paths = 'calabash.framework'
   s.source_files = "calabash.framework/Versions/A/Headers/*"
-  s.xcconfig = { "OTHER_LDFLAGS" => "-ObjC -force_load \"$(PODS_ROOT)/calabash/calabash.framework/calabash\"" }
+  s.xcconfig = { "OTHER_LDFLAGS" => "-ObjC -force_load \"$(PODS_ROOT)/Calabash/calabash.framework/calabash\"" }
   s.ios.framework = 'CFNetwork'
   s.requires_arc = false
 end

@@ -2,7 +2,7 @@ unless Luffa::Environment.travis_ci?
   describe Calabash::Cucumber::Device do
 
     before do
-      RunLoop::SimControl.terminate_all_sims
+      RunLoop::CoreSimulator.quit_simulator
     end
 
     let(:endpoint) { 'http://localhost:37265' }
@@ -20,6 +20,7 @@ unless Luffa::Environment.travis_ci?
             :instruments => instruments,
             :launch_retries => Luffa::Retry.instance.launch_retries
       }
+
       launcher = Calabash::Cucumber::Launcher.new
       launcher.relaunch(options)
       device = launcher.device
@@ -31,7 +32,6 @@ unless Luffa::Environment.travis_ci?
       expect(device.server_version).to be_truthy
       expect(device.iphone_app_emulated_on_ipad?).to be_falsey
       expect(device.form_factor).to be == 'iphone 4in'
-      expect(device.device_name).to be == 'iPhone Simulator'
       expect(device.screen_dimensions.count).to be == 5
     end
 
@@ -55,14 +55,14 @@ unless Luffa::Environment.travis_ci?
 
       context 'device is an ipad' do
         let(:device_target) do
-          Resources.shared.simulator_identifier_with_name('iPad Retina')
+          Resources.shared.simulator_identifier_with_name('iPad Air')
         end
         it { is_expected.to be == 'ipad' }
       end
 
       context 'iPhone 5 is an 4in iphone' do
         let(:device_target) do
-          Resources.shared.simulator_identifier_with_name('iPhone 5')
+          Resources.shared.simulator_identifier_with_name('iPhone SE')
         end
         it { is_expected.to be == 'iphone 4in' }
       end
@@ -72,13 +72,6 @@ unless Luffa::Environment.travis_ci?
           Resources.shared.simulator_identifier_with_name('iPhone 5s')
         end
         it { is_expected.to be == 'iphone 4in' }
-      end
-
-      context 'device is a 3.5" iphone' do
-        let(:device_target) do
-          Resources.shared.simulator_identifier_with_name('iPhone 4s')
-        end
-        it { is_expected.to be == 'iphone 3.5in' }
       end
 
       context 'device is an iphone 6' do

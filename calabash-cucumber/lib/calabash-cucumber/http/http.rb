@@ -15,12 +15,15 @@ module Calabash
       def self.ping_app
         endpoint = Calabash::Cucumber::Environment.device_endpoint
         url = URI.parse(endpoint)
-
+        path = url.path
         http = Net::HTTP.new(url.host, url.port)
-        response = http.start do |sess|
-          sess.request(Net::HTTP::Get.new("version"))
+        if url.scheme == "https"
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         end
-
+        response = http.start do |sess|
+          sess.request(Net::HTTP::Get.new("#{path}version"))
+        end
         body = nil
         success = response.is_a?(Net::HTTPSuccess)
         if success
@@ -112,4 +115,3 @@ If your app is crashing at launch, find a crash report to determine the cause.
     end
   end
 end
-

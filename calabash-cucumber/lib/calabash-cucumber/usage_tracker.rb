@@ -1,5 +1,7 @@
+
 module Calabash
   module Cucumber
+    # @!visibility private
     class UsageTracker
       require "calabash-cucumber/store/preferences"
       require "calabash-cucumber/logging"
@@ -161,7 +163,7 @@ module Calabash
         hash = {
           :event_name => "session",
           :data_version => DATA_VERSION,
-          :user_id => user_id
+          :distinct_id => user_id
         }
 
         if allowed == "system_info"
@@ -176,6 +178,9 @@ module Calabash
               :used_cucumber => used_cucumber?,
 
               :version => Calabash::Cucumber::VERSION,
+              :run_loop_version => RunLoop::VERSION,
+
+              :xcode_version => RunLoop::Xcode.new.version,
 
               :ci => RunLoop::Environment.ci?,
               :jenkins => RunLoop::Environment.jenkins?,

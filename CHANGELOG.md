@@ -1,3 +1,167 @@
+### 0.21.1
+
+* Coordinates: full-screen pans start and end closer to screen edge #1329
+* Support the new view hierarchy of the navigation bar on iOS 11 #1325 @MortenGregersen
+* Remove usage tracking to comply with EU GDPR 2018 #1320
+
+### 0.20.5
+
+This release adds a public API for manually managing SpringBoard alerts.
+This behavior is only available when running with Xcode 8.x. See this
+pull-request for API examples: [run\_loop#611](https://github.com/calabash/run_loop/pull/611).
+
+This release does not require a server update.
+
+* IRB: rescue LoadError on require 'irb/\*' #1294
+* DeviceAgent: add public API for managing SpringBoard alerts #1292
+* Fix logical inconsistency in warning emitted by
+  Launcher#calabash\_no\_launch? #1275 @duboviy
+* Fix typo in contributing doc #1264 @acroos
+* Update Calabash.podspec #1253 @nadzeya
+
+### 0.20.4
+
+This release, combined with DeviceAgent 1.0.4 and run-loop 2.2.4
+fixes several critical bugs related to:
+
+1. Code signing the DeviceAgent-Runner.app for physical devices
+2. Text entry and keyboard interactions
+3. Dismissing SpringBoard alerts
+
+Definining a `CODE_SIGN_IDENTITY` is no longer necessary, but is
+supported if for some reason you require a specific identity for
+signing.
+
+We have identified a flaw in text entry on i386 simulators and armv7
+devices.  At the moment, we have no fail-proof solution.  We recommend
+that you do not test on i386 simulators or armv7 devices.
+
+* HTTP: dismiss SpringBoard alerts before and after most LPServer calls #1245
+* DeviceAgent:API: #to\_s and #inspect #1215
+* Implement Automator::DeviceAgent#clear\_text #1205
+* Calabash can return the type of the visible keyboard #1207
+
+### 0.20.3
+
+This release, combined with DeviceAgent 1.0.2, and run-loop 2.2.2,
+fixes several critical bugs related to:
+
+1. Code signing the DeviceAgent-Runner.app for physical devices
+2. Text entry and keyboard interactions
+
+0.20.0 shipped with a mistake in the `Calabash::Cucumber::DeviceAgent`
+API.  That module incorrect forwarded missing methods to `Core`.  Some
+users will experience failing tests if they are making calls to `Core`
+methods through the `Core::device_agent` method.  You should only be
+calling `Core#device_agent` if absolutely necessary.  As time goes on,
+we are finding edge cases were the DeviceAgent query engine is extremely
+slow to respond.
+
+* Automator::DeviceAgent: search for any first responder for return key
+  type #1204
+* Automator::DeviceAgent#tap\_keyboard\_action\_key should operate on
+  button only #1202 @ark-konopacki
+* Keyboard: Keyboard: text from first responders should check other views
+  #1199
+* DeviceAgent: automator skips keyboard visible checks #1197
+* Console attach for DeviceAgent + automatic console\_attach #1192
+* Full screen gestures should use screen dimensions #1190
+* Update the Core#scroll methods #1189
+* Capture run\_loop and xcode versions in tracker #1188 @ark-konopacki
+* Replace user\_id with distinct\_id #1187 @ark-konopacki
+* Adds device agent implementation for pinch #1186 @jescriba
+* Added polish "message of day" #1184 @ark-konopacki
+* 2x-bridge: pass string to fail method (as Calabash 0.x does) #1174
+  @JoeSSS
+* Refactor DeviceAgent public API screenshot and fail #1170
+* Gem: force httpclient 2.7.1 or higher #1165
+* Core: add #ios10?
+
+### 0.20.0
+
+This release provides support for iOS 9 and iOS 10 with Xcode 8.
+
+If you need to test iOS 8, you must have Xcode 7 installed. macOS Sierra
+does not support Xcode 7, so keep that in mind when making your macOS
+upgrade plans.
+
+### DeviceAgent
+
+Apple has removed UIAutomation from Xcode 8. Our replacement for UIAutomation
+is DeviceAgent. DeviceAgent is based on Apple's XCUITest framework.
+
+Our goal for this transition is 100% backward compatibility with
+UIAutomation.  We think we are close, but we need your help to discover
+what is missing.  Since UIAutomation is not available, all `uia_*` calls
+now raise an error when tests are run with DeviceAgent.  The text of the
+error will have workarounds and examples to help you transition your
+tests.  When you find something you cannot do with DeviceAgent, please
+create a GitHub issue.
+
+Please see the
+[DeviceAgent](https://github.com/calabash/calabash-ios/wiki/DeviceAgent)
+on the Calabash iOS Wiki for more details.
+
+### CODE\_SIGN\_IDENTITY
+
+Testing on physical devices now has an additional requirement:
+code signing.
+
+```
+# Find the valid code signing identities
+$ xcrun security find-identity -v -p codesigning
+  1) 18<snip>84 "iPhone Developer: Your Name (ABCDEF1234)"
+  2) 23<snip>33 "iPhone Distribution: Your Company Name (A1B2C3D4EF)"
+  3) 38<snip>11 "iPhone Developer: Your Colleague (1234ABCDEF)"
+
+# Chose an "iPhone Developer" certificate.
+
+$ CODE_SIGN_IDENTITY="iPhone Developer: Your Name (ABCDEF1234)" \
+   DEVICE_TARGET=< udid | name> \
+   DEVICE_ENDPOINT=http://< ip >:37265 \
+   bundle exec cucumber
+```
+
+Many thanks to: @ark-konopacki, @TeresaPeters, @JoeSSS,
+@MortenGregersen, @haocuihc, and every else on
+[Gitter](https://gitter.im/calabash/calabash0x?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
+who has helped test.
+
+And a big thank you to @nicholasbarron for his clutch PR.
+
+* Map: dismiss SpringBoard alerts when DeviceAgent is available #1151
+* Public query and gesture API for DeviceAgent. #1150
+* UIA methods will raise an error with examples if called when running
+  with DeviceAgent #1148
+* Replaced calls to touch() to use Hash argument instead of String #1144
+  @nicholasbarron
+* calabash\_exit does not raise an error if the server is not running #1139
+* Added missing word 'on' in message #1122 @ark-konopacki
+
+### 0.19.2
+
+This is a server only release.  The gem behavior has not changed.
+
+The 0.19.2 server fixes touch coordinates for legacy applications on
+iPhone 6 Plus form factors.  Legacy applications do not have the correct
+icons, launch images, and image assets (@3x) to support non-scaled
+display on iPhone 6 and iPhone 6 Plus form factors.
+
+### 0.19.1
+
+* UIA: automatically attach in the IRB #1102
+* Remove Playback API references from keyboard\_helpers #1101
+* Podspec path to server should be "Calabash" not "calabash" #1098
+  @ark-konopacki @tachtevrenidis
+* Launcher: fix grammar in log message generated by console\_attach #1093
+  @TersaP
+* Add nodeType to tree #1088 @TeresaP
+* Fix undefined method "embed" in Calabash::Cucumber.map #1086
+* Gem: pin listen to 3.0.6 #1084
+* IRB: save pry history to local file #1082
+* Update ENVIRONMENT\_VARIABLES.md docs for APP\_BUNDLE\_PATH #1081
+  @sapieneptus
+
 ### 0.19.0
 
 This release removes almost all deprecated methods.  Further, Calabash

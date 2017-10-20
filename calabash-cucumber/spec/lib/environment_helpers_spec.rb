@@ -35,6 +35,27 @@ describe Calabash::Cucumber::EnvironmentHelpers do
     expect(world.ios9?).to be_falsey
   end
 
+  it '.ios10?' do
+    expect(device).to receive(:ios10?).and_return(true, false)
+
+    expect(world.ios10?).to be_truthy
+    expect(world.ios10?).to be_falsey
+  end
+
+  it '.ios11?' do
+    expect(device).to receive(:ios11?).and_return(true, false)
+
+    expect(world.ios11?).to be_truthy
+    expect(world.ios11?).to be_falsey
+  end
+
+  it '.ios_gte_11?' do
+    expect(device).to receive(:ios_gte_11?).and_return(true, false)
+
+    expect(world.ios_gte_11?).to be_truthy
+    expect(world.ios_gte_11?).to be_falsey
+  end
+
   describe 'form factor helpers' do
     it '.iphone_35in?' do
       expect(device).to receive(:iphone_35in?).and_return(true, false)

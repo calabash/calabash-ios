@@ -28,7 +28,7 @@ module Calabash
       # If `method_name` maps to no LPOperation, then it is treated a selector
       # and is performed on any view that matches `query`.
       #
-      # @examples
+      # @example
       #
       #   # Calls 'text' on any visible UITextField, because :text is not a defined operation.
       #   > map("textField", :text)
@@ -141,7 +141,7 @@ module Calabash
       def self.assert_map_results(map_results, msg)
         compact = map_results.compact
         if compact.empty? or compact.member? '<VOID>' or compact.member? '*****'
-          Map.new.screenshot_and_raise msg
+          self.map_factory.screenshot_and_raise msg
         end
       end
 

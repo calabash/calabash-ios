@@ -12,11 +12,20 @@ module Calabash
       # @param {String} command the JavaScript snippet to execute
       # @return {Object} the result returned by the UIA process
       def uia(command, options={})
+        raise ArgumentError, "Please supply :command" unless command
+
         # UIA only makes sense if there is a run loop
         launcher = Calabash::Cucumber::Launcher.launcher_if_used
-        run_loop = launcher && launcher.active? && launcher.run_loop
-        raise ArgumentError, 'the current launcher must be active and be attached to a run_loop' unless run_loop
-        raise ArgumentError, 'please supply :command' unless command
+        run_loop = launcher && launcher.attached_to_automator? && launcher.run_loop
+
+        # Automatically attach in the calabash console
+        if !run_loop && defined?(IRB)
+          RunLoop.log_debug("Attaching to current instruments process...")
+          launcher = Calabash::Cucumber::Launcher.new
+          Calabash::Cucumber::Launcher.attach
+          run_loop = launcher.run_loop
+          RunLoop.log_debug("Attached!")
+        end
 
         strategy = run_loop[:uia_strategy]
         case strategy
@@ -298,6 +307,47 @@ module Calabash
         uia("target.setDeviceOrientation(#{uia_orientation})")
       end
 
+      # Used for detecting keyboards that are not normally visible to calabash;
+      # e.g. the keyboard on the `MFMailComposeViewController`
+      #
+      # @note
+      #  IMPORTANT this should only be used when the app does not respond to
+      #  `keyboard_visible?` and UIAutomation is being used.
+      #
+      # @see #keyboard_visible?
+      #
+      # @raise [RuntimeError] If the app was not launched with instruments
+      def uia_keyboard_visible?
+        res = uia_query_windows(:keyboard)
+        res != ":nil"
+      end
+
+      # Waits for a keyboard that is not normally visible to calabash;
+      # e.g. the keyboard on `MFMailComposeViewController`.
+      #
+      # @note
+      #  IMPORTANT this should only be used when the app does not respond to
+      #  `keyboard_visible?` and UIAutomation is being used.
+      #
+      # @see #keyboard_visible?
+      #
+      # @raise [RuntimeError] if the app was not launched with instruments
+      def uia_wait_for_keyboard(options={})
+        default_opts = {
+          :timeout => 10,
+          :retry_frequency => 0.1,
+          :post_timeout => 0.5,
+          :timeout_message => "Keyboard did not appear"
+        }
+
+        options = default_opts.merge(options)
+
+        wait_for(options) do
+          uia_keyboard_visible?
+        end
+        true
+      end
+
       # @!visibility private
       def uia_type_string(string, opt_text_before='', escape=true)
         result = uia_handle_command(:typeString, string, opt_text_before)
@@ -328,6 +378,7 @@ module Calabash
         end
       end
 
+      # @!visibility private
       def uia_type_string_raw(str)
         uia("uia.keyboard().typeString('#{str}')")
       end
@@ -395,7 +446,6 @@ module Calabash
         end
 
         uia_result(uia(command))
-
       end
 
       # @!visibility private
@@ -450,6 +500,7 @@ module Calabash
       end
 
       private
+
       def validate_hash_is_location!(options)
         return if options[:latitude] and options[:longitude]
         if (options[:latitude] and not options[:longitude]) ||
@@ -472,5 +523,294 @@ module Calabash
         end
       end
     end
+  end
+end
+
+module Calabash::Cucumber::UIA
+
+  # @!visibility private
+  def self.redefine_instance_methods_if_necessary(xcode, automator=nil)
+    return if Calabash::Cucumber::Environment.xtc?
+
+    if xcode.version_gte_8?
+      reason = "UIAutomation is not available in Xcode >= 8.0."
+      return self.redefine_instance_methods_to_raise(reason)
+    end
+
+    if automator && automator.name == :device_agent
+      reason = "UIAutomation is not available when testing with DeviceAgent."
+      return self.redefine_instance_methods_to_raise(reason)
+    end
+  end
+
+  # @!visibility private
+  def self.redefine_instance_methods_to_raise(reason)
+    methods = Calabash::Cucumber::UIA.instance_methods
+    methods.each do |method_name|
+      Calabash::Cucumber::UIA.send(:remove_method, method_name)
+
+      Calabash::Cucumber::UIA.send(:define_method, method_name) do |*args|
+
+        case method_name
+          when :uia
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+It is not possible to make raw UIAutomation JavaScript calls.
+
+If you are trying to make query, use the DeviceAgent query API.
+
+    device_agent.query({type: "TextField", index:1})
+    device_agent.query({marked: "Cancel"})
+
+If you are trying to perform a gesture or enter text, in most cases the normal
+Core method will work.  If a normal Core method does work, try the DeviceAgent
+Gesture API.
+
+    device_agent.touch({type: "TextField", index:1})
+    device_agent.touch({marked: "Button"})
+
+If you cannot find an equivalent DeviceAgent workaround, please create an issue
+and include:
+
+1. At a high level, what you are trying to do.
+2. The JavaScript you are trying to invoke.
+
+Links:
+
+* http://calabashapi.xamarin.com/ios/Calabash/Cucumber/DeviceAgent.html
+* https://github.com/calabash/calabash-ios/issues
+]
+          when :uia_call, :uia_call_windows, :uia_call_method, :uia_names
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+There is no suggested workaround for this method.  Please review the DeviceAgent
+API for a replacement.  If you can find no replacement, please create an issue
+and include:
+
+If you are trying to make query, use the DeviceAgent query API.
+
+    device_agent.query({type: "TextField", index:1})
+    device_agent.query({marked: "Cancel"})
+
+If you are trying to perform a gesture or enter text, in most cases the normal
+Core method will work.  If a normal Core method does work, try the DeviceAgent
+Gesture API.
+
+    device_agent.touch({type: "TextField", index:1})
+    device_agent.touch({marked: "Button"})
+
+If you cannot find an equivalent DeviceAgent workaround, please create an issue
+and include:
+
+1. At a high level, what you are trying to do.
+2. The method you are invoking with the arguments.
+
+Links:
+
+* http://calabashapi.xamarin.com/ios/Calabash/Cucumber/DeviceAgent.html
+* https://github.com/calabash/calabash-ios/issues
+]
+          when :uia_element_exists?, :uia_element_does_not_exist?
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+Use the DeviceAgent wait API.
+
+    device_agent.wait_for_view({marked: "Cancel"})
+    device_agent.wait_for_no_view({marked: "Cancel"})
+
+]
+          when :uia_query, :uia_query_el
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+Use the DeviceAgent query API.
+
+    device_agent.query({marked: "Cancel"})
+    device_agent.query({type: "TextField", index:1})
+
+]
+
+          when :uia_query_windows
+
+          raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+Try to use the DeviceAgent query API.
+
+    device_agent.query({marked: "Cancel"})
+    device_agent.query({type: "TextField", index:1})
+
+If the DeviceAgent query API does not find the correct views, please create an
+issue and include:
+
+1. At a high level, what you are trying to do.
+2. The method you are invoking with the arguments.
+
+]
+          when :uia_screenshot
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+There is no replacement for this method.
+
+Please create an issue and include:
+
+1. At a high level, what you are trying to do.
+2. A screenshot of the view you are trying capture.
+
+]
+          when :uia_orientation, :uia_rotate_home_button_to, :uia_rotate
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+You should not be calling this method.  Always call the orientation methods
+defined in the Core API.
+
+]
+          when :uia_type_string, :uia_type_string_raw, :uia_enter, :uia_set_responder_value
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+In general, you should use the the text input methods defined in Core.
+
+In some cases you will need to use the DeviceAgent query and keyboard API.
+
+    device_agent.touch({type: "TextField", index: 1})
+    wait_for_keyboard
+    keyboard_enter_text("Hello")
+
+It is important to note that the DeviceAgent implementations of:
+
+    * keyboard_enter_text
+    * keyboard_enter_char
+    * enter_text_in
+    * enter_text
+    * fast_enter_text
+
+have exactly the same performance.
+
+You should prefer `enter_text` or `enter_text_in` because it matches the
+Calabash 2.0 API.
+
+]
+          when :uia_set_location
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+This method has been broken for various iOS versions and device combinations
+for years.
+
+At the moment, we do not have replacement for location spoofing with DeviceAgent.
+
+]
+          when :uia_send_app_to_background
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+You should not use this method.  If the Core send_app_to_background is not
+working under UIAutomation, please create a GitHub issue.
+
+https://github.com/calabash/calabash-ios/issues
+
+]
+          when :uia_keyboard_visible?, :uia_wait_for_keyboard
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+We have not found a case (yet) where the the Core keyboard_visible? and
+wait_for_keyboard methods do not work when using DeviceAgent.  If you find a
+case where the Core methods do not work, please create a GitHub issue.
+
+The current DeviceAgent keyboard API is scheduled for removal.  It is crucial
+that you report workflows that require the DeviceAgent keyboard API.
+
+    device_agent.keyboard_visible?
+    wait_for { device_agent.keyboard_visible? }
+
+https://github.com/calabash/calabash-ios/issues
+
+]
+          when :uia_handle_command, :uia_serialize_command,
+            :uia_serialize_arguments, :uia_serialize_argument,
+            :escape_uia_string, :send_uia_command
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+There is no replacement.
+
+]
+          when :uia_tap, :uia_tap_mark, :uia_tap_offset,
+            :uia_double_tap, :uia_double_tap_mark, :uia_double_tap_offset,
+            :uia_two_finger_tap, :uia_two_finger_tap_offset,
+            :uia_touch_hold, :uia_touch_hold_offset,
+            :uia_pan, :uia_pan_offset,
+            :uia_swipe, :uia_swipe_offset, :uia_flick_offset,
+            :uia_drag_inside, :uia_drag_inside_mark,
+            :uia_pinch, :uia_pinch_offset, :uia_scroll_to
+            raise RuntimeError, %Q[
+
+#{reason}
+
+#{method_name} has been removed from the Calabash API.
+
+DeviceAgent is our replacement for UIAutomation. In most cases, you will not
+need to use a special DeviceAgent gesture method like you did with UIAutomation.
+
+If a Core gesture method does not work, there is a DeviceAgent gesture API.
+
+    device_agent.touch({type: "Button", marked: "Back"})
+
+For UIA pan gestures (flick, swipe, pan) use pan_coordinates.
+
+    from_point = device_agent.query_for_coordinate({marked: "From"})
+    to_point = device_agent.query_for_coordinate({marked: "To"})
+    pan_coordinates(from_point, to_point)
+
+]
+          else
+            raise ArgumentError, "This #{method_name} has not been handled"
+        end
+      end
+    end
+    true
   end
 end

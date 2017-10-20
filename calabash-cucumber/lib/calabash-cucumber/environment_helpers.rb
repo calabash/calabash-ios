@@ -1,6 +1,3 @@
-require 'calabash-cucumber/device'
-require 'calabash-cucumber/launcher'
-
 module Calabash
   module Cucumber
 
@@ -11,6 +8,8 @@ module Calabash
     #  The `OS` environmental variable has been deprecated.  It should never
     #  be set.
     module EnvironmentHelpers
+
+      require "calabash-cucumber/device"
 
       # Are the uia* methods available?
       #
@@ -47,6 +46,7 @@ module Calabash
       #
       # @return [Calabash::Cucumber::Device] An instance of Device.
       def default_device
+        require "calabash-cucumber/launcher"
         l = Calabash::Cucumber::Launcher.launcher_if_used
         l && l.device
       end
@@ -133,6 +133,7 @@ module Calabash
       # @raise [RuntimeError] If the server cannot be reached.
       # @return [RunLoop::Version] The version of the iOS running on the device.
       def ios_version
+        require "run_loop/version"
         RunLoop::Version.new(_default_device_or_create.ios_version)
       end
 
@@ -189,6 +190,30 @@ module Calabash
       # @return [Boolean] true if device under test is running iOS 9
       def ios9?
        _default_device_or_create.ios9?
+      end
+
+      # Is the device under test running iOS 10?
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 10
+      def ios10?
+       _default_device_or_create.ios10?
+      end
+
+      # Is the device under test running iOS 11?
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 11
+      def ios11?
+        _default_device_or_create.ios11?
+      end
+
+      # Is the device under test running iOS 11 or greater?
+      #
+      # @raise [RuntimeError] if the server cannot be reached
+      # @return [Boolean] true if device under test is running iOS 11 or greater
+      def ios_gte_11?
+        _default_device_or_create.ios_gte_11?
       end
 
       # Is the app that is being tested an iPhone app emulated on an iPad?
