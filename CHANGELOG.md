@@ -1,3 +1,11 @@
+### 0.21.2
+
+This release requires an LPServer update.
+
+* Updated XCUIElementType documentation #1335
+* Use correct query for navigation bar with title on iOS 11 #1333
+  @MortenGregersen
+
 ### 0.21.1
 
 * Coordinates: full-screen pans start and end closer to screen edge #1329
