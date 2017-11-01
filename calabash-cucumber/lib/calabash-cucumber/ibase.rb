@@ -74,7 +74,7 @@ class Calabash::IBase
   def trait
     raise "You should define a trait method or a title method" unless respond_to?(:title)
     if ios_gte_11?
-      "view:'_UINavigationItemView' label marked:'#{self.title}'"
+      "UINavigationBar marked:'#{self.title}'"
     else
       "navigationItemView marked:'#{self.title}'"
     end

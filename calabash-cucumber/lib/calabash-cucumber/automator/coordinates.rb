@@ -388,12 +388,12 @@ module Calabash
 
         # @!visibility private
         def min_x
-          10
+          2
         end
 
         # @!visibility private
         def max_x
-          @max_x ||= window[:width] - 10
+          @max_x ||= window[:width] - 2
         end
       end
     end

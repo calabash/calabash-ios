@@ -32,7 +32,7 @@ unless Luffa::Environment.travis_ci?
       expect(device.server_version).to be_truthy
       expect(device.iphone_app_emulated_on_ipad?).to be_falsey
       expect(device.form_factor).to be == 'iphone 4in'
-      expect(device.screen_dimensions.count).to be == 5
+      expect(device.screen_dimensions.count).to be == 9
     end
 
     describe '#form_factor' do
