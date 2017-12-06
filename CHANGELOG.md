@@ -1,6 +1,12 @@
+### 0.21.4
+
+This releae requires a Calabash iOS Server update.
+
+* Gem: pin cucumber to 2.x #1359
+
 ### 0.21.2
 
-This release requires an LPServer update.
+This release requires a Calabash iOS Server update.
 
 * Updated XCUIElementType documentation #1335
 * Use correct query for navigation bar with title on iOS 11 #1333
