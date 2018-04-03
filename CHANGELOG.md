@@ -1,3 +1,10 @@
+### 0.21.5
+
+This release requires a Calabash iOS Server update.
+
+Adds support for touch-and-hold (first press duration) for iOS 11
+drag and drop.
+
 ### 0.21.4
 
 This releae requires a Calabash iOS Server update.

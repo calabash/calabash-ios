@@ -285,7 +285,11 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       it "pans between the center of the queries and returns both views" do
         from_query = "from"
         to_query = "to"
-        options = {:duration => 1.0}
+        options = {
+          duration: 1.0,
+          num_fingers: 1,
+          first_touch_hold_duration: 0.0
+        }
 
         from_options = options.merge({:query => from_query})
         to_options = options.merge({:query => to_query})
@@ -307,7 +311,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
         expect(device_agent.client).to(
           receive(:pan_between_coordinates).with(:from_point, :to_point,
-                                                 {:duration => 1.0}).and_return(true)
+                                                 options).and_return(true)
         )
 
         actual = device_agent.pan(from_query, to_query, options)
@@ -319,11 +323,15 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
     context "#pan_coordinates" do
       it "pans between two coordinates" do
-        options = {:duration => 1.0}
+        options = {
+          duration: 1.0,
+          num_fingers: 1,
+          first_touch_hold_duration: 0.0
+        }
 
         expect(client).to(
           receive(:pan_between_coordinates).with(:from_point, :to_point,
-                                                 {:duration => 1.0}).and_return(true)
+                                                 options).and_return(true)
         )
 
         expect(device_agent).to(

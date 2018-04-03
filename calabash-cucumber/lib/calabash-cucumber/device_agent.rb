@@ -232,6 +232,55 @@ module Calabash
         with_screenshot_on_failure { client.long_press(uiquery, {:duration => duration}) }
       end
 
+      # Wait for text to appear in a view matched by uiquery.
+      #
+      # @param [Hash] text the text to wait for (exact match)
+      # @param [Hash] uiquery query for the view in which the text should appear
+      # @param [Hash] options control the timeout
+      # @option options [Numeric] :timeout How long to wait for the query to
+      #  match a view and the text to appear in that view.
+      #
+      # @raise [Timeout::Error] when no match appears before the timeout
+      # @return The first view that matches uiquery and contains text
+      def wait_for_text_in_view(text, uiquery, options={})
+        value = nil
+        with_screenshot_on_failure do
+          value = client.wait_for_text_in_view(text, uiquery, options)
+        end
+        value
+      end
+
+      # Wait for view to match uiquery.
+      #
+      # @param [Hash] uiquery the query
+      # @param [Hash] options control the timeout
+      # @option options [Numeric] :timeout How long to wait for the query to
+      #  match a view and the text to appear in that view.
+      #
+      # @raise [Timeout::Error] when no match appears before the timeout
+      # @return The first view that matches uiquery
+      def wait_for_view(uiquery, options={})
+        value = nil
+        with_screenshot_on_failure do
+          value = client.wait_for_view(uiquery, options)
+        end
+        value
+      end
+
+      # Wait for no view to match uiquery.
+      #
+      # @param [Hash] uiquery the query
+      # @param [Hash] options control the timeout
+      # @option options [Numeric] :timeout How long to wait for the query to
+      #  match a view and the text to appear in that view.
+      #
+      # @raise [Timeout::Error] when there is a view that matches uiquery
+      def wait_for_no_view(uiquery, options={})
+        with_screenshot_on_failure do
+          client.wait_for_no_view(uiquery, options)
+        end
+      end
+
       # Returns true if there is a keyboard visible.
       #
       # Scheduled for removal in 0.21.0.  Use Core#keyboard_visible?. If you

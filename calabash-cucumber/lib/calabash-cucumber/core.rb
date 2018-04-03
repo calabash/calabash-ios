@@ -490,6 +490,9 @@ Valid forces are: :strong, :normal, :light
       # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
       #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
       #  duration must be > 0.
+      # @option options {Numeric} :first_touch_hold_duration (0.0) How long the
+      #  first touch holds before starting the pan.  Only available for iOS 9
+      #  or greater (requires DeviceAgent)
       # @return {Array<Hash>} array containing the serialized version of the
       #  touched views.  The first element is the first view matched by
       #  the from_query and the second element is the first view matched by
@@ -522,6 +525,8 @@ The minimum duration is 0.0.
 ]
         end
 
+        # TODO validate first_touch_hold_duration
+
         launcher.automator.pan(from_query, to_query, merged_options)
       end
 
@@ -551,6 +556,9 @@ The minimum duration is 0.0.
       # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
       #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
       #  duration must be > 0.
+      # @option options {Numeric} :first_touch_hold_duration (0.0) How long the
+      #  first touch holds before starting the pan. Only available for iOS 9 or
+      #  greater (requires DeviceAgent).
       #
       # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
       #  for DeviceAgent.
@@ -579,8 +587,9 @@ The minimum duration is 0.0.
 ]
         end
 
-        launcher.automator.pan_coordinates(from_point, to_point,
-                                           merged_options)
+        # TODO validate first_touch_hold_duration
+
+        launcher.automator.pan_coordinates(from_point, to_point, merged_options)
       end
 
       # Performs a "pinch" gesture.

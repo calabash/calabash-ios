@@ -1,0 +1,35 @@
+# Force Xcode environment
+language: objective-c
+
+osx_image: xcode9.3
+
+# rvm ships with a version of gem and bundler that is too old.
+before_install:
+  - gem update --system
+  - gem --version
+  - gem install bundler
+  - bundler --version
+
+# ruby 2.0.0 fails because of encoding test.
+# Tell the user to upgrade using rbenv or calabash-sandbox.
+rvm:
+  - 2.3.3
+  - 2.2.5
+
+script:
+  - bin/ci/travis/run.sh
+  # Skip XTC run on all but the latest to avoid redundant testing;
+  # the ruby version is immaterial.
+  - if [[ `ruby -e 'print RUBY_VERSION'` == '2.3.3' ]]; then script/ci/travis/xtc-submit-ci.rb; fi
+
+
+notifications:
+  email:
+    recipients:
+      - josmoo@microsoft.com
+    on_success: change
+    on_failure: always
+  slack:
+    rooms:
+      secure: j15+d9xbUbGIyX4mmTmWP4EUg13LFiyeSGoVvpjsrPyoCR78V4jqbunLON55KczLQD5ql+xBwv34x57UZhca8g74ZBulF7A5xm7oxSyOgMOB1hgf5ruEU3n8dtWvHFvuLUyreu2QYrmGPznJnEOXE0feFuDBiyp1BpTvk4gwr+4=
+
