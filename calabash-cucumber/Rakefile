@@ -31,7 +31,6 @@ module Bundler
     # happen during development.
     def libraries_built?
       ['staticlib/calabash.framework.zip',
-       'staticlib/libFrankCalabash.a',
        # Not yet, maybe never.
        # 'dylibs/libCalabashDynFAT.dylib',
        'dylibs/libCalabashDyn.dylib',
@@ -64,7 +63,6 @@ end
 # Builds and installs the Objective-C libraries that this gem requires.
 #
 # * staticlib/calabash.framework.zip
-# * staticlib/libFrankCalabash.a
 # * dylibs/libCalabashDyn.dylib
 # * dylibs/libCalabashDynSim.dylib
 #
@@ -152,26 +150,6 @@ Please run again without bundle exec.\033[0m
         end
 
         log_info('Installed framework to ./staticlib/calabash.framework.zip')
-
-        unless system('make', 'frank')
-          log_error("There was an error executing 'make frank'")
-          exit 1
-        end
-
-        source = File.expand_path('./libFrankCalabash.a')
-        target = File.join(gem_static_libs_dir, 'libFrankCalabash.a')
-        args = ['ditto', source, target]
-
-        Luffa::Debug.with_debugging do
-          RunLoop::Xcrun.new.exec(args, {log_cmd: true})
-        end
-
-        unless File.exist?(target)
-          log_error('There was a problem installing the libFrankCalabash.a to ./staticlib')
-          exit 1
-        end
-
-        log_info('Installed frank plugin to ./staticlib/libFrankCalabash.a')
 
         unless system('make', 'dylibs')
           log_error("There was an error executing 'make dylibs'")

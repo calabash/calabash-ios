@@ -30,7 +30,6 @@ banner "Install Stubs for LPServer libs"
 
 mkdir -p calabash-cucumber/staticlib
 touch calabash-cucumber/staticlib/calabash.framework.zip
-touch calabash-cucumber/staticlib/libFrankCalabash.a
 mkdir -p calabash-cucumber/dylibs
 touch calabash-cucumber/dylibs/libCalabashDyn.dylib
 touch calabash-cucumber/dylibs/libCalabashDynSim.dylib
