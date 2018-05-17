@@ -12,13 +12,13 @@ additional_bin_files = %w(bin/cal.xcconfig bin/CalabashSetup bin/calabash-ios)
 bin_help = %w(doc/calabash-ios-help.txt)
 
 # the calabash framework
-staticlib = %w(staticlib/calabash.framework.zip staticlib/libFrankCalabash.a)
+staticlib = %w(staticlib/calabash.framework.zip)
 
 # calabash dylibs
 dylibs = %w(dylibs/libCalabashDyn.dylib dylibs/libCalabashDynSim.dylib)
 
 # files in script
-scripts = %w(scripts/.irbrc scripts/calabash.xcconfig.erb)
+scripts = %w(scripts/.irbrc)
 
 # files in script/data
 scripts_data = Dir.glob('scripts/data/*.plist')
@@ -44,7 +44,7 @@ Gem::Specification.new do |s|
   s.description = %q{calabash-cucumber drives tests for native iOS apps. You must link your app with calabash-ios-server framework to execute tests.}
   s.files         = gem_files
   s.test_files    = []
-  s.executables   = %w(calabash-ios frank-calabash)
+  s.executables   = %w(calabash-ios)
   s.require_paths = %w(lib)
   s.license       = 'EPL-1.0'
 
