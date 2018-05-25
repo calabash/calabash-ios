@@ -9,7 +9,7 @@ pipeline {
     SLACK_COLOR_INFO    = '#6ECADC'
     SLACK_COLOR_WARNING = '#FFC300'
     SLACK_COLOR_GOOD    = '#3EB991'
-    PROJECT_NAME = 'Calabash.iOS'
+    PROJECT_NAME = 'Calabash iOS'
   }
   options {
     disableConcurrentBuilds()
