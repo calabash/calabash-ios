@@ -2,5 +2,4 @@
 
 bundle update
 
-# Assumes Xcode 7.3.1 on Jenkins.
-bundle exec cucumber -f pretty -f json -o reports/instruments.json
+bundle exec cucumber -t ~@flick -f pretty -f junit -o reports/junit

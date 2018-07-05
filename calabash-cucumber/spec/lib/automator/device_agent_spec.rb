@@ -9,6 +9,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       def rotate_home_button_to(_); ; end
       def perform_coordinate_gesture(_, _, _, _={}); ; end
       def pan_between_coordinates(_, _, _={}); ; end
+      def enter_text_without_keyboard_check(_); ; end
     end.new
   end
 
@@ -160,6 +161,25 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       end
     end
 
+    context "#element_for_device_screen" do
+      it "returns a Hash representation of device_screen" do
+        device = Resources.shared.device_for_mocking
+        expect(device_agent).to receive(:device).and_return(device)
+        expected = {
+          "screen" => true,
+          "rect" => {
+            "height" => 568,
+            "width" => 320,
+            "center_x" => 160,
+            "center_y" => 284
+          }
+        }
+
+        actual = device_agent.send(:element_for_device_screen)
+        expect(actual).to be == expected
+      end
+    end
+
     context "#touch" do
       it "performs a touch and returns an array with one element" do
         hash = {
@@ -265,7 +285,11 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       it "pans between the center of the queries and returns both views" do
         from_query = "from"
         to_query = "to"
-        options = {:duration => 1.0}
+        options = {
+          duration: 1.0,
+          num_fingers: 1,
+          first_touch_hold_duration: 0.0
+        }
 
         from_options = options.merge({:query => from_query})
         to_options = options.merge({:query => to_query})
@@ -287,7 +311,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
         expect(device_agent.client).to(
           receive(:pan_between_coordinates).with(:from_point, :to_point,
-                                                 {:duration => 1.0}).and_return(true)
+                                                 options).and_return(true)
         )
 
         actual = device_agent.pan(from_query, to_query, options)
@@ -299,11 +323,15 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
     context "#pan_coordinates" do
       it "pans between two coordinates" do
-        options = {:duration => 1.0}
+        options = {
+          duration: 1.0,
+          num_fingers: 1,
+          first_touch_hold_duration: 0.0
+        }
 
         expect(client).to(
           receive(:pan_between_coordinates).with(:from_point, :to_point,
-                                                 {:duration => 1.0}).and_return(true)
+                                                 options).and_return(true)
         )
 
         expect(device_agent).to(
@@ -312,6 +340,133 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
         actual = device_agent.pan_coordinates(:from_point, :to_point, options)
         expect(actual).to be == [:view]
+      end
+    end
+
+    context "#swipe" do
+      let(:force) { :strong }
+      let(:direction) { :left }
+      let(:gesture_options) { { duration: 0.2 } }
+
+      context "nil query" do
+        let(:options) { { force: force, direction: direction, query: nil } }
+
+        it "performs the gesture using screen coordinates" do
+          element = {
+            "screen" => true,
+            "rect" => {
+              "height" => 200,
+              "width" => 100,
+              "center_x" => 50,
+              "center_y" => 100
+            }
+          }
+
+          from_point = {x: 50, y: 100}
+          to_point = {x: 75, y: 125 }
+
+          expect(device_agent).to receive(:element_for_device_screen).and_return(element)
+          expect(device_agent).to receive(:point_from).and_return(from_point)
+          expect(Calabash::Cucumber::Automator::Coordinates).to(
+            receive(:end_point_for_swipe).with(:left, element, :strong).and_return(to_point)
+          )
+
+          expect(device_agent.client).to(
+            receive(:pan_between_coordinates).with(from_point, to_point, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.swipe(options)).to be == [element]
+        end
+      end
+
+      context "non-nil query" do
+        let(:options) { { force: force, direction: direction, query: "query" } }
+
+        it "performs the gesture using query coordinates" do
+          element = {:view => true}
+          hash = {
+            :coordinates => {x: 50, y: 100},
+            :view => element
+          }
+
+          to_point = {x: 75, y: 125 }
+          from_point = hash[:coordinates]
+
+          expect(device_agent).to receive(:query_for_coordinates).and_return(hash)
+          expect(Calabash::Cucumber::Automator::Coordinates).to(
+            receive(:end_point_for_swipe).with(:left, element, :strong).and_return(to_point)
+          )
+
+          expect(device_agent.client).to(
+            receive(:pan_between_coordinates).with(from_point, to_point, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.swipe(options)).to be == [element]
+        end
+      end
+    end
+
+    context "#pinch" do
+      let(:direction) { :out }
+      let(:duration) { 0.5 }
+      let(:amount) { 100 }
+      let(:gesture_options) do
+        { duration: duration, amount: amount, pinch_direction: direction.to_s }
+      end
+
+      context "nil query" do
+        let(:options) do
+          dupped = gesture_options.dup
+          dupped[:query] = nil
+          dupped
+        end
+
+        it "performs the gesture using screen coordinates" do
+          element = {
+            "screen" => true,
+            "rect" => {
+              "height" => 200,
+              "width" => 100,
+              "center_x" => 50,
+              "center_y" => 100
+            }
+          }
+
+          coordinates = {x: 50, y: 100}
+
+          expect(device_agent).to receive(:element_for_device_screen).and_return(element)
+          expect(device_agent).to receive(:point_from).and_return(coordinates)
+
+          expect(device_agent.client).to(
+            receive(:perform_coordinate_gesture).with("pinch", 50, 100, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.pinch(direction, options)).to be == [element]
+        end
+      end
+
+      context "non-nil query" do
+        let(:options) do
+          dupped = gesture_options.dup
+          dupped[:query] = "query"
+          dupped
+        end
+
+        it "performs the gesture using query coordinates" do
+          element = {:view => true}
+          hash = {
+            :coordinates => {x: 50, y: 100},
+            :view => element
+          }
+
+          expect(device_agent).to receive(:query_for_coordinates).and_return(hash)
+
+          expect(device_agent.client).to(
+            receive(:perform_coordinate_gesture).with("pinch", 50, 100, gesture_options)
+          ).and_return(true)
+
+          expect(device_agent.pinch(direction, options)).to be == [element]
+        end
       end
     end
 
@@ -343,7 +498,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
     context "Text Entry" do
       context "#enter_text_with_keyboard" do
         it "types a string by calling out to enter_text" do
-          expect(device_agent.client).to receive(:enter_text).with("text").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("text").and_return({})
+          )
 
           expect(device_agent.enter_text_with_keyboard("text")).to be == {}
         end
@@ -351,7 +508,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
       context "#enter_char_with_keyboard" do
         it "types a char by calling out to enter_text" do
-          expect(device_agent.client).to receive(:enter_text).with("c").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("c").and_return({})
+          )
 
           expect(device_agent.enter_text_with_keyboard("c")).to be == {}
         end
@@ -378,7 +537,7 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           expect(device_agent).to(
             receive(:mark_for_return_key_of_first_responder)
           ).and_return("Mark")
-          expect(device_agent.client).to receive(:touch).with({marked: "Mark"}).and_return({})
+          expect(device_agent.client).to receive(:touch).with({:type=>"Button", marked: "Mark"}).and_return({})
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -388,7 +547,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
             receive(:mark_for_return_key_of_first_responder)
           ).and_return(nil)
           expect(device_agent).to receive(:char_for_keyboard_action).and_return("\n")
-          expect(device_agent.client).to receive(:enter_text).with("\n").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("\n").and_return({})
+          )
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -399,12 +560,14 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           ).and_return("Unmatchable identifier")
 
           expect(device_agent.client).to(
-            receive(:touch).with({marked: "Unmatchable identifier"}).and_raise(
+            receive(:touch).with({:type=>"Button", marked: "Unmatchable identifier"}).and_raise(
               RuntimeError, "No match found")
           )
 
           expect(device_agent).to receive(:char_for_keyboard_action).and_return("\n")
-          expect(device_agent.client).to receive(:enter_text).with("\n").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("\n").and_return({})
+          )
 
           expect(device_agent.tap_keyboard_action_key).to be == {}
         end
@@ -420,7 +583,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
 
       context "#fast_enter_text" do
         it "calls 'enter_text'" do
-          expect(device_agent.client).to receive(:enter_text).with("text").and_return({})
+          expect(device_agent.client).to(
+            receive(:enter_text_without_keyboard_check).with("text").and_return({})
+          )
 
           expect(device_agent.fast_enter_text("text")).to be == {}
         end
@@ -465,8 +630,9 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
       end
 
       context "#return_key_type_of_first_responder" do
-        it "returns the returnKeyType of text field when it is the first responder" do
-          query = "textField isFirstResponder:1"
+        let(:query) { "* isFirstResponder:1" }
+
+        it "returns the returnKeyType of the first responder" do
           expect(Calabash::Cucumber::Map).to(
             receive(:raw_map).with(query, :query, :returnKeyType)
           ).and_return({"results" => [1]})
@@ -475,31 +641,28 @@ describe Calabash::Cucumber::Automator::DeviceAgent do
           expect(actual).to be == 1
         end
 
-        it "returns the returnKeyType of text view when it is the first responder" do
-          query = "textField isFirstResponder:1"
+        it "returns nil if returnKeyType result is empty" do
           expect(Calabash::Cucumber::Map).to(
             receive(:raw_map).with(query, :query, :returnKeyType)
           ).and_return({"results" => []})
-
-          query = "textView isFirstResponder:1"
-          expect(Calabash::Cucumber::Map).to(
-            receive(:raw_map).with(query, :query, :returnKeyType)
-          ).and_return({"results" => [2]})
 
           actual = device_agent.send(:return_key_type_of_first_responder)
-          expect(actual).to be == 2
+          expect(actual).to be == nil
         end
 
-        it "returns nil when no first responder can be found" do
-          query = "textField isFirstResponder:1"
+        it "returns nil if first responder does not respond to :returnKeyType" do
           expect(Calabash::Cucumber::Map).to(
             receive(:raw_map).with(query, :query, :returnKeyType)
-          ).and_return({"results" => []})
+          ).and_return({"results" => ["*****"]})
 
-          query = "textView isFirstResponder:1"
+          actual = device_agent.send(:return_key_type_of_first_responder)
+          expect(actual).to be == nil
+        end
+
+        it "returns nil if first responder :returnKeyType is nil" do
           expect(Calabash::Cucumber::Map).to(
             receive(:raw_map).with(query, :query, :returnKeyType)
-          ).and_return({"results" => []})
+          ).and_return({"results" => [nil]})
 
           actual = device_agent.send(:return_key_type_of_first_responder)
           expect(actual).to be == nil

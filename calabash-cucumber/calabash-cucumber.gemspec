@@ -12,13 +12,13 @@ additional_bin_files = %w(bin/cal.xcconfig bin/CalabashSetup bin/calabash-ios)
 bin_help = %w(doc/calabash-ios-help.txt)
 
 # the calabash framework
-staticlib = %w(staticlib/calabash.framework.zip staticlib/libFrankCalabash.a)
+staticlib = %w(staticlib/calabash.framework.zip)
 
 # calabash dylibs
 dylibs = %w(dylibs/libCalabashDyn.dylib dylibs/libCalabashDynSim.dylib)
 
 # files in script
-scripts = %w(scripts/.irbrc scripts/calabash.xcconfig.erb)
+scripts = %w(scripts/.irbrc)
 
 # files in script/data
 scripts_data = Dir.glob('scripts/data/*.plist')
@@ -44,13 +44,13 @@ Gem::Specification.new do |s|
   s.description = %q{calabash-cucumber drives tests for native iOS apps. You must link your app with calabash-ios-server framework to execute tests.}
   s.files         = gem_files
   s.test_files    = []
-  s.executables   = %w(calabash-ios frank-calabash)
+  s.executables   = %w(calabash-ios)
   s.require_paths = %w(lib)
   s.license       = 'EPL-1.0'
 
   s.required_ruby_version = '>= 2.0'
 
-  s.add_dependency("cucumber")
+  s.add_dependency("cucumber", "~> 2.0")
   # Avoid 1.0.5 release; has an errant 'binding.pry'.
   s.add_dependency('edn', '>= 1.0.6', '< 2.0')
   s.add_dependency('slowhandcuke', '~> 0.0.3')
@@ -59,7 +59,7 @@ Gem::Specification.new do |s|
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
   s.add_dependency("clipboard", "~> 1.0")
-  s.add_dependency("run_loop", ">= 2.2.0", "< 3.0")
+  s.add_dependency("run_loop", ">= 2.6.6", "< 3.0")
 
   # Shared with run-loop.
   s.add_dependency('json')
@@ -76,6 +76,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
+  s.add_development_dependency "rb-readline"
   s.add_development_dependency 'guard-rspec'
   s.add_development_dependency 'guard-bundler'
   # Pin to 3.0.6; >= 3.1.0 requires ruby 2.2. This is guard dependency.

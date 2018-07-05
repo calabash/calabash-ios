@@ -47,7 +47,12 @@ end
 
 Then(/^I can pull down to see the Today and Notifications page$/) do
   if ipad?
-    puts "Test is not stable on iPad; skipping"
+    $stdout.puts "Test is not stable on iPad; skipping"
+    $stdout.flush
+  elsif ios11?
+    $stdout.puts "Skipping test on iOS 11, test needs to be written"
+    $stdout.puts "due to changes in the Notification Center"
+    $stdout.flush
   else
     element = wait_for_view("*")
     x = element["rect"]["center_x"]

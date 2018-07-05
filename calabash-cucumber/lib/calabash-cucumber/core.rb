@@ -382,13 +382,13 @@ Expected: options[:offset] = {:x => NUMERIC, :y => NUMERIC}
       # @option options {Hash} :offset (nil) optional offset to touch point.
       #  Offset supports an `:x` and `:y` key and causes the touch to be
       #  offset with `(x,y)` relative to the center.
-      # @option options {String} :query (nil) If specified, the swipe will be
-      #  made on the first view matching this query.  If this option is nil
-      #  (the default), the swipe will happen on the first view matched by "*".
       # @option options [Symbol] :force (normal) Indicates the force of the
       #  swipe.  Valid values are :strong, :normal, :light.
+      # @option options {String} :query (nil) If specified, the swipe will be
+      #  made on the first view matching this query.  If this option is nil
+      #  (the default), the swipe will happen at the center of the screen.
       #
-      # @return {Array<Hash>,String} An array with one element; the view that
+      # @return {Array<Hash>} An array with one element; the view that
       #  was swiped.
       #
       # @raise [ArgumentError] If :force is invalid.
@@ -490,6 +490,9 @@ Valid forces are: :strong, :normal, :light
       # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
       #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
       #  duration must be > 0.
+      # @option options {Numeric} :first_touch_hold_duration (0.0) How long the
+      #  first touch holds before starting the pan.  Only available for iOS 9
+      #  or greater (requires DeviceAgent)
       # @return {Array<Hash>} array containing the serialized version of the
       #  touched views.  The first element is the first view matched by
       #  the from_query and the second element is the first view matched by
@@ -522,6 +525,8 @@ The minimum duration is 0.0.
 ]
         end
 
+        # TODO validate first_touch_hold_duration
+
         launcher.automator.pan(from_query, to_query, merged_options)
       end
 
@@ -551,6 +556,9 @@ The minimum duration is 0.0.
       # @option options {Numeric} :duration (1.0) duration of the 'pan'.  The
       #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
       #  duration must be > 0.
+      # @option options {Numeric} :first_touch_hold_duration (0.0) How long the
+      #  first touch holds before starting the pan. Only available for iOS 9 or
+      #  greater (requires DeviceAgent).
       #
       # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
       #  for DeviceAgent.
@@ -579,25 +587,76 @@ The minimum duration is 0.0.
 ]
         end
 
-        launcher.automator.pan_coordinates(from_point, to_point,
-                                           merged_options)
+        # TODO validate first_touch_hold_duration
+
+        launcher.automator.pan_coordinates(from_point, to_point, merged_options)
       end
 
       # Performs a "pinch" gesture.
+      #
       # By default, the gesture starts at the center of the screen.
-      # @todo `pinch` is an old style API which doesn't take a query as its first argument. We should migrate this.
+      #
       # @example
+      #   # Zoom in
       #   pinch :out
-      # @example
+      #
+      #   # Zoom out
       #   pinch :in, query:"MKMapView", offset:{x:42}
-      # @param {String} in_out the direction to pinch ('in' or 'out') (symbols can also be used).
+      #
+      # @param {String, Symbol} in_out the direction to pinch ('in' or 'out')
       # @param {Hash} options option for modifying the details of the touch.
-      # @option options {Hash} :offset (nil) optional offset to touch point. Offset supports an `:x` and `:y` key
-      #   and causes the touch to be offset with `(x,y)` relative to the center (`center + (offset[:x], offset[:y])`).
-      # @option options {String} :query (nil) if specified, the pinch will be made relative to this query.
-      # @return {Array<Hash>,String} array containing the serialized version of the touched view if `options[:query]` is given.
+      # @option options {Hash} :offset (nil) optional offset to touch point.
+      # @option options {String} :query (nil) The view to pinch on.  If this
+      #  value is nil, the pinch happens at the center of the screen.
+      # @option options {Numeric} :amount (100) How large (in points) the
+      #  pinch should be.  This option is ignored when running with UIAutomation.
+      # @option options {Numeric} :duration (1.0) duration of the 'pinch'.  The
+      #  minimum value of pan in UIAutomation is 0.5.  For DeviceAgent, the
+      #  duration must be > 0.
+      # @return {Array<Hash>} array containing the serialized version of
+      #  the view touched.
+      #
+      # @raise [ArgumentError] If duration is < 0.5 for UIAutomation and <= 0
+      #  for DeviceAgent.
+      # @raise [ArgumentError] If in_out argument is invalid.
       def pinch(in_out, options={})
-        launcher.automator.pinch(in_out.to_sym, options)
+        merged_options = {
+          :query => nil,
+          # Ignored by UIAutomation
+          :amount => 100,
+          :duration => 0.5
+        }.merge(options)
+
+        symbol = in_out.to_sym
+
+        if ![:in, :out].include?(symbol)
+          raise ArgumentError, %Q[
+Invalid pinch direction: '#{symbol}'.  Valid directions are:
+
+"in", "out", :in, :out
+
+]
+        end
+
+        duration = merged_options[:duration]
+
+        if uia_available? && duration < 0.5
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.5
+
+]
+        elsif duration <= 0.0
+          raise ArgumentError, %Q[
+Invalid duration: #{duration}
+
+The minimum duration is 0.0.
+
+]
+        end
+
+        launcher.automator.pinch(in_out.to_sym, merged_options)
       end
 
       # @deprecated 0.21.0 Use #keyboard_enter_text
@@ -757,7 +816,7 @@ To type strings with more than one character, use keyboard_enter_text.
       # for the keyboard to disappear.
       #
       # @note
-      #  the dismiss keyboard key does not exist on the iPhone or iPod
+      #  The dismiss keyboard key does not exist on the iPhone or iPod
       #
       # @raise [RuntimeError] If the device is not an iPad
       # @raise [Calabash::Cucumber::WaitHelpers::WaitError] If the keyboard does
@@ -802,38 +861,111 @@ Use `ipad?` to branch in your test.
         views_touched
       end
 
-      # Scroll a table view to a row. Table view should have only one section.
-      # @see #scroll_to_cell
-      # @example
-      #   scroll_to_row "UITableView", 2
-      # @note this is implemented by calling the Obj-C `scrollToRowAtIndexPath:atScrollPosition:animated:` method
-      #   and can do things users cant.
+      # Scrolls to a mark in a UIScrollView.
       #
-      # @param {String} uiquery query describing view scroll (should be  UIScrollView or a web view).
+      # Make sure your query matches exactly one UIScrollView.  If multiple
+      # scroll views are matched, the results can be unpredictable.
+      #
+      # @example
+      #  scroll_to_mark("settings")
+      #  scroll_to_mark("Android", {:animated => false})
+      #  scroll_to_mark("Alarm", {:query => "UIScrollView marked:'Settings'"})
+      #
+      # @see #scroll_to_row_with_mark
+      # @see #scroll_to_collection_view_item_with_mark
+      #
+      # @param [String] mark an accessibility label or identifier or text
+      # @param [Hash] options controls the query and and scroll behavior
+      # @option options [String] :query ("UIScrollView index:0") A query to
+      #  uniquely identify the scroll view if there are multiple scroll views.
+      # @option options [Boolean] :animate (true) should the scrolling be animated
+      # @option options [String] :failure_message (nil) If nil, a default failure
+      #  message will be shown if this scroll scroll cannot be performed.
+      #
+      # @raise [RuntimeError] If the scroll cannot be performed
+      # @raise [RuntimeError] If the :query finds no scroll view
+      # @raise [ArgumentError] If the mark is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_mark(mark, options={})
+        if mark.nil?
+          raise ArgumentError, "The mark cannot be nil"
+        end
+
+        merged_options = {:query => "UIScrollView index:0",
+                          :animate => true,
+                          :failure_message => nil}.merge(options)
+
+        uiquery = merged_options[:query]
+
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
+        end
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        args = [merged_options[:animate]]
+
+        views_touched = Map.map(uiquery, :scrollToMark, mark, *args)
+
+        message = merged_options[:failure_message]
+
+        if !message
+          message = %Q[
+
+Unable to scroll to mark '#{mark}' in UIScrollView matching #{uiquery}"
+
+]
+        end
+
+        Map.assert_map_results(views_touched, message)
+        views_touched
+      end
+
+      # Scroll a table view to a row. Table view should have only one section.
+      #
+      # Make sure your query matches exactly one UITableView.  If multiple views
+      # are matched, the results can be unpredictable.
+      #
+      # @see #scroll_to_cell
+      #
+      # @example
+      #   scroll_to_row "UITableView index:0", 2
+      #
+      # @param {String} uiquery Should match a UITableView
       def scroll_to_row(uiquery, number)
         views_touched = Map.map(uiquery, :scrollToRow, number)
-        msg = "unable to scroll: '#{uiquery}' to: #{number}"
+        msg = "Unable to scroll to row #{number} in table view with '#{uiquery}'"
         Map.assert_map_results(views_touched, msg)
         views_touched
       end
 
-      # Scroll a table view to a section and row. Table view can have multiple sections.
+      # Scroll a table view to a section and row.
+      #
+      # Make sure your query matches exactly one UITableView.  If multiple views
+      # are matched, the results can be unpredictable.
       #
       # @todo should expose a non-option first argument query and required parameters `section`, `row`
       #
       # @see #scroll_to_row
       # @example
-      #   scroll_to_cell query:"UITableView", row:4, section:0, animate: false
-      # @note this is implemented by calling the Obj-C `scrollToRowAtIndexPath:atScrollPosition:animated:` method
-      #   and can do things users cant.
+      #   scroll_to_cell  row:4, section:0, animate: false
       #
       # @param {Hash} options specifies details of the scroll
-      # @option options {String} :query ('tableView') query specifying which table view to scroll
+      # @option options {String} :query ("UITableView index:0") query specifying
+      #   which table view to scroll
       # @option options {Fixnum} :section section to scroll to
       # @option options {Fixnum} :row row to scroll to
       # @option options {String} :scroll_position position to scroll to
       # @option options {Boolean} :animated (true) animate or not
-      def scroll_to_cell(options={:query => 'tableView',
+      # @raise [ArgumentError] If row or section is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_cell(options={:query => "UITableView index:0",
                                   :row => 0,
                                   :section => 0,
                                   :scroll_position => :top,
@@ -841,8 +973,8 @@ Use `ipad?` to branch in your test.
         uiquery = options[:query] || 'tableView'
         row = options[:row]
         sec = options[:section]
-        if row.nil? or sec.nil?
-          raise 'You must supply both :row and :section keys to scroll_to_cell'
+        if row.nil? || sec.nil?
+          raise ArgumentError, 'You must supply both :row and :section keys to scroll_to_cell'
         end
 
         args = []
@@ -862,14 +994,16 @@ Use `ipad?` to branch in your test.
 
       # Scrolls to a mark in a UITableView.
       #
+      # Make sure your query matches exactly one UITableView.  If multiple
+      # views are matched, the results can be unpredictable.
+      #
       # @example Scroll to the top of the item with the given mark.
       #  scroll_to_row_with_mark('settings', {:scroll_position => :top})
       #
       # @example Scroll to the bottom of the item with the given mark.
       #  scroll_to_row_with_mark('about', {:scroll_position => :bottom})
       #
-      # @param [String] mark an accessibility `{label | identifier}` or text in
-      #  or on the row
+      # @param [String] mark an accessibility label or identifier or text in row
       # @param [Hash] options controls the query and and scroll behavior
       #
       # @option options [String] :query ('tableView')
@@ -879,37 +1013,63 @@ Use `ipad?` to branch in your test.
       #  `{:middle | :top | :bottom}`
       # @option options [Boolean] :animate (true)
       #  should the scrolling be animated
+      # @option options [String] :failure_message (nil) If nil, a default failure
+      #  message will be shown if this scroll scroll cannot be performed.
       #
       # @raise [RuntimeError] if the scroll cannot be performed
-      # @raise [RuntimeError] if the mark is nil
       # @raise [RuntimeError] if the table query finds no table view
       # @raise [RuntimeError] if the scroll position is invalid
-      def scroll_to_row_with_mark(mark, options={:query => 'tableView',
-                                                 :scroll_position => :middle,
-                                                 :animate => true})
+      # @raise [ArgumentError] if the mark is nil
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_row_with_mark(mark, options={})
+        merged_options = {:query => "UITableView index:0",
+                          :scroll_position => :middle,
+                          :animate => true,
+                          :failure_message => nil}.merge(options)
+
         if mark.nil?
-          screenshot_and_raise 'mark argument cannot be nil'
+          raise ArgumentError, "The mark cannot be nil"
         end
 
-        uiquery = options[:query] || 'tableView'
+        uiquery = merged_options[:query]
 
-        args = []
-        if options.has_key?(:scroll_position)
-          args << options[:scroll_position]
-        else
-          args << 'middle'
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
         end
-        if options.has_key?(:animate)
-          args << options[:animate]
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
         end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        args = [merged_options[:scroll_position], merged_options[:animate]]
 
         views_touched = Map.map(uiquery, :scrollToRowWithMark, mark, *args)
-        msg = options[:failed_message] || "Unable to scroll: '#{uiquery}' to: #{options}"
-        Map.assert_map_results(views_touched, msg)
+
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to mark: '#{mark}' in table view matched by query:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
+        end
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 
       # Scrolls to an item in a section of a UICollectionView.
+      #
+      # Make sure your query matches exactly one UICollectionView.  If multiple
+      # views are matched, the results can be unpredictable.
       #
       # @note item and section are zero-indexed
       #
@@ -922,12 +1082,12 @@ Use `ipad?` to branch in your test.
       # @example The following are the allowed :scroll_position values.
       #  {:top | :center_vertical | :bottom | :left | :center_horizontal | :right}
       #
-      # @param [Integer] item the index of the item to scroll to
-      # @param [Integer] section the section of the item to scroll to
-      # @param [Hash] opts options for controlling the collection view query
+      # @param [Integer] item_index the index of the item to scroll to.  Must be >= 0.
+      # @param [Integer] section_index the section of the item to scroll to. Must be > 0.
+      # @param [Hash] options options for controlling the collection view query
       #  and scroll behavior
       #
-      # @option opts [String] :query ('collectionView')
+      # @option opts [String] :query ("UICollectionView index:0")
       #  the query that is used to identify which collection view to scroll
       #
       # @option opts [Symbol] :scroll_position (top)
@@ -936,45 +1096,85 @@ Use `ipad?` to branch in your test.
       # @option opts [Boolean] :animate (true)
       #  should the scrolling be animated
       #
-      # @option opts [String] :failed_message (nil)
+      # @option opts [String] :failure_message (nil)
       #  a custom error message to display if the scrolling fails - if not
       #  specified, a generic failure will be displayed
       #
       # @raise [RuntimeError] if the scroll cannot be performed
       # @raise [RuntimeError] :query finds no collection view
       # @raise [RuntimeError] the collection view does not contain a cell at item/section
-      # @raise [RuntimeError] :scroll_position is invalid
-      def scroll_to_collection_view_item(item, section, opts={})
-        default_options = {:query => 'collectionView',
+      # @raise [ArgumentError] :scroll_position is invalid
+      # @raise [ArgumentError] item or section is < 0.
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      def scroll_to_collection_view_item(item_index, section_index, options={})
+        default_options = {:query => "UICollectionView index:0",
                            :scroll_position => :top,
                            :animate => true,
-                           :failed_message => nil}
-        opts = default_options.merge(opts)
-        uiquery = opts[:query]
+                           :failure_message => nil}
+        merged_options = default_options.merge(options)
+        uiquery = merged_options[:query]
 
-        scroll_position = opts[:scroll_position]
-        candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
-        unless candidates.include?(scroll_position)
-          raise "scroll_position '#{scroll_position}' is not one of '#{candidates}'"
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
         end
 
-        animate = opts[:animate]
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        if item_index < 0
+          raise ArgumentError, "Invalid item index: '#{item_index}' - must be >= 0"
+        end
+
+        if section_index < 0
+          raise ArgumentError, "Invalid section index: '#{section_index}' - must be >= 0"
+        end
+
+        scroll_position = merged_options[:scroll_position]
+        candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
+        if !candidates.include?(scroll_position)
+          raise ArgumentError, %Q[
+
+Invalid :scroll_position option '#{scroll_position}'.  Valid options are:
+
+#{candidates.join(", ")}
+
+          ]
+        end
+
+        animate = merged_options[:animate]
 
         views_touched = Map.map(uiquery, :collectionViewScroll,
-                                item.to_i, section.to_i,
+                                item_index.to_i, section_index.to_i,
                                 scroll_position, animate)
 
-        if opts[:failed_message]
-          msg = opts[:failed_message]
-        else
-          msg = "unable to scroll: '#{uiquery}' to item '#{item}' in section '#{section}'"
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to item index '#{item_index}' in section index '#{section_index}'
+in CollectionView matched by:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
         end
 
-        Map.assert_map_results(views_touched, msg)
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 
       # Scrolls to mark in a UICollectionView.
+      #
+      # Make sure your query matches exactly one UICollectionView.  If multiple
+      # views are matched, the results can be unpredictable.
       #
       # @example Scroll to the top of the item with the given mark.
       #  scroll_to_collection_view_item_with_mark('cat', {:scroll_position => :top})
@@ -987,7 +1187,7 @@ Use `ipad?` to branch in your test.
       #
       # @param [String] mark an accessibility `{label | identifier}` or text in
       #  or on the item
-      # @param [Hash] opts options for controlling the collection view query
+      # @param [Hash] options options for controlling the collection view query
       #  and scroll behavior
       #
       # @option opts [String] :query ('collectionView')
@@ -996,43 +1196,74 @@ Use `ipad?` to branch in your test.
       #   the position in the collection view to scroll the item to
       # @option opts [Boolean] :animate (true) should the scroll
       #   be animated
-      # @option opts [String] :failed_message (nil)
-      #  a custom error message to display if the scrolling fails - if not
-      #  specified, a generic failure will be displayed
+      # @option opts [String] :failure_message (nil) a custom error message to
+      #   display if the scrolling fails - if not specified, a generic failure
+      #   will be displayed
       #
       # @raise [RuntimeError] if the scroll cannot be performed
-      # @raise [RuntimeError] if the mark is nil
       # @raise [RuntimeError] :query finds no collection view
       # @raise [RuntimeError] the collection view does not contain a cell
       #  with the mark
       # @raise [RuntimeError] :scroll_position is invalid
-      def scroll_to_collection_view_item_with_mark(mark, opts={})
-        default_options = {:query => 'collectionView',
+      # @raise [ArgumentError] If the :query value is nil, "", or "*".
+      # @raise [ArgumentError] if the mark is nil
+      def scroll_to_collection_view_item_with_mark(mark, options={})
+        default_options = {:query => "UICollectionView index:0",
                            :scroll_position => :top,
                            :animate => true,
-                           :failed_message => nil}
-        opts = default_options.merge(opts)
-        uiquery = opts[:query]
+                           :failure_message => nil}
+        merged_options = default_options.merge(options)
+        uiquery = merged_options[:query]
 
         if mark.nil?
-          raise 'mark argument cannot be nil'
+          raise ArgumentError, "The mark cannot be nil"
         end
 
-        args = []
-        scroll_position = opts[:scroll_position]
+        if uiquery.nil?
+          raise ArgumentError, "The :query option cannot be nil"
+        end
+
+        if uiquery == ""
+          raise ArgumentError, "The :query option cannot be the empty string"
+        end
+
+        if uiquery == "*"
+          raise ArgumentError, "The :query option cannot be the wildcard '*'"
+        end
+
+        scroll_position = merged_options[:scroll_position]
         candidates = [:top, :center_vertical, :bottom, :left, :center_horizontal, :right]
-        unless candidates.include?(scroll_position)
-          raise "scroll_position '#{scroll_position}' is not one of '#{candidates}'"
+        if !candidates.include?(scroll_position)
+          raise ArgumentError, %Q[
+
+Invalid :scroll_position option '#{scroll_position}'.  Valid options are:
+
+#{candidates.join(", ")}
+
+          ]
         end
 
-        args << scroll_position
-        args << opts[:animate]
+        args = [scroll_position, merged_options[:animate]]
 
-        views_touched = Map.map(uiquery, :collectionViewScrollToItemWithMark,
+        views_touched = Map.map(uiquery,
+                                :collectionViewScrollToItemWithMark,
                                 mark, *args)
 
-        msg = opts[:failed_message] || "Unable to scroll: '#{uiquery}' to cell with mark: '#{mark}' with #{opts}"
-        Map.assert_map_results(views_touched, msg)
+        message = merged_options[:failure_message]
+        if !message
+          message = %Q[
+Unable to scroll to item with mark '#{mark}' in UICollectionView matching query:
+
+#{uiquery}
+
+with options:
+
+#{merged_options}
+
+]
+        end
+
+        Map.assert_map_results(views_touched, message)
         views_touched
       end
 

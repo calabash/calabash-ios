@@ -10,6 +10,7 @@ describe Calabash::Cucumber::Core do
       def swipe(_); :success; end
       def to_s; "#<Automator RSPEC STUB>"; end
       def inspect; to_s; end
+      def name; :automator; end
     end.new
   end
 
@@ -253,6 +254,83 @@ describe Calabash::Cucumber::Core do
       )
 
       expect(world.pan_coordinates("from", "to")).to be_truthy
+    end
+  end
+
+  context "pinch" do
+    context "performs the pinch gesture" do
+      let(:merged_options) do
+        {
+          :query => nil,
+          :amount => 100,
+          :duration => 0.5
+        }
+      end
+
+      before do
+        expect(world).to receive(:launcher).and_return(launcher)
+        expect(launcher).to receive(:automator).and_return(automator)
+      end
+
+      it "allows :in" do
+        expect(automator).to(
+          receive(:pinch).with(:in, merged_options).and_return(true)
+        )
+
+        expect(world.pinch(:in)).to be_truthy
+      end
+
+      it "allows 'in'" do
+        expect(automator).to(
+          receive(:pinch).with(:in, merged_options).and_return(true)
+        )
+
+        expect(world.pinch("in")).to be_truthy
+      end
+
+      it "allows :out" do
+        expect(automator).to(
+          receive(:pinch).with(:out, merged_options).and_return(true)
+        )
+
+        expect(world.pinch(:out)).to be_truthy
+      end
+
+      it "allows 'out'" do
+        expect(automator).to(
+          receive(:pinch).with(:out, merged_options).and_return(true)
+        )
+
+        expect(world.pinch("out")).to be_truthy
+      end
+    end
+
+    it "raises an error if in_out argument is invalid" do
+      expect do
+        world.pinch(:invalid)
+      end.to raise_error ArgumentError, /Invalid pinch direction/
+    end
+
+    context "validates duration option" do
+      let(:options) { {} }
+
+      it "raises if duration < 0.5 with UIAutomation" do
+        expect(world).to receive(:uia_available?).and_return(true)
+        options[:duration] = 0.4
+
+        expect do
+          world.pinch(:in, options)
+        end.to raise_error ArgumentError, /Invalid duration/
+      end
+
+      it "raises if duration <= 0.0 with DeviceAgent" do
+        expect(world).to receive(:uia_available?).and_return(false)
+        options[:duration] = 0.0
+
+        expect do
+          world.pinch(:in, options)
+        end.to raise_error ArgumentError, /Invalid duration/
+      end
     end
   end
 
@@ -942,6 +1020,384 @@ describe Calabash::Cucumber::Core do
       expect(launcher).to receive(:instruments?).and_return(true)
 
       expect(world.dump_run_loop_log).to be_truthy
+    end
+  end
+
+  context "#scroll_to_mark" do
+    let(:options) do
+      {
+        :query => "query",
+        :animate => :animate,
+        :failure_message => "custom failure message"
+      }
+    end
+    let(:success) { ["a non nil result"] }
+    let(:failure) { [ nil ] }
+    let(:map) { Calabash::Cucumber::Map.new }
+
+    before do
+      allow(Calabash::Cucumber::Map).to receive(:map_factory).and_return(map)
+      allow(map).to receive(:screenshot).and_return("path/to/screenshot")
+    end
+
+    it "raises an ArgumentError if mark is nil" do
+      expect do
+        world.scroll_to_mark(nil)
+      end.to raise_error ArgumentError, /The mark cannot be nil/
+    end
+
+    context "validates the :query option" do
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_mark(:mark, {:query => nil})
+        end.to raise_error ArgumentError, /query option cannot be nil/
+      end
+
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_mark(:mark, {:query => ""})
+        end.to raise_error ArgumentError, /query option cannot be the empty string/
+      end
+
+      it "raises an ArgumentError if query is *" do
+        expect do
+          world.scroll_to_mark(:mark, {:query => "*"})
+        end.to raise_error ArgumentError, /query option cannot be the wildcard/
+      end
+    end
+
+    context "merges options correctly and asserts results" do
+      it "calls map with the correct variables" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :scrollToMark, :mark, :animate).and_return(success)
+        )
+
+        actual = world.scroll_to_mark(:mark, options)
+        expect(actual).to be == success
+      end
+
+      it "fails with the right error message" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :scrollToMark, :mark, :animate).and_return(failure)
+        )
+
+        expect do
+          world.scroll_to_mark(:mark, options)
+        end.to raise_error RuntimeError, /#{options[:failure_message]}/
+      end
+    end
+
+    it "calls Map with the correct defaults" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UIScrollView index:0", :scrollToMark, :mark, true).and_return(success)
+      )
+
+      actual = world.scroll_to_mark(:mark)
+      expect(actual).to be == success
+    end
+
+    it "fails with a good default message" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UIScrollView index:0", :scrollToMark, :mark, true).and_return(failure)
+      )
+
+      expect do
+        world.scroll_to_mark(:mark)
+      end.to raise_error RuntimeError, /Unable to scroll to mark/
+    end
+  end
+
+  context "#scroll_to_row_with_mark" do
+    let(:options) do
+      {
+        :query => "query",
+        :scroll_position => :top,
+        :animate => :animate,
+        :failure_message => "custom failure message"
+      }
+    end
+
+    let(:success) { ["a non nil result"] }
+    let(:failure) { [ nil ] }
+    let(:map) { Calabash::Cucumber::Map.new }
+
+    before do
+      allow(Calabash::Cucumber::Map).to receive(:map_factory).and_return(map)
+      allow(map).to receive(:screenshot).and_return("path/to/screenshot")
+    end
+
+    it "raises an ArgumentError if mark is nil" do
+      expect do
+        world.scroll_to_row_with_mark(nil)
+      end.to raise_error ArgumentError, /The mark cannot be nil/
+    end
+
+    context "validates the :query option" do
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_row_with_mark(:mark, {:query => nil})
+        end.to raise_error ArgumentError, /query option cannot be nil/
+      end
+
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_row_with_mark(:mark, {:query => ""})
+        end.to raise_error ArgumentError, /query option cannot be the empty string/
+      end
+
+      it "raises an ArgumentError if query is *" do
+        expect do
+          world.scroll_to_row_with_mark(:mark, {:query => "*"})
+        end.to raise_error ArgumentError, /query option cannot be the wildcard/
+      end
+    end
+
+    context "merges options correctly and asserts results" do
+      it "calls map with the correct variables" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :scrollToRowWithMark, :mark, :top, :animate).and_return(success)
+        )
+
+        actual = world.scroll_to_row_with_mark(:mark, options)
+        expect(actual).to be == success
+      end
+
+      it "fails with the right error message" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :scrollToRowWithMark, :mark, :top, :animate).and_return(failure)
+        )
+
+        expect do
+          world.scroll_to_row_with_mark(:mark, options)
+        end.to raise_error RuntimeError, /#{options[:failure_message]}/
+      end
+    end
+
+    it "calls Map with the correct defaults" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UITableView index:0", :scrollToRowWithMark, :mark, :middle, true).and_return(success)
+      )
+
+      actual = world.scroll_to_row_with_mark(:mark)
+      expect(actual).to be == success
+    end
+
+    it "fails with a good default message" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UITableView index:0", :scrollToRowWithMark, :mark, :middle, true).and_return(failure)
+      )
+
+      expect do
+        world.scroll_to_row_with_mark(:mark)
+      end.to raise_error RuntimeError, /Unable to scroll to mark/
+    end
+  end
+
+  context "#scroll_to_collection_view_item" do
+    let(:options) do
+      {
+        :query => "query",
+        :scroll_position => :bottom,
+        :animate => :animate,
+        :failure_message => "custom failure message"
+      }
+    end
+
+    let(:success) { ["a non nil result"] }
+    let(:failure) { [ nil ] }
+    let(:map) { Calabash::Cucumber::Map.new }
+
+    before do
+      allow(Calabash::Cucumber::Map).to receive(:map_factory).and_return(map)
+      allow(map).to receive(:screenshot).and_return("path/to/screenshot")
+    end
+
+    context "validates the :query option" do
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_collection_view_item(1, 1, {:query => nil})
+        end.to raise_error ArgumentError, /query option cannot be nil/
+      end
+
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_collection_view_item(1, 1, {:query => ""})
+        end.to raise_error ArgumentError, /query option cannot be the empty string/
+      end
+
+      it "raises an ArgumentError if query is *" do
+        expect do
+          world.scroll_to_collection_view_item(1, 1, {:query => "*"})
+        end.to raise_error ArgumentError, /query option cannot be the wildcard/
+      end
+    end
+
+    context "validates item and section index arguments" do
+      it "raises an ArgumentError if item index < 0" do
+        expect do
+          world.scroll_to_collection_view_item(-1, 0)
+        end.to raise_error ArgumentError, /Invalid item index/
+      end
+
+      it "raises an ArgumentError if section index < 0" do
+        expect do
+          world.scroll_to_collection_view_item(0, -1)
+        end.to raise_error ArgumentError, /Invalid section index/
+      end
+    end
+
+    context "validates the scroll position" do
+      it "raises an error if :scroll_position is invalid" do
+        options[:scroll_position] = :invalid
+
+        expect do
+          world.scroll_to_collection_view_item(0, 1, options)
+        end.to raise_error ArgumentError, /Invalid :scroll_position option/
+      end
+    end
+
+    context "merges options correctly and asserts results" do
+      it "calls map with the correct variables" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :collectionViewScroll,
+                             0, 1, :bottom, :animate).and_return(success)
+        )
+
+        actual = world.scroll_to_collection_view_item(0, 1, options)
+        expect(actual).to be == success
+      end
+
+      it "fails with the right error message" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :collectionViewScroll,
+                             0, 1, :bottom, :animate).and_return(failure)
+        )
+
+        expect do
+          world.scroll_to_collection_view_item(0, 1, options)
+        end.to raise_error RuntimeError, /#{options[:failure_message]}/
+      end
+    end
+
+    it "calls Map with the correct defaults" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UICollectionView index:0", :collectionViewScroll,
+                           0, 1, :top, true).and_return(success)
+      )
+
+      actual = world.scroll_to_collection_view_item(0, 1)
+      expect(actual).to be == success
+    end
+
+    it "fails with a good default message" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UICollectionView index:0", :collectionViewScroll,
+                           0, 1, :top, true).and_return(failure)
+      )
+
+      expect do
+        world.scroll_to_collection_view_item(0, 1)
+      end.to raise_error RuntimeError, /Unable to scroll to item/
+    end
+  end
+
+  context "#scroll_to_collection_view_item_with_mark" do
+    let(:options) do
+      {
+        :query => "query",
+        :scroll_position => :bottom,
+        :animate => :animate,
+        :failure_message => "custom failure message"
+      }
+    end
+
+    let(:success) { ["a non nil result"] }
+    let(:failure) { [ nil ] }
+    let(:map) { Calabash::Cucumber::Map.new }
+
+    before do
+      allow(Calabash::Cucumber::Map).to receive(:map_factory).and_return(map)
+      allow(map).to receive(:screenshot).and_return("path/to/screenshot")
+    end
+
+    it "raises an ArgumentError if mark is nil" do
+      expect do
+        world.scroll_to_collection_view_item_with_mark(nil)
+      end.to raise_error ArgumentError, /The mark cannot be nil/
+    end
+
+    context "validates the :query option" do
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_collection_view_item_with_mark(:mark, {:query => nil})
+        end.to raise_error ArgumentError, /query option cannot be nil/
+      end
+
+      it "raises an ArgumentError if query is nil" do
+        expect do
+          world.scroll_to_collection_view_item_with_mark(:mark, {:query => ""})
+        end.to raise_error ArgumentError, /query option cannot be the empty string/
+      end
+
+      it "raises an ArgumentError if query is *" do
+        expect do
+          world.scroll_to_collection_view_item_with_mark(:mark, {:query => "*"})
+        end.to raise_error ArgumentError, /query option cannot be the wildcard/
+      end
+    end
+
+    context "validates the scroll position" do
+      it "raises an error if :scroll_position is invalid" do
+        options[:scroll_position] = :invalid
+
+        expect do
+          world.scroll_to_collection_view_item_with_mark(:mark, options)
+        end.to raise_error ArgumentError, /Invalid :scroll_position option/
+      end
+    end
+
+    context "merges options correctly and asserts results" do
+      it "calls map with the correct variables" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :collectionViewScrollToItemWithMark,
+                             :mark, :bottom, :animate).and_return(success)
+        )
+
+        actual = world.scroll_to_collection_view_item_with_mark(:mark, options)
+        expect(actual).to be == success
+      end
+
+      it "fails with the right error message" do
+        expect(Calabash::Cucumber::Map).to(
+          receive(:map).with("query", :collectionViewScrollToItemWithMark,
+                             :mark, :bottom, :animate).and_return(failure)
+        )
+
+        expect do
+          world.scroll_to_collection_view_item_with_mark(:mark, options)
+        end.to raise_error RuntimeError, /#{options[:failure_message]}/
+      end
+    end
+
+    it "calls Map with the correct defaults" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UICollectionView index:0", :collectionViewScrollToItemWithMark,
+                           :mark, :top, true).and_return(success)
+      )
+
+      actual = world.scroll_to_collection_view_item_with_mark(:mark)
+      expect(actual).to be == success
+    end
+
+    it "fails with a good default message" do
+      expect(Calabash::Cucumber::Map).to(
+        receive(:map).with("UICollectionView index:0", :collectionViewScrollToItemWithMark,
+                           :mark, :top, true).and_return(failure)
+      )
+
+      expect do
+        world.scroll_to_collection_view_item_with_mark(:mark)
+      end.to raise_error RuntimeError, /Unable to scroll to item/
     end
   end
 end

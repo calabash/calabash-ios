@@ -68,8 +68,10 @@ class Resources
   def simulator_identifier_with_name(name)
     @simulators ||= simctl.simulators
 
+    min_ios_version = RunLoop::Version.new("#{xcode.version.major + 2}.0")
+
     match = @simulators.find do |simulator|
-      simulator.name == name
+      simulator.name == name && simulator.version >= min_ios_version
     end
     match.instruments_identifier(xcode)
   end
@@ -88,7 +90,6 @@ class Resources
 
   def device_for_mocking
     endpoint = 'http://localhost:37265/'
-    # noinspection RubyStringKeysInHashInspection
     version_data =
     {
           'outcome' => 'SUCCESS',
@@ -104,10 +105,10 @@ class Resources
                 'revision' => 'e494e30'
           },
           'screen_dimensions' => {
-                'scale' => 2,
-                'width' => 640,
-                'sample' => 1,
-                'height' => 1136
+            'scale' => 2,
+            'width' => 640,
+            'sample' => 1,
+            'height' => 1136
           },
           'app_version' => '1.4.0',
           'iOS_version' => '8.0',

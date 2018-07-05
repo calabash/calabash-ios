@@ -1,0 +1,113 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0 maximum-scale=1.0, user-scalable=no" charset="UTF-8"/>
+  <title>Calabash Page</title>
+</head>
+
+<style>
+h1 {margin-top: 44px;}
+</style>
+
+<body>
+  <h1>H1 Header!</h1>
+
+  <h2>H2 Header!</h2>
+
+  <div class='menu'>
+    <span class='heading'>List of Links</span>
+    <ul id="links">
+      <li id="external"> <a id="external-link" href='http://www.google.com'>An external link.  Don't touch!</a></li>
+      <li id="internal"> <a id="internal-link" href="#faq-link" onclick="function() { return true; };">An internal link.  Touch!</a></li>
+    </ul>
+  </div>
+
+  <div class='menu'>
+    <span class='heading'>List of Fruits</span>
+    <ul id="fruits">
+      <li id="watermelon">Wassermelone</li>
+      <li id="apple">æble</li>
+      <li id="peach">pêche</li>
+    </ul>
+  </div>
+
+  <div class='menu'>
+    <span class='heading'>List of Numbers</span>
+    <ul id="numbers">
+      <li>one</li>
+      <li>two</li>
+      <li>three</li>
+    </ul>
+  </div>
+
+  </br>
+  <hr id="thick_blue_line" width="300" size="8" color="blue" >
+  </br>
+
+  <div class='menu'>
+    <span id="secret_message" class='heading' style="display: none;">Let Op!</span>
+    </br>
+    <button id="show_secret">Toggle the Secret</button>
+    <script type="application/javascript">
+(function() {
+  var button = document.getElementById('show_secret'),
+  secret = document.getElementById('secret_message');
+
+  button.addEventListener('click', function() {
+    if (secret.style.display === 'block') {
+      secret.style.display = 'none';
+    } else {
+      secret.style.display = 'block';
+    }
+  });
+}());
+
+    </script>
+  </div>
+
+
+  </br>
+  <hr id="green_stripe" width="300" size="8" color="green" >
+  </br>
+
+  <div class='menu'>
+    <span class='heading'><a id="faq-link">FAQ</a></span>
+    <ul id="faq-list">
+      <li id="calabash">What is a calabash anyway?</li>
+      <li id="break">Isn't it time for a break?</li>
+      <li id="coffee">Can I get you a coffee?</li>
+    </ul>
+  </div>
+
+  </br>
+  <hr id="brown_stripe" width="300" size="8" color="brown" >
+  </br>
+
+  <form id='name' action="#">
+    First name:<br>
+    <input type="text" name="firstname" id='firstname'>
+    <br>
+    Last name:<br>
+    <input type="text" name="lastname" id='lastname'>
+  </form>
+
+  </br>
+  <hr id="sapphire_line" width="300" size="8" color="sapphire" >
+  </br>
+
+  <h1 style='text-align:center'>Here there be iFrames</h1>
+
+  <br>
+  <iframe id="same-domain"
+          frameborder="2"
+          height="500"
+          src="https://calabash-ci.xyz/CalWebViewApp/iframe.html">
+  </iframe>
+  <iframe id="x-domain"
+          frameborder="2"
+          height="500"
+          src="https://cdn.rawgit.com/calabash/ios-webview-test-app/master/CalWebViewApp/CalWebViewApp/x-domain-iframe.html">
+  </iframe>
+  <p>This is the end of the page.</p>
+
+</body>
+</html>

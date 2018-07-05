@@ -1,3 +1,103 @@
+### 0.21.5
+
+This release requires a Calabash iOS Server update.
+
+Adds support for touch-and-hold (first press duration) for iOS 11
+drag and drop.
+
+### 0.21.4
+
+This releae requires a Calabash iOS Server update.
+
+* Gem: pin cucumber to 2.x #1359
+
+### 0.21.2
+
+This release requires a Calabash iOS Server update.
+
+* Updated XCUIElementType documentation #1335
+* Use correct query for navigation bar with title on iOS 11 #1333
+  @MortenGregersen
+
+### 0.21.1
+
+* Coordinates: full-screen pans start and end closer to screen edge #1329
+* Support the new view hierarchy of the navigation bar on iOS 11 #1325 @MortenGregersen
+* Remove usage tracking to comply with EU GDPR 2018 #1320
+
+### 0.20.5
+
+This release adds a public API for manually managing SpringBoard alerts.
+This behavior is only available when running with Xcode 8.x. See this
+pull-request for API examples: [run\_loop#611](https://github.com/calabash/run_loop/pull/611).
+
+This release does not require a server update.
+
+* IRB: rescue LoadError on require 'irb/\*' #1294
+* DeviceAgent: add public API for managing SpringBoard alerts #1292
+* Fix logical inconsistency in warning emitted by
+  Launcher#calabash\_no\_launch? #1275 @duboviy
+* Fix typo in contributing doc #1264 @acroos
+* Update Calabash.podspec #1253 @nadzeya
+
+### 0.20.4
+
+This release, combined with DeviceAgent 1.0.4 and run-loop 2.2.4
+fixes several critical bugs related to:
+
+1. Code signing the DeviceAgent-Runner.app for physical devices
+2. Text entry and keyboard interactions
+3. Dismissing SpringBoard alerts
+
+Definining a `CODE_SIGN_IDENTITY` is no longer necessary, but is
+supported if for some reason you require a specific identity for
+signing.
+
+We have identified a flaw in text entry on i386 simulators and armv7
+devices.  At the moment, we have no fail-proof solution.  We recommend
+that you do not test on i386 simulators or armv7 devices.
+
+* HTTP: dismiss SpringBoard alerts before and after most LPServer calls #1245
+* DeviceAgent:API: #to\_s and #inspect #1215
+* Implement Automator::DeviceAgent#clear\_text #1205
+* Calabash can return the type of the visible keyboard #1207
+
+### 0.20.3
+
+This release, combined with DeviceAgent 1.0.2, and run-loop 2.2.2,
+fixes several critical bugs related to:
+
+1. Code signing the DeviceAgent-Runner.app for physical devices
+2. Text entry and keyboard interactions
+
+0.20.0 shipped with a mistake in the `Calabash::Cucumber::DeviceAgent`
+API.  That module incorrect forwarded missing methods to `Core`.  Some
+users will experience failing tests if they are making calls to `Core`
+methods through the `Core::device_agent` method.  You should only be
+calling `Core#device_agent` if absolutely necessary.  As time goes on,
+we are finding edge cases were the DeviceAgent query engine is extremely
+slow to respond.
+
+* Automator::DeviceAgent: search for any first responder for return key
+  type #1204
+* Automator::DeviceAgent#tap\_keyboard\_action\_key should operate on
+  button only #1202 @ark-konopacki
+* Keyboard: Keyboard: text from first responders should check other views
+  #1199
+* DeviceAgent: automator skips keyboard visible checks #1197
+* Console attach for DeviceAgent + automatic console\_attach #1192
+* Full screen gestures should use screen dimensions #1190
+* Update the Core#scroll methods #1189
+* Capture run\_loop and xcode versions in tracker #1188 @ark-konopacki
+* Replace user\_id with distinct\_id #1187 @ark-konopacki
+* Adds device agent implementation for pinch #1186 @jescriba
+* Added polish "message of day" #1184 @ark-konopacki
+* 2x-bridge: pass string to fail method (as Calabash 0.x does) #1174
+  @JoeSSS
+* Refactor DeviceAgent public API screenshot and fail #1170
+* Gem: force httpclient 2.7.1 or higher #1165
+* Core: add #ios10?
+
 ### 0.20.0
 
 This release provides support for iOS 9 and iOS 10 with Xcode 8.

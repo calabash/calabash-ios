@@ -173,14 +173,52 @@ module Calabash
           screenshot_and_raise "There must be a visible keyboard"
         end
 
-        ['textField', 'textView'].each do |ui_class|
-          query = "#{ui_class} isFirstResponder:1"
-          result = _query_wrapper(query, :text)
-          if !result.empty?
-            return result.first
-          end
+        query = "* isFirstResponder:1"
+        elements = _query_wrapper(query, :text)
+
+        return "" if elements.count == 0
+
+        text = elements[0]
+
+        # first responder did not respond to :text selector
+        return "" if text == "*****"
+
+        return "" if text.nil?
+
+        text
+      end
+
+      # @!visibility private
+      # Returns the keyboard type as a symbol from the specified query
+      #
+      # UIKeyboardTypeDefault => :default
+      # UIKeyboardTypeASCIICapable => :ascii_capable
+      # UIKeyboardTypeNumbersAndPunctuation => :numbers_and_punctuation
+      # UIKeyboardTypeURL => :url
+      # UIKeyboardTypeNumberPad => :number_pad
+      # UIKeyboardTypePhonePad => :phone_pad
+      # UIKeyboardTypeNamePhonePad => :name_phone_pad
+      # UIKeyboardTypeEmailAddress => :email
+      # UIKeyboardTypeDecimalPad => :decimal
+      # UIKeyboardTypeTwitter => :twitter
+      # UIKeyboardTypeWebSearch => :web_search
+      #
+      # @raise [RuntimeError] if there is no visible keyboard
+      def keyboard_type(query = "* isFirstResponder:1")
+        if !keyboard_visible?
+          screenshot_and_raise "There must be a visible keyboard"
         end
-        ""
+
+        query_result = _query_wrapper(query, :keyboardType).first
+        keyboard_type = KEYBOARD_TYPES[query_result]
+
+        if !keyboard_type
+          RunLoop.log_debug("Found query_result:#{query_result}, but expected
+                            to match key in #{KEYBOARD_TYPES}")
+          keyboard_type = :unknown
+        end
+
+        keyboard_type
       end
 
       # @visibility private
@@ -188,6 +226,22 @@ module Calabash
       alias_method :_text_from_first_responder, :text_from_first_responder
 
       private
+
+      # @!visibility private
+      KEYBOARD_TYPES = {
+          0 => :default,
+          1 => :ascii_capable,
+          2 => :numbers_and_punctuation,
+          3 => :url,
+          4 => :number_pad,
+          5 => :phone_pad,
+          6 => :name_phone_pad,
+          7 => :email,
+          8 => :decimal,
+          9 => :twitter,
+          10 => :web_search
+        }
+
 
       # @!visibility private
       KEYBOARD_QUERY = "view:'UIKBKeyplaneView'"

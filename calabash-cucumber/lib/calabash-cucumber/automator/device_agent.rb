@@ -130,12 +130,13 @@ args[0] = #{args[0]}])
           dupped_options = options.dup
 
           if dupped_options[:query].nil?
-            dupped_options[:query] = "*"
+            element = element_for_device_screen
+            from_point = point_from(element, options)
+          else
+            hash = query_for_coordinates(dupped_options)
+            from_point = hash[:coordinates]
+            element = hash[:view]
           end
-
-          hash = query_for_coordinates(dupped_options)
-          from_point = hash[:coordinates]
-          element = hash[:view]
 
           # DeviceAgent does not understand the :force. Does anyone?
           force = dupped_options[:force]
@@ -158,7 +159,38 @@ args[0] = #{args[0]}])
           direction = dupped_options[:direction]
           to_point = Coordinates.end_point_for_swipe(direction, element, force)
           client.pan_between_coordinates(from_point, to_point, gesture_options)
-          [hash[:view]]
+          [element]
+        end
+
+        # @!visibility private
+        def pinch(in_out, options)
+          dupped_options = options.dup
+
+          if dupped_options[:query].nil?
+            element = element_for_device_screen
+            coordinates = point_from(element, options)
+          else
+            hash = query_for_coordinates(dupped_options)
+            element = hash[:view]
+            coordinates = hash[:coordinates]
+          end
+
+          in_out = in_out.to_s
+          duration = dupped_options[:duration]
+          amount = dupped_options[:amount]
+
+          gesture_options = {
+            :pinch_direction => in_out,
+            :amount => amount,
+            :duration => duration
+          }
+
+          client.perform_coordinate_gesture("pinch",
+                                            coordinates[:x],
+                                            coordinates[:y],
+                                            gesture_options)
+
+          [element]
         end
 
         # @!visibility private
@@ -174,11 +206,13 @@ args[0] = #{args[0]}])
           to_point = to_hash[:coordinates]
 
           gesture_options = {
-            :duration => dupped_options[:duration]
+            duration: dupped_options[:duration],
+            num_fingers: dupped_options.fetch(:num_fingers, 1),
+            first_touch_hold_duration:
+              dupped_options.fetch(:first_touch_hold_duration, 0.0)
           }
 
-          client.pan_between_coordinates(from_point, to_point,
-                                         gesture_options)
+          client.pan_between_coordinates(from_point, to_point, gesture_options)
 
           [from_hash[:view], to_hash[:view]]
         end
@@ -187,11 +221,13 @@ args[0] = #{args[0]}])
         def pan_coordinates(from_point, to_point, options)
 
           gesture_options = {
-            :duration => options[:duration]
+            duration: options[:duration],
+            num_fingers: options.fetch(:num_fingers, 1),
+            first_touch_hold_duration:
+              options.fetch(:first_touch_hold_duration, 0.0)
           }
 
-          client.pan_between_coordinates(from_point, to_point,
-                                         gesture_options)
+          client.pan_between_coordinates(from_point, to_point, gesture_options)
           [first_element_for_query("*")]
         end
 
@@ -223,12 +259,12 @@ args[0] = #{args[0]}])
 
         # @!visibility private
         def enter_text_with_keyboard(string, options={})
-          client.enter_text(string)
+          client.enter_text_without_keyboard_check(string)
         end
 
         # @!visibility private
         def enter_char_with_keyboard(char)
-          client.enter_text(char)
+          client.enter_text_without_keyboard_check(char)
         end
 
         # @!visibility private
@@ -242,7 +278,7 @@ args[0] = #{args[0]}])
           if mark
             begin
               # The underlying query for coordinates always expects results.
-              value = client.touch({marked: mark})
+              value = client.touch({type: "Button", marked: mark})
               return value
             rescue RuntimeError => _
               RunLoop.log_debug("Cannot find mark '#{mark}' with query; will send a newline")
@@ -252,7 +288,7 @@ args[0] = #{args[0]}])
           end
 
           code = char_for_keyboard_action("Return")
-          client.enter_text(code)
+          client.enter_text_without_keyboard_check(code)
         end
 
         # @!visibility private
@@ -262,7 +298,7 @@ args[0] = #{args[0]}])
 
         # @!visibility private
         def fast_enter_text(text)
-          client.enter_text(text)
+          client.enter_text_without_keyboard_check(text)
         end
 
         # @!visibility private
@@ -354,6 +390,27 @@ Make sure your query returns at least one view.
         end
 
         # @!visibility private
+        def element_for_device_screen
+          screen_dimensions = device.screen_dimensions
+
+          scale = screen_dimensions[:scale]
+          height = (screen_dimensions[:height]/scale).to_i
+          center_y = (height/2)
+          width = (screen_dimensions[:width]/scale).to_i
+          center_x = (width/2)
+
+          {
+            "screen" => true,
+            "rect" => {
+              "height" => height,
+              "width" => width,
+              "center_x" => center_x,
+              "center_y" => center_y
+            }
+          }
+        end
+
+        # @!visibility private
         #
         # Don't change the double quotes.
         SPECIAL_ACTION_CHARS = {
@@ -400,17 +457,25 @@ Make sure your query returns at least one view.
         # @!visibility private
         def return_key_type_of_first_responder
 
-          ['textField', 'textView'].each do |ui_class|
-            query = "#{ui_class} isFirstResponder:1"
-            raw = Calabash::Cucumber::Map.raw_map(query, :query, :returnKeyType)
-            results = raw["results"]
-            if !results.empty?
-              return results.first
-            end
+          query = "* isFirstResponder:1"
+          raw = Calabash::Cucumber::Map.raw_map(query, :query, :returnKeyType)
+          elements = raw["results"]
+          return nil if elements.count == 0
+
+          return_key_type = elements[0]
+
+          # first responder did not respond to :text selector
+          if return_key_type == "*****"
+            RunLoop.log_debug("First responder does not respond to :returnKeyType")
+            return nil
           end
 
-          RunLoop.log_debug("Cannot find keyboard first responder to ask for its returnKeyType")
-          nil
+          if return_key_type.nil?
+            RunLoop.log_debug("First responder has nil :returnKeyType")
+            return nil
+          end
+
+          return_key_type
         end
 
         # @!visibility private

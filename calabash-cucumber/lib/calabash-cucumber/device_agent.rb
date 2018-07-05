@@ -24,6 +24,28 @@ module Calabash
         @world = world
       end
 
+      # @!visibility private
+      def to_s
+        if client.running?
+          version = client.server_version["bundle_short_version"]
+        else
+          version = "not connected!"
+        end
+        "#<DeviceAgent API: #{version}>"
+      end
+
+      # @!visibility private
+      def inspect
+        to_s
+      end
+
+      # @!visibility private
+      # https://github.com/awesome-print/awesome_print/pull/253
+      # Awesome print patch for BasicObject
+      def ai(_)
+        to_s
+      end
+
       # Query the UI for elements.
       #
       # @example
@@ -108,11 +130,16 @@ module Calabash
       # ]
       # ```
       #
-      # @see http://masilotti.com/xctest-documentation/Constants/XCUIElementType.html
+      # @see https://developer.apple.com/documentation/xctest/xcuielementtype
       # @param [Hash] uiquery A hash describing the query.
       # @return [Array<Hash>] An array of elements matching the `uiquery`.
       def query(uiquery)
         client.query(uiquery)
+      end
+
+      # Perform a clear text on the active view
+      def clear_text
+        client.clear_text
       end
 
       # Query for the center of a view.
@@ -203,6 +230,55 @@ module Calabash
       # @raise [RuntimeError] if no view matches the uiquery after waiting.
       def long_press(uiquery, duration)
         with_screenshot_on_failure { client.long_press(uiquery, {:duration => duration}) }
+      end
+
+      # Wait for text to appear in a view matched by uiquery.
+      #
+      # @param [Hash] text the text to wait for (exact match)
+      # @param [Hash] uiquery query for the view in which the text should appear
+      # @param [Hash] options control the timeout
+      # @option options [Numeric] :timeout How long to wait for the query to
+      #  match a view and the text to appear in that view.
+      #
+      # @raise [Timeout::Error] when no match appears before the timeout
+      # @return The first view that matches uiquery and contains text
+      def wait_for_text_in_view(text, uiquery, options={})
+        value = nil
+        with_screenshot_on_failure do
+          value = client.wait_for_text_in_view(text, uiquery, options)
+        end
+        value
+      end
+
+      # Wait for view to match uiquery.
+      #
+      # @param [Hash] uiquery the query
+      # @param [Hash] options control the timeout
+      # @option options [Numeric] :timeout How long to wait for the query to
+      #  match a view and the text to appear in that view.
+      #
+      # @raise [Timeout::Error] when no match appears before the timeout
+      # @return The first view that matches uiquery
+      def wait_for_view(uiquery, options={})
+        value = nil
+        with_screenshot_on_failure do
+          value = client.wait_for_view(uiquery, options)
+        end
+        value
+      end
+
+      # Wait for no view to match uiquery.
+      #
+      # @param [Hash] uiquery the query
+      # @param [Hash] options control the timeout
+      # @option options [Numeric] :timeout How long to wait for the query to
+      #  match a view and the text to appear in that view.
+      #
+      # @raise [Timeout::Error] when there is a view that matches uiquery
+      def wait_for_no_view(uiquery, options={})
+        with_screenshot_on_failure do
+          client.wait_for_no_view(uiquery, options)
+        end
       end
 
       # Returns true if there is a keyboard visible.
@@ -309,6 +385,74 @@ module Calabash
       # @see #alert
       def springboard_alert
         client.springboard_alert
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Disables Calabash's ability to dismiss SpringBoard alerts automatically.
+      def dismiss_springboard_alerts_automatically!
+        client.set_dismiss_springboard_alerts_automatically(true)
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Enables Calabash's ability to dismiss SpringBoard alerts automatically.
+      def dismiss_springboard_alerts_manually!
+        client.set_dismiss_springboard_alerts_automatically(false)
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Enables or disables Calabash's ability to dismiss SpringBoard alerts
+      # automatically.
+      #
+      # @param true_or_false
+      def set_dismiss_springboard_alerts_automatically(true_or_false)
+        client.set_dismiss_springboard_alerts_automatically(true_or_false)
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Wait for a SpringBoard alert to appear.
+      def wait_for_springboard_alert(timeout=nil)
+        if timeout
+          client.wait_for_springboard_alert(timeout)
+        else
+          client.wait_for_springboard_alert
+        end
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # Wait for a SpringBoard alert to disappear.
+      def wait_for_no_springboard_alert(timeout=nil)
+        if timeout
+          client.wait_for_no_springboard_alert(timeout)
+        else
+          client.wait_for_no_springboard_alert
+        end
+      end
+
+      # EXPERIMENTAL: This API may change.
+      #
+      # @param [String] button_title The title of the button to touch.
+      #
+      # Please pay attention to non-ASCII characters in button titles.
+      #
+      # "Don’t Allow" => UTF-8 single quote in Don't
+      # "Don't Allow" => ASCII single quote in Don't
+      #
+      # Only UTF-8 string will match the button title.
+      #
+      # @return true if a SpringBoard alert is dismissed.
+      #
+      # @raise RuntimeError If there is no SpringBoard alert visible
+      # @raise RuntimeError If the SpringBoard alert does not have a button
+      #   matching button_title.
+      # @raise RuntimeError If there is an error dismissing the SpringBoard
+      #   alert.
+      def dismiss_springboard_alert(button_title)
+         client.dismiss_springboard_alert(button_title)
       end
 
 =begin

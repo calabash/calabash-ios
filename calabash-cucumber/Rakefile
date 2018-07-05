@@ -31,7 +31,6 @@ module Bundler
     # happen during development.
     def libraries_built?
       ['staticlib/calabash.framework.zip',
-       'staticlib/libFrankCalabash.a',
        # Not yet, maybe never.
        # 'dylibs/libCalabashDynFAT.dylib',
        'dylibs/libCalabashDyn.dylib',
@@ -64,7 +63,6 @@ end
 # Builds and installs the Objective-C libraries that this gem requires.
 #
 # * staticlib/calabash.framework.zip
-# * staticlib/libFrankCalabash.a
 # * dylibs/libCalabashDyn.dylib
 # * dylibs/libCalabashDynSim.dylib
 #
@@ -110,13 +108,15 @@ Please run again without bundle exec.\033[0m
 
       calabash_server_dir = find_server_repo_or_raise
 
-      expect_server_is_on_master_branch(calabash_server_dir)
+      expect_server_is_on_tagged_branch(calabash_server_dir)
 
       log_warning_about_skipping_dylibs
 
       gem_lib_dirs = prepare_gem_library_directories
       gem_static_libs_dir = gem_lib_dirs[:static_libs]
       gem_dylibs_dir = gem_lib_dirs[:dylibs]
+
+      server_version = "0.0.0"
 
       Dir.chdir(calabash_server_dir) do
         banner 'Cleaning'
@@ -130,6 +130,10 @@ Please run again without bundle exec.\033[0m
           log_error("There was an error executing 'make framework'")
           exit 1
         end
+
+        args = ["calabash.framework/Resources/version"]
+        hash_out = RunLoop::Shell.run_shell_command(args, {log_cmd:true})
+        server_version = hash_out[:out].strip
 
         source = File.expand_path('./calabash.framework')
         target = File.join(gem_static_libs_dir, 'calabash.framework.zip')
@@ -147,26 +151,6 @@ Please run again without bundle exec.\033[0m
 
         log_info('Installed framework to ./staticlib/calabash.framework.zip')
 
-        unless system('make', 'frank')
-          log_error("There was an error executing 'make frank'")
-          exit 1
-        end
-
-        source = File.expand_path('./libFrankCalabash.a')
-        target = File.join(gem_static_libs_dir, 'libFrankCalabash.a')
-        args = ['ditto', source, target]
-
-        Luffa::Debug.with_debugging do
-          RunLoop::Xcrun.new.exec(args, {log_cmd: true})
-        end
-
-        unless File.exist?(target)
-          log_error('There was a problem installing the libFrankCalabash.a to ./staticlib')
-          exit 1
-        end
-
-        log_info('Installed frank plugin to ./staticlib/libFrankCalabash.a')
-
         unless system('make', 'dylibs')
           log_error("There was an error executing 'make dylibs'")
           exit 1
@@ -174,7 +158,7 @@ Please run again without bundle exec.\033[0m
 
         ['libCalabashDynSim.dylib',
          'libCalabashDyn.dylib',
-         'libCalabashDynFAT.dylib'].each do |dylib|
+         'libCalabashFAT.dylib'].each do |dylib|
 
            source = File.join('calabash-dylibs', dylib)
            target = File.join(gem_dylibs_dir, dylib)
@@ -201,6 +185,8 @@ Please run again without bundle exec.\033[0m
         system('ls', '-hal', 'staticlib')
         system('ls', '-hal', 'dylibs')
       end
+
+      update_pod_spec_version(server_version)
 
       log_info('Done!')
     end
@@ -238,17 +224,17 @@ or set CALABASH_SERVER_PATH to point to your local copy of the server.
       calabash_server_dir
     end
 
-    def expect_server_is_on_master_branch(calabash_server_dir)
+    def expect_server_is_on_tagged_branch(calabash_server_dir)
       branch = `git -C #{calabash_server_dir} rev-parse --abbrev-ref HEAD`.chomp
-      unless branch == 'master'
+      if !branch[/tag/]
         raise %Q{\033[31m
 Expected git branch of of the server repo at:
 
         #{File.expand_path(calabash_server_dir)}
 
-to be 'master' but found '#{branch}'.
+to be a tag/ topic branch, but found '#{branch}'.
 
-The server must be built from the master branch.\033[0m
+The server must be built from a tag/ branch.\033[0m
 
         }
       end
@@ -277,6 +263,18 @@ The server must be built from the master branch.\033[0m
         static_libs: static_libs_dir,
         dylibs: dylibs_dir
       }
+    end
+
+    def update_pod_spec_version(version)
+      path = File.expand_path(File.join("..", "Calabash.podspec"))
+      contents = File.read(path)
+      contents.sub!(/(\d+\.\d+(\.\d+)?)/, version)
+
+      File.open(path, "w:UTF-8") do |file|
+        file.write(contents)
+      end
+
+      log_info("Updated pod spec to #{version}")
     end
   end
 end
