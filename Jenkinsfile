@@ -3,7 +3,7 @@
 pipeline {
   agent { label 'master' }
   environment {
-    DEVELOPER_DIR = '/Xcode/9.2/Xcode.app/Contents/Developer'
+    DEVELOPER_DIR = '/Xcode/9.4.1/Xcode.app/Contents/Developer'
 
     SLACK_COLOR_DANGER  = '#E01563'
     SLACK_COLOR_INFO    = '#6ECADC'
@@ -15,6 +15,7 @@ pipeline {
     disableConcurrentBuilds()
     timestamps()
     buildDiscarder(logRotator(numToKeepStr: '10'))
+    timeout(time: 30, unit: 'MINUTES')
   }
   stages {
     stage('announce') {
