@@ -1,3 +1,8 @@
+### 0.21.6
+
+* Removed Frank related code and tests #1378
+* Updated project for blue ocean CI #1379
+
 ### 0.21.5
 
 This release requires a Calabash iOS Server update.
