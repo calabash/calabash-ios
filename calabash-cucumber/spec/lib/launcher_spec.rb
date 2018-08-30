@@ -17,7 +17,7 @@ describe 'Calabash Launcher' do
   end
 
   before(:example) {
-    RunLoop::SimControl.terminate_all_sims
+    RunLoop::CoreSimulator.quit_simulator
   }
 
   let(:instruments_automator) do
