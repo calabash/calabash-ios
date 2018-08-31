@@ -21,10 +21,6 @@ describe 'calabash ios sim cli' do
     calabash_sim_reset
   end
 
-  it '#calabash_sim_accessibility' do
-    calabash_sim_accessibility
-  end
-
   describe "#calabash_sim_locale" do
     it "prints a helpful message with no args" do
       actual = true

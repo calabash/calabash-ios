@@ -14,10 +14,6 @@ def calabash_sim_reset
   RunLoop::CoreSimulator.erase(device)
 end
 
-def calabash_sim_accessibility
-  RunLoop::SimControl.new.enable_accessibility_on_sims
-end
-
 def calabash_sim_locale(args)
 
   if args.length != 2
