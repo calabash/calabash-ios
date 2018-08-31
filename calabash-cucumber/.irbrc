@@ -2,7 +2,7 @@ require 'irb/completion'
 require 'irb/ext/save-history'
 require 'benchmark'
 require 'calabash-cucumber'
-require "run_loop"
+require 'run_loop'
 require 'command_runner'
 
 AwesomePrint.irb!
@@ -45,7 +45,7 @@ puts ''
 puts '#       =>  Useful Methods  <=          #'
 puts '> xcode       => Xcode instance'
 puts '> instruments => Instruments instance'
-puts '> simcontrol  => SimControl instance'
+puts '> simctl      => Simctl instance'
 puts '> default_sim => Default simulator'
 puts '> verbose     => turn on DEBUG logging'
 puts '> quiet       => turn off DEBUG logging'
@@ -59,14 +59,14 @@ def instruments
   @instruments ||= RunLoop::Instruments.new
 end
 
-def simcontrol
-  @simcontrol ||= RunLoop::SimControl.new
+def simctl
+  @simctl ||= RunLoop::Simctl.new
 end
 
 def default_sim
   @default_sim ||= lambda do
     name = RunLoop::Core.default_simulator(xcode)
-    simcontrol.simulators.find do |sim|
+    simctl.simulators.find do |sim|
       sim.instruments_identifier(xcode) == name
     end
   end.call
