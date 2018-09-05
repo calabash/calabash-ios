@@ -1,15 +1,17 @@
 require "run_loop"
 
 def quit_sim
-  RunLoop::SimControl.new.quit_sim
+  RunLoop::CoreSimulator.quit_simulator
 end
 
 def calabash_sim_reset
-  RunLoop::SimControl.new.reset_sim_content_and_settings
-end
+  xcode = RunLoop::Xcode.new
+  instruments = RunLoop::Instruments.new
+  simctl = RunLoop::Simctl.new
 
-def calabash_sim_accessibility
-  RunLoop::SimControl.new.enable_accessibility_on_sims
+  device = RunLoop::Device.detect_device({}, xcode, simctl, instruments)
+
+  RunLoop::CoreSimulator.erase(device)
 end
 
 def calabash_sim_locale(args)

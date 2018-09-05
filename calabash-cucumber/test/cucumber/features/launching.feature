@@ -1,5 +1,5 @@
 @launching
-Feature:
+Feature: Launching
 In order to test my app shutting down and restarting
 As an iOS Tester
 I want some way to control when my app is restarted

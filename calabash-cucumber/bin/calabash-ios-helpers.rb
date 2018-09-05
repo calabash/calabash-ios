@@ -23,8 +23,6 @@ def print_usage
       change locale and regional settings for an iOS Simulator
     sim reset
       reset content and settings in all iOS Simulators
-    sim acc
-      enable accessibility in all iOS Simulators
     check [{<path to .ipa>|<path to .app>}]
       check whether an app or ipa is linked with calabash.framework (EXPERIMENTAL)
     setup [<path>]
