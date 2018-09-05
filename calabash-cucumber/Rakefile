@@ -31,7 +31,6 @@ module Bundler
     # happen during development.
     def libraries_built?
       ['staticlib/calabash.framework.zip',
-       'staticlib/libFrankCalabash.a',
        # Not yet, maybe never.
        # 'dylibs/libCalabashDynFAT.dylib',
        'dylibs/libCalabashDyn.dylib',
@@ -64,7 +63,6 @@ end
 # Builds and installs the Objective-C libraries that this gem requires.
 #
 # * staticlib/calabash.framework.zip
-# * staticlib/libFrankCalabash.a
 # * dylibs/libCalabashDyn.dylib
 # * dylibs/libCalabashDynSim.dylib
 #
@@ -118,6 +116,8 @@ Please run again without bundle exec.\033[0m
       gem_static_libs_dir = gem_lib_dirs[:static_libs]
       gem_dylibs_dir = gem_lib_dirs[:dylibs]
 
+      server_version = "0.0.0"
+
       Dir.chdir(calabash_server_dir) do
         banner 'Cleaning'
 
@@ -130,6 +130,10 @@ Please run again without bundle exec.\033[0m
           log_error("There was an error executing 'make framework'")
           exit 1
         end
+
+        args = ["calabash.framework/Resources/version"]
+        hash_out = RunLoop::Shell.run_shell_command(args, {log_cmd:true})
+        server_version = hash_out[:out].strip
 
         source = File.expand_path('./calabash.framework')
         target = File.join(gem_static_libs_dir, 'calabash.framework.zip')
@@ -146,26 +150,6 @@ Please run again without bundle exec.\033[0m
         end
 
         log_info('Installed framework to ./staticlib/calabash.framework.zip')
-
-        unless system('make', 'frank')
-          log_error("There was an error executing 'make frank'")
-          exit 1
-        end
-
-        source = File.expand_path('./libFrankCalabash.a')
-        target = File.join(gem_static_libs_dir, 'libFrankCalabash.a')
-        args = ['ditto', source, target]
-
-        Luffa::Debug.with_debugging do
-          RunLoop::Xcrun.new.exec(args, {log_cmd: true})
-        end
-
-        unless File.exist?(target)
-          log_error('There was a problem installing the libFrankCalabash.a to ./staticlib')
-          exit 1
-        end
-
-        log_info('Installed frank plugin to ./staticlib/libFrankCalabash.a')
 
         unless system('make', 'dylibs')
           log_error("There was an error executing 'make dylibs'")
@@ -201,6 +185,8 @@ Please run again without bundle exec.\033[0m
         system('ls', '-hal', 'staticlib')
         system('ls', '-hal', 'dylibs')
       end
+
+      update_pod_spec_version(server_version)
 
       log_info('Done!')
     end
@@ -277,6 +263,18 @@ The server must be built from a tag/ branch.\033[0m
         static_libs: static_libs_dir,
         dylibs: dylibs_dir
       }
+    end
+
+    def update_pod_spec_version(version)
+      path = File.expand_path(File.join("..", "Calabash.podspec"))
+      contents = File.read(path)
+      contents.sub!(/(\d+\.\d+(\.\d+)?)/, version)
+
+      File.open(path, "w:UTF-8") do |file|
+        file.write(contents)
+      end
+
+      log_info("Updated pod spec to #{version}")
     end
   end
 end

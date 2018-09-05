@@ -52,8 +52,6 @@ elsif cmd == 'sim'
 
   if subcmd == 'reset'
     calabash_sim_reset
-  elsif subcmd == 'acc'
-    calabash_sim_accessibility
   elsif subcmd == 'locale'
     calabash_sim_locale(ARGV)
   else

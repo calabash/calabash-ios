@@ -206,11 +206,13 @@ args[0] = #{args[0]}])
           to_point = to_hash[:coordinates]
 
           gesture_options = {
-            :duration => dupped_options[:duration]
+            duration: dupped_options[:duration],
+            num_fingers: dupped_options.fetch(:num_fingers, 1),
+            first_touch_hold_duration:
+              dupped_options.fetch(:first_touch_hold_duration, 0.0)
           }
 
-          client.pan_between_coordinates(from_point, to_point,
-                                         gesture_options)
+          client.pan_between_coordinates(from_point, to_point, gesture_options)
 
           [from_hash[:view], to_hash[:view]]
         end
@@ -219,11 +221,13 @@ args[0] = #{args[0]}])
         def pan_coordinates(from_point, to_point, options)
 
           gesture_options = {
-            :duration => options[:duration]
+            duration: options[:duration],
+            num_fingers: options.fetch(:num_fingers, 1),
+            first_touch_hold_duration:
+              options.fetch(:first_touch_hold_duration, 0.0)
           }
 
-          client.pan_between_coordinates(from_point, to_point,
-                                         gesture_options)
+          client.pan_between_coordinates(from_point, to_point, gesture_options)
           [first_element_for_query("*")]
         end
 

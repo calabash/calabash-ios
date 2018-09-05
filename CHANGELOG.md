@@ -1,3 +1,29 @@
+### 0.21.6
+
+* Removed Frank related code and tests #1378
+* Updated project for blue ocean CI #1379
+
+### 0.21.5
+
+This release requires a Calabash iOS Server update.
+
+Adds support for touch-and-hold (first press duration) for iOS 11
+drag and drop.
+
+### 0.21.4
+
+This releae requires a Calabash iOS Server update.
+
+* Gem: pin cucumber to 2.x #1359
+
+### 0.21.2
+
+This release requires a Calabash iOS Server update.
+
+* Updated XCUIElementType documentation #1335
+* Use correct query for navigation bar with title on iOS 11 #1333
+  @MortenGregersen
+
 ### 0.21.1
 
 * Coordinates: full-screen pans start and end closer to screen edge #1329
