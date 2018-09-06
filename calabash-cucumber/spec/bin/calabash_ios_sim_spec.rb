@@ -3,18 +3,22 @@ describe 'calabash ios sim cli' do
   require File.expand_path(File.join(__FILE__, '..', '..', '..', 'bin', 'calabash-ios-sim'))
 
   it '#quit_sim' do
-    sim_control = RunLoop::SimControl.new
-    sim_control.launch_sim
+    xcode = RunLoop::Xcode.new
+    instruments = RunLoop::Instruments.new
+    simctl = RunLoop::Simctl.new
+  
+    device = RunLoop::Device.detect_device({}, xcode, simctl, instruments)
+    app = RunLoop::App.new(Resources.shared.app_bundle_path(:cal_smoke_app))
+
+    core_sim = RunLoop::CoreSimulator.new(device, app)
+    core_sim.launch_simulator
     quit_sim
-    expect(sim_control.sim_is_running?).to be == false
+
+    expect(core_sim.simulator_requires_relaunch?).to be_truthy
   end
 
   it '#calabash_sim_reset' do
     calabash_sim_reset
-  end
-
-  it '#calabash_sim_accessibility' do
-    calabash_sim_accessibility
   end
 
   describe "#calabash_sim_locale" do
