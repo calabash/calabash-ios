@@ -50,7 +50,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.0'
 
-  s.add_dependency("cucumber", "~> 2.0")
+  s.add_dependency('cucumber')
   # Avoid 1.0.5 release; has an errant 'binding.pry'.
   s.add_dependency('edn', '>= 1.0.6', '< 2.0')
   s.add_dependency('slowhandcuke', '~> 0.0.3')
