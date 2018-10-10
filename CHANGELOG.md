@@ -1,3 +1,26 @@
+### 0.21.7
+
+This release allows Calabash iOS to used with json 2.0
+and cucumber 3.0.  This will also allow users to update
+their ruby to 2.5.x.
+
+Test Cloud users will need to pin their ruby version to
+2.3.x and the json and cucumber versions.  To your Gemfile
+add the following:
+
+```
+gem "json", "1.8.6"
+gem "cucumber", "2.99.0"
+```
+
+Test submitted to Test Cloud with json > 1.8.6 and cucumber 3.x
+will fail validation.
+
+* Allow to use newest run_loop versions #1398
+* Do not bind Calabash to any versions of Cucumber #1396
+
+Thanks @JoeSSS.
+
 ### 0.21.6
 
 * Removed Frank related code and tests #1378

@@ -18,24 +18,12 @@ While Calabash is completely free, Xamarin provides a number of commercial servi
 
 Xamarin Studio users should visit [http://developer.xamarin.com/testcloud/](http://developer.xamarin.com/testcloud/) for setup instructions and requirements.
 
-We recommend that you use the most recent released version of Xcode, MacOS, and Ruby.
-
-* MacOS 10.10 or 10.11
-* Xcode 6 or 7
-* iOS Devices >= 7.1
-* iOS Simulators >= 8.0
-* ruby >= 2.0 (latest is preferred)
+* macOS High Sierra and Mojave
+* Xcode 9.4.1 or Xcode 10.0
+* ruby at least ruby 2.3.x
 
 For the best Ruby experience we recommend that you use a managed Ruby
 like [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/)).
-
-If you are just getting started or don't want to commit to a managed Ruby, we
-recommend you install and use the [Calabash Sandbox](https://github.com/calabash/install).
-
-```
-# Installs the Calabash Sandbox
-$ curl -sSL https://raw.githubusercontent.com/calabash/install/master/install-osx.sh | bash
-```
 
 Please do *not* install gems with `sudo`
 
