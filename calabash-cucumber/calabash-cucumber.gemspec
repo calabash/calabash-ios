@@ -59,7 +59,7 @@ Gem::Specification.new do |s|
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
   s.add_dependency("clipboard", "~> 1.0")
-  s.add_dependency("run_loop", ">= 3.0", "< 4.0")
+  s.add_dependency("run_loop", ">= 4.0", "< 5.0")
 
   # Shared with run-loop.
   s.add_dependency('json')
