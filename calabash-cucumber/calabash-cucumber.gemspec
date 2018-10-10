@@ -50,7 +50,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.0'
 
-  s.add_dependency("cucumber", "~> 2.0")
+  s.add_dependency('cucumber')
   # Avoid 1.0.5 release; has an errant 'binding.pry'.
   s.add_dependency('edn', '>= 1.0.6', '< 2.0')
   s.add_dependency('slowhandcuke', '~> 0.0.3')
@@ -59,7 +59,7 @@ Gem::Specification.new do |s|
   # Match the xamarin-test-cloud dependency.
   s.add_dependency('bundler', '~> 1.3')
   s.add_dependency("clipboard", "~> 1.0")
-  s.add_dependency("run_loop", ">= 3.0", "< 4.0")
+  s.add_dependency("run_loop", ">= 4.0", "< 5.0")
 
   # Shared with run-loop.
   s.add_dependency('json')
