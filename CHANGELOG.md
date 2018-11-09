@@ -1,3 +1,7 @@
+### 0.21.8
+
+* gem: calabash-ios binary does not need CFPropertyList #1400
+
 ### 0.21.7
 
 This release allows Calabash iOS to used with json 2.0

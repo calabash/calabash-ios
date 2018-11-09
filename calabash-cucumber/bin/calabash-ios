@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
-require 'cfpropertylist'
 require 'rexml/document'
-
 
 require File.join(File.dirname(__FILE__),"calabash-ios-helpers")
 require File.join(File.dirname(__FILE__),"calabash-ios-generate")
