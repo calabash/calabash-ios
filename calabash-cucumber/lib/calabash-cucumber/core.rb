@@ -1811,6 +1811,17 @@ arguments => '#{arguments}'
         launcher.attach({:uia_strategy => uia_strategy})
       end
 
+      # Checks if attached device is simulator
+      #
+      # @return [Bool] if device is a simulator
+      def simulator?
+        xcode = Calabash::Cucumber::Environment.xcode
+        simctl = Calabash::Cucumber::Environment.simctl
+        instruments = Calabash::Cucumber::Environment.instruments
+        device = RunLoop::Device.detect_device(options, xcode, simctl, instruments)
+        device.simulator?
+      end
+
       # Returns an object that provides an interface to the DeviceAgent
       # public query and gesture API.
       #
@@ -1846,6 +1857,14 @@ this method.
         end
 
         if !launcher.automator
+          # If device is a simulator the test run will most likely stuck for hours because simulator is stuck on booting
+          # quitting the simulator will make the next test stable
+          if simulator?
+            require "run_loop"
+            calabash_warn('Simulator seems to be stuck. Quitting the somulator app..')
+            RunLoop::CoreSimulator.quit_simulator
+          end
+
           raise RuntimeError, %Q[
 The launcher is not attached to an automator.
 
@@ -1981,4 +2000,3 @@ end
     end
   end
 end
-
