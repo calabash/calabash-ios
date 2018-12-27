@@ -1861,7 +1861,7 @@ this method.
           # quitting the simulator will make the next test stable
           if simulator?
             require "run_loop"
-            calabash_warn('Simulator seems to be stuck. Quitting the somulator app..')
+            calabash_warn('Simulator seems to be stuck. Quitting the simulator app..')
             RunLoop::CoreSimulator.quit_simulator
           end
 
