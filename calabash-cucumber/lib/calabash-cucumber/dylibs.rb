@@ -6,7 +6,7 @@ module Calabash
 
       # @!visibility private
       def self.sim_dylib_basename
-        "libCalabashDynSim.dylib"
+        "libCalabashSim.dylib"
       end
 
       # @!visibility private
@@ -16,7 +16,7 @@ module Calabash
 
       # @!visibility private
       def self.device_dylib_basename
-        "libCalabashDyn.dylib"
+        "libCalabashARM.dylib"
       end
 
       # @!visibility private
