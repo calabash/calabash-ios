@@ -6,8 +6,8 @@ describe Calabash::Cucumber::Dylibs do
     FileUtils.rm_rf(path)
     FileUtils.mkdir_p(path)
 
-    FileUtils.touch(File.join(path, "libCalabashDynSim.dylib"))
-    FileUtils.touch(File.join(path, "libCalabashDyn.dylib"))
+    FileUtils.touch(File.join(path, "libCalabashSim.dylib"))
+    FileUtils.touch(File.join(path, "libCalabashARM.dylib"))
 
     expect(Calabash::Cucumber::Dylibs).to receive(:dylib_dir).and_return(path)
   end

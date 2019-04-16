@@ -31,10 +31,8 @@ module Bundler
     # happen during development.
     def libraries_built?
       ['staticlib/calabash.framework.zip',
-       # Not yet, maybe never.
-       # 'dylibs/libCalabashDynFAT.dylib',
-       'dylibs/libCalabashDyn.dylib',
-       'dylibs/libCalabashDynSim.dylib'
+       'dylibs/libCalabashARM.dylib',
+       'dylibs/libCalabashSim.dylib'
       ].all? do |lib|
         File.size?(lib)
       end
@@ -63,8 +61,8 @@ end
 # Builds and installs the Objective-C libraries that this gem requires.
 #
 # * staticlib/calabash.framework.zip
-# * dylibs/libCalabashDyn.dylib
-# * dylibs/libCalabashDynSim.dylib
+# * dylibs/libCalabashARM.dylib
+# * dylibs/libCalabashSim.dylib
 #
 # Expects that the calabash-ios-server source code is located in:
 #  `../../calabash-ios-server.` If your server source code is in a different
@@ -156,9 +154,10 @@ Please run again without bundle exec.\033[0m
           exit 1
         end
 
-        ['libCalabashDynSim.dylib',
-         'libCalabashDyn.dylib',
-         'libCalabashFAT.dylib'].each do |dylib|
+        ['libCalabashSim.dylib',
+         'libCalabashARM.dylib',
+         'libCalabashFAT.dylib',
+         'Headers.zip'].each do |dylib|
 
            source = File.join('calabash-dylibs', dylib)
            target = File.join(gem_dylibs_dir, dylib)
