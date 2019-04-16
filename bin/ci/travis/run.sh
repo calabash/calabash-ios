@@ -31,8 +31,8 @@ banner "Install Stubs for LPServer libs"
 mkdir -p calabash-cucumber/staticlib
 touch calabash-cucumber/staticlib/calabash.framework.zip
 mkdir -p calabash-cucumber/dylibs
-touch calabash-cucumber/dylibs/libCalabashDyn.dylib
-touch calabash-cucumber/dylibs/libCalabashDynSim.dylib
+touch calabash-cucumber/dylibs/libCalabashARM.dylib
+touch calabash-cucumber/dylibs/libCalabashSim.dylib
 
 banner "Install Gem"
 

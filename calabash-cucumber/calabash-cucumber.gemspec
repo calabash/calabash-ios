@@ -15,7 +15,7 @@ bin_help = %w(doc/calabash-ios-help.txt)
 staticlib = %w(staticlib/calabash.framework.zip)
 
 # calabash dylibs
-dylibs = %w(dylibs/libCalabashDyn.dylib dylibs/libCalabashDynSim.dylib)
+dylibs = %w(dylibs/libCalabashARM.dylib dylibs/libCalabashSim.dylib)
 
 # files in script
 scripts = %w(scripts/.irbrc)

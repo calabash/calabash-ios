@@ -33,7 +33,7 @@ class Resources
   end
 
   def simulator_dylib
-    @sim_dylib_path ||= File.join(resources_dir, "libCalabashDynSim.dylib")
+    @sim_dylib_path ||= File.join(resources_dir, "libCalabashSim.dylib")
   end
 
   def app_bundle_path(bundle_name)

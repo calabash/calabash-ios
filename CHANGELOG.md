@@ -1,4 +1,4 @@
-### 0.21.9
+### 0.21.10
 
 Remove bundler as a dependency.
 
@@ -6,6 +6,10 @@ The embedded LPServer was build with Xcode 10.2 on macOS Mojave.
 
 The server version is 0.21.8 (not a typo), it is just trailing behind
 the gem version.
+
+### 0.21.9
+
+Never released.
 
 ### 0.21.8
 
