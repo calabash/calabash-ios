@@ -3,6 +3,7 @@ module Calabash
 
     # @!visibility private
     class Map
+      VALID_PREDICATES = ['BEGINSWITH', 'CONTAINS', 'ENDSWITH', 'LIKE', 'MATCHES', '<', '>']
 
       require "json"
       require "calabash-cucumber/http_helpers"
@@ -77,28 +78,29 @@ module Calabash
       #
       # @see map for examples.
       def self.raw_map(query, method_name, *method_args)
-        operation_map = {
-            :method_name => method_name,
-            :arguments => method_args
-        }
+        if correct_predicate?(query) || correct_format?(query)
+          operation_map = {
+              :method_name => method_name,
+              :arguments => method_args
+          }
 
-        route = {:method => :post, :path => "map"}
-        parameters = {:query => query,
-                      :operation => operation_map}
-        body = self.map_factory.http(route, parameters)
+          route = {:method => :post, :path => "map"}
+          parameters = {:query => query,
+                        :operation => operation_map}
+          body = self.map_factory.http(route, parameters)
 
-        hash = JSON.parse(body)
-        if hash["outcome"] != "SUCCESS"
-          message = %Q[
-map #{query}, #{method_name} failed for:
+          hash = JSON.parse(body)
+          if hash["outcome"] != "SUCCESS"
+            message = %Q[
+              map #{query}, #{method_name} failed for:
+              reason: #{hash["reason"]}
+              details: #{hash["details"]}
+            ]
+            self.map_factory.screenshot_and_raise(message)
+          end
 
- reason: #{hash["reason"]}
-details: #{hash["details"]}
-]
-          self.map_factory.screenshot_and_raise(message)
+          hash
         end
-
-        hash
       end
 
       # Asserts the result of a calabash `map` call and raises an error with
@@ -143,6 +145,49 @@ details: #{hash["details"]}
         end
       end
 
+      # Return predicate section of query
+      def self.query_predicate(query)
+        query.match(/{.*}/)
+      end
+
+      # Evaluating whether a query contain correct predicate selector
+      # and if predicate string contain two ' char
+      # returns true or raise an exceptions
+      def self.correct_predicate?(query)
+        match = query_predicate(query)
+        if !match.nil?
+          correct = false
+          predicates = VALID_PREDICATES
+          predicates.each do |value|
+            if match.to_s.include?(value)
+              correct = true
+            end
+          end
+          if !match.to_s.match(/{.*'.*'.*}/).nil? && correct
+            true
+          else
+            raise("Incorrect predicate used, valid operation are: #{predicates}")
+          end
+        end
+      end
+
+      # Evaluating whether a query contain two ' characters
+      # returns true if query include : character and two ' characters
+      # like query("label marked:'label'")
+      # returns true or raise an exceptions
+      # TODO: We can add additional verification in future
+      def self.correct_format?(query)
+        if !query.match(/:'/).nil? && query_predicate(query).nil?
+          if !query.match(/:'.*'/).nil?
+            true
+          else
+            raise('Incorrect query format please check query string')
+          end
+        elsif !query_predicate(query).nil?
+        else
+          true
+        end
+      end
       private
 
       def self.map_factory
