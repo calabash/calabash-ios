@@ -1,7 +1,7 @@
 describe Calabash::Cucumber::DotDir do
 
   let(:home_dir) { "./tmp/dot-calabash-examples" }
-  let(:dot_dir) { File.join(home_dir, ".calabash") }
+  let(:dot_dir) { File.join(home_dir, ".test-cloud-dev") }
 
   before do
     allow(RunLoop::Environment).to receive(:user_home_directory).and_return home_dir

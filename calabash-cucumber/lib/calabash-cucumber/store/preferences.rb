@@ -7,7 +7,7 @@ module Calabash
 
     # Users preferences persisted across runs:
     #
-    # ~/.calabash/preferences/preferences.json
+    # ~/.test-cloud-dev/preferences/preferences.json
     class Preferences
       require "calabash-cucumber/dot_dir"
 

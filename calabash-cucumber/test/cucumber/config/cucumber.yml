@@ -5,7 +5,7 @@ require "run_loop"
 SIM_APP = File.join("aut", "sim", "TestApp.app")
 DEVICE_APP = File.join("aut", "device", "TestApp.app")
 
-calabash_dir = File.expand_path(File.join(ENV["HOME"], ".calabash"))
+calabash_dir = File.expand_path(File.join(ENV["HOME"], ".test-cloud-dev"))
 
 devices = {}
 
