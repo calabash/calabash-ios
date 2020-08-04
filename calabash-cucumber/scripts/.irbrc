@@ -34,9 +34,9 @@ IRB.conf[:HISTORY_FILE] = ".irb-history"
 
 begin
   require "pry"
-  Pry.config.history.should_save = true
-  Pry.config.history.should_load = true
-  Pry.config.history.file = ".pry-history"
+  Pry.config.history_save = true
+  Pry.config.history_load = true
+  Pry.config.history_file = ".pry-history"
   require "pry-nav"
 rescue LoadError => _
 
