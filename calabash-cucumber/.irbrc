@@ -29,8 +29,8 @@ IRB.conf[:PROMPT_MODE] = :CALABASH_IOS
 
 begin
   require 'pry'
-  Pry.config.history_save = true
-  Pry.config.history_load = true
+  Pry.config.history_save = false
+  Pry.config.history_load = false
   require 'pry-nav'
 rescue LoadError => _
 
