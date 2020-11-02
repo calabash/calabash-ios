@@ -1,5 +1,11 @@
-### 0.22.0
+### 0.22.2
 The embedded LPServer was build with Xcode 12.2
+
+### 0.22.1
+reverted
+
+### 0.22.0
+reverted
 
 ### 0.21.10
 
