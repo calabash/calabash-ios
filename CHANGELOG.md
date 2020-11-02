@@ -1,5 +1,8 @@
 ### 0.22.2
-The embedded LPServer was build with Xcode 12.2
+Fix irb/pry settings #1426
+
+#### Calabash Server
+Fix waiting for none animation for Xcode 12 https://github.com/calabash/calabash-ios-server/pull/461
 
 ### 0.22.1
 reverted
