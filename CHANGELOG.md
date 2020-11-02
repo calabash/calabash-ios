@@ -1,3 +1,6 @@
+### 0.22.0
+The embedded LPServer was build with Xcode 12.2
+
 ### 0.21.10
 
 Remove bundler as a dependency.

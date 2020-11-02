@@ -92,15 +92,6 @@ module Calabash
   module Rake
 
     def build_server
-      if Module.method_defined?('gem')
-        raise %Q{\033[31m
-Bundle exec detected!
-
-This command cannot be run in the context of bundle exec.
-
-Please run again without bundle exec.\033[0m
-}
-      end
 
       banner 'Preparing'
 

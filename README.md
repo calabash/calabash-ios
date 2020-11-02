@@ -13,7 +13,7 @@ Calabash is a free-to-use open source project that is looking for a maintainer.
 ## Requirements
 
 * macOS Mojave or Catalina
-* Xcode 10.3 or Xcode 11.x
+* Xcode 10.3+
 * ruby at least ruby 2.3.x
 
 For the best Ruby experience we recommend that you use a managed Ruby
