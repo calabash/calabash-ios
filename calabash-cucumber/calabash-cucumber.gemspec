@@ -64,13 +64,13 @@ Gem::Specification.new do |s|
   s.add_dependency('awesome_print')
 
   s.add_development_dependency 'yard', '~> 0.8'
-  s.add_development_dependency 'redcarpet', '3.2.0'
+  s.add_development_dependency 'redcarpet', '3.5.1'
 
   # Shared with run-loop.
   s.add_development_dependency("rspec_junit_formatter")
   s.add_development_dependency 'luffa', '>= 1.1.0' # Remove ASAP.
   # Rake 11.0 is not compatible with rspec 3.4.* or 3.5.0.beta1
-  s.add_development_dependency 'rake', "10.5.0"
+  s.add_development_dependency 'rake', "12.3.3"
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
