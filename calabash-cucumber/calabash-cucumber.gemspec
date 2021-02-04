@@ -70,7 +70,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("rspec_junit_formatter")
   s.add_development_dependency 'luffa', '>= 1.1.0' # Remove ASAP.
   # Rake 11.0 is not compatible with rspec 3.4.* or 3.5.0.beta1
-  s.add_development_dependency 'rake', "12.3.3"
+  s.add_development_dependency 'rake', "13.0.3"
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
