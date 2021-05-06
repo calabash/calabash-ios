@@ -52,7 +52,11 @@ module Calabash
         path = screenshot(options)
         filename = options[:label] || File.basename(path)
         if self.respond_to?(:embed)
-          embed(path, 'image/png', filename)
+          begin
+            embed(path, 'image/png', filename)
+          rescue NoMethodError
+            attach(path, 'image/png')
+          end
         else
           RunLoop.log_info2("Embed is not available in this context. Will not embed.")
         end
