@@ -6,20 +6,14 @@
 
 >After delivering support for the final releases of iOS 11 and Android 8 operating systems, Microsoft will discontinue our contributions to developing Calabash, the open-source mobile app testing tool. We hope that the community will continue to fully adopt and maintain it. As part of our transition on the development of Calabash, we've provided an overview of mobile app UI and end-to-end testing frameworks as a starting point for teams who are looking to re-evaluate their testing strategy. Please see our [Mobile App Testing Frameworks Overview](https://docs.microsoft.com/en-us/appcenter/migration/test-cloud/frameworks) document.
 
-[http://calaba.sh/](http://calaba.sh/)
-
 Calabash is an automated testing technology for Android and iOS native and hybrid applications.
 
-Calabash is a free-to-use open source project that is developed and maintained by [Xamarin](http://xamarin.com).
-
-While Calabash is completely free, Xamarin provides a number of commercial services centered around Calabash and quality assurance for mobile, namely Xamarin Test Cloud consisting of hosted test-execution environments which let you execute Calabash tests on a large number of Android and iOS devices.  For more information about the Xamarin Test Cloud visit [http://xamarin.com/test-cloud](http://xamarin.com/test-cloud).
+Calabash is a free-to-use open source project that is looking for a maintainer.
 
 ## Requirements
 
-Xamarin Studio users should visit [http://developer.xamarin.com/testcloud/](http://developer.xamarin.com/testcloud/) for setup instructions and requirements.
-
-* macOS High Sierra and Mojave
-* Xcode 9.4.1 or Xcode 10.0
+* macOS Mojave or Catalina
+* Xcode 10.3+
 * ruby at least ruby 2.3.x
 
 For the best Ruby experience we recommend that you use a managed Ruby
