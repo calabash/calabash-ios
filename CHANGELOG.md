@@ -1,3 +1,7 @@
+### 0.23.0
+
+* Support for Cucumber 6
+
 ### 0.21.10
 
 Remove bundler as a dependency.
