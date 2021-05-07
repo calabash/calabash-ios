@@ -433,7 +433,12 @@ module Calabash
           FileUtils.rm_f(path)
           return res
         else
-          embed(path, 'image/png', msg)
+          begin
+            embed(path, 'image/png', msg)
+          rescue NoMethodError
+            attach(path, 'image/png')
+          end
+
           raise wait_error(msg)
         end
       end
