@@ -1,3 +1,7 @@
+### 0.23.0
+
+* Support for Cucumber 6
+
 ### 0.22.2
 Fix irb/pry settings #1426
 
