@@ -15,3 +15,7 @@ When device_agent.two_finger_tap fails, it generates a screenshot
 When device_agent.long_press fails, it generates a screenshot
 When device_agent.enter_text fails, it generates a screenshot
 When device_agent.enter_text_in fails, it generates a screenshot
+
+Scenario: Check that Today/Notification and Control Panel elements are visible for DeviceAgent
+Then I can open Notifications tab in Today and Notifications page
+And I can see Control Panel page elements

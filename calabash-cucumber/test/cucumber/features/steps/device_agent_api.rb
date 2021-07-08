@@ -83,3 +83,102 @@ end
 When(/^device_agent\.enter_text_in fails, it generates a screenshot$/) do
   expect_device_agent_to_screenshot(:enter_text_in)
 end
+
+Then(/^I can open Notifications tab in Today and Notifications page$/) do
+  # Timeout for views in Control/Notification Panels to appear
+  timeout = 5
+
+  if ipad?
+    puts "Test is not stable on iPad; skipping"
+  else
+    element = wait_for_view("*")
+    x = element["rect"]["center_x"]
+    final_y = element["rect"]["center_y"] + (element["rect"]["height"]/2)
+    pan_coordinates({:x => x, :y => 0},
+                    {:x => x, :y => final_y},
+                    {duration: 0.5})
+
+    # Waiting for animations is not good enough - the animation is outside of
+    # the AUT's view hierarchy
+    wait_for_external_animations
+
+    # Screenshots will not show the Control Panel page.
+    if ios9?
+      if uia_available?
+        if uia_call_windows([:button, {marked: 'Notifications'}], :isVisible) != 1
+          fail("Expected to see 'Notifications' element.")
+        end
+
+        uia_tap :button, marked: 'Notifications'
+        wait_for_external_animations
+
+        if uia_call_windows([:element, {marked: 'No Notifications'}], :isVisible) != 1
+          fail("Expected to see 'No Notifications' element")
+        end
+      else
+        message = "Timed out waiting for 'Notifications' view after #{timeout} seconds"
+        bridge_wait_for(message, {timeout: timeout}) do
+          !device_agent.query({marked: 'Notifications'}).empty?
+        end
+
+        device_agent.touch({:marked => 'Notifications'})
+
+        message = "Timed out waiting for 'No Notifications' view after #{timeout} seconds"
+        bridge_wait_for(message, {timeout: timeout}) do
+          !device_agent.query({marked: 'No Notifications'}).empty?
+        end
+      end
+    elsif ios10?
+      message = "Timed out waiting for 'No Notifications' view after #{timeout} seconds"
+      bridge_wait_for(message, {timeout: timeout}) do
+        !device_agent.query({marked: 'No Notifications'}).empty?
+      end
+    end
+  end
+end
+
+Then(/^I can see Control Panel page elements$/) do
+
+  # Timeout for views in Control/Notification Panels to appear
+  timeout = 5
+  message = "Timed out waiting for 'Wi-Fi' view after #{timeout} seconds"
+
+  if ipad?
+    puts "Test is not stable on iPad; skipping"
+  else
+    element = wait_for_view("*")
+    x = element["rect"]["center_x"]
+    start_y = element["rect"]["height"] - 10
+    final_y = element["rect"]["center_y"] + (element["rect"]["height"]/4)
+    pan_coordinates({:x => x, :y => start_y},
+                    {:x => x, :y => final_y},
+                    {duration: 0.5})
+
+    # Waiting for animations is not good enough - the animation is outside of
+    # the AUT's view hierarchy
+    wait_for_external_animations
+
+    # Screenshots will not show the Control Panel page.
+    if ios9?
+      if uia_available?
+        if uia_call_windows([:element, {marked: 'Wi-Fi'}], :isVisible) != 1
+          fail("Expected to see 'Wi-Fi' element.")
+        end
+      else
+        bridge_wait_for(message, {timeout: timeout}) do
+          !device_agent.query({marked: 'Wi-Fi'}).empty?
+        end
+      end
+    elsif ios10?
+      # We have to tap on Continue button from Welcome view after sim reset.
+      if !device_agent.query({marked: 'Continue'}).empty?
+        device.agent.touch({marked: 'Continue'})
+        wait_for_external_animations
+      end
+
+      bridge_wait_for(message, {timeout: timeout}) do
+        !device_agent.query({marked: 'Wi-Fi'}).empty?
+      end
+    end
+  end
+end
