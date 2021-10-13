@@ -1,3 +1,7 @@
+### 0.23.1
+
+* Added server version 0.23.0
+
 ### 0.23.0
 
 * Support for Cucumber 6
