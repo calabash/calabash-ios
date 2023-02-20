@@ -52,25 +52,24 @@ Gem::Specification.new do |s|
 
   s.add_dependency('cucumber')
   # Avoid 1.0.5 release; has an errant 'binding.pry'.
-  s.add_dependency('edn', '>= 1.0.6', '< 2.0')
-  s.add_dependency('slowhandcuke', '~> 0.0.3')
-  s.add_dependency('geocoder', '>= 1.1.8', '< 2.0')
-  s.add_dependency('httpclient', '>= 2.7.1', '< 3.0')
-  s.add_dependency("clipboard", "~> 1.0")
+  s.add_dependency('edn')
+  s.add_dependency('slowhandcuke')
+  s.add_dependency('geocoder')
+  s.add_dependency('httpclient')
+  s.add_dependency("clipboard")
   s.add_dependency("run_loop", ">= 4.2", "< 5.0")
 
   # Shared with run-loop.
   s.add_dependency('json')
   s.add_dependency('awesome_print')
 
-  s.add_development_dependency 'yard', '~> 0.8'
-  s.add_development_dependency 'redcarpet', '3.5.1'
+  s.add_development_dependency 'yard'
+  s.add_development_dependency 'redcarpet'
 
   # Shared with run-loop.
   s.add_development_dependency("rspec_junit_formatter")
-  s.add_development_dependency 'luffa', '>= 1.1.0' # Remove ASAP.
-  # Rake 11.0 is not compatible with rspec 3.4.* or 3.5.0.beta1
-  s.add_development_dependency 'rake', "13.0.3"
+  s.add_development_dependency 'luffa' # Remove ASAP.
+  s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
@@ -78,9 +77,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'guard-rspec'
   s.add_development_dependency 'guard-bundler'
   # Pin to 3.0.6; >= 3.1.0 requires ruby 2.2. This is guard dependency.
-  s.add_development_dependency("listen", "3.0.6")
+  s.add_development_dependency("listen")
   s.add_development_dependency 'growl'
   s.add_development_dependency 'stub_env'
   # Sometimes JSON.parse is failing to parse JSON dumped to a file.
-  s.add_development_dependency("oj", "~> 2.0")
+  s.add_development_dependency("oj")
 end
