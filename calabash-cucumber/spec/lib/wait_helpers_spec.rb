@@ -61,11 +61,32 @@ describe Calabash::Cucumber::WaitHelpers do
   end
 
   describe '.wait_for_condition' do
-    it 'rescues StandardError' do
-      expect(world).to receive(:http).and_raise(StandardError, 'I got raised!')
-      expect {
-        world.wait_for_condition({screenshot_on_error: false})
-      }.to raise_error(StandardError, 'I got raised!')
+    subject { world.wait_for_condition({ screenshot_on_error: false, timeout: }) }
+
+    context 'when no timeout parameter is provided' do
+      let(:timeout) { nil }
+
+      before do
+        expect(Timeout).to receive(:timeout).with(35, described_class::WaitError).and_call_original
+      end
+
+      it 'rescues StandardError' do
+        expect(world).to receive(:http).and_raise(StandardError, 'I got raised!')
+        expect { subject }.to raise_error(StandardError, 'I got raised!')
+      end
+    end
+
+    context 'when a timeout parameter is provided' do
+      let(:timeout) { 10 }
+
+      before do
+        expect(Timeout).to receive(:timeout).with(15, described_class::WaitError).and_call_original
+      end
+
+      it 'rescues StandardError' do
+        expect(world).to receive(:http).and_raise(StandardError, 'I got raised!')
+        expect { subject }.to raise_error(StandardError, 'I got raised!')
+      end
     end
   end
 

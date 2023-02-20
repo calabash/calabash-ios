@@ -132,7 +132,7 @@ module Calabash
         end
 
         begin
-          Timeout::timeout(timeout, WaitError) do
+          Timeout.timeout(timeout, WaitError) do
             sleep(retry_frequency) until yield
           end
           sleep(post_timeout) if post_timeout > 0
@@ -274,10 +274,9 @@ module Calabash
 
       # @!visibility private
       def wait_for_condition(options = {})
-        timeout = options[:timeout]
-        unless timeout && timeout > 0
-          timeout = 30
-        end
+        timeout = options[:timeout] || ENV['WAIT_TIMEOUT']
+        timeout = DEFAULT_OPTS[:timeout] unless timeout && timeout > 0
+
         options[:query] = options[:query] || '*'
         if options.has_key?(:condition)
           opt_condition = options[:condition]
@@ -299,7 +298,7 @@ module Calabash
         end
 
         begin
-          Timeout::timeout(timeout+CLIENT_TIMEOUT_ADDITION, WaitError) do
+          Timeout.timeout(timeout + CLIENT_TIMEOUT_ADDITION, WaitError) do
             res = http({:method => :post, :path => 'condition'},
                        options)
             res = JSON.parse(res)
