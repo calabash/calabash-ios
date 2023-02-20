@@ -1,3 +1,7 @@
+### 0.23.5
+
+* Start to use `WAIT_TIMEOUT` environment to decide how long to wait for `Calabash::Cucumber::WaitHelpers.wait_for_condition` (used from `wait_for_none_animating` / `wait_for_no_network_indicator` / `wait_for_transition`)
+
 ### 0.23.1
 
 * Added server version 0.23.0
@@ -374,4 +378,3 @@ libraries included in this release are compatible with these
 new rules.
 
 * Improve server build rake task to complement the new server build system #864
-
