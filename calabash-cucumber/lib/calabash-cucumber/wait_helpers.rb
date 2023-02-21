@@ -274,7 +274,7 @@ module Calabash
 
       # @!visibility private
       def wait_for_condition(options = {})
-        timeout = options[:timeout] || ENV['WAIT_TIMEOUT']
+        timeout = options[:timeout] || ENV['WAIT_TIMEOUT'].to_i
         timeout = DEFAULT_OPTS[:timeout] unless timeout && timeout > 0
 
         options[:query] = options[:query] || '*'
