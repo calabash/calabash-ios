@@ -1,11 +1,15 @@
 describe Calabash::Cucumber::WaitHelpers do
-
   let(:world) do
     Class.new do
       include Calabash::Cucumber::Core
       include Calabash::Cucumber::WaitHelpers
       include Calabash::Cucumber::HTTPHelpers
     end.new
+  end
+  let(:environment_wait_timeout) { 'WAIT_TIMEOUT' }
+
+  before do
+    allow(ENV).to receive(:[]).and_call_original
   end
 
   describe '.handle_error_with_options' do
@@ -61,22 +65,42 @@ describe Calabash::Cucumber::WaitHelpers do
   end
 
   describe '.wait_for_condition' do
-    subject { world.wait_for_condition({ screenshot_on_error: false, timeout: }) }
-
     context 'when no timeout parameter is provided' do
-      let(:timeout) { nil }
+      subject { world.wait_for_condition({ screenshot_on_error: false }) }
 
-      before do
-        expect(Timeout).to receive(:timeout).with(35, described_class::WaitError).and_call_original
+      context 'when no "WAIT_TIMEOUT" environment is set' do
+        before do
+          expect(Timeout).to receive(:timeout).with(35, described_class::WaitError).and_call_original
+        end
+
+        it 'rescues StandardError' do
+          expect(world).to receive(:http).and_raise(StandardError, 'I got raised!')
+          expect { subject }.to raise_error(StandardError, 'I got raised!')
+        end
       end
 
-      it 'rescues StandardError' do
-        expect(world).to receive(:http).and_raise(StandardError, 'I got raised!')
-        expect { subject }.to raise_error(StandardError, 'I got raised!')
+      context 'when the "WAIT_TIMEOUT" environment is set' do
+        let(:timeout) { 10 }
+
+        before do
+          expect(ENV).to receive(:[])
+            .with(environment_wait_timeout)
+            .and_return(timeout)
+            .at_least(:once)
+
+          expect(Timeout).to receive(:timeout).with(15, described_class::WaitError).and_call_original
+        end
+
+        it 'rescues StandardError' do
+          expect(world).to receive(:http).and_raise(StandardError, 'I got raised!')
+          expect { subject }.to raise_error(StandardError, 'I got raised!')
+        end
       end
     end
 
     context 'when a timeout parameter is provided' do
+      subject { world.wait_for_condition({ screenshot_on_error: false, timeout: }) }
+
       let(:timeout) { 10 }
 
       before do

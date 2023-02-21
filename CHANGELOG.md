@@ -1,3 +1,7 @@
+### 0.23.6
+
+* Fix the casting of `WAIT_TIMEOUT` environment
+
 ### 0.23.5
 
 * Start to use `WAIT_TIMEOUT` environment to decide how long to wait for `Calabash::Cucumber::WaitHelpers.wait_for_condition` (used from `wait_for_none_animating` / `wait_for_no_network_indicator` / `wait_for_transition`)
