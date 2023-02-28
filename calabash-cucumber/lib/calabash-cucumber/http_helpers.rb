@@ -6,7 +6,7 @@ module Calabash
     # @!visibility private
     module HTTPHelpers
 
-      require "calabash-cucumber/environment"
+      require 'calabash-cucumber/environment'
 
       # @!visibility private
       CAL_HTTP_RETRY_COUNT=3
@@ -30,19 +30,23 @@ module Calabash
             options[:body] = data.to_json
           end
         end
-        res = make_http_request(options)
-        res.force_encoding("UTF-8") if res.respond_to?(:force_encoding)
+        res = Timeout.timeout(45) do
+          make_http_request(options)
+        end
+        res.force_encoding('UTF-8') if res.respond_to?(:force_encoding)
 
         _private_dismiss_springboard_alerts
 
         res
+      rescue Timeout::Error
+        raise Timeout::Error, 'The http call to Calabash web-server has timed out. It may mean that your app has crashed or frozen'
       end
 
       # @!visibility private
       def url_for(verb)
         url = URI.parse(Calabash::Cucumber::Environment.device_endpoint)
         path = url.path
-        if path.end_with? "/"
+        if path.end_with? '/'
           path = "#{path}#{verb}"
         else
           path = "#{path}/#{verb}"
@@ -97,9 +101,9 @@ module Calabash
       # @!visibility private
       def init_request(options={})
         http = HTTPClient.new
-        http.connect_timeout = 30
-        http.send_timeout = 120
-        http.receive_timeout = 120
+        http.connect_timeout = 5
+        http.send_timeout = 15
+        http.receive_timeout = 15
         if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
           http.debug_dev = $stdout
         end
@@ -112,7 +116,7 @@ module Calabash
       #
       # Do not call this method.
       def _private_dismiss_springboard_alerts
-        require "calabash-cucumber/launcher"
+        require 'calabash-cucumber/launcher'
         launcher = Calabash::Cucumber::Launcher.launcher_if_used
         if launcher && launcher.automator && launcher.automator.name == :device_agent
           launcher.automator.client.send(:_dismiss_springboard_alerts)
