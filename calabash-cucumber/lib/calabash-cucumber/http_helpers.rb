@@ -99,9 +99,9 @@ module Calabash
       # @!visibility private
       def init_request(options={})
         http = HTTPClient.new
-        http.connect_timeout = 30
-        http.send_timeout = 120
-        http.receive_timeout = 120
+        http.connect_timeout = 5
+        http.send_timeout = 15
+        http.receive_timeout = 15
         if options[:debug] || (ENV['DEBUG_HTTP'] == '1' && options[:debug] != false)
           http.debug_dev = $stdout
         end
