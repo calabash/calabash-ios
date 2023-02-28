@@ -39,7 +39,7 @@ module Calabash
 
         res
       rescue Timeout::Error
-        raise Timeout::Error, 'The http call to Calabash web-server has timed out'
+        raise Timeout::Error, 'The http call to Calabash web-server has timed out. It may mean that your app has crashed or frozen'
       end
 
       # @!visibility private
