@@ -30,7 +30,9 @@ module Calabash
             options[:body] = data.to_json
           end
         end
-        res = make_http_request(options)
+        res = Timeout.timeout(45) do
+          make_http_request(options)
+        end
         res.force_encoding("UTF-8") if res.respond_to?(:force_encoding)
 
         _private_dismiss_springboard_alerts
