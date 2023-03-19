@@ -28,9 +28,9 @@ module Calabash
       # List the visible element with all marks.
       def marks
         opts = {:print => false, :return => true }
-        res = accessibility_marks(:id, opts).each { |elm|elm << :id }
+        res = accessibility_marks(:id, opts).each { |elm| elm << :id }
         res.concat(accessibility_marks(:label, opts).each { |elm| elm << :label })
-        res.concat(text_marks(opts).each { |elm| elm << :text })
+        res.concat(text_marks(opts).each { |elm| elm.map! {|e| e ? e : ''} && elm << :text })
         max_width = 0
         res.each { |elm|
           len = elm[0].length
@@ -170,7 +170,11 @@ module Calabash
       # @param {Integer} max_width
       def print_marks(marks, max_width)
         counter = -1
-        marks.sort.each { |elm|
+        # Replace nil elements with empty string to avoid "ArgumentError: comparison of Array with Array failed" error
+        marks.each { |elm|
+          elm.map! {|e| e ? e : ''}
+        }
+        marks.sort_by.each { |elm|
           printf("%4s %#{max_width + 2}s => %s\n", "[#{counter = counter + 1}]", elm[0], elm[1])
         }
       end
