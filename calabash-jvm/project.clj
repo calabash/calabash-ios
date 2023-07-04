@@ -15,12 +15,13 @@
                  [clj-http "0.5.3"]
                  [slingshot "0.10.3"]
                  [org.slf4j/slf4j-log4j12 "1.6.4"]
-                 [log4j "1.2.16" :exclusions [javax.mail/mail
+                 [log4j "2.17.1" :exclusions [javax.mail/mail
                                               javax.jms/jms
                                               com.sun.jdmk/jmxtools
                                               com.sun.jmx/jmxri]]
 
-                 [org.clojure/tools.logging "0.2.3"]
+                 [org.clojure/tools.logging "1.2.4"]
+                 [cider/cider-nrepl "0.7.0"]
                  [clj-logging-config/clj-logging-config "1.9.8"]
                  [org.clojure/tools.nrepl "0.2.0-beta9"]]
 
