@@ -95,37 +95,37 @@ end
 Then(/^I can pull up to see the Control Panel page$/) do
   if ipad?
     puts "Test is not stable on iPad; skipping"
-  end
-
-  element = wait_for_view("*")
-  x = element["rect"]["center_x"]
-  start_y = element["rect"]["height"] - 10
-  final_y = element["rect"]["center_y"] + (element["rect"]["height"]/4)
-  pan_coordinates({:x => x, :y => start_y},
-                  {:x => x, :y => final_y},
-                  {duration: 0.5})
-
-  # Waiting for animations is not good enough - the animation is outside of
-  # the AUT's view hierarchy
-  wait_for_external_animations
-
-  # Screenshots will not show the Control Panel page.
-  if uia_available?
-    if uia_call_windows([:button, {marked: 'Camera'}], :isVisible) != 1
-       fail("Expected to see the iOS Control page.")
-    end
-
-    # This will dismiss the control panel by touching the navigation bar.
-    touch("* marked:'Pan Menu'")
   else
-    # Control Panel view is invisible to the LPServer and the DeviceAgent queries.
-    # Try to touch a row that is hidden by the page and expect no transition.
+    element = wait_for_view("*")
+    x = element["rect"]["center_x"]
+    start_y = element["rect"]["height"] - 10
+    final_y = element["rect"]["center_y"] + (element["rect"]["height"]/4)
+    pan_coordinates({:x => x, :y => start_y},
+                    {:x => x, :y => final_y},
+                    {duration: 0.5})
 
-    # This will dismiss the control panel.
-    touch("* marked:'pan palette row'")
+    # Waiting for animations is not good enough - the animation is outside of
+    # the AUT's view hierarchy
+    wait_for_external_animations
 
-    if !query("* marked:'pan palette page'").empty?
-      fail("Expected to see the iOS Control panel page.")
+    # Screenshots will not show the Control Panel page.
+    if uia_available?
+      if uia_call_windows([:button, {marked: 'Camera'}], :isVisible) != 1
+         fail("Expected to see the iOS Control page.")
+      end
+
+      # This will dismiss the control panel by touching the navigation bar.
+      touch("* marked:'Pan Menu'")
+    else
+      # Control Panel view is invisible to the LPServer and the DeviceAgent queries.
+      # Try to touch a row that is hidden by the page and expect no transition.
+
+      # This will dismiss the control panel.
+      touch("* marked:'pan palette row'")
+
+      if !query("* marked:'pan palette page'").empty?
+        fail("Expected to see the iOS Control panel page.")
+      end
     end
   end
 
